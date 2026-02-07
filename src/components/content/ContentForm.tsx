@@ -1158,8 +1158,8 @@ export default function ContentForm({
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={10}
-          className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-sm"
+          rows={6}
+          className="w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm"
           placeholder="Le script détaillé sera généré ici selon le framework SLAY ou AIDA en fonction de la plateforme..."
         />
       </div>
@@ -1188,8 +1188,8 @@ export default function ContentForm({
         <textarea
           value={formData.caption}
           onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
-          rows={5}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          rows={3}
+          className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base"
           placeholder="Texte d'accompagnement du post"
         />
       </div>
@@ -1207,8 +1207,8 @@ export default function ContentForm({
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          rows={3}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          rows={2}
+          className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base"
           placeholder="Ajoute tes notes et réflexions personnelles sur ce contenu..."
         />
       </div>
@@ -1255,7 +1255,7 @@ export default function ContentForm({
         />
       </div>
 
-      <div className="flex justify-end gap-2 md:gap-3 pt-3 md:pt-4 sticky bottom-0 bg-white py-3 -mx-4 px-4 md:mx-0 md:px-0 border-t border-gray-200 md:border-0 md:static">
+      <div className="flex justify-end gap-2 md:gap-3 pt-4 md:pt-6 pb-20 md:pb-4">
         <button
           type="button"
           onClick={onCancel}

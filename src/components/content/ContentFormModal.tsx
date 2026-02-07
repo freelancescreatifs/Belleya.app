@@ -33,7 +33,13 @@ export default function ContentFormModal({
         </div>
 
         {/* Zone scrollable */}
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div
+          className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            maxHeight: 'calc(95vh - 70px)'
+          }}
+        >
           <ContentForm
             mode={mode}
             contentId={contentId}
