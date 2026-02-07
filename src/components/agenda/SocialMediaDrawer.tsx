@@ -130,10 +130,23 @@ export default function SocialMediaDrawer({ content, onClose, onEdit }: SocialMe
             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border ${getStatusColor(content.status)}`}>
               {getStatusLabel(content.status)}
             </span>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border ${getPlatformColor(content.platform)}`}>
-              {getPlatformIcon(content.platform)}
-              {content.platform}
-            </span>
+
+            {/* Gérer platform comme tableau ou string */}
+            {(() => {
+              const platforms = Array.isArray(content.platform)
+                ? content.platform
+                : typeof content.platform === 'string'
+                  ? [content.platform]
+                  : [];
+
+              return platforms.map((platform, idx) => (
+                <span key={idx} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border ${getPlatformColor(platform)}`}>
+                  {getPlatformIcon(platform)}
+                  {platform}
+                </span>
+              ));
+            })()}
+
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium border border-gray-300">
               {content.content_type}
             </span>

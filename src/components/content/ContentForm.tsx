@@ -370,7 +370,7 @@ export default function ContentForm({
     setGeneratingCaption(true);
     try {
       const contentType = formData.content_type as 'post' | 'reel' | 'carrousel' | 'story' | 'video' | 'live';
-      const platform = formData.platform as 'instagram' | 'tiktok' | 'linkedin' | 'facebook' | 'youtube' | 'twitter';
+      const platform = (selectedPlatforms[0] || 'instagram') as 'instagram' | 'tiktok' | 'linkedin' | 'facebook' | 'youtube' | 'twitter';
 
       const generated = generateContentAI({
         title: formData.title,
@@ -427,7 +427,7 @@ export default function ContentForm({
       const generated = generateContentAI({
         title: formData.title,
         contentType: formData.content_type as any,
-        platform: formData.platform as any,
+        platform: (selectedPlatforms[0] || 'instagram') as any,
         description: formData.description,
         objective: formData.objective as any,
         pillar: formData.editorial_pillar || undefined,
@@ -459,7 +459,7 @@ export default function ContentForm({
       const generated = generateContentAI({
         title: formData.title,
         contentType: formData.content_type as any,
-        platform: formData.platform as any,
+        platform: (selectedPlatforms[0] || 'instagram') as any,
         description: formData.description,
         objective: formData.objective as any,
         pillar: formData.editorial_pillar || undefined,
@@ -1140,7 +1140,7 @@ export default function ContentForm({
               Script détaillé
             </label>
             <p className="text-xs text-blue-700 mt-1">
-              {formData.platform === 'linkedin' || formData.platform === 'facebook'
+              {selectedPlatforms.includes('linkedin') || selectedPlatforms.includes('facebook')
                 ? '📝 Framework SLAY recommandé (Story → Lesson → Actionable → You)'
                 : '📝 Framework AIDA recommandé (Attention → Interest → Desire → Action)'}
             </p>
