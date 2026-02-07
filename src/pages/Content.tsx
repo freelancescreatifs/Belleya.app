@@ -76,7 +76,7 @@ interface ViewPreferences {
 export default function Content() {
   const { user } = useAuth();
   const { socialViews } = useMenuPreferences(user?.id);
-  const [view, setView] = useState<'calendar' | 'studio' | 'stats' | 'events'>('studio');
+  const [view, setView] = useState<'calendar' | 'studio' | 'stats' | 'events'>('calendar');
   const [calendarSubView, setCalendarSubView] = useState<'editorial' | 'production'>('editorial');
   const [studioSubView, setStudioSubView] = useState<'columns' | 'lines' | 'social_post_type'>('social_post_type');
   const [showIdeasGenerator, setShowIdeasGenerator] = useState(false);
@@ -174,8 +174,8 @@ export default function Content() {
         setViewPreferences(prefs);
 
         const availableViews = [];
-        if (prefs.studio_enabled) availableViews.push('studio');
         if (prefs.calendar_enabled) availableViews.push('calendar');
+        if (prefs.studio_enabled) availableViews.push('studio');
         availableViews.push('stats', 'events');
 
         if (availableViews.length > 0 && !availableViews.includes(view)) {
@@ -392,20 +392,6 @@ export default function Content() {
 
         <div className="space-y-4 mb-6">
           <div className="flex gap-2 flex-wrap overflow-x-hidden">
-            {viewPreferences.studio_enabled && (
-              <button
-                onClick={() => setView('studio')}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all text-sm sm:text-base ${
-                  view === 'studio'
-                    ? 'bg-white text-orange-600 shadow-lg'
-                    : 'bg-white/50 text-gray-600 hover:bg-white/80'
-                }`}
-              >
-                <Clapperboard className="w-4 sm:w-5 h-4 sm:h-5" />
-                <span className="hidden sm:inline">Studio de contenu</span>
-                <span className="sm:hidden">Studio</span>
-              </button>
-            )}
             {viewPreferences.calendar_enabled && (
               <button
                 onClick={() => setView('calendar')}
@@ -418,6 +404,20 @@ export default function Content() {
                 <Calendar className="w-4 sm:w-5 h-4 sm:h-5" />
                 <span className="hidden sm:inline">Calendrier</span>
                 <span className="sm:hidden">Cal.</span>
+              </button>
+            )}
+            {viewPreferences.studio_enabled && (
+              <button
+                onClick={() => setView('studio')}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all text-sm sm:text-base ${
+                  view === 'studio'
+                    ? 'bg-white text-orange-600 shadow-lg'
+                    : 'bg-white/50 text-gray-600 hover:bg-white/80'
+                }`}
+              >
+                <Clapperboard className="w-4 sm:w-5 h-4 sm:h-5" />
+                <span className="hidden sm:inline">Studio de contenu</span>
+                <span className="sm:hidden">Studio</span>
               </button>
             )}
             <button

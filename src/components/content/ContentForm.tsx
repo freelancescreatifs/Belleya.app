@@ -76,7 +76,7 @@ const PLATFORMS = [
 
 const STATUSES = [
   { value: 'idea', label: 'Idée' },
-  { value: 'script', label: 'Écriture' },
+  { value: 'script', label: 'Script' },
   { value: 'shooting', label: 'Tournage' },
   { value: 'editing', label: 'Montage' },
   { value: 'scheduled', label: 'Programmé' },

@@ -313,7 +313,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                     onClick={() => setShowPlatformDropdown(!showPlatformDropdown)}
                     className="flex items-center gap-1 hover:text-orange-600 transition-colors"
                   >
-                    Réseau
+                    Réseaux sociaux
                     <ChevronDown className="w-3 h-3" />
                   </button>
                   {showPlatformDropdown && (
