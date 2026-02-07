@@ -604,7 +604,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                             onContentEdit(content);
                           }
                         }}
-                        className="p-1 text-gray-400 hover:text-orange-600 transition-colors"
+                        className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-all hover:shadow-sm"
                         title="Modifier"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -616,7 +616,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                             handleDelete(content.id);
                           }
                         }}
-                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:shadow-sm"
                         title="Supprimer"
                       >
                         <Trash2 className="w-4 h-4" />

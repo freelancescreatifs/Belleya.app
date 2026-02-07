@@ -76,9 +76,9 @@ interface ViewPreferences {
 export default function Content() {
   const { user } = useAuth();
   const { socialViews } = useMenuPreferences(user?.id);
-  const [view, setView] = useState<'calendar' | 'studio' | 'stats' | 'events'>('calendar');
+  const [view, setView] = useState<'calendar' | 'studio' | 'stats' | 'events'>('studio');
   const [calendarSubView, setCalendarSubView] = useState<'editorial' | 'production'>('editorial');
-  const [studioSubView, setStudioSubView] = useState<'columns' | 'lines' | 'social_post_type'>('columns');
+  const [studioSubView, setStudioSubView] = useState<'columns' | 'lines' | 'social_post_type'>('social_post_type');
   const [showIdeasGenerator, setShowIdeasGenerator] = useState(false);
   const [contents, setContents] = useState<ContentItem[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -140,11 +140,11 @@ export default function Content() {
 
     if (view === 'studio') {
       const availableStudioViews = [];
+      if (socialViews.viewByPostType) availableStudioViews.push('social_post_type');
       if (viewPreferences.type_view_enabled) availableStudioViews.push('columns');
       if (viewPreferences.table_view_enabled) availableStudioViews.push('lines');
-      if (socialViews.viewByPostType) availableStudioViews.push('social_post_type');
 
-      if (availableStudioViews.length === 1) {
+      if (availableStudioViews.length >= 1) {
         setStudioSubView(availableStudioViews[0] as 'columns' | 'lines' | 'social_post_type');
       }
     }
@@ -174,8 +174,8 @@ export default function Content() {
         setViewPreferences(prefs);
 
         const availableViews = [];
-        if (prefs.calendar_enabled) availableViews.push('calendar');
         if (prefs.studio_enabled) availableViews.push('studio');
+        if (prefs.calendar_enabled) availableViews.push('calendar');
         availableViews.push('stats', 'events');
 
         if (availableViews.length > 0 && !availableViews.includes(view)) {
@@ -195,6 +195,8 @@ export default function Content() {
             setStudioSubView('columns');
           } else if (!prefs.type_view_enabled && prefs.table_view_enabled) {
             setStudioSubView('lines');
+          } else {
+            setStudioSubView('social_post_type');
           }
         }
       }
@@ -390,20 +392,6 @@ export default function Content() {
 
         <div className="space-y-4 mb-6">
           <div className="flex gap-2 flex-wrap overflow-x-hidden">
-            {viewPreferences.calendar_enabled && (
-              <button
-                onClick={() => setView('calendar')}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all text-sm sm:text-base ${
-                  view === 'calendar'
-                    ? 'bg-white text-orange-600 shadow-lg'
-                    : 'bg-white/50 text-gray-600 hover:bg-white/80'
-                }`}
-              >
-                <Calendar className="w-4 sm:w-5 h-4 sm:h-5" />
-                <span className="hidden sm:inline">Calendrier</span>
-                <span className="sm:hidden">Cal.</span>
-              </button>
-            )}
             {viewPreferences.studio_enabled && (
               <button
                 onClick={() => setView('studio')}
@@ -416,6 +404,20 @@ export default function Content() {
                 <Clapperboard className="w-4 sm:w-5 h-4 sm:h-5" />
                 <span className="hidden sm:inline">Studio de contenu</span>
                 <span className="sm:hidden">Studio</span>
+              </button>
+            )}
+            {viewPreferences.calendar_enabled && (
+              <button
+                onClick={() => setView('calendar')}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all text-sm sm:text-base ${
+                  view === 'calendar'
+                    ? 'bg-white text-orange-600 shadow-lg'
+                    : 'bg-white/50 text-gray-600 hover:bg-white/80'
+                }`}
+              >
+                <Calendar className="w-4 sm:w-5 h-4 sm:h-5" />
+                <span className="hidden sm:inline">Calendrier</span>
+                <span className="sm:hidden">Cal.</span>
               </button>
             )}
             <button
@@ -478,13 +480,27 @@ export default function Content() {
 
           {view === 'studio' && (() => {
             const availableStudioViews = [
+              socialViews.viewByPostType,
               viewPreferences.type_view_enabled,
-              viewPreferences.table_view_enabled,
-              socialViews.viewByPostType
+              viewPreferences.table_view_enabled
             ].filter(Boolean).length;
             return availableStudioViews > 1;
           })() && (
             <div className="flex gap-2 pl-0 sm:pl-4 sm:border-l-2 border-orange-300 flex-wrap overflow-x-hidden">
+              {socialViews.viewByPostType && (
+                <button
+                  onClick={() => setStudioSubView('social_post_type')}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                    studioSubView === 'social_post_type'
+                      ? 'bg-orange-100 text-orange-700 font-medium'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Instagram className="w-4 h-4" />
+                  <span className="hidden sm:inline">Réseaux sociaux</span>
+                  <span className="sm:hidden">Réseaux</span>
+                </button>
+              )}
               {viewPreferences.type_view_enabled && (
                 <button
                   onClick={() => setStudioSubView('columns')}
@@ -511,20 +527,6 @@ export default function Content() {
                   <Table className="w-4 h-4" />
                   <span className="hidden sm:inline">Vue Lignes</span>
                   <span className="sm:hidden">Lignes</span>
-                </button>
-              )}
-              {socialViews.viewByPostType && (
-                <button
-                  onClick={() => setStudioSubView('social_post_type')}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                    studioSubView === 'social_post_type'
-                      ? 'bg-orange-100 text-orange-700 font-medium'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <Instagram className="w-4 h-4" />
-                  <span className="hidden sm:inline">Vue par type de post</span>
-                  <span className="sm:hidden">Type post</span>
                 </button>
               )}
             </div>

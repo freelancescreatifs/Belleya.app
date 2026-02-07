@@ -390,24 +390,26 @@ function KanbanCard({
               {content.publication_time ? `à ${content.publication_time}` : ''}
             </p>
           </div>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit();
               }}
-              className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+              className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
+              title="Modifier"
             >
-              <Edit2 className="w-4 h-4 text-gray-600" />
+              <Edit2 className="w-4 h-4" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-1.5 hover:bg-red-50 rounded transition-colors"
+              className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+              title="Supprimer"
             >
-              <Trash2 className="w-4 h-4 text-red-600" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
