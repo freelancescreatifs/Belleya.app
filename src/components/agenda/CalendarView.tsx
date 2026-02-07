@@ -35,9 +35,9 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       {/* En-têtes des jours - version mobile ultra-compacte */}
-      <div className="grid grid-cols-7 border-b border-gray-200">
+      <div className="grid grid-cols-7 border-b border-gray-100">
         {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
-          <div key={idx} className="p-1.5 md:p-3 text-center text-[10px] md:text-sm font-semibold text-gray-600 border-r border-gray-200 last:border-r-0">
+          <div key={idx} className="py-1 md:p-3 text-center text-[9px] md:text-sm font-semibold text-gray-500 md:text-gray-600">
             <span className="hidden md:inline">
               {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][idx]}
             </span>
@@ -55,16 +55,16 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
             <div
               key={index}
               onClick={() => onDayClick(day)}
-              className={`min-h-[80px] md:min-h-[120px] p-0.5 md:p-2 border-r border-b border-gray-200 last:border-r-0 cursor-pointer hover:bg-gray-50 transition-colors ${
-                !isCurrentMonth ? 'bg-gray-50' : ''
+              className={`min-h-[65px] md:min-h-[120px] p-0.5 md:p-2 border-r border-b border-gray-100 last:border-r-0 cursor-pointer active:bg-gray-100 md:hover:bg-gray-50 transition-colors ${
+                !isCurrentMonth ? 'bg-gray-50/50' : ''
               }`}
             >
               {/* Numéro du jour */}
-              <div className="flex justify-between items-start mb-0.5 md:mb-1 px-0.5 md:px-0">
+              <div className="flex justify-center md:justify-start items-start mb-0.5 md:mb-1">
                 <span
-                  className={`text-[11px] md:text-sm font-medium ${
+                  className={`text-[10px] md:text-sm font-medium ${
                     isToday
-                      ? 'bg-belleya-500 text-white w-4 h-4 md:w-6 md:h-6 flex items-center justify-center rounded-full text-[10px] md:text-sm'
+                      ? 'bg-belleya-500 text-white w-[18px] h-[18px] md:w-6 md:h-6 flex items-center justify-center rounded-full'
                       : isCurrentMonth
                       ? 'text-gray-900'
                       : 'text-gray-400'
@@ -75,10 +75,11 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
               </div>
 
               {/* Événements - version ultra-compacte sur mobile */}
-              <div className="space-y-0.5 md:space-y-1">
-                {dayItems.slice(0, 2).map((item) => {
+              <div className="space-y-[2px] md:space-y-1">
+                {dayItems.slice(0, 3).map((item) => {
                   const isCancelled = item.type === 'event' && (item.data as any).status === 'cancelled';
                   const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
+
                   return (
                     <div
                       key={item.id}
@@ -86,18 +87,16 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                         e.stopPropagation();
                         onItemClick(item);
                       }}
-                      className={`${getEventColor(item)} text-white rounded cursor-pointer hover:opacity-80 transition-opacity ${isCancelled ? 'line-through' : ''}
-                        text-[9px] leading-tight px-1 py-0.5
-                        md:text-xs md:px-2 md:py-1`}
+                      className={`${getEventColor(item)} text-white rounded-sm md:rounded cursor-pointer active:scale-95 md:hover:opacity-80 transition-all ${isCancelled ? 'line-through opacity-60' : ''}`}
                     >
-                      {/* Version mobile ultra-compacte */}
-                      <div className="md:hidden truncate">
-                        {productionStep && <span className="mr-0.5">{getStepEmoji(productionStep)}</span>}
-                        {item.title.length > 12 ? item.title.substring(0, 12) + '...' : item.title}
+                      {/* Version mobile ultra-compacte - style Apple/Google */}
+                      <div className="md:hidden text-[8px] leading-[1.3] px-[3px] py-[2px] font-medium truncate">
+                        {productionStep && <span className="mr-0.5 text-[9px]">{getStepEmoji(productionStep)}</span>}
+                        {item.title.length > 9 ? item.title.substring(0, 9) + '.' : item.title}
                       </div>
 
                       {/* Version desktop normale */}
-                      <div className="hidden md:flex items-start gap-1">
+                      <div className="hidden md:flex items-start gap-1 px-2 py-1 text-xs">
                         <span className="flex-shrink-0">{formatTime(item.start)}</span>
                         <span className="line-clamp-2 flex-1">
                           {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
@@ -107,9 +106,11 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                     </div>
                   );
                 })}
-                {dayItems.length > 2 && (
-                  <div className="text-[9px] md:text-xs text-gray-500 px-0.5 md:px-2">
-                    +{dayItems.length - 2}
+
+                {/* Indicateur "+X" pour événements supplémentaires */}
+                {dayItems.length > 3 && (
+                  <div className="text-[8px] md:text-xs text-gray-500 font-medium px-[3px] md:px-2 pt-0.5">
+                    +{dayItems.length - 3}
                   </div>
                 )}
               </div>
