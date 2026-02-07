@@ -5,38 +5,6 @@ import L from 'leaflet';
 import { geocodeAddress, GeocodeResult } from '../../lib/geocodingHelpers';
 import 'leaflet/dist/leaflet.css';
 
-function MapDebugger() {
-  const map = useMap();
-
-  useEffect(() => {
-    const container = map.getContainer();
-    const size = map.getSize();
-
-    console.log('🗺️ [AddressInput] MAP INIT', {
-      containerWidth: container.offsetWidth,
-      containerHeight: container.offsetHeight,
-      mapWidth: size.x,
-      mapHeight: size.y,
-    });
-
-    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-      console.error('❌ [AddressInput] MAP ERROR: Container has 0 width or height!');
-    }
-
-    const tileErrorHandler = (e: any) => {
-      console.error('❌ [AddressInput] TILE ERROR:', e.url);
-    };
-
-    map.on('tileerror', tileErrorHandler);
-
-    return () => {
-      map.off('tileerror', tileErrorHandler);
-    };
-  }, [map]);
-
-  return null;
-}
-
 function MapResizer() {
   const map = useMap();
 
@@ -279,12 +247,10 @@ export default function AddressInput({
                 className="h-full w-full"
                 style={{ height: '100%', width: '100%' }}
               >
-                <MapDebugger />
                 <MapResizer />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
                 />
                 <Marker
                   position={[currentLocation.latitude, currentLocation.longitude]}

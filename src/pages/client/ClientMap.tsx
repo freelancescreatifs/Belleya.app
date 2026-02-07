@@ -21,107 +21,13 @@ function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }
   return null;
 }
 
-function MapDebugger() {
-  const map = useMap();
-
-  useEffect(() => {
-    const container = map.getContainer();
-    const size = map.getSize();
-
-    console.log('🗺️ MAP INIT', {
-      containerWidth: container.offsetWidth,
-      containerHeight: container.offsetHeight,
-      mapWidth: size.x,
-      mapHeight: size.y,
-      center: map.getCenter(),
-      zoom: map.getZoom(),
-      tileLayerUrl: 'CARTO Light (no token needed)',
-      timestamp: new Date().toISOString(),
-    });
-
-    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-      console.error('❌ MAP ERROR: Container has 0 width or height!', {
-        offsetWidth: container.offsetWidth,
-        offsetHeight: container.offsetHeight,
-        clientWidth: container.clientWidth,
-        clientHeight: container.clientHeight,
-      });
-    }
-
-    const tileLoadStartHandler = (e: any) => {
-      console.log('🔄 Tile loading:', e.url);
-    };
-
-    const tileLoadHandler = (e: any) => {
-      console.log('✅ Tile loaded:', e.url);
-    };
-
-    const tileErrorHandler = (e: any) => {
-      console.error('❌ TILE ERROR:', {
-        url: e.url,
-        coords: e.coords,
-        error: e.error,
-        tile: e.tile,
-      });
-
-      fetch(e.url, { method: 'HEAD' })
-        .then(response => {
-          console.error('❌ Tile HTTP Status:', {
-            url: e.url,
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers.entries()),
-          });
-        })
-        .catch(err => {
-          console.error('❌ Tile fetch error:', err);
-        });
-    };
-
-    map.on('tileloadstart', tileLoadStartHandler);
-    map.on('tileload', tileLoadHandler);
-    map.on('tileerror', tileErrorHandler);
-
-    map.on('load', () => {
-      console.log('✅ Map fully loaded');
-    });
-
-    map.on('zoomend', () => {
-      console.log('🔍 Zoom changed:', map.getZoom());
-    });
-
-    map.on('moveend', () => {
-      console.log('📍 Map moved:', map.getCenter());
-    });
-
-    return () => {
-      map.off('tileloadstart', tileLoadStartHandler);
-      map.off('tileload', tileLoadHandler);
-      map.off('tileerror', tileErrorHandler);
-    };
-  }, [map]);
-
-  return null;
-}
-
 function MapResizer() {
   const map = useMap();
 
   useEffect(() => {
     const resizeMap = () => {
       setTimeout(() => {
-        const container = map.getContainer();
-        const oldSize = map.getSize();
-
         map.invalidateSize();
-
-        const newSize = map.getSize();
-        console.log('🔄 Map resized:', {
-          before: { width: oldSize.x, height: oldSize.y },
-          after: { width: newSize.x, height: newSize.y },
-          containerWidth: container.offsetWidth,
-          containerHeight: container.offsetHeight,
-        });
       }, 100);
     };
 
@@ -132,7 +38,6 @@ function MapResizer() {
 
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('👁️ Page visible again, resizing map...');
         resizeMap();
       }
     };
@@ -447,7 +352,6 @@ export default function ClientMap() {
           className="h-full w-full"
           style={{ height: '100%', width: '100%', position: 'relative', zIndex: 0 }}
         >
-          <MapDebugger />
           <MapUpdater center={mapCenter} zoom={mapZoom} />
           <MapResizer />
           <TileLayer
@@ -455,7 +359,6 @@ export default function ClientMap() {
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             maxZoom={19}
             subdomains="abcd"
-            errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
           />
 
           {userLocation && (
