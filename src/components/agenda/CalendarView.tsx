@@ -399,13 +399,13 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       return (
                         <div
                           key={`dragging-${dragState.item.id}`}
-                          className={`${getEventColor(dragState.item)} text-white px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm md:rounded overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto`}
+                          className={`${getEventColor(dragState.item)} text-white px-1.5 md:px-2 py-0.5 md:py-1 overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
                             height: `${Math.max(height - 3, 20)}px`,
-                            left: '2px',
-                            right: '2px',
+                            left: '0',
+                            right: '0',
                             zIndex: 100,
                           }}
                         >
@@ -453,7 +453,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       return (
                         <div
                           key={isGhost ? `${item.id}-ghost` : item.id}
-                          className={`${getEventColor(item)} text-white px-1 md:px-1.5 py-0.5 md:py-1 rounded-sm md:rounded overflow-hidden select-none group relative ${
+                          className={`${getEventColor(item)} text-white px-1.5 md:px-2 py-0.5 md:py-1 overflow-hidden select-none group relative ${
                             isGhost
                               ? 'opacity-20 pointer-events-none'
                               : isBeingDragged
@@ -468,8 +468,6 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                             height: `${Math.max(height - 3, 20)}px`,
                             left: `${leftPercent}%`,
                             width: `${widthPercent}%`,
-                            paddingLeft: '3px',
-                            paddingRight: '3px',
                             transform: isBeingDragged && !isGhost ? 'scale(1.05)' : undefined,
                             transition: isBeingDragged ? 'none' : undefined,
                           }}
