@@ -1,0 +1,304 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Safe Area Insets for iOS/Android */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Mobile App Optimizations */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+  -webkit-touch-callout: none;
+  box-sizing: border-box;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+body {
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Force no horizontal overflow on mobile - Optimized and less aggressive */
+@media (max-width: 768px) {
+  html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+  }
+
+  #root {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Force ONLY structural elements, not all elements */
+  main, section, header, footer, article, aside, nav {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Prevent containers from causing horizontal scroll */
+  .container,
+  [class*="container"]:not(svg):not(button),
+  [class*="wrapper"]:not(svg):not(button) {
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  /* Prevent tables and pre elements from overflowing */
+  table, pre, code {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Ensure images and videos don't overflow - EXCLUDE SVG icons */
+  img:not([class*="w-"]):not([class*="h-"]),
+  video,
+  canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Prevent scale transforms from causing overflow */
+  [class*="scale-"] {
+    transform-origin: center;
+  }
+
+  /* Ensure sidebar doesn't cause overflow when hidden */
+  .fixed.w-64 {
+    max-width: 256px;
+  }
+
+  /* Ensure translated elements stay in bounds */
+  .-translate-x-full {
+    margin-left: 0;
+  }
+
+  /* Prevent form elements from causing overflow */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Touch targets - minimum 44x44px for better mobile UX */
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Smooth scrolling for better mobile experience */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Mobile-first UI enhancements */
+@media (max-width: 768px) {
+  /* Better spacing for mobile */
+  section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  /* Optimize font sizes for mobile readability */
+  h1, .text-4xl, .text-5xl, .text-6xl {
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  /* Better button spacing */
+  button {
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+  }
+
+  /* Improve card spacing */
+  [class*="rounded-xl"],
+  [class*="rounded-2xl"] {
+    padding: 1rem;
+  }
+
+  /* Better grid gaps */
+  [class*="grid"] {
+    gap: 0.75rem;
+  }
+
+  /* Optimize text sizes */
+  p, span, div {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+}
+
+.custom-marker-icon {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.custom-marker-icon:hover {
+  transform: translateY(-2px);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+.leaflet-popup-tip {
+  display: none;
+}
+
+/* Support for dvh with fallback for older browsers */
+@supports not (height: 100dvh) {
+  .h-\[60dvh\] {
+    height: 60vh !important;
+  }
+}
+
+/* Leaflet Map Container - Force proper rendering on mobile */
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  position: relative !important;
+  z-index: 0 !important;
+  background: #f0f0f0 !important;
+  touch-action: pan-x pan-y;
+  min-height: 500px;
+}
+
+.leaflet-pane {
+  z-index: auto !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-shadow-pane {
+  z-index: 3 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 4 !important;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 5 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 6 !important;
+}
+
+/* Ensure map tiles load properly */
+.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* Better touch handling for mobile */
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  border: 2px solid rgba(0,0,0,0.2);
+  background-clip: padding-box;
+}
+
+/* Improve zoom controls on mobile */
+.leaflet-touch .leaflet-bar a {
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  font-size: 22px;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure buttons in horizontal scroll don't shrink */
+.scrollbar-hide > button {
+  flex-shrink: 0;
+}
+
+/* Safe Area Bottom - iOS/Android notch and home indicator */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Bottom Navigation - ensure it respects safe areas */
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+}
+
+/* ChatBot - ensure proper interaction on mobile */
+[class*="chatbot"] {
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+/* ChatBot scroll container */
+[class*="chatbot-scroll"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
