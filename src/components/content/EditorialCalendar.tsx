@@ -143,46 +143,17 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
     if (!user || contents.length === 0) return;
 
     try {
-      const contentIds = contents.map(c => c.id);
-
-      const { data: productionTasks, error } = await supabase
-        .from('production_tasks')
-        .select('content_id, production_step, task_id')
-        .in('content_id', contentIds);
-
-      if (error) {
-        console.error('Error loading production tasks:', error);
-        return;
-      }
-
-      if (!productionTasks || productionTasks.length === 0) {
-        setProductionTasksMap(new Map());
-        return;
-      }
-
-      const taskIds = productionTasks.map(pt => pt.task_id);
-
-      const { data: tasks, error: tasksError } = await supabase
-        .from('tasks')
-        .select('id, completed')
-        .in('id', taskIds);
-
-      if (tasksError) {
-        console.error('Error loading tasks:', tasksError);
-        return;
-      }
-
-      const tasksById = new Map(tasks?.map(t => [t.id, t.completed]) || []);
-
       const tasksMap = new Map<string, Map<string, boolean>>();
 
-      for (const pt of productionTasks) {
-        if (!tasksMap.has(pt.content_id)) {
-          tasksMap.set(pt.content_id, new Map());
-        }
-        const contentTasksMap = tasksMap.get(pt.content_id)!;
-        const stepKey = `date_${pt.production_step}`;
-        contentTasksMap.set(stepKey, tasksById.get(pt.task_id) || false);
+      for (const content of contents) {
+        const contentTasksMap = new Map<string, boolean>();
+
+        contentTasksMap.set('date_script', !!content.date_script);
+        contentTasksMap.set('date_shooting', !!content.date_shooting);
+        contentTasksMap.set('date_editing', !!content.date_editing);
+        contentTasksMap.set('date_scheduling', !!content.date_scheduling);
+
+        tasksMap.set(content.id, contentTasksMap);
       }
 
       setProductionTasksMap(tasksMap);
