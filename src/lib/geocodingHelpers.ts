@@ -76,8 +76,8 @@ export const getCurrentPosition = (): Promise<{ latitude: number; longitude: num
       },
       {
         enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0,
+        timeout: 15000,
+        maximumAge: 5000,
       }
     );
   });

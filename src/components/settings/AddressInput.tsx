@@ -5,36 +5,39 @@ import L from 'leaflet';
 import { geocodeAddress, GeocodeResult } from '../../lib/geocodingHelpers';
 import 'leaflet/dist/leaflet.css';
 
-function MapResizeHandler() {
+function MapResizer() {
   const map = useMap();
 
   useEffect(() => {
-    const forceMapRedraw = () => {
+    const resizeMap = () => {
       setTimeout(() => {
-        map.invalidateSize(true);
-        const currentZoom = map.getZoom();
-        map.setZoom(currentZoom);
-      }, 200);
-    };
-
-    const handleResize = () => {
-      setTimeout(() => {
-        map.invalidateSize(true);
+        map.invalidateSize();
       }, 100);
     };
 
-    forceMapRedraw();
+    resizeMap();
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', resizeMap);
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        resizeMap();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const resizeInterval = setInterval(() => {
-      map.invalidateSize(true);
-    }, 400);
+    const observer = new ResizeObserver(() => {
+      resizeMap();
+    });
 
-    setTimeout(() => clearInterval(resizeInterval), 2000);
+    const container = map.getContainer();
+    if (container) {
+      observer.observe(container);
+    }
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', resizeMap);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      observer.disconnect();
     };
   }, [map]);
 
@@ -236,17 +239,18 @@ export default function AddressInput({
           </div>
 
           {showMap && (
-            <div className="map-wrapper-small rounded-lg border border-gray-300">
+            <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
               <MapContainer
                 center={[currentLocation.latitude, currentLocation.longitude]}
                 zoom={15}
                 scrollWheelZoom={false}
+                className="h-full w-full"
+                style={{ height: '100%', width: '100%' }}
               >
-                <MapResizeHandler />
+                <MapResizer />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  detectRetina={true}
                 />
                 <Marker
                   position={[currentLocation.latitude, currentLocation.longitude]}
