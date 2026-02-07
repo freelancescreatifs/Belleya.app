@@ -20,7 +20,7 @@ interface ContentItem {
   title: string;
   description: string;
   content_type: string;
-  platform: string[] | string;
+  platform: string;
   publication_date: string;
   publication_time?: string;
   status: 'idea' | 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
@@ -78,7 +78,7 @@ export default function Content() {
   const { socialViews } = useMenuPreferences(user?.id);
   const [view, setView] = useState<'calendar' | 'studio' | 'stats' | 'events'>('calendar');
   const [calendarSubView, setCalendarSubView] = useState<'editorial' | 'production'>('editorial');
-  const [studioSubView, setStudioSubView] = useState<'columns' | 'lines' | 'social_post_type'>('social_post_type');
+  const [studioSubView, setStudioSubView] = useState<'columns' | 'lines' | 'social_post_type'>('columns');
   const [showIdeasGenerator, setShowIdeasGenerator] = useState(false);
   const [contents, setContents] = useState<ContentItem[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -140,11 +140,11 @@ export default function Content() {
 
     if (view === 'studio') {
       const availableStudioViews = [];
-      if (socialViews.viewByPostType) availableStudioViews.push('social_post_type');
       if (viewPreferences.type_view_enabled) availableStudioViews.push('columns');
       if (viewPreferences.table_view_enabled) availableStudioViews.push('lines');
+      if (socialViews.viewByPostType) availableStudioViews.push('social_post_type');
 
-      if (availableStudioViews.length >= 1) {
+      if (availableStudioViews.length === 1) {
         setStudioSubView(availableStudioViews[0] as 'columns' | 'lines' | 'social_post_type');
       }
     }
@@ -195,8 +195,6 @@ export default function Content() {
             setStudioSubView('columns');
           } else if (!prefs.type_view_enabled && prefs.table_view_enabled) {
             setStudioSubView('lines');
-          } else {
-            setStudioSubView('social_post_type');
           }
         }
       }
@@ -480,27 +478,13 @@ export default function Content() {
 
           {view === 'studio' && (() => {
             const availableStudioViews = [
-              socialViews.viewByPostType,
               viewPreferences.type_view_enabled,
-              viewPreferences.table_view_enabled
+              viewPreferences.table_view_enabled,
+              socialViews.viewByPostType
             ].filter(Boolean).length;
             return availableStudioViews > 1;
           })() && (
             <div className="flex gap-2 pl-0 sm:pl-4 sm:border-l-2 border-orange-300 flex-wrap overflow-x-hidden">
-              {socialViews.viewByPostType && (
-                <button
-                  onClick={() => setStudioSubView('social_post_type')}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                    studioSubView === 'social_post_type'
-                      ? 'bg-orange-100 text-orange-700 font-medium'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <Instagram className="w-4 h-4" />
-                  <span className="hidden sm:inline">Réseaux sociaux</span>
-                  <span className="sm:hidden">Réseaux</span>
-                </button>
-              )}
               {viewPreferences.type_view_enabled && (
                 <button
                   onClick={() => setStudioSubView('columns')}
@@ -527,6 +511,20 @@ export default function Content() {
                   <Table className="w-4 h-4" />
                   <span className="hidden sm:inline">Vue Lignes</span>
                   <span className="sm:hidden">Lignes</span>
+                </button>
+              )}
+              {socialViews.viewByPostType && (
+                <button
+                  onClick={() => setStudioSubView('social_post_type')}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                    studioSubView === 'social_post_type'
+                      ? 'bg-orange-100 text-orange-700 font-medium'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Instagram className="w-4 h-4" />
+                  <span className="hidden sm:inline">Vue par type de post</span>
+                  <span className="sm:hidden">Type post</span>
                 </button>
               )}
             </div>
@@ -611,8 +609,8 @@ export default function Content() {
               contents={contents.filter(c => {
                 if (c.status === 'idea') return false;
                 if (platformFilter.length === 0) return true;
-                const contentPlatforms = Array.isArray(c.platform) ? c.platform : c.platform.split(',');
-                return contentPlatforms.some(p => platformFilter.includes(p.trim()));
+                const contentPlatforms = c.platform.split(',');
+                return contentPlatforms.some(p => platformFilter.includes(p));
               })}
               pillars={pillars}
               viewMode="type"
@@ -680,8 +678,8 @@ export default function Content() {
               contents={contents.filter(c => {
                 if (c.status === 'idea') return false;
                 if (platformFilter.length === 0) return true;
-                const contentPlatforms = Array.isArray(c.platform) ? c.platform : c.platform.split(',');
-                return contentPlatforms.some(p => platformFilter.includes(p.trim()));
+                const contentPlatforms = c.platform.split(',');
+                return contentPlatforms.some(p => platformFilter.includes(p));
               })}
               pillars={pillars}
               viewMode="type"

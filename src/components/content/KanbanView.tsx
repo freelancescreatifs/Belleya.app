@@ -18,7 +18,7 @@ interface ContentItem {
   title: string;
   description: string;
   content_type: string;
-  platform: string[] | string;
+  platform: string;
   publication_date: string;
   publication_time?: string;
   status: 'idea' | 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
@@ -390,26 +390,24 @@ function KanbanCard({
               {content.publication_time ? `à ${content.publication_time}` : ''}
             </p>
           </div>
-          <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit();
               }}
-              className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
-              title="Modifier"
+              className="p-1.5 hover:bg-gray-100 rounded transition-colors"
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-4 h-4 text-gray-600" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-              title="Supprimer"
+              className="p-1.5 hover:bg-red-50 rounded transition-colors"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4 text-red-600" />
             </button>
           </div>
         </div>
@@ -425,9 +423,9 @@ function KanbanCard({
             {content.content_type}
           </span>
 
-          {(Array.isArray(content.platform) ? content.platform : content.platform.split(',')).map((platform, idx) => (
-            <span key={idx} className="px-3 py-1.5 bg-orange-50 border border-orange-200 text-orange-700 rounded-full text-xs font-medium">
-              {typeof platform === 'string' ? platform.trim() : platform}
+          {content.platform.split(',').map((platform, idx) => (
+            <span key={idx} className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+              {platform.trim()}
             </span>
           ))}
         </div>

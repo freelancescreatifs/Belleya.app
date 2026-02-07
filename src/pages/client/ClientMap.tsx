@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { MapPin, Search, Navigation, Star, Calendar, Filter, ExternalLink } from 'lucide-react';
+import { MapPin, Search, Navigation, Star, Calendar, Filter } from 'lucide-react';
 import L, { DivIcon } from 'leaflet';
 import { supabase } from '../../lib/supabase';
 import { ProviderProfile, getNearbyProviders } from '../../lib/socialHelpers';
@@ -21,44 +21,6 @@ function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }
   return null;
 }
 
-function MapResizeHandler() {
-  const map = useMap();
-
-  useEffect(() => {
-    const forceMapRedraw = () => {
-      requestAnimationFrame(() => {
-        map.invalidateSize({ animate: false, pan: false });
-      });
-    };
-
-    const handleResize = () => {
-      forceMapRedraw();
-    };
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        forceMapRedraw();
-      }
-    };
-
-    setTimeout(forceMapRedraw, 100);
-    setTimeout(forceMapRedraw, 300);
-    setTimeout(forceMapRedraw, 600);
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [map]);
-
-  return null;
-}
-
 export default function ClientMap() {
   const [providers, setProviders] = useState<ProviderProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +33,7 @@ export default function ClientMap() {
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
+
   const createCustomIcon = (profilePhoto: string | null, companyName: string): DivIcon => {
     const photoHtml = profilePhoto
       ? `<img src="${profilePhoto}" alt="${companyName}" class="w-full h-full object-cover" />`
@@ -112,7 +74,6 @@ export default function ClientMap() {
   });
 
   useEffect(() => {
-    setTimeout(() => setMapReady(true), 100);
     requestGeolocation();
   }, []);
 
@@ -126,34 +87,12 @@ export default function ClientMap() {
 
   const requestGeolocation = async () => {
     try {
-      if (!navigator.geolocation) {
-        alert('Votre navigateur ne supporte pas la géolocalisation');
-        return;
-      }
-
-      const permission = await navigator.permissions.query({ name: 'geolocation' });
-
-      if (permission.state === 'denied') {
-        alert('La géolocalisation est bloquée. Veuillez activer la géolocalisation dans les paramètres de votre navigateur.');
-        return;
-      }
-
       const position = await getCurrentPosition();
       setUserLocation([position.latitude, position.longitude]);
       setMapCenter([position.latitude, position.longitude]);
-      setMapZoom(14);
       setShowGeolocationPrompt(false);
-    } catch (error: any) {
-      console.error('Geolocation error:', error);
-
-      if (error.code === 1) {
-        alert('Permission de géolocalisation refusée. Veuillez autoriser l\'accès à votre position dans les paramètres de votre navigateur.');
-      } else if (error.code === 2) {
-        alert('Impossible d\'obtenir votre position. Vérifiez que les services de localisation sont activés.');
-      } else if (error.code === 3) {
-        alert('La demande de géolocalisation a expiré. Veuillez réessayer.');
-      }
-
+    } catch (error) {
+      console.log('Geolocation denied or not available');
       setShowGeolocationPrompt(true);
     }
   };
@@ -233,13 +172,6 @@ export default function ClientMap() {
     }
   };
 
-  const openInGoogleMaps = (provider: ProviderProfile) => {
-    if (provider.latitude && provider.longitude) {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${provider.latitude},${provider.longitude}`;
-      window.open(url, '_blank');
-    }
-  };
-
   const filteredProviders = useMemo(() => {
     if (selectedProfession === 'all') {
       return providers;
@@ -253,8 +185,8 @@ export default function ClientMap() {
   }, [providers]);
 
   return (
-    <div className="bg-gray-50 min-h-screen overflow-y-auto">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-[1000]">
         <div className="px-4 pt-6 pb-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Carte des pros</h1>
 
@@ -266,28 +198,12 @@ export default function ClientMap() {
               <div className="flex gap-2">
                 <button
                   onClick={requestGeolocation}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors active:bg-blue-800"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                 >
                   <Navigation className="w-4 h-4" />
-                  Activer ma position
+                  Activer
                 </button>
               </div>
-            </div>
-          )}
-
-          {!showGeolocationPrompt && userLocation && (
-            <div className="mb-4 flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
-              <p className="text-sm text-green-800 flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                Position activée
-              </p>
-              <button
-                onClick={requestGeolocation}
-                className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors active:bg-green-800"
-              >
-                <Navigation className="w-3 h-3" />
-                Actualiser
-              </button>
             </div>
           )}
 
@@ -348,70 +264,51 @@ export default function ClientMap() {
         </div>
       </div>
 
-      <div className="map-wrapper">
-        {mapReady ? (
-          <MapContainer
-            key="map-container"
-            center={mapCenter}
-            zoom={mapZoom}
-            scrollWheelZoom={true}
-            zoomControl={true}
-            preferCanvas={false}
-            style={{ height: '100%', width: '100%' }}
-          >
-            <MapUpdater center={mapCenter} zoom={mapZoom} />
-            <MapResizeHandler />
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maxZoom={19}
-              subdomains={['a', 'b', 'c']}
-              detectRetina={true}
-              keepBuffer={2}
-              updateWhenIdle={false}
-              updateWhenZooming={true}
-            />
+      <div className="h-[400px] relative z-0">
+        <MapContainer
+          center={mapCenter}
+          zoom={mapZoom}
+          scrollWheelZoom={true}
+          className="h-full w-full"
+        >
+          <MapUpdater center={mapCenter} zoom={mapZoom} />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          />
 
-            {userLocation && (
-              <Marker position={userLocation} icon={userIcon}>
+          {userLocation && (
+            <Marker position={userLocation} icon={userIcon}>
+              <Popup>
+                <div className="text-center">
+                  <p className="font-semibold text-blue-600">Vous êtes ici</p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {filteredProviders.map((provider) => {
+            if (!provider.latitude || !provider.longitude) return null;
+
+            return (
+              <Marker
+                key={provider.user_id}
+                position={[provider.latitude, provider.longitude]}
+                icon={createCustomIcon(provider.profile_photo, provider.company_name)}
+                eventHandlers={{
+                  click: () => setSelectedProvider(provider),
+                }}
+              >
                 <Popup>
-                  <div className="text-center">
-                    <p className="font-semibold text-blue-600">Vous êtes ici</p>
-                  </div>
+                  <ProviderMapMarker
+                    provider={provider}
+                    onViewProfile={() => handleViewProfile(provider.user_id)}
+                  />
                 </Popup>
               </Marker>
-            )}
-
-            {filteredProviders.map((provider) => {
-              if (!provider.latitude || !provider.longitude) return null;
-
-              return (
-                <Marker
-                  key={provider.user_id}
-                  position={[provider.latitude, provider.longitude]}
-                  icon={createCustomIcon(provider.profile_photo, provider.company_name)}
-                  eventHandlers={{
-                    click: () => setSelectedProvider(provider),
-                  }}
-                >
-                  <Popup>
-                    <ProviderMapMarker
-                      provider={provider}
-                      onViewProfile={() => handleViewProfile(provider.user_id)}
-                    />
-                  </Popup>
-                </Marker>
-              );
-            })}
-          </MapContainer>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-600">Chargement de la carte...</p>
-            </div>
-          </div>
-        )}
+            );
+          })}
+        </MapContainer>
       </div>
 
       <div className="p-4">
@@ -439,13 +336,11 @@ export default function ClientMap() {
             {filteredProviders.map((provider) => (
               <div
                 key={provider.user_id}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all"
+                onClick={() => handleViewProfile(provider.user_id)}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer hover:border-gray-300"
               >
                 <div className="flex gap-4">
-                  <div
-                    className="flex-shrink-0 cursor-pointer"
-                    onClick={() => handleViewProfile(provider.user_id)}
-                  >
+                  <div className="flex-shrink-0">
                     {provider.profile_photo ? (
                       <img
                         src={provider.profile_photo}
@@ -462,17 +357,14 @@ export default function ClientMap() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h3
-                      className="font-bold text-gray-900 text-lg mb-1 cursor-pointer hover:text-brand-600"
-                      onClick={() => handleViewProfile(provider.user_id)}
-                    >
+                    <h3 className="font-bold text-gray-900 text-lg mb-1">
                       {provider.company_name}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">
                       {provider.activity_type || 'Professionnelle'}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       {provider.distance !== undefined && (
                         <div className="flex items-center gap-1 text-sm text-gray-700">
                           <MapPin className="w-4 h-4 text-gray-500" />
@@ -495,22 +387,6 @@ export default function ClientMap() {
                           </span>
                         </div>
                       )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleViewProfile(provider.user_id)}
-                        className="flex-1 px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors"
-                      >
-                        Voir le profil
-                      </button>
-                      <button
-                        onClick={() => openInGoogleMaps(provider)}
-                        className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-1"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Itinéraire
-                      </button>
                     </div>
                   </div>
                 </div>

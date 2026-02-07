@@ -9,7 +9,7 @@ interface ContentItem {
   title: string;
   description: string;
   content_type: string;
-  platform: string[] | string;
+  platform: string;
   publication_date: string;
   publication_time?: string;
   status: 'idea' | 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
@@ -125,8 +125,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
   }
 
   const filteredContents = contents.filter(content => {
-    const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
-    const platformMatch = platformFilter.length === 0 || platforms.some(p => platformFilter.includes(p));
+    const platformMatch = platformFilter.length === 0 || platformFilter.includes(content.platform);
     const pillarMatch = pillarFilter.length === 0 || (content.editorial_pillar && pillarFilter.includes(content.editorial_pillar));
     const formatMatch = formatFilter.length === 0 || formatFilter.includes(content.content_type);
     const objectiveMatch = objectiveFilter.length === 0 || (content.objective && objectiveFilter.includes(content.objective));
@@ -314,7 +313,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                     onClick={() => setShowPlatformDropdown(!showPlatformDropdown)}
                     className="flex items-center gap-1 hover:text-orange-600 transition-colors"
                   >
-                    Réseaux sociaux
+                    Réseau
                     <ChevronDown className="w-3 h-3" />
                   </button>
                   {showPlatformDropdown && (
@@ -512,22 +511,16 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                     </div>
                   </td>
 
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => {
-                        const Icon = getPlatformIcon(platform);
-                        const platformOption = PLATFORM_OPTIONS.find(p => p.value === platform);
-                        return (
-                          <span
-                            key={platform}
-                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200 rounded-full"
-                          >
-                            <Icon className="w-3 h-3" />
-                            {platformOption?.label || platform}
-                          </span>
-                        );
-                      })}
-                    </div>
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <select
+                      value={content.platform}
+                      onChange={(e) => handleQuickUpdate(content.id, 'platform', e.target.value)}
+                      className="px-2 py-1 text-xs border border-gray-200 rounded hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white"
+                    >
+                      {PLATFORM_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
                   </td>
 
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -611,7 +604,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                             onContentEdit(content);
                           }
                         }}
-                        className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-all hover:shadow-sm"
+                        className="p-1 text-gray-400 hover:text-orange-600 transition-colors"
                         title="Modifier"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -623,7 +616,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                             handleDelete(content.id);
                           }
                         }}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:shadow-sm"
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
                         title="Supprimer"
                       >
                         <Trash2 className="w-4 h-4" />

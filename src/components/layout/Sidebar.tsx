@@ -78,7 +78,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .single();
 
       setIsAdmin(data?.role === 'admin');
     } catch (error) {

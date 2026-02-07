@@ -9,8 +9,6 @@ interface Service {
   duration: number;
   price: number;
   user_id: string;
-  special_offer?: string | null;
-  offer_type?: 'percentage' | 'fixed' | null;
 }
 
 interface Provider {
@@ -74,20 +72,6 @@ export default function BookingAvailabilityModal({
     if (data?.week_schedule) {
       setWeekSchedule(data.week_schedule as WeekSchedule);
     }
-  };
-
-  const calculateFinalPrice = (): number => {
-    if (!service.special_offer || !service.offer_type) {
-      return service.price;
-    }
-
-    const offerValue = Number(service.special_offer);
-    if (service.offer_type === 'percentage') {
-      return service.price * (1 - offerValue / 100);
-    } else if (service.offer_type === 'fixed') {
-      return Math.max(0, service.price - offerValue);
-    }
-    return service.price;
   };
 
   const loadAvailableSlots = async () => {
@@ -170,7 +154,7 @@ export default function BookingAvailabilityModal({
         service_id: service.id,
         appointment_date: startDateTime.toISOString(),
         duration: service.duration,
-        price: calculateFinalPrice(),
+        price: service.price,
         status: 'pending',
         notes: bookingNote || null,
       });
@@ -246,20 +230,8 @@ export default function BookingAvailabilityModal({
                     <Clock className="w-4 h-4" />
                     {service.duration} min
                   </div>
-                  <div className="flex items-center gap-2">
-                    {service.special_offer && service.offer_type ? (
-                      <>
-                        <span className="text-gray-400 line-through text-sm">{service.price} €</span>
-                        <span className="font-bold text-brand-600">
-                          {service.offer_type === 'percentage'
-                            ? (service.price * (1 - Number(service.special_offer) / 100)).toFixed(2)
-                            : (service.price - Number(service.special_offer)).toFixed(2)
-                          } €
-                        </span>
-                      </>
-                    ) : (
-                      <span className="font-bold text-brand-600">{service.price} €</span>
-                    )}
+                  <div className="font-bold text-brand-600">
+                    {service.price} €
                   </div>
                 </div>
               </div>

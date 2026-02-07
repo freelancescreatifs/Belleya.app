@@ -12,7 +12,7 @@ interface ContentItem {
   title: string;
   description: string;
   content_type: string;
-  platform: string[] | string;
+  platform: string;
   publication_date: string;
   publication_time?: string;
   status: 'idea' | 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
@@ -76,7 +76,7 @@ const PLATFORMS = [
 
 const STATUSES = [
   { value: 'idea', label: 'Idée' },
-  { value: 'script', label: 'Script' },
+  { value: 'script', label: 'Écriture' },
   { value: 'shooting', label: 'Tournage' },
   { value: 'editing', label: 'Montage' },
   { value: 'scheduled', label: 'Programmé' },
@@ -142,14 +142,8 @@ export default function ContentForm({
   });
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(() => {
-    const platformData = prefillData?.platform;
-    if (Array.isArray(platformData)) {
-      return platformData;
-    }
-    if (typeof platformData === 'string') {
-      return platformData.includes(',') ? platformData.split(',') : [platformData];
-    }
-    return ['instagram'];
+    const platformData = prefillData?.platform || 'instagram';
+    return platformData.includes(',') ? platformData.split(',') : [platformData];
   });
 
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
@@ -332,14 +326,8 @@ export default function ContentForm({
           production_start_date: data.production_start_date || '',
         });
 
-        const platformData = data.platform;
-        if (Array.isArray(platformData)) {
-          setSelectedPlatforms(platformData);
-        } else if (typeof platformData === 'string') {
-          setSelectedPlatforms(platformData.includes(',') ? platformData.split(',') : [platformData]);
-        } else {
-          setSelectedPlatforms(['instagram']);
-        }
+        const platformData = data.platform || 'instagram';
+        setSelectedPlatforms(platformData.includes(',') ? platformData.split(',') : [platformData]);
 
         if (data.date_script || data.date_shooting || data.date_editing || data.date_scheduling) {
           setShowProductionDates(true);
@@ -560,7 +548,7 @@ export default function ContentForm({
         title: formData.title,
         description: formData.description,
         content_type: formData.content_type,
-        platform: selectedPlatforms,
+        platform: selectedPlatforms.join(','),
         status: finalStatus,
         publication_date: formData.publication_date,
         publication_time: formData.publication_time || null,

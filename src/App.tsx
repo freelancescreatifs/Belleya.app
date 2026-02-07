@@ -32,7 +32,6 @@ import ClientMap from './pages/client/ClientMap';
 import ClientFavorites from './pages/client/ClientFavorites';
 import ClientProfile from './pages/client/ClientProfile';
 import ProviderProfile from './pages/client/ProviderProfile';
-import ChatBot from './components/shared/ChatBot';
 import {
   Handshake,
   Video,
@@ -107,22 +106,12 @@ function AppContent() {
 
   if (isBookingPage) {
     const slug = pathname.replace('/book/', '');
-    return (
-      <>
-        <PublicBooking slug={slug} />
-        <ChatBot />
-      </>
-    );
+    return <PublicBooking slug={slug} />;
   }
 
   if (isProviderProfilePage) {
     const slug = pathname.replace('/provider/', '');
-    return (
-      <>
-        <ProviderProfile slug={slug} />
-        <ChatBot />
-      </>
-    );
+    return <ProviderProfile slug={slug} />;
   }
 
   useEffect(() => {
@@ -141,19 +130,9 @@ function AppContent() {
 
   if (!user) {
     if (!selectedRole) {
-      return (
-        <>
-          <Landing onSelectRole={setSelectedRole} />
-          <ChatBot />
-        </>
-      );
+      return <Landing onSelectRole={setSelectedRole} />;
     }
-    return (
-      <>
-        <AuthPage role={selectedRole} onBack={() => setSelectedRole(null)} />
-        <ChatBot />
-      </>
-    );
+    return <AuthPage role={selectedRole} onBack={() => setSelectedRole(null)} />;
   }
 
   if (!profile) {
@@ -210,12 +189,9 @@ function AppContent() {
     };
 
     return (
-      <>
-        <ClientLayout currentPage={currentPage} onPageChange={setCurrentPage}>
-          {renderClientPage()}
-        </ClientLayout>
-        <ChatBot />
-      </>
+      <ClientLayout currentPage={currentPage} onPageChange={setCurrentPage}>
+        {renderClientPage()}
+      </ClientLayout>
     );
   }
 
@@ -281,9 +257,6 @@ function AppContent() {
 
       {/* Bottom Navigation mobile only */}
       <BottomNavigation currentPage={currentPage} onPageChange={setCurrentPage} />
-
-      {/* ChatBot accessible from all pages */}
-      <ChatBot />
     </div>
   );
 }

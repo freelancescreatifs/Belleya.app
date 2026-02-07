@@ -526,7 +526,7 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 {followingContent.map((content) => (
                   <ContentFeedCard
                     key={content.id}
@@ -555,7 +555,7 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {followingContent.map((content) => (
                 <ContentFeedCard
                   key={content.id}

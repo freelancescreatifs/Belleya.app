@@ -10,7 +10,7 @@ interface SavedIdea {
   title: string;
   description: string;
   content_type: string;
-  platform: string[] | string;
+  platform: string;
   objective: string;
   notes: string;
   status: string;

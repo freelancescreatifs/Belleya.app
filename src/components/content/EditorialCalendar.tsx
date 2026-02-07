@@ -620,8 +620,6 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
                   getStatusLabel={getStatusLabel}
                   getStatusColor={getStatusColor}
                   getTypeIcon={getTypeIcon}
-                  getPlatformIcon={getPlatformIcon}
-                  getPlatformColor={getPlatformColor}
                   progressPercent={progressPercent}
                   completedSteps={completedSteps}
                   totalSteps={totalSteps}
@@ -868,7 +866,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setView('day')}
@@ -902,7 +900,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
           </button>
         </div>
 
-        <div className="flex items-center justify-center sm:justify-end gap-4">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => navigateDate('prev')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1020,13 +1018,9 @@ function DraggableContent({
           }`}>
             {content.is_published ? <CheckCircle className="w-3 h-3 text-green-700" /> : <Calendar className="w-3 h-3 text-gray-700" />}
           </span>
-          <div className="flex gap-0.5 flex-shrink-0">
-            {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
-              <span key={platform} className={`px-1 py-0.5 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(platform)}`}>
-                {getPlatformIcon(platform)}
-              </span>
-            ))}
-          </div>
+          <span className={`px-1 py-0.5 rounded text-xs flex items-center gap-0.5 flex-shrink-0 border ${getPlatformColor(content.platform)}`}>
+            {getPlatformIcon(content.platform)}
+          </span>
           {content.editorial_pillar && (
             <div
               className="w-2 h-2 rounded-full flex-shrink-0"
@@ -1167,13 +1161,9 @@ function DraggableWeekContent({
               {getTypeIcon(content.content_type)}
               {content.content_type}
             </span>
-            <div className="flex gap-1">
-              {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
-                <span key={platform} className={`px-1 py-1 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(platform)}`}>
-                  {getPlatformIcon(platform)}
-                </span>
-              ))}
-            </div>
+            <span className={`px-1 py-1 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(content.platform)}`}>
+              {getPlatformIcon(content.platform)}
+            </span>
           </div>
         </div>
       </div>
@@ -1189,8 +1179,6 @@ function ContentCard({
   getStatusLabel,
   getStatusColor,
   getTypeIcon,
-  getPlatformIcon,
-  getPlatformColor,
   compact = false,
   progressPercent,
   completedSteps,
@@ -1206,8 +1194,6 @@ function ContentCard({
   getStatusLabel: (status: string) => string;
   getStatusColor: (status: string) => string;
   getTypeIcon: (type: string) => JSX.Element;
-  getPlatformIcon: (platform: string) => JSX.Element;
-  getPlatformColor: (platform: string) => string;
   compact?: boolean;
   progressPercent?: number;
   completedSteps?: number;
@@ -1299,13 +1285,17 @@ function ContentCard({
           {getTypeIcon(content.content_type)}
           {content.content_type}
         </span>
-        <div className="flex gap-1.5">
-          {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
-            <span key={platform} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 ${getPlatformColor(platform)}`}>
-              {getPlatformIcon(platform)}
-            </span>
-          ))}
-        </div>
+        {content.platforms && content.platforms.length > 0 ? (
+          <span className="px-2.5 py-1.5 bg-gray-100 text-gray-800 rounded-lg text-xs font-medium">
+            {content.platforms.join(',')}
+          </span>
+        ) : (
+          <span className={`px-2.5 py-1.5 rounded-lg text-xs font-medium ${
+            content.platform === 'instagram' ? 'bg-belleya-100 text-belleya-deep' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {content.platform}
+          </span>
+        )}
       </div>
 
       {showProgress ? (

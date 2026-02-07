@@ -8,7 +8,7 @@ interface ContentFeedCardProps {
     title: string;
     description: string;
     media_url?: string;
-    platform: string[] | string;
+    platform: string;
     published_date?: string;
     likes_count: number;
     comments_count: number;
@@ -212,13 +212,13 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
 
       {content.media_url && (
         <div
-          className="cursor-pointer aspect-square"
+          className="cursor-pointer"
           onClick={handleProviderClick}
         >
           <img
             src={content.media_url}
             alt={content.title}
-            className="w-full h-full object-cover"
+            className="w-full h-96 object-cover"
           />
         </div>
       )}

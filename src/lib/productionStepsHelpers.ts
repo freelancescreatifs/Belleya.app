@@ -92,15 +92,15 @@ export function getProductionSteps(content: ContentItem): ProductionStep[] {
         isPast: isCompleted || diffDays < 0,
         isCompleted
       });
-    } else {
+    } else if (isCompleted) {
       steps.push({
         ...step,
         stepDate: undefined,
-        diffDays: 999,
+        diffDays: -999,
         isOverdue: false,
         isToday: false,
-        isPast: isCompleted,
-        isCompleted
+        isPast: true,
+        isCompleted: true
       });
     }
   }
@@ -164,7 +164,7 @@ export const stepColorMap: Record<string, string> = {
 };
 
 export const stepLabelMap: Record<string, string> = {
-  script: 'Script',
+  script: 'Écriture',
   shooting: 'Tournage',
   editing: 'Montage',
   subtitles: 'Sous-titres',

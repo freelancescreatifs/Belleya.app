@@ -93,8 +93,8 @@ export default function ClientProfile() {
 
     const file = e.target.files[0];
     const fileExt = file.name.split('.').pop();
-    const fileName = `profile-${Date.now()}.${fileExt}`;
-    const filePath = `client-profiles/${user.id}/${fileName}`;
+    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+    const filePath = `client-profiles/${fileName}`;
 
     setUploading(true);
 
