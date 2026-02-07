@@ -11,6 +11,37 @@ import 'leaflet/dist/leaflet.css';
 const DEFAULT_CENTER: [number, number] = [48.8566, 2.3522];
 const DEFAULT_ZOOM = 13;
 
+function useContainerSize(ref: React.RefObject<HTMLDivElement>) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const updateSize = () => {
+      if (ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        setSize({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateSize();
+
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(ref.current);
+
+    window.addEventListener('resize', updateSize);
+    window.addEventListener('orientationchange', updateSize);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateSize);
+      window.removeEventListener('orientationchange', updateSize);
+    };
+  }, [ref]);
+
+  return size;
+}
+
 function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
 
@@ -21,41 +52,148 @@ function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }
   return null;
 }
 
+function MapDebugger() {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const size = map.getSize();
+
+    console.log('🗺️ MAP INIT', {
+      containerWidth: container.offsetWidth,
+      containerHeight: container.offsetHeight,
+      mapWidth: size.x,
+      mapHeight: size.y,
+      center: map.getCenter(),
+      zoom: map.getZoom(),
+      tileLayerUrl: 'CARTO Light (no token needed)',
+      timestamp: new Date().toISOString(),
+    });
+
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      console.error('❌ MAP ERROR: Container has 0 width or height!', {
+        offsetWidth: container.offsetWidth,
+        offsetHeight: container.offsetHeight,
+        clientWidth: container.clientWidth,
+        clientHeight: container.clientHeight,
+      });
+    }
+
+    const tileLoadStartHandler = (e: any) => {
+      console.log('🔄 Tile loading:', e.url);
+    };
+
+    const tileLoadHandler = (e: any) => {
+      console.log('✅ Tile loaded:', e.url);
+    };
+
+    const tileErrorHandler = (e: any) => {
+      console.error('❌ TILE ERROR:', {
+        url: e.url,
+        coords: e.coords,
+        error: e.error,
+        tile: e.tile,
+      });
+
+      fetch(e.url, { method: 'HEAD' })
+        .then(response => {
+          console.error('❌ Tile HTTP Status:', {
+            url: e.url,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+          });
+        })
+        .catch(err => {
+          console.error('❌ Tile fetch error:', err);
+        });
+    };
+
+    map.on('tileloadstart', tileLoadStartHandler);
+    map.on('tileload', tileLoadHandler);
+    map.on('tileerror', tileErrorHandler);
+
+    map.on('load', () => {
+      console.log('✅ Map fully loaded');
+    });
+
+    map.on('zoomend', () => {
+      console.log('🔍 Zoom changed:', map.getZoom());
+    });
+
+    map.on('moveend', () => {
+      console.log('📍 Map moved:', map.getCenter());
+    });
+
+    return () => {
+      map.off('tileloadstart', tileLoadStartHandler);
+      map.off('tileload', tileLoadHandler);
+      map.off('tileerror', tileErrorHandler);
+    };
+  }, [map]);
+
+  return null;
+}
+
 function MapResizer() {
   const map = useMap();
 
   useEffect(() => {
-    const resizeMap = () => {
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
+    const forceResize = () => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const container = map.getContainer();
+          if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+            console.error('❌ Container still has 0 size, retrying...');
+            setTimeout(forceResize, 100);
+            return;
+          }
+
+          map.invalidateSize({ pan: false });
+
+          setTimeout(() => {
+            map.invalidateSize({ pan: false });
+          }, 50);
+
+          console.log('🔄 Map force resized:', {
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+          });
+        }, 0);
+      });
     };
 
-    resizeMap();
+    forceResize();
 
-    window.addEventListener('resize', resizeMap);
-    window.addEventListener('orientationchange', resizeMap);
+    const handleResize = () => forceResize();
+    const handleOrientation = () => {
+      setTimeout(forceResize, 100);
+      setTimeout(forceResize, 300);
+      setTimeout(forceResize, 600);
+    };
 
-    const handleVisibilityChange = () => {
+    const handleVisibility = () => {
       if (!document.hidden) {
-        resizeMap();
+        console.log('👁️ Page visible, force resizing...');
+        forceResize();
+        setTimeout(forceResize, 200);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const observer = new ResizeObserver(() => {
-      resizeMap();
-    });
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientation);
+    document.addEventListener('visibilitychange', handleVisibility);
 
+    const observer = new ResizeObserver(handleResize);
     const container = map.getContainer();
     if (container) {
       observer.observe(container);
     }
 
     return () => {
-      window.removeEventListener('resize', resizeMap);
-      window.removeEventListener('orientationchange', resizeMap);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientation);
+      document.removeEventListener('visibilitychange', handleVisibility);
       observer.disconnect();
     };
   }, [map]);
@@ -75,6 +213,26 @@ export default function ClientMap() {
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [mapKey, setMapKey] = useState(0);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const containerSize = useContainerSize(mapContainerRef);
+
+  const safeMapCenter: [number, number] = useMemo(() => {
+    if (!mapCenter || mapCenter[0] === 0 || mapCenter[1] === 0) {
+      return DEFAULT_CENTER;
+    }
+    return mapCenter;
+  }, [mapCenter]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (containerSize.width > 0 && containerSize.height > 0) {
+        setMapKey(prev => prev + 1);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [containerSize.width, containerSize.height]);
 
   const createCustomIcon = (profilePhoto: string | null, companyName: string): DivIcon => {
     const photoHtml = profilePhoto
@@ -343,23 +501,43 @@ export default function ClientMap() {
         </div>
       </div>
 
-      <div className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0" style={{ height: '60dvh', minHeight: '500px', maxHeight: '700px' }}>
-        <MapContainer
-          center={mapCenter}
-          zoom={mapZoom}
-          scrollWheelZoom={true}
-          zoomControl={true}
-          className="h-full w-full"
-          style={{ height: '100%', width: '100%', position: 'relative', zIndex: 0 }}
-        >
-          <MapUpdater center={mapCenter} zoom={mapZoom} />
-          <MapResizer />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            maxZoom={19}
-            subdomains="abcd"
-          />
+      <div
+        ref={mapContainerRef}
+        className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0"
+        style={{
+          height: containerSize.height > 0 ? `${containerSize.height}px` : '60dvh',
+          minHeight: '500px',
+          maxHeight: '700px'
+        }}
+      >
+        {containerSize.width > 0 && containerSize.height > 0 && (
+          <MapContainer
+            key={`map-${mapKey}-${containerSize.width}-${containerSize.height}`}
+            center={safeMapCenter}
+            zoom={mapZoom}
+            scrollWheelZoom={true}
+            zoomControl={true}
+            className="h-full w-full"
+            style={{ height: '100%', width: '100%', position: 'relative', zIndex: 0 }}
+            whenReady={(map) => {
+              setTimeout(() => {
+                map.target.invalidateSize({ pan: false });
+              }, 100);
+            }}
+          >
+            <MapDebugger />
+            <MapUpdater center={safeMapCenter} zoom={mapZoom} />
+            <MapResizer />
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maxZoom={19}
+              minZoom={3}
+              keepBuffer={2}
+              updateWhenIdle={false}
+              updateWhenZooming={false}
+              errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+            />
 
           {userLocation && (
             <Marker position={userLocation} icon={userIcon}>
@@ -392,7 +570,16 @@ export default function ClientMap() {
               </Marker>
             );
           })}
-        </MapContainer>
+          </MapContainer>
+        )}
+        {(containerSize.width === 0 || containerSize.height === 0) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Chargement de la carte...</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-4">

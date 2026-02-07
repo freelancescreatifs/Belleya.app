@@ -200,7 +200,7 @@ button, a, [role="button"] {
 /* Support for dvh with fallback for older browsers */
 @supports not (height: 100dvh) {
   .h-\[60dvh\] {
-    height: 60vh !important;
+    height: calc(var(--vh, 1vh) * 60) !important;
   }
 }
 
@@ -213,6 +213,25 @@ button, a, [role="button"] {
   background: #f0f0f0 !important;
   touch-action: pan-x pan-y;
   min-height: 500px;
+}
+
+/* Force minimum dimensions to prevent 0-height containers */
+.leaflet-container:empty {
+  min-height: 500px;
+  background: #f0f0f0;
+}
+
+/* Ensure tiles load properly and don't get hidden */
+.leaflet-tile {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Fix iOS Safari viewport height issues */
+@supports (-webkit-touch-callout: none) {
+  .h-\[60dvh\] {
+    height: calc(var(--vh, 1vh) * 60) !important;
+  }
 }
 
 .leaflet-pane {

@@ -5,38 +5,82 @@ import L from 'leaflet';
 import { geocodeAddress, GeocodeResult } from '../../lib/geocodingHelpers';
 import 'leaflet/dist/leaflet.css';
 
+function MapDebugger() {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const size = map.getSize();
+
+    console.log('🗺️ [AddressInput] MAP INIT', {
+      containerWidth: container.offsetWidth,
+      containerHeight: container.offsetHeight,
+      mapWidth: size.x,
+      mapHeight: size.y,
+    });
+
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      console.error('❌ [AddressInput] MAP ERROR: Container has 0 width or height!');
+    }
+
+    const tileErrorHandler = (e: any) => {
+      console.error('❌ [AddressInput] TILE ERROR:', e.url);
+    };
+
+    map.on('tileerror', tileErrorHandler);
+
+    return () => {
+      map.off('tileerror', tileErrorHandler);
+    };
+  }, [map]);
+
+  return null;
+}
+
 function MapResizer() {
   const map = useMap();
 
   useEffect(() => {
-    const resizeMap = () => {
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
+    const forceResize = () => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const container = map.getContainer();
+          if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+            setTimeout(forceResize, 100);
+            return;
+          }
+
+          map.invalidateSize({ pan: false });
+
+          setTimeout(() => {
+            map.invalidateSize({ pan: false });
+          }, 50);
+        }, 0);
+      });
     };
 
-    resizeMap();
+    forceResize();
 
-    window.addEventListener('resize', resizeMap);
-    const handleVisibilityChange = () => {
+    const handleResize = () => forceResize();
+    const handleVisibility = () => {
       if (!document.hidden) {
-        resizeMap();
+        forceResize();
+        setTimeout(forceResize, 200);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const observer = new ResizeObserver(() => {
-      resizeMap();
-    });
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibility);
 
+    const observer = new ResizeObserver(handleResize);
     const container = map.getContainer();
     if (container) {
       observer.observe(container);
     }
 
     return () => {
-      window.removeEventListener('resize', resizeMap);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibility);
       observer.disconnect();
     };
   }, [map]);
@@ -75,7 +119,14 @@ export default function AddressInput({
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingStatus, setGeocodingStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [showMap, setShowMap] = useState(false);
+  const [mapKey, setMapKey] = useState(0);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (showMap && currentLocation) {
+      setMapKey(prev => prev + 1);
+    }
+  }, [showMap, currentLocation]);
 
   useEffect(() => {
     if (!value || value.length < 3) {
@@ -239,18 +290,31 @@ export default function AddressInput({
           </div>
 
           {showMap && (
-            <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
+            <div className="h-64 rounded-lg overflow-hidden border border-gray-300 relative">
               <MapContainer
+                key={`address-map-${mapKey}-${currentLocation.latitude}-${currentLocation.longitude}`}
                 center={[currentLocation.latitude, currentLocation.longitude]}
                 zoom={15}
                 scrollWheelZoom={false}
                 className="h-full w-full"
                 style={{ height: '100%', width: '100%' }}
+                whenReady={(map) => {
+                  setTimeout(() => {
+                    map.target.invalidateSize({ pan: false });
+                  }, 100);
+                }}
               >
+                <MapDebugger />
                 <MapResizer />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  maxZoom={19}
+                  minZoom={3}
+                  keepBuffer={2}
+                  updateWhenIdle={false}
+                  updateWhenZooming={false}
+                  errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
                 />
                 <Marker
                   position={[currentLocation.latitude, currentLocation.longitude]}
