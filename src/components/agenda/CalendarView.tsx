@@ -155,7 +155,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
   const getDateTimeFromPosition = (e: React.MouseEvent, dayElement: HTMLElement) => {
     const rect = dayElement.getBoundingClientRect();
     const y = e.clientY - rect.top;
-    const hourHeight = 64;
+    const hourHeight = 48;
     const totalHours = y / hourHeight;
     const hours = Math.floor(totalHours);
     const minutes = Math.round((totalHours - hours) * 60 / 15) * 15;
@@ -312,24 +312,25 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      <div className="grid grid-cols-8 border-b border-gray-200">
-        <div className="p-3 text-center text-sm font-semibold text-gray-600 border-r border-gray-200"></div>
+      {/* En-têtes des jours - version ultra-compacte comme vue mois */}
+      <div className="grid grid-cols-8 border-b border-gray-100">
+        <div className="py-1 md:py-2 text-center text-[9px] md:text-xs font-semibold text-gray-500 border-r border-gray-100"></div>
         {days.map((day) => {
           const isToday = isSameDay(day, today);
           return (
             <div
               key={day.toISOString()}
               onClick={() => onDayClick(day)}
-              className={`p-3 text-center border-r border-gray-200 last:border-r-0 cursor-pointer hover:bg-gray-50 transition-colors ${
-                isToday ? 'bg-belleya-50' : ''
+              className={`py-1 md:py-2 px-1 text-center border-r border-gray-100 last:border-r-0 cursor-pointer active:bg-gray-100 md:hover:bg-gray-50 transition-colors ${
+                isToday ? 'bg-belleya-50/30' : ''
               }`}
             >
-              <div className="text-xs text-gray-600">
+              <div className="text-[9px] md:text-xs text-gray-500 font-medium">
                 {day.toLocaleDateString('fr-FR', { weekday: 'short' })}
               </div>
               <div
-                className={`text-lg font-semibold mt-1 ${
-                  isToday ? 'text-belleya-primary' : 'text-gray-900'
+                className={`text-sm md:text-base font-semibold mt-0.5 ${
+                  isToday ? 'text-belleya-500' : 'text-gray-900'
                 }`}
               >
                 {day.getDate()}
@@ -338,12 +339,12 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
           );
         })}
       </div>
-      <div className="overflow-y-auto max-h-[600px]">
+      <div className="overflow-y-auto max-h-[500px] md:max-h-[600px]">
         <div className="grid grid-cols-8">
-          <div className="border-r border-gray-200">
+          <div className="border-r border-gray-100">
             {hours.map((hour) => (
-              <div key={hour} className="h-16 p-2 text-xs text-gray-500 border-b border-gray-100">
-                {hour.toString().padStart(2, '0')}:00
+              <div key={hour} className="h-12 py-1 px-1 md:px-2 text-[9px] md:text-xs text-gray-400 border-b border-gray-50">
+                {hour.toString().padStart(2, '0')}h
               </div>
             ))}
           </div>
@@ -354,7 +355,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
             return (
               <div
                 key={day.toISOString()}
-                className={`border-r border-gray-200 last:border-r-0 relative transition-all duration-200 ${
+                className={`border-r border-gray-100 last:border-r-0 relative transition-all duration-200 ${
                   dragState.dragStarted && dragState.hoveredDayIndex === dayIndex
                     ? 'bg-blue-50/70 ring-2 ring-inset ring-blue-400'
                     : ''
@@ -365,7 +366,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                 {hours.map((hour) => (
                   <div
                     key={hour}
-                    className="h-16 border-b border-gray-100 hover:bg-gray-50/50 cursor-pointer transition-colors"
+                    className="h-12 border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors"
                     onClick={(e) => {
                       if (dragState.dragStarted) return;
                       const now = Date.now();
@@ -392,39 +393,39 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       const end = dragState.currentEnd!;
                       const startHour = start.getHours() + start.getMinutes() / 60;
                       const endHour = end.getHours() + end.getMinutes() / 60;
-                      const top = startHour * 64;
-                      const height = (endHour - startHour) * 64;
+                      const top = startHour * 48;
+                      const height = (endHour - startHour) * 48;
 
                       return (
                         <div
                           key={`dragging-${dragState.item.id}`}
-                          className={`${getEventColor(dragState.item)} text-white text-xs px-2 py-1 rounded overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-4 ring-white scale-105 pointer-events-auto`}
+                          className={`${getEventColor(dragState.item)} text-white px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm md:rounded overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
-                            height: `${Math.max(height - 4, 24)}px`,
-                            left: '4px',
-                            right: '4px',
+                            height: `${Math.max(height - 3, 20)}px`,
+                            left: '2px',
+                            right: '2px',
                             zIndex: 100,
                           }}
                         >
                           <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none">
-                            <span className="text-white font-semibold text-xs px-2 py-1 bg-black/60 rounded shadow-lg">
+                            <span className="text-white font-semibold text-[9px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 bg-black/60 rounded shadow-lg">
                               {dragState.mode === 'move' ? 'Déplacement...' : 'Redimensionnement...'}
                             </span>
                           </div>
-                          <div className="font-medium line-clamp-2">
+                          <div className="font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs">
                             {(() => {
                               const productionStep = dragState.item.type === 'task' ? (dragState.item.data as any).production_step : null;
                               return (
                                 <>
-                                  {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
+                                  {productionStep && <span className="mr-0.5 text-[10px] md:text-xs">{getStepEmoji(productionStep)}</span>}
                                   {dragState.item.title}
                                 </>
                               );
                             })()}
                           </div>
-                          <div className="text-xs opacity-90 truncate">
+                          <div className="text-[8px] md:text-xs opacity-90 truncate">
                             {formatTime(start)} - {formatTime(end)}
                           </div>
                         </div>
@@ -446,29 +447,29 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                     const renderEvent = (start: Date, end: Date, isGhost: boolean) => {
                       const startHour = start.getHours() + start.getMinutes() / 60;
                       const endHour = end.getHours() + end.getMinutes() / 60;
-                      const top = startHour * 64;
-                      const height = (endHour - startHour) * 64;
+                      const top = startHour * 48;
+                      const height = (endHour - startHour) * 48;
 
                       return (
                         <div
                           key={isGhost ? `${item.id}-ghost` : item.id}
-                          className={`${getEventColor(item)} text-white text-xs px-2 py-1 rounded overflow-hidden select-none group relative ${
+                          className={`${getEventColor(item)} text-white px-1 md:px-1.5 py-0.5 md:py-1 rounded-sm md:rounded overflow-hidden select-none group relative ${
                             isGhost
                               ? 'opacity-20 pointer-events-none'
                               : isBeingDragged
-                              ? 'opacity-65 cursor-grabbing shadow-2xl ring-4 ring-white scale-105 z-50 pointer-events-auto'
+                              ? 'opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 z-50 pointer-events-auto'
                               : isGrabbed
-                              ? 'scale-105 cursor-grabbing shadow-lg ring-2 ring-white/50 transition-transform duration-150 pointer-events-auto'
+                              ? 'scale-105 cursor-grabbing shadow-lg ring-1 md:ring-2 ring-white/50 transition-transform duration-150 pointer-events-auto'
                               : 'cursor-grab hover:opacity-90 transition-all duration-200 hover:scale-102 pointer-events-auto'
                           }`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
-                            height: `${Math.max(height - 4, 24)}px`,
+                            height: `${Math.max(height - 3, 20)}px`,
                             left: `${leftPercent}%`,
                             width: `${widthPercent}%`,
-                            paddingLeft: '4px',
-                            paddingRight: '4px',
+                            paddingLeft: '3px',
+                            paddingRight: '3px',
                             transform: isBeingDragged && !isGhost ? 'scale(1.05)' : undefined,
                             transition: isBeingDragged ? 'none' : undefined,
                           }}
@@ -495,34 +496,34 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                         >
                           {(isBeingDragged || isGrabbed) && !isGhost && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none">
-                              <span className="text-white font-semibold text-xs px-2 py-1 bg-black/60 rounded shadow-lg">
+                              <span className="text-white font-semibold text-[9px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 bg-black/60 rounded shadow-lg">
                                 {isBeingDragged ? dragLabel : 'Prêt...'}
                               </span>
                             </div>
                           )}
                           {!isGhost && (
                             <div
-                              className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute top-0 left-0 right-0 h-1.5 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
                               style={{ background: 'rgba(255,255,255,0.3)' }}
                             />
                           )}
-                          <div className={`font-medium line-clamp-2 ${isCancelled ? 'line-through' : ''}`}>
+                          <div className={`font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs leading-tight ${isCancelled ? 'line-through' : ''}`}>
                             {(() => {
                               const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
                               return (
                                 <>
-                                  {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
+                                  {productionStep && <span className="mr-0.5 text-[10px] md:text-xs">{getStepEmoji(productionStep)}</span>}
                                   {item.title}
                                 </>
                               );
                             })()}
                           </div>
-                          <div className={`text-xs opacity-90 truncate ${isCancelled ? 'line-through' : ''}`}>
+                          <div className={`text-[8px] md:text-[10px] opacity-90 truncate ${isCancelled ? 'line-through' : ''}`}>
                             {formatTime(start)} - {formatTime(end)}
                           </div>
                           {!isGhost && (
                             <div
-                              className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute bottom-0 left-0 right-0 h-1.5 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
                               style={{ background: 'rgba(255,255,255,0.3)' }}
                             />
                           )}
