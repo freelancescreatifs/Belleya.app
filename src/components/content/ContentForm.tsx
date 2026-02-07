@@ -717,7 +717,7 @@ export default function ContentForm({
   function getProductionSteps() {
     const contentType = formData.content_type;
     const allSteps = {
-      script: { key: 'date_script', label: 'Écriture', icon: FileText, color: 'blue' },
+      script: { key: 'date_script', label: 'Script', icon: FileText, color: 'blue' },
       shooting: { key: 'date_shooting', label: 'Tournage', icon: Video, color: 'red' },
       editing: { key: 'date_editing', label: 'Montage', icon: Scissors, color: 'purple' },
       scheduling: { key: 'date_scheduling', label: 'Planifié', icon: Send, color: 'green' }
@@ -1023,7 +1023,7 @@ export default function ContentForm({
                 Toutes les dates de production sont calculées EN ARRIÈRE depuis la date de publication.
               </p>
               <p className="text-sm text-blue-800">
-                Exemple : Publication le 20/01 → Programmer le 19/01 (J-1) → Montage le 17/01 (J-3) → Tournage le 16/01 (J-4) → Écriture le 15/01 (J-5)
+                Exemple : Publication le 20/01 → Programmer le 19/01 (J-1) → Montage le 17/01 (J-3) → Tournage le 16/01 (J-4) → Script le 15/01 (J-5)
               </p>
               <p className="text-xs text-blue-700 mt-2">
                 Ces dates génèrent automatiquement des tâches dans votre agenda avec le tag "Réseaux sociaux".

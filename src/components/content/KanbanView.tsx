@@ -50,7 +50,7 @@ interface KanbanViewProps {
 }
 
 const STATUS_COLUMNS = [
-  { id: 'script', label: 'Écriture', icon: FileEdit, color: 'bg-orange-100' },
+  { id: 'script', label: 'Script', icon: FileEdit, color: 'bg-orange-100' },
   { id: 'shooting', label: 'Tournage', icon: Camera, color: 'bg-purple-100' },
   { id: 'editing', label: 'Montage', icon: Scissors, color: 'bg-indigo-100', hiddenByDefault: true },
   { id: 'scheduled', label: 'Programmé', icon: CalendarCheck, color: 'bg-blue-100' },
@@ -351,7 +351,7 @@ function KanbanCard({
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       'idea': 'Idée',
-      'script': 'Écriture',
+      'script': 'Script',
       'shooting': 'Tournage',
       'editing': 'Montage',
       'scheduled': 'Programmé',

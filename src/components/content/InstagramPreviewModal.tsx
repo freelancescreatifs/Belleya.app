@@ -64,7 +64,7 @@ export default function InstagramPreviewModal({
   function getStatusBadge() {
     const badges = {
       idea: { label: 'Idée', className: 'bg-gray-100 text-gray-800' },
-      script: { label: 'Écriture', className: 'bg-orange-100 text-orange-800' },
+      script: { label: 'Script', className: 'bg-orange-100 text-orange-800' },
       shooting: { label: 'Tournage', className: 'bg-purple-100 text-purple-800' },
       editing: { label: 'Montage', className: 'bg-indigo-100 text-indigo-800' },
       scheduled: { label: 'Programmé', className: 'bg-blue-100 text-blue-800' },

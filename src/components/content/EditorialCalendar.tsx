@@ -257,7 +257,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
       case 'scheduled':
         return 'Programmé';
       case 'script':
-        return 'Écriture';
+        return 'Script';
       case 'shooting':
         return 'Tournage';
       case 'editing':

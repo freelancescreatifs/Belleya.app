@@ -562,7 +562,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                       className="px-2 py-1 text-xs border border-gray-200 rounded hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white"
                     >
                       <option value="none">Aucune étape</option>
-                      <option value="script">Écriture</option>
+                      <option value="script">Script</option>
                       <option value="shooting">Tournage</option>
                       <option value="editing">Montage</option>
                       <option value="scheduling">Planifié</option>

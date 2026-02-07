@@ -50,7 +50,7 @@ export default function SocialMediaDrawer({ content, onClose, onEdit }: SocialMe
       case 'scheduled':
         return 'Programmé';
       case 'script':
-        return 'Écriture';
+        return 'Script';
       case 'shooting':
         return 'Tournage';
       case 'editing':
