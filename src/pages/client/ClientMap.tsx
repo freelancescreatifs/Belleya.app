@@ -11,37 +11,6 @@ import 'leaflet/dist/leaflet.css';
 const DEFAULT_CENTER: [number, number] = [48.8566, 2.3522];
 const DEFAULT_ZOOM = 13;
 
-function useContainerSize(ref: React.RefObject<HTMLDivElement>) {
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const updateSize = () => {
-      if (ref.current) {
-        const rect = ref.current.getBoundingClientRect();
-        setSize({ width: rect.width, height: rect.height });
-      }
-    };
-
-    updateSize();
-
-    const observer = new ResizeObserver(updateSize);
-    observer.observe(ref.current);
-
-    window.addEventListener('resize', updateSize);
-    window.addEventListener('orientationchange', updateSize);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', updateSize);
-      window.removeEventListener('orientationchange', updateSize);
-    };
-  }, [ref]);
-
-  return size;
-}
-
 function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
 
@@ -139,61 +108,49 @@ function MapResizer() {
   const map = useMap();
 
   useEffect(() => {
-    const forceResize = () => {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          const container = map.getContainer();
-          if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-            console.error('❌ Container still has 0 size, retrying...');
-            setTimeout(forceResize, 100);
-            return;
-          }
+    const resizeMap = () => {
+      setTimeout(() => {
+        const container = map.getContainer();
+        const oldSize = map.getSize();
 
-          map.invalidateSize({ pan: false });
+        map.invalidateSize();
 
-          setTimeout(() => {
-            map.invalidateSize({ pan: false });
-          }, 50);
-
-          console.log('🔄 Map force resized:', {
-            width: container.offsetWidth,
-            height: container.offsetHeight,
-          });
-        }, 0);
-      });
+        const newSize = map.getSize();
+        console.log('🔄 Map resized:', {
+          before: { width: oldSize.x, height: oldSize.y },
+          after: { width: newSize.x, height: newSize.y },
+          containerWidth: container.offsetWidth,
+          containerHeight: container.offsetHeight,
+        });
+      }, 100);
     };
 
-    forceResize();
+    resizeMap();
 
-    const handleResize = () => forceResize();
-    const handleOrientation = () => {
-      setTimeout(forceResize, 100);
-      setTimeout(forceResize, 300);
-      setTimeout(forceResize, 600);
-    };
+    window.addEventListener('resize', resizeMap);
+    window.addEventListener('orientationchange', resizeMap);
 
-    const handleVisibility = () => {
+    const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('👁️ Page visible, force resizing...');
-        forceResize();
-        setTimeout(forceResize, 200);
+        console.log('👁️ Page visible again, resizing map...');
+        resizeMap();
       }
     };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleOrientation);
-    document.addEventListener('visibilitychange', handleVisibility);
+    const observer = new ResizeObserver(() => {
+      resizeMap();
+    });
 
-    const observer = new ResizeObserver(handleResize);
     const container = map.getContainer();
     if (container) {
       observer.observe(container);
     }
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleOrientation);
-      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('resize', resizeMap);
+      window.removeEventListener('orientationchange', resizeMap);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       observer.disconnect();
     };
   }, [map]);
@@ -213,26 +170,6 @@ export default function ClientMap() {
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [mapKey, setMapKey] = useState(0);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const containerSize = useContainerSize(mapContainerRef);
-
-  const safeMapCenter: [number, number] = useMemo(() => {
-    if (!mapCenter || mapCenter[0] === 0 || mapCenter[1] === 0) {
-      return DEFAULT_CENTER;
-    }
-    return mapCenter;
-  }, [mapCenter]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (containerSize.width > 0 && containerSize.height > 0) {
-        setMapKey(prev => prev + 1);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [containerSize.width, containerSize.height]);
 
   const createCustomIcon = (profilePhoto: string | null, companyName: string): DivIcon => {
     const photoHtml = profilePhoto
@@ -501,43 +438,25 @@ export default function ClientMap() {
         </div>
       </div>
 
-      <div
-        ref={mapContainerRef}
-        className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0"
-        style={{
-          height: containerSize.height > 0 ? `${containerSize.height}px` : '60dvh',
-          minHeight: '500px',
-          maxHeight: '700px'
-        }}
-      >
-        {containerSize.width > 0 && containerSize.height > 0 && (
-          <MapContainer
-            key={`map-${mapKey}-${containerSize.width}-${containerSize.height}`}
-            center={safeMapCenter}
-            zoom={mapZoom}
-            scrollWheelZoom={true}
-            zoomControl={true}
-            className="h-full w-full"
-            style={{ height: '100%', width: '100%', position: 'relative', zIndex: 0 }}
-            whenReady={(map) => {
-              setTimeout(() => {
-                map.target.invalidateSize({ pan: false });
-              }, 100);
-            }}
-          >
-            <MapDebugger />
-            <MapUpdater center={safeMapCenter} zoom={mapZoom} />
-            <MapResizer />
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maxZoom={19}
-              minZoom={3}
-              keepBuffer={2}
-              updateWhenIdle={false}
-              updateWhenZooming={false}
-              errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-            />
+      <div className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0" style={{ height: '60dvh', minHeight: '500px', maxHeight: '700px' }}>
+        <MapContainer
+          center={mapCenter}
+          zoom={mapZoom}
+          scrollWheelZoom={true}
+          zoomControl={true}
+          className="h-full w-full"
+          style={{ height: '100%', width: '100%', position: 'relative', zIndex: 0 }}
+        >
+          <MapDebugger />
+          <MapUpdater center={mapCenter} zoom={mapZoom} />
+          <MapResizer />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            maxZoom={19}
+            subdomains="abcd"
+            errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+          />
 
           {userLocation && (
             <Marker position={userLocation} icon={userIcon}>
@@ -570,16 +489,7 @@ export default function ClientMap() {
               </Marker>
             );
           })}
-          </MapContainer>
-        )}
-        {(containerSize.width === 0 || containerSize.height === 0) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
-              <p className="text-gray-600">Chargement de la carte...</p>
-            </div>
-          </div>
-        )}
+        </MapContainer>
       </div>
 
       <div className="p-4">

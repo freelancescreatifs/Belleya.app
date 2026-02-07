@@ -41,46 +41,34 @@ function MapResizer() {
   const map = useMap();
 
   useEffect(() => {
-    const forceResize = () => {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          const container = map.getContainer();
-          if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-            setTimeout(forceResize, 100);
-            return;
-          }
-
-          map.invalidateSize({ pan: false });
-
-          setTimeout(() => {
-            map.invalidateSize({ pan: false });
-          }, 50);
-        }, 0);
-      });
+    const resizeMap = () => {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
     };
 
-    forceResize();
+    resizeMap();
 
-    const handleResize = () => forceResize();
-    const handleVisibility = () => {
+    window.addEventListener('resize', resizeMap);
+    const handleVisibilityChange = () => {
       if (!document.hidden) {
-        forceResize();
-        setTimeout(forceResize, 200);
+        resizeMap();
       }
     };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    window.addEventListener('resize', handleResize);
-    document.addEventListener('visibilitychange', handleVisibility);
+    const observer = new ResizeObserver(() => {
+      resizeMap();
+    });
 
-    const observer = new ResizeObserver(handleResize);
     const container = map.getContainer();
     if (container) {
       observer.observe(container);
     }
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('resize', resizeMap);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       observer.disconnect();
     };
   }, [map]);
@@ -119,14 +107,7 @@ export default function AddressInput({
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingStatus, setGeocodingStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [showMap, setShowMap] = useState(false);
-  const [mapKey, setMapKey] = useState(0);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (showMap && currentLocation) {
-      setMapKey(prev => prev + 1);
-    }
-  }, [showMap, currentLocation]);
 
   useEffect(() => {
     if (!value || value.length < 3) {
@@ -290,30 +271,19 @@ export default function AddressInput({
           </div>
 
           {showMap && (
-            <div className="h-64 rounded-lg overflow-hidden border border-gray-300 relative">
+            <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
               <MapContainer
-                key={`address-map-${mapKey}-${currentLocation.latitude}-${currentLocation.longitude}`}
                 center={[currentLocation.latitude, currentLocation.longitude]}
                 zoom={15}
                 scrollWheelZoom={false}
                 className="h-full w-full"
                 style={{ height: '100%', width: '100%' }}
-                whenReady={(map) => {
-                  setTimeout(() => {
-                    map.target.invalidateSize({ pan: false });
-                  }, 100);
-                }}
               >
                 <MapDebugger />
                 <MapResizer />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  maxZoom={19}
-                  minZoom={3}
-                  keepBuffer={2}
-                  updateWhenIdle={false}
-                  updateWhenZooming={false}
                   errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
                 />
                 <Marker
