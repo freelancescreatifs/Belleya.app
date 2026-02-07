@@ -63,12 +63,6 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
   const [sortedContents, setSortedContents] = useState<ContentItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [showPublished, setShowPublished] = useState(false);
-  const [showDragHint, setShowDragHint] = useState(() => {
-    return !localStorage.getItem('instagram_drag_hint_dismissed');
-  });
-  const [showFutureAlert, setShowFutureAlert] = useState(() => {
-    return !localStorage.getItem('instagram_future_alert_dismissed');
-  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -105,7 +99,7 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
       .sort((a, b) => {
         const dateA = new Date(`${a.publication_date} ${a.publication_time || '00:00'}`).getTime();
         const dateB = new Date(`${b.publication_date} ${b.publication_time || '00:00'}`).getTime();
-        return dateA - dateB;
+        return dateB - dateA;
       });
 
     setSortedContents(instagramContents);
@@ -174,13 +168,6 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
     const swapValidation = canSwapContent(contentA, contentB);
 
     if (!swapValidation.allowed) {
-      if (showFutureAlert && swapValidation.reason?.includes('date plus future')) {
-        alert(swapValidation.reason);
-        localStorage.setItem('instagram_future_alert_dismissed', 'true');
-        setShowFutureAlert(false);
-      } else if (!swapValidation.reason?.includes('date plus future')) {
-        alert(swapValidation.reason);
-      }
       return;
     }
 
@@ -246,33 +233,6 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
       <div className="px-2">
         <InstagramProfileHeader postsCount={sortedContents.length} />
       </div>
-      {isDragging && showDragHint && (
-        <div className="mb-2 mx-2 p-3 bg-orange-100 border-2 border-orange-400 rounded-xl space-y-2 relative">
-          <button
-            onClick={() => {
-              localStorage.setItem('instagram_drag_hint_dismissed', 'true');
-              setShowDragHint(false);
-            }}
-            className="absolute top-2 right-2 text-orange-600 hover:text-orange-800 transition-colors"
-            title="Ne plus afficher"
-          >
-            <X className="w-4 h-4" />
-          </button>
-          <p className="text-sm font-medium text-orange-900 text-center pr-6">
-            Les dates des deux posts seront échangées
-          </p>
-          <div className="text-xs text-orange-700 space-y-1">
-            <p className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-orange-600 rounded-full"></span>
-              Seuls les posts "Non publié" peuvent être déplacés
-            </p>
-            <p className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-orange-600 rounded-full"></span>
-              Vous ne pouvez pas déplacer vers une date plus future
-            </p>
-          </div>
-        </div>
-      )}
 
       {sortedContents.length === 0 ? (
         <div className="text-center py-8 px-2">
@@ -293,7 +253,7 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
             items={sortedContents.map(c => c.id)}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-3 gap-0.5 sm:gap-1 w-full">
+            <div className="grid grid-cols-3 gap-0.5 w-full px-2">
               {sortedContents.map(content => {
                 const isPublished = content.is_published === true;
 

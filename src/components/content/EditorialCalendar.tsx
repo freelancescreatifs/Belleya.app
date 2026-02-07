@@ -868,7 +868,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
         </button>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setView('day')}
@@ -902,7 +902,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-center sm:justify-end gap-4">
           <button
             onClick={() => navigateDate('prev')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

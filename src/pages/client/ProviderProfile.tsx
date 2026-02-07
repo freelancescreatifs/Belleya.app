@@ -231,7 +231,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Profil introuvable</h1>
           <p className="text-gray-600 mb-6">Ce profil n'existe pas ou n'est plus disponible.</p>
           <button
-            onClick={() => window.location.href = '#client-home'}
+            onClick={() => window.history.back()}
             className="px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
           >
             Retour
@@ -246,7 +246,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
       <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white">
         <div className="container mx-auto px-4 py-6">
           <button
-            onClick={() => window.location.href = '#client-home'}
+            onClick={() => window.history.back()}
             className="flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />

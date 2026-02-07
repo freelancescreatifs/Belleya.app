@@ -1,9 +1,45 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Check, AlertCircle, Loader } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { geocodeAddress, GeocodeResult } from '../../lib/geocodingHelpers';
 import 'leaflet/dist/leaflet.css';
+
+function MapResizeHandler() {
+  const map = useMap();
+
+  useEffect(() => {
+    const forceMapRedraw = () => {
+      setTimeout(() => {
+        map.invalidateSize(true);
+        const currentZoom = map.getZoom();
+        map.setZoom(currentZoom);
+      }, 200);
+    };
+
+    const handleResize = () => {
+      setTimeout(() => {
+        map.invalidateSize(true);
+      }, 100);
+    };
+
+    forceMapRedraw();
+
+    window.addEventListener('resize', handleResize);
+
+    const resizeInterval = setInterval(() => {
+      map.invalidateSize(true);
+    }, 400);
+
+    setTimeout(() => clearInterval(resizeInterval), 2000);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+
+  return null;
+}
 
 interface AddressInputProps {
   value: string;
@@ -200,16 +236,17 @@ export default function AddressInput({
           </div>
 
           {showMap && (
-            <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
+            <div className="map-wrapper-small rounded-lg border border-gray-300">
               <MapContainer
                 center={[currentLocation.latitude, currentLocation.longitude]}
                 zoom={15}
                 scrollWheelZoom={false}
-                className="h-full w-full"
               >
+                <MapResizeHandler />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  detectRetina={true}
                 />
                 <Marker
                   position={[currentLocation.latitude, currentLocation.longitude]}

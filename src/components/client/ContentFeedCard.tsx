@@ -212,13 +212,13 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
 
       {content.media_url && (
         <div
-          className="cursor-pointer"
+          className="cursor-pointer aspect-square"
           onClick={handleProviderClick}
         >
           <img
             src={content.media_url}
             alt={content.title}
-            className="w-full h-96 object-cover"
+            className="w-full h-full object-cover"
           />
         </div>
       )}

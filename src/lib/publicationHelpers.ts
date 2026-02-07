@@ -34,15 +34,5 @@ export function canSwapContent(
     return { allowed: false, reason: 'Impossible de déplacer vers un contenu déjà publié' };
   }
 
-  const dateTimeA = new Date(`${contentA.publication_date} ${contentA.publication_time || '00:00'}`).getTime();
-  const dateTimeB = new Date(`${contentB.publication_date} ${contentB.publication_time || '00:00'}`).getTime();
-
-  if (dateTimeB > dateTimeA) {
-    return {
-      allowed: false,
-      reason: 'Vous ne pouvez pas déplacer un post vers une date plus future. Le feed sert uniquement à réorganiser ou backfill le contenu.'
-    };
-  }
-
   return { allowed: true };
 }
