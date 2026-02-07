@@ -27,7 +27,7 @@ interface ContentItem {
   title: string;
   description: string;
   content_type: string;
-  platform: string;
+  platform: string[] | string;
   publication_date: string;
   publication_time?: string;
   status: 'idea' | 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
@@ -91,7 +91,8 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
         const hasMedia = c.image_url || (c.media_urls && (
           typeof c.media_urls === 'string' ? JSON.parse(c.media_urls).length > 0 : c.media_urls.length > 0
         ));
-        const isInstagram = c.platform?.toLowerCase().includes('instagram');
+        const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
+        const isInstagram = platforms.some(p => p?.toLowerCase() === 'instagram');
 
         if (c.status === 'idea') return false;
 

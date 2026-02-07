@@ -620,6 +620,8 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
                   getStatusLabel={getStatusLabel}
                   getStatusColor={getStatusColor}
                   getTypeIcon={getTypeIcon}
+                  getPlatformIcon={getPlatformIcon}
+                  getPlatformColor={getPlatformColor}
                   progressPercent={progressPercent}
                   completedSteps={completedSteps}
                   totalSteps={totalSteps}
@@ -1187,6 +1189,8 @@ function ContentCard({
   getStatusLabel,
   getStatusColor,
   getTypeIcon,
+  getPlatformIcon,
+  getPlatformColor,
   compact = false,
   progressPercent,
   completedSteps,
@@ -1202,6 +1206,8 @@ function ContentCard({
   getStatusLabel: (status: string) => string;
   getStatusColor: (status: string) => string;
   getTypeIcon: (type: string) => JSX.Element;
+  getPlatformIcon: (platform: string) => JSX.Element;
+  getPlatformColor: (platform: string) => string;
   compact?: boolean;
   progressPercent?: number;
   completedSteps?: number;

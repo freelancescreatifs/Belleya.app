@@ -8,7 +8,7 @@ interface ContentFeedCardProps {
     title: string;
     description: string;
     media_url?: string;
-    platform: string;
+    platform: string[] | string;
     published_date?: string;
     likes_count: number;
     comments_count: number;

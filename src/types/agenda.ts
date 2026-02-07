@@ -84,7 +84,7 @@ export interface SocialMediaContent {
   enriched_title?: string;
   description?: string;
   content_type: string;
-  platform: string;
+  platform: string[] | string;
   publication_date: string;
   publication_time?: string;
   status: 'idea' | 'to_shoot' | 'to_edit' | 'to_produce' | 'scheduled' | 'published';

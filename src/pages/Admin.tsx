@@ -72,7 +72,7 @@ export default function Admin() {
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking admin status:', error);
@@ -121,7 +121,7 @@ export default function Admin() {
               .from('user_roles')
               .select('role')
               .eq('user_id', u.id)
-              .single();
+              .maybeSingle();
 
             return {
               id: u.id,

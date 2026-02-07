@@ -18,7 +18,7 @@ interface ContentItem {
   title: string;
   description: string;
   content_type: string;
-  platform: string;
+  platform: string[] | string;
   publication_date: string;
   publication_time?: string;
   status: 'idea' | 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';

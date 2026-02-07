@@ -821,7 +821,7 @@ interface ContentIdea {
   title: string;
   description: string;
   content_type: string;
-  platform: string;
+  platform: string[] | string;
   angle: string;
   objective: string;
   type: 'content' | 'event';

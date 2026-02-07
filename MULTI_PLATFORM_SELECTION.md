@@ -244,6 +244,89 @@ Cette approche permet une transition en douceur même si certaines données sont
 
 ---
 
+## 🐛 Corrections post-migration
+
+### Fix 1: InstagramFeed - TypeError sur platform.toLowerCase()
+
+**Problème** :
+```
+TypeError: c.platform?.toLowerCase is not a function
+```
+
+**Cause** :
+Le composant `InstagramFeed.tsx` utilisait `c.platform?.toLowerCase().includes('instagram')`, mais `platform` est maintenant un array `text[]` et non plus une string.
+
+**Solution** :
+```typescript
+// Avant (ligne 94)
+const isInstagram = c.platform?.toLowerCase().includes('instagram');
+
+// Après
+const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
+const isInstagram = platforms.some(p => p?.toLowerCase() === 'instagram');
+```
+
+**Fichier modifié** : `src/components/content/InstagramFeed.tsx`
+
+---
+
+### Fix 2: Mise à jour des interfaces TypeScript
+
+**Problème** :
+Page blanche sur l'onglet Contenu car les interfaces TypeScript utilisaient `platform: string` au lieu de `platform: string[] | string`.
+
+**Fichiers corrigés** :
+- `src/pages/Content.tsx` (interface ContentItem)
+- `src/lib/contentAIGenerator.ts` (interface ContentIdea)
+- `src/types/agenda.ts` (interface SocialMediaContent)
+- `src/components/content/KanbanView.tsx` (interface ContentItem)
+- `src/components/content/ContentForm.tsx` (interface ContentItem)
+- `src/components/content/InstagramFeed.tsx` (interface ContentItem)
+- `src/components/content/IdeasGenerator.tsx` (interface ContentIdea)
+- `src/components/content/ContentTable.tsx` (interface ContentItem)
+- `src/components/content/EditorialCalendar.tsx` (interface ContentItem)
+- `src/components/content/InstagramFeedCard.tsx` (interface ContentItem)
+- `src/components/content/ProductionCalendar.tsx` (interface ProductionEvent)
+- `src/components/content/InstagramPreviewModal.tsx` (interface ContentItem)
+- `src/components/client/ContentFeedCard.tsx` (interface ContentPost)
+
+**Solution** :
+```typescript
+// Avant
+platform: string;
+
+// Après
+platform: string[] | string;
+```
+
+---
+
+### Fix 3: SocialMediaDrawer - Affichage des badges de plateformes
+
+**Problème** :
+Le drawer affichait un seul badge pour les plateformes, même quand plusieurs étaient sélectionnées.
+
+**Solution** :
+```typescript
+// Avant (ligne 133-136)
+<span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border ${getPlatformColor(content.platform)}`}>
+  {getPlatformIcon(content.platform)}
+  {content.platform}
+</span>
+
+// Après
+{(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform, index) => (
+  <span key={index} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border ${getPlatformColor(platform)}`}>
+    {getPlatformIcon(platform)}
+    {platform}
+  </span>
+))}
+```
+
+**Fichier modifié** : `src/components/agenda/SocialMediaDrawer.tsx`
+
+---
+
 ## 📌 Principe clé
 
 **Un sujet = un post** qui peut être publié sur **plusieurs réseaux sociaux**, sans duplication de contenu ni de workflow de production.
