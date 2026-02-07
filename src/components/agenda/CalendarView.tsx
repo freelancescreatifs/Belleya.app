@@ -399,7 +399,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       return (
                         <div
                           key={`dragging-${dragState.item.id}`}
-                          className={`${getEventColor(dragState.item)} text-white px-1.5 md:px-2 py-0.5 md:py-1 overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto`}
+                          className={`${getEventColor(dragState.item)} text-white overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
@@ -414,7 +414,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                               {dragState.mode === 'move' ? 'Déplacement...' : 'Redimensionnement...'}
                             </span>
                           </div>
-                          <div className="font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs">
+                          <div className="px-1 md:px-1.5 py-0.5 md:py-1 font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs">
                             {(() => {
                               const productionStep = dragState.item.type === 'task' ? (dragState.item.data as any).production_step : null;
                               return (
@@ -425,7 +425,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                               );
                             })()}
                           </div>
-                          <div className="text-[8px] md:text-xs opacity-90 truncate">
+                          <div className="px-1 md:px-1.5 text-[8px] md:text-xs opacity-90 truncate">
                             {formatTime(start)} - {formatTime(end)}
                           </div>
                         </div>
@@ -453,7 +453,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       return (
                         <div
                           key={isGhost ? `${item.id}-ghost` : item.id}
-                          className={`${getEventColor(item)} text-white px-1.5 md:px-2 py-0.5 md:py-1 overflow-hidden select-none group relative ${
+                          className={`${getEventColor(item)} text-white overflow-hidden select-none group relative ${
                             isGhost
                               ? 'opacity-20 pointer-events-none'
                               : isBeingDragged
@@ -505,7 +505,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                               style={{ background: 'rgba(255,255,255,0.3)' }}
                             />
                           )}
-                          <div className={`font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs leading-tight ${isCancelled ? 'line-through' : ''}`}>
+                          <div className={`px-1 md:px-1.5 py-0.5 md:py-1 font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs leading-tight ${isCancelled ? 'line-through' : ''}`}>
                             {(() => {
                               const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
                               return (
@@ -516,7 +516,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                               );
                             })()}
                           </div>
-                          <div className={`text-[8px] md:text-[10px] opacity-90 truncate ${isCancelled ? 'line-through' : ''}`}>
+                          <div className={`px-1 md:px-1.5 pb-0.5 md:pb-1 text-[8px] md:text-[10px] opacity-90 truncate ${isCancelled ? 'line-through' : ''}`}>
                             {formatTime(start)} - {formatTime(end)}
                           </div>
                           {!isGhost && (
@@ -808,7 +808,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                   return (
                     <div
                       key={isGhost ? `${item.id}-ghost` : item.id}
-                      className={`${getEventColor(item)} text-white px-4 py-2 rounded-lg select-none group relative ${
+                      className={`${getEventColor(item)} text-white rounded-lg select-none group relative ${
                         isGhost
                           ? 'opacity-20 pointer-events-none'
                           : isBeingDragged
@@ -821,8 +821,8 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                         position: 'absolute',
                         top: `${top}px`,
                         height: `${Math.max(height - 8, 40)}px`,
-                        left: `calc(${leftPercent}% + 8px)`,
-                        width: `calc(${widthPercent}% - 16px)`,
+                        left: `${leftPercent}%`,
+                        width: `${widthPercent}%`,
                         transform: isBeingDragged && !isGhost ? 'scale(1.05)' : undefined,
                         transition: isBeingDragged ? 'none' : undefined,
                       }}
@@ -860,7 +860,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                           style={{ background: 'rgba(255,255,255,0.3)' }}
                         />
                       )}
-                      <div className={`font-semibold text-base line-clamp-2 ${isCancelled ? 'line-through' : ''}`}>
+                      <div className={`px-3 md:px-4 pt-2 font-semibold text-base line-clamp-2 ${isCancelled ? 'line-through' : ''}`}>
                         {(() => {
                           const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
                           return (
@@ -871,7 +871,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                           );
                         })()}
                       </div>
-                      <div className={`text-sm opacity-90 mt-1 truncate ${isCancelled ? 'line-through' : ''}`}>
+                      <div className={`px-3 md:px-4 pb-2 text-sm opacity-90 mt-1 truncate ${isCancelled ? 'line-through' : ''}`}>
                         {formatTime(start)} - {formatTime(end)}
                       </div>
                       {!isGhost && (
