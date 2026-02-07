@@ -167,46 +167,30 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
     if (!user) return;
 
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const updates: any = {
-        date_script: null,
-        date_shooting: null,
-        date_editing: null,
-        date_scheduling: null,
-        is_published: false
-      };
-
       if (step === 'none') {
-        // Réinitialiser toutes les étapes
+        // Décocher toutes les étapes en décochant la dernière étape pertinente
+        await supabase.rpc('cascade_production_steps', {
+          p_content_id: content.id,
+          p_step: 'script',
+          p_checked: false
+        });
       } else if (step === 'published') {
-        // Marquer toutes les étapes comme complétées
-        updates.date_script = today;
-        updates.date_shooting = today;
-        updates.date_editing = today;
-        updates.date_scheduling = today;
-        updates.is_published = true;
-      } else if (step === 'script') {
-        updates.date_script = today;
-      } else if (step === 'shooting') {
-        updates.date_script = today;
-        updates.date_shooting = today;
-      } else if (step === 'editing') {
-        updates.date_script = today;
-        updates.date_shooting = today;
-        updates.date_editing = today;
-      } else if (step === 'scheduling') {
-        updates.date_script = today;
-        updates.date_shooting = today;
-        updates.date_editing = today;
-        updates.date_scheduling = today;
+        // Utiliser la RPC avec le step spécial "published"
+        await supabase.rpc('cascade_production_steps', {
+          p_content_id: content.id,
+          p_step: 'published',
+          p_checked: true
+        });
+      } else {
+        // Pour les autres étapes, utiliser la RPC qui gère la cascade
+        const { error } = await supabase.rpc('cascade_production_steps', {
+          p_content_id: content.id,
+          p_step: step,
+          p_checked: true
+        });
+
+        if (error) throw error;
       }
-
-      const { error } = await supabase
-        .from('content_calendar')
-        .update(updates)
-        .eq('id', content.id);
-
-      if (error) throw error;
 
       onContentUpdated();
     } catch (error) {

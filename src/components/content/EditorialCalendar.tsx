@@ -177,14 +177,8 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
     const newCompleted = !currentCompleted;
 
-    setProductionTasksMap(prev => {
-      const newMap = new Map(prev);
-      const contentTasks = newMap.get(contentId) || new Map();
-      const updatedContentTasks = new Map(contentTasks);
-      updatedContentTasks.set(stepKey, newCompleted);
-      newMap.set(contentId, updatedContentTasks);
-      return newMap;
-    });
+    // Ne pas faire de mise à jour optimiste locale pour éviter la désynchronisation
+    // La RPC gère la cascade et on recharge juste après
 
     try {
       const { data, error } = await supabase
@@ -196,10 +190,9 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
       if (error) throw error;
 
-      setTimeout(async () => {
-        await loadProductionTasks();
-        onContentUpdated();
-      }, 300);
+      // Recharger immédiatement après la RPC pour synchroniser l'état
+      await loadProductionTasks();
+      onContentUpdated();
     } catch (error) {
       console.error('Error toggling production step:', error);
       await loadProductionTasks();
