@@ -21,83 +21,44 @@ function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }
   return null;
 }
 
-function MapResizer({ providersCount }: { providersCount: number }) {
+function MapResizer() {
   const map = useMap();
-  const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    // Late invalidate with double RAF and timeout for mobile reliability
-    const lateInvalidate = () => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            if (map) {
-              map.invalidateSize(true);
-            }
-          }, 120);
-        });
-      });
+    const resizeMap = () => {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
     };
 
-    // Initial invalidate
-    lateInvalidate();
+    resizeMap();
 
-    // Handle resize events
-    const handleResize = () => {
-      lateInvalidate();
-    };
+    window.addEventListener('resize', resizeMap);
+    window.addEventListener('orientationchange', resizeMap);
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-
-    // Handle visibility change (when tab becomes visible)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        lateInvalidate();
+        resizeMap();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Observe both container and parent for size changes
     const observer = new ResizeObserver(() => {
-      lateInvalidate();
+      resizeMap();
     });
 
     const container = map.getContainer();
     if (container) {
-      containerRef.current = container;
       observer.observe(container);
-
-      // Also observe parent for better detection
-      if (container.parentElement) {
-        observer.observe(container.parentElement);
-      }
     }
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener('resize', resizeMap);
+      window.removeEventListener('orientationchange', resizeMap);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       observer.disconnect();
     };
   }, [map]);
-
-  // Trigger invalidate when providers list changes (affects map content)
-  useEffect(() => {
-    const lateInvalidate = () => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            if (map) {
-              map.invalidateSize(true);
-            }
-          }, 120);
-        });
-      });
-    };
-
-    lateInvalidate();
-  }, [providersCount, map]);
 
   return null;
 }
@@ -114,7 +75,6 @@ export default function ClientMap() {
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
 
   const createCustomIcon = (profilePhoto: string | null, companyName: string): DivIcon => {
     const photoHtml = profilePhoto
@@ -154,23 +114,6 @@ export default function ClientMap() {
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
   });
-
-  // DVH fallback for iOS
-  useEffect(() => {
-    const setDvh = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--app-dvh', `${vh}px`);
-    };
-
-    setDvh();
-    window.addEventListener('resize', setDvh);
-    window.addEventListener('orientationchange', setDvh);
-
-    return () => {
-      window.removeEventListener('resize', setDvh);
-      window.removeEventListener('orientationchange', setDvh);
-    };
-  }, []);
 
   useEffect(() => {
     requestGeolocation();
@@ -304,22 +247,9 @@ export default function ClientMap() {
     return unique.sort();
   }, [providers]);
 
-  const handleMapReady = (map: L.Map) => {
-    setMapReady(true);
-    // Late invalidate after map is ready
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          map.invalidateSize(true);
-        }, 120);
-      });
-    });
-  };
-
   return (
-    <div className="flex flex-col h-full bg-gray-50">
-      {/* Sticky Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-[1000] flex-shrink-0">
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-[1000]">
         <div className="px-4 pt-6 pb-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Carte des pros</h1>
 
@@ -413,15 +343,7 @@ export default function ClientMap() {
         </div>
       </div>
 
-      {/* Map Container - Stable height calculation */}
-      <div
-        className="flex-1 relative z-0 overflow-hidden"
-        style={{
-          height: 'calc(var(--app-dvh, 1vh) * 100 - 64px - 64px)',
-          minHeight: '400px',
-          maxHeight: 'calc(var(--app-dvh, 1vh) * 100 - 64px - 64px)'
-        }}
-      >
+      <div className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0" style={{ height: '60dvh', minHeight: '500px', maxHeight: '700px' }}>
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
@@ -429,10 +351,9 @@ export default function ClientMap() {
           zoomControl={true}
           className="h-full w-full"
           style={{ height: '100%', width: '100%', position: 'relative', zIndex: 0 }}
-          whenReady={(e) => handleMapReady(e.target)}
         >
           <MapUpdater center={mapCenter} zoom={mapZoom} />
-          <MapResizer providersCount={filteredProviders.length} />
+          <MapResizer />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -474,8 +395,7 @@ export default function ClientMap() {
         </MapContainer>
       </div>
 
-      {/* Provider List */}
-      <div className="p-4 flex-shrink-0 bg-gray-50">
+      <div className="p-4">
         <h2 className="text-lg font-bold text-gray-900 mb-4">
           Pros à proximité
         </h2>

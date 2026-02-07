@@ -197,27 +197,11 @@ button, a, [role="button"] {
   display: none;
 }
 
-/* DVH Fallback for iOS and older browsers */
-:root {
-  --app-dvh: 1vh;
-}
-
 /* Support for dvh with fallback for older browsers */
 @supports not (height: 100dvh) {
   .h-\[60dvh\] {
     height: 60vh !important;
   }
-}
-
-/* App screen height utility - works on all devices */
-.h-app-screen {
-  height: calc(var(--app-dvh, 1vh) * 100);
-}
-
-/* Map specific height - accounts for header and bottom nav */
-.h-map-container {
-  height: calc(var(--app-dvh, 1vh) * 100 - 64px - 64px);
-  min-height: 400px;
 }
 
 /* Leaflet Map Container - Force proper rendering on mobile */
