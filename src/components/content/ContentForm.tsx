@@ -749,8 +749,8 @@ export default function ContentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 pb-4">
+      <div className="space-y-1.5">
         <label className="block text-sm font-medium text-gray-700">
           Titre *
         </label>
@@ -758,21 +758,21 @@ export default function ContentForm({
           type="text"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          placeholder="Ex: Tendance ongles été 2024, Tuto balayage..."
+          className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base"
+          placeholder="Ex: Tendance ongles été 2024"
           required
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-700">
             Type de contenu *
           </label>
           <select
             value={formData.content_type}
             onChange={(e) => setFormData({ ...formData, content_type: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base"
             required
           >
             {CONTENT_TYPES.map(type => (
@@ -781,15 +781,15 @@ export default function ContentForm({
           </select>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-700">
-            Plateformes * (sélection multiple)
+            Plateformes * (multi)
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             {PLATFORMS.map(platform => (
               <label
                 key={platform.value}
-                className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer transition-all ${
+                className={`flex items-center gap-1.5 px-2 py-1.5 md:px-3 md:py-2 border rounded-lg cursor-pointer transition-all ${
                   selectedPlatforms.includes(platform.value)
                     ? 'bg-orange-50 border-orange-500 text-orange-700'
                     : 'bg-white border-gray-300 text-gray-700 hover:border-orange-300'
@@ -805,9 +805,9 @@ export default function ContentForm({
                       setSelectedPlatforms(selectedPlatforms.filter(p => p !== platform.value));
                     }
                   }}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                  className="w-3.5 h-3.5 md:w-4 md:h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
                 />
-                <span className="text-sm font-medium">{platform.label}</span>
+                <span className="text-xs md:text-sm font-medium">{platform.label}</span>
               </label>
             ))}
           </div>
@@ -817,8 +817,8 @@ export default function ContentForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-sm font-medium text-gray-700">
               Pilier éditorial
@@ -952,54 +952,54 @@ export default function ContentForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-700">
-            <Calendar className="w-4 h-4 inline mr-2" />
+            <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 inline mr-1.5" />
             Date de publication *
           </label>
           <input
             type="date"
             value={formData.publication_date}
             onChange={(e) => setFormData({ ...formData, publication_date: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base"
             required
           />
           {formData.publication_date && new Date(formData.publication_date + 'T00:00:00') < new Date(new Date().setHours(0, 0, 0, 0)) && (
-            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800">
-                Cette date est dans le passé. Le contenu sera automatiquement marqué comme "publié" et n'apparaîtra pas dans le feed Instagram ni le calendrier éditorial.
+            <div className="flex items-start gap-1.5 p-2 md:p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertTriangle className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs md:text-sm text-amber-800">
+                Date passée → sera marqué comme "publié"
               </p>
             </div>
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-700">
-            <Clock className="w-4 h-4 inline mr-2" />
+            <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 inline mr-1.5" />
             Heure de publication
           </label>
           <input
             type="time"
             value={formData.publication_time}
             onChange={(e) => setFormData({ ...formData, publication_time: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base"
           />
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            Planning de Production
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-3 md:p-6">
+        <div className="flex items-center justify-between mb-3 md:mb-4">
+          <h3 className="text-base md:text-lg font-semibold text-blue-900 flex items-center gap-1.5 md:gap-2">
+            <Calendar className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+            Planning Production
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             <button
               type="button"
               onClick={() => setShowProductionDates(!showProductionDates)}
-              className="text-sm text-blue-700 hover:text-blue-900 font-medium"
+              className="text-xs md:text-sm text-blue-700 hover:text-blue-900 font-medium"
             >
               {showProductionDates ? 'Masquer' : 'Afficher'}
             </button>
@@ -1007,26 +1007,26 @@ export default function ContentForm({
               <button
                 type="button"
                 onClick={handleAutoPlanning}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 text-xs md:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md"
               >
-                <Wand2 className="w-4 h-4" />
-                Planifier automatiquement
+                <Wand2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                Auto-plan
               </button>
             )}
           </div>
         </div>
 
         {showProductionDates && (
-          <div className="space-y-4">
-            <div className="bg-white/60 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                Toutes les dates de production sont calculées EN ARRIÈRE depuis la date de publication.
+          <div className="space-y-3 md:space-y-4">
+            <div className="bg-white/60 border border-blue-200 rounded-lg p-2.5 md:p-4">
+              <p className="text-xs md:text-sm text-blue-900 font-medium mb-1.5 md:mb-2">
+                Dates calculées EN ARRIÈRE depuis la publication
               </p>
-              <p className="text-sm text-blue-800">
-                Exemple : Publication le 20/01 → Programmer le 19/01 (J-1) → Montage le 17/01 (J-3) → Tournage le 16/01 (J-4) → Script le 15/01 (J-5)
+              <p className="text-xs text-blue-800 hidden md:block">
+                Exemple : Pub 20/01 → Programme 19/01 (J-1) → Montage 17/01 (J-3) → Tournage 16/01 (J-4) → Script 15/01 (J-5)
               </p>
-              <p className="text-xs text-blue-700 mt-2">
-                Ces dates génèrent automatiquement des tâches dans votre agenda avec le tag "Réseaux sociaux".
+              <p className="text-[10px] md:text-xs text-blue-700 mt-1.5 md:mt-2">
+                Génère automatiquement des tâches dans l'agenda.
               </p>
             </div>
 
@@ -1255,20 +1255,20 @@ export default function ContentForm({
         />
       </div>
 
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex justify-end gap-2 md:gap-3 pt-3 md:pt-4 sticky bottom-0 bg-white py-3 -mx-4 px-4 md:mx-0 md:px-0 border-t border-gray-200 md:border-0 md:static">
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-4 py-2 md:px-6 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           Annuler
         </button>
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 md:gap-2 px-4 py-2 md:px-6 md:py-3 text-sm md:text-base bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50"
         >
-          <Save className="w-5 h-5" />
+          <Save className="w-4 h-4 md:w-5 md:h-5" />
           {saving ? 'Enregistrement...' : mode === 'edit' ? 'Enregistrer' : 'Créer'}
         </button>
       </div>
