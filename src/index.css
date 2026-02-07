@@ -140,6 +140,41 @@ button, a, [role="button"] {
   }
 }
 
+/* Leaflet Map Wrapper - CRITICAL for mobile - height MUST be explicit */
+.map-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  height: 500px !important;
+  overflow: visible !important;
+  transform: none !important;
+  will-change: auto !important;
+  contain: layout !important;
+}
+
+@media (min-width: 640px) {
+  .map-wrapper {
+    height: 600px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .map-wrapper {
+    height: 65vh !important;
+    max-height: 700px !important;
+  }
+}
+
+/* Small preview map for AddressInput */
+.map-wrapper-small {
+  position: relative !important;
+  width: 100% !important;
+  height: 256px !important;
+  overflow: visible !important;
+  transform: none !important;
+  will-change: auto !important;
+  contain: layout !important;
+}
+
 /* Mobile-first UI enhancements */
 @media (max-width: 768px) {
   /* Better spacing for mobile */
@@ -197,56 +232,39 @@ button, a, [role="button"] {
   display: none;
 }
 
-/* Support for dvh with fallback for older browsers */
-@supports not (height: 100dvh) {
-  .h-\[60dvh\] {
-    height: 60vh !important;
+/* Leaflet Map Container - Responsive et épuré */
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  background: #f5f5f5;
+  border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .map-wrapper {
+    height: 500px;
   }
 }
 
-/* Leaflet Map Container - Force proper rendering on mobile */
-.leaflet-container {
-  height: 100% !important;
-  width: 100% !important;
-  position: relative !important;
-  z-index: 0 !important;
-  background: #f0f0f0 !important;
+.map-wrapper .leaflet-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
   touch-action: pan-x pan-y;
-  min-height: 500px;
 }
 
-.leaflet-pane {
-  z-index: auto !important;
+/* Tuiles optimisées pour mobile */
+.leaflet-tile-container {
+  will-change: transform;
 }
 
-.leaflet-tile-pane {
-  z-index: 1 !important;
-}
-
-.leaflet-overlay-pane {
-  z-index: 2 !important;
-}
-
-.leaflet-shadow-pane {
-  z-index: 3 !important;
-}
-
-.leaflet-marker-pane {
-  z-index: 4 !important;
-}
-
-.leaflet-tooltip-pane {
-  z-index: 5 !important;
-}
-
-.leaflet-popup-pane {
-  z-index: 6 !important;
-}
-
-/* Ensure map tiles load properly */
 .leaflet-tile {
-  max-width: none !important;
-  max-height: none !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 /* Better touch handling for mobile */
@@ -301,4 +319,16 @@ button, a, [role="button"] {
 [class*="chatbot-scroll"] {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+/* Map animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

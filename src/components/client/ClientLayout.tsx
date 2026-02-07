@@ -18,14 +18,32 @@ const navItems = [
 
 export default function ClientLayout({ currentPage, onPageChange, children }: ClientLayoutProps) {
   const { user } = useAuth();
+  const isMapPage = currentPage === 'map';
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-30 h-16 flex items-center justify-end px-4">
+    <div className="flex flex-col h-screen bg-gray-50" style={{ overflow: 'hidden' }}>
+      <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-30 h-16 flex items-center justify-end px-4" style={{ transform: 'none' }}>
         {user && <NotificationBell userId={user.id} onNavigate={onPageChange} />}
       </header>
 
-      <main className="flex-1 overflow-y-auto pt-16 pb-20">
+      <main
+        className={`flex-1 ${isMapPage ? '' : 'overflow-y-auto'}`}
+        style={
+          isMapPage
+            ? {
+                overflow: 'visible',
+                transform: 'none',
+                paddingTop: '64px',
+                paddingBottom: '80px',
+                position: 'relative',
+                willChange: 'auto'
+              }
+            : {
+                paddingTop: '64px',
+                paddingBottom: '80px'
+              }
+        }
+      >
         {children}
       </main>
 
