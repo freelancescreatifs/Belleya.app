@@ -425,9 +425,9 @@ function KanbanCard({
             {content.content_type}
           </span>
 
-          {content.platform.split(',').map((platform, idx) => (
-            <span key={idx} className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-              {platform.trim()}
+          {(Array.isArray(content.platform) ? content.platform : content.platform.split(',')).map((platform, idx) => (
+            <span key={idx} className="px-3 py-1.5 bg-orange-50 border border-orange-200 text-orange-700 rounded-full text-xs font-medium">
+              {typeof platform === 'string' ? platform.trim() : platform}
             </span>
           ))}
         </div>

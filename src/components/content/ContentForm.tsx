@@ -142,8 +142,14 @@ export default function ContentForm({
   });
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(() => {
-    const platformData = prefillData?.platform || 'instagram';
-    return platformData.includes(',') ? platformData.split(',') : [platformData];
+    const platformData = prefillData?.platform;
+    if (Array.isArray(platformData)) {
+      return platformData;
+    }
+    if (typeof platformData === 'string') {
+      return platformData.includes(',') ? platformData.split(',') : [platformData];
+    }
+    return ['instagram'];
   });
 
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
@@ -326,8 +332,14 @@ export default function ContentForm({
           production_start_date: data.production_start_date || '',
         });
 
-        const platformData = data.platform || 'instagram';
-        setSelectedPlatforms(platformData.includes(',') ? platformData.split(',') : [platformData]);
+        const platformData = data.platform;
+        if (Array.isArray(platformData)) {
+          setSelectedPlatforms(platformData);
+        } else if (typeof platformData === 'string') {
+          setSelectedPlatforms(platformData.includes(',') ? platformData.split(',') : [platformData]);
+        } else {
+          setSelectedPlatforms(['instagram']);
+        }
 
         if (data.date_script || data.date_shooting || data.date_editing || data.date_scheduling) {
           setShowProductionDates(true);
@@ -548,7 +560,7 @@ export default function ContentForm({
         title: formData.title,
         description: formData.description,
         content_type: formData.content_type,
-        platform: selectedPlatforms.join(','),
+        platform: selectedPlatforms,
         status: finalStatus,
         publication_date: formData.publication_date,
         publication_time: formData.publication_time || null,

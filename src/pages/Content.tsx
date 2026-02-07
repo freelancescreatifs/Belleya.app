@@ -611,8 +611,8 @@ export default function Content() {
               contents={contents.filter(c => {
                 if (c.status === 'idea') return false;
                 if (platformFilter.length === 0) return true;
-                const contentPlatforms = c.platform.split(',');
-                return contentPlatforms.some(p => platformFilter.includes(p));
+                const contentPlatforms = Array.isArray(c.platform) ? c.platform : c.platform.split(',');
+                return contentPlatforms.some(p => platformFilter.includes(p.trim()));
               })}
               pillars={pillars}
               viewMode="type"
@@ -680,8 +680,8 @@ export default function Content() {
               contents={contents.filter(c => {
                 if (c.status === 'idea') return false;
                 if (platformFilter.length === 0) return true;
-                const contentPlatforms = c.platform.split(',');
-                return contentPlatforms.some(p => platformFilter.includes(p));
+                const contentPlatforms = Array.isArray(c.platform) ? c.platform : c.platform.split(',');
+                return contentPlatforms.some(p => platformFilter.includes(p.trim()));
               })}
               pillars={pillars}
               viewMode="type"

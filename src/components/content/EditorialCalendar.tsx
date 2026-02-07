@@ -1018,9 +1018,13 @@ function DraggableContent({
           }`}>
             {content.is_published ? <CheckCircle className="w-3 h-3 text-green-700" /> : <Calendar className="w-3 h-3 text-gray-700" />}
           </span>
-          <span className={`px-1 py-0.5 rounded text-xs flex items-center gap-0.5 flex-shrink-0 border ${getPlatformColor(content.platform)}`}>
-            {getPlatformIcon(content.platform)}
-          </span>
+          <div className="flex gap-0.5 flex-shrink-0">
+            {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
+              <span key={platform} className={`px-1 py-0.5 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(platform)}`}>
+                {getPlatformIcon(platform)}
+              </span>
+            ))}
+          </div>
           {content.editorial_pillar && (
             <div
               className="w-2 h-2 rounded-full flex-shrink-0"
@@ -1161,9 +1165,13 @@ function DraggableWeekContent({
               {getTypeIcon(content.content_type)}
               {content.content_type}
             </span>
-            <span className={`px-1 py-1 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(content.platform)}`}>
-              {getPlatformIcon(content.platform)}
-            </span>
+            <div className="flex gap-1">
+              {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
+                <span key={platform} className={`px-1 py-1 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(platform)}`}>
+                  {getPlatformIcon(platform)}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -1285,17 +1293,13 @@ function ContentCard({
           {getTypeIcon(content.content_type)}
           {content.content_type}
         </span>
-        {content.platforms && content.platforms.length > 0 ? (
-          <span className="px-2.5 py-1.5 bg-gray-100 text-gray-800 rounded-lg text-xs font-medium">
-            {content.platforms.join(',')}
-          </span>
-        ) : (
-          <span className={`px-2.5 py-1.5 rounded-lg text-xs font-medium ${
-            content.platform === 'instagram' ? 'bg-belleya-100 text-belleya-deep' : 'bg-gray-100 text-gray-800'
-          }`}>
-            {content.platform}
-          </span>
-        )}
+        <div className="flex gap-1.5">
+          {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
+            <span key={platform} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 ${getPlatformColor(platform)}`}>
+              {getPlatformIcon(platform)}
+            </span>
+          ))}
+        </div>
       </div>
 
       {showProgress ? (
