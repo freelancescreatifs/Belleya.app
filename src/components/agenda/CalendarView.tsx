@@ -31,17 +31,87 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
   const days = getMonthDays(currentDate.getFullYear(), currentDate.getMonth());
   const today = new Date();
   const currentMonth = currentDate.getMonth();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-gray-100">
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
+            <div key={idx} className="py-2 text-center text-[10px] font-semibold text-gray-500">
+              {day}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7">
+          {days.map((day, index) => {
+            const dayItems = getItemsForDay(items, day);
+            const isCurrentMonth = day.getMonth() === currentMonth;
+            const isToday = isSameDay(day, today);
+            const hasEvents = dayItems.length > 0;
+            const uniqueColors = [...new Set(dayItems.map(item => {
+              const colorClass = getEventColor(item);
+              return colorClass.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400';
+            }))];
+
+            return (
+              <div
+                key={index}
+                onClick={() => onDayClick(day)}
+                className={`min-h-[52px] py-1.5 px-0.5 border-r border-b border-gray-100 last:border-r-0 cursor-pointer active:bg-gray-100 transition-colors flex flex-col items-center ${
+                  !isCurrentMonth ? 'bg-gray-50/50' : ''
+                }`}
+              >
+                <span
+                  className={`text-sm font-medium flex items-center justify-center ${
+                    isToday
+                      ? 'bg-belleya-500 text-white w-7 h-7 rounded-full'
+                      : isCurrentMonth
+                      ? 'text-gray-900 w-7 h-7'
+                      : 'text-gray-400 w-7 h-7'
+                  }`}
+                >
+                  {day.getDate()}
+                </span>
+                {hasEvents && (
+                  <div className="flex items-center justify-center gap-[3px] mt-1 min-h-[6px] flex-wrap max-w-[40px]">
+                    {uniqueColors.slice(0, 3).map((colorClass, idx) => (
+                      <span
+                        key={idx}
+                        className={`w-[5px] h-[5px] rounded-full ${colorClass}`}
+                      />
+                    ))}
+                    {dayItems.length > 3 && (
+                      <span className="text-[8px] text-gray-500 font-medium ml-0.5">
+                        +{dayItems.length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {!hasEvents && <div className="min-h-[6px] mt-1" />}
+              </div>
+            );
+          })}
+        </div>
+        <div className="p-2 text-center text-[11px] text-gray-500 bg-gray-50 border-t border-gray-100">
+          Appuyez sur un jour pour voir les details
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      {/* En-têtes des jours - version mobile ultra-compacte */}
       <div className="grid grid-cols-7 border-b border-gray-100">
-        {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
-          <div key={idx} className="py-1 md:p-3 text-center text-[9px] md:text-sm font-semibold text-gray-500 md:text-gray-600">
-            <span className="hidden md:inline">
-              {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][idx]}
-            </span>
-            <span className="md:hidden">{day}</span>
+        {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, idx) => (
+          <div key={idx} className="p-3 text-center text-sm font-semibold text-gray-600">
+            {day}
           </div>
         ))}
       </div>
@@ -55,16 +125,15 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
             <div
               key={index}
               onClick={() => onDayClick(day)}
-              className={`min-h-[65px] md:min-h-[120px] p-0.5 md:p-2 border-r border-b border-gray-100 last:border-r-0 cursor-pointer active:bg-gray-100 md:hover:bg-gray-50 transition-colors ${
+              className={`min-h-[120px] p-2 border-r border-b border-gray-100 last:border-r-0 cursor-pointer hover:bg-gray-50 transition-colors ${
                 !isCurrentMonth ? 'bg-gray-50/50' : ''
               }`}
             >
-              {/* Numéro du jour */}
-              <div className="flex justify-center md:justify-start items-start mb-0.5 md:mb-1">
+              <div className="flex justify-start items-start mb-1">
                 <span
-                  className={`text-[10px] md:text-sm font-medium ${
+                  className={`text-sm font-medium ${
                     isToday
-                      ? 'bg-belleya-500 text-white w-[18px] h-[18px] md:w-6 md:h-6 flex items-center justify-center rounded-full'
+                      ? 'bg-belleya-500 text-white w-6 h-6 flex items-center justify-center rounded-full'
                       : isCurrentMonth
                       ? 'text-gray-900'
                       : 'text-gray-400'
@@ -73,9 +142,7 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                   {day.getDate()}
                 </span>
               </div>
-
-              {/* Événements - version ultra-compacte sur mobile */}
-              <div className="space-y-[2px] md:space-y-1">
+              <div className="space-y-1">
                 {dayItems.slice(0, 3).map((item) => {
                   const isCancelled = item.type === 'event' && (item.data as any).status === 'cancelled';
                   const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
@@ -87,16 +154,9 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                         e.stopPropagation();
                         onItemClick(item);
                       }}
-                      className={`${getEventColor(item)} text-white rounded-sm md:rounded cursor-pointer active:scale-95 md:hover:opacity-80 transition-all ${isCancelled ? 'line-through opacity-60' : ''}`}
+                      className={`${getEventColor(item)} text-white rounded cursor-pointer hover:opacity-80 transition-all ${isCancelled ? 'line-through opacity-60' : ''}`}
                     >
-                      {/* Version mobile ultra-compacte - style Apple/Google */}
-                      <div className="md:hidden text-[8px] leading-[1.3] px-[3px] py-[2px] font-medium truncate">
-                        {productionStep && <span className="mr-0.5 text-[9px]">{getStepEmoji(productionStep)}</span>}
-                        {item.title.length > 9 ? item.title.substring(0, 9) + '.' : item.title}
-                      </div>
-
-                      {/* Version desktop normale */}
-                      <div className="hidden md:flex items-start gap-1 px-2 py-1 text-xs">
+                      <div className="flex items-start gap-1 px-2 py-1 text-xs">
                         <span className="flex-shrink-0">{formatTime(item.start)}</span>
                         <span className="line-clamp-2 flex-1">
                           {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
@@ -106,10 +166,8 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                     </div>
                   );
                 })}
-
-                {/* Indicateur "+X" pour événements supplémentaires */}
                 {dayItems.length > 3 && (
-                  <div className="text-[8px] md:text-xs text-gray-500 font-medium px-[3px] md:px-2 pt-0.5">
+                  <div className="text-xs text-gray-500 font-medium px-2 pt-0.5">
                     +{dayItems.length - 3}
                   </div>
                 )}
@@ -659,7 +717,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 7 * 80;
     }
-  }, []);
+  }, [currentDate]);
 
   const getDateTimeFromPosition = (e: React.MouseEvent, dayElement: HTMLElement) => {
     const rect = dayElement.getBoundingClientRect();

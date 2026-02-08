@@ -455,7 +455,7 @@ export default function Agenda() {
   const handleDayClick = (date: Date) => {
     const isMobile = window.innerWidth < 768;
 
-    if (isMobile && view === 'week') {
+    if (isMobile && (view === 'week' || view === 'month')) {
       setCurrentDate(date);
       setView('day');
     } else {
