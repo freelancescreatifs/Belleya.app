@@ -128,6 +128,13 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [lastClickTime, setLastClickTime] = useState<{ time: number; dayIndex: number; hour: number } | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const [dragState, setDragState] = useState<{
     item: CalendarItem | null;
@@ -313,30 +320,89 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
     });
   };
 
+  if (isMobile) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-gray-100">
+          {days.map((day) => {
+            const isToday = isSameDay(day, today);
+            const dayItems = getItemsForDay(items, day);
+            const uniqueColors = [...new Set(dayItems.map(item => getEventColor(item)))];
+            const hasEvents = dayItems.length > 0;
+
+            return (
+              <div
+                key={day.toISOString()}
+                onClick={() => onDayClick(day)}
+                className={`py-3 px-1 text-center cursor-pointer active:bg-gray-100 transition-colors ${
+                  isToday ? 'bg-belleya-50' : ''
+                }`}
+              >
+                <div className="text-[10px] text-gray-500 font-medium uppercase">
+                  {day.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3)}
+                </div>
+                <div
+                  className={`text-lg font-semibold mt-1 ${
+                    isToday
+                      ? 'bg-belleya-500 text-white w-8 h-8 flex items-center justify-center rounded-full mx-auto'
+                      : 'text-gray-900'
+                  }`}
+                >
+                  {day.getDate()}
+                </div>
+                {hasEvents && (
+                  <div className="flex items-center justify-center gap-0.5 mt-2 min-h-[8px]">
+                    {uniqueColors.slice(0, 4).map((colorClass, idx) => {
+                      const bgColor = colorClass.includes('bg-')
+                        ? colorClass.split(' ').find(c => c.startsWith('bg-'))?.replace('bg-', '') || 'gray-400'
+                        : 'gray-400';
+                      return (
+                        <span
+                          key={idx}
+                          className={`w-[6px] h-[6px] rounded-full ${colorClass.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400'}`}
+                        />
+                      );
+                    })}
+                    {dayItems.length > 4 && (
+                      <span className="text-[8px] text-gray-500 ml-0.5">+{dayItems.length - 4}</span>
+                    )}
+                  </div>
+                )}
+                {!hasEvents && <div className="min-h-[8px] mt-2" />}
+              </div>
+            );
+          })}
+        </div>
+        <div className="p-3 text-center text-xs text-gray-500 bg-gray-50 border-t border-gray-100">
+          Appuyez sur un jour pour voir les details
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* En-têtes des jours - version ultra-compacte comme vue mois */}
       <div className="grid grid-cols-8 border-b border-gray-100">
-        <div className="py-1 md:py-2 text-center text-[9px] md:text-xs font-semibold text-gray-500 border-r border-gray-100"></div>
+        <div className="py-2 text-center text-xs font-semibold text-gray-500 border-r border-gray-100"></div>
         {days.map((day) => {
           const isToday = isSameDay(day, today);
           return (
             <div
               key={day.toISOString()}
               onClick={() => onDayClick(day)}
-              className={`py-1 md:py-2 px-1 text-center border-r border-gray-100 last:border-r-0 cursor-pointer active:bg-gray-100 md:hover:bg-gray-50 transition-colors ${
+              className={`py-2 px-1 text-center border-r border-gray-100 last:border-r-0 cursor-pointer hover:bg-gray-50 transition-colors ${
                 isToday ? 'bg-belleya-50/30' : ''
               }`}
             >
-              <div className="text-[9px] md:text-xs text-gray-500 font-medium">
+              <div className="text-xs text-gray-500 font-medium">
                 {day.toLocaleDateString('fr-FR', { weekday: 'short' })}
               </div>
               <div
-                className={`text-sm md:text-base font-semibold mt-0.5 ${
+                className={`text-base font-semibold mt-0.5 ${
                   isToday ? 'text-belleya-500' : 'text-gray-900'
                 }`}
               >
@@ -346,11 +412,11 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
           );
         })}
       </div>
-      <div ref={scrollContainerRef} className="overflow-y-auto max-h-[500px] md:max-h-[600px]">
+      <div ref={scrollContainerRef} className="overflow-y-auto max-h-[600px]">
         <div className="grid grid-cols-8">
           <div className="border-r border-gray-100">
             {hours.map((hour) => (
-              <div key={hour} className="h-12 py-1 px-1 md:px-2 text-[9px] md:text-xs text-gray-400 border-b border-gray-50">
+              <div key={hour} className="h-12 py-1 px-2 text-xs text-gray-400 border-b border-gray-50">
                 {hour.toString().padStart(2, '0')}h
               </div>
             ))}
