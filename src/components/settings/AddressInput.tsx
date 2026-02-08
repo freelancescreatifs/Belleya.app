@@ -1,48 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Check, AlertCircle, Loader } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import Map, { Marker, Popup } from 'react-map-gl';
 import { geocodeAddress, GeocodeResult } from '../../lib/geocodingHelpers';
-import 'leaflet/dist/leaflet.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-function MapResizer() {
-  const map = useMap();
-
-  useEffect(() => {
-    const resizeMap = () => {
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
-    };
-
-    resizeMap();
-
-    window.addEventListener('resize', resizeMap);
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        resizeMap();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    const observer = new ResizeObserver(() => {
-      resizeMap();
-    });
-
-    const container = map.getContainer();
-    if (container) {
-      observer.observe(container);
-    }
-
-    return () => {
-      window.removeEventListener('resize', resizeMap);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      observer.disconnect();
-    };
-  }, [map]);
-
-  return null;
-}
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 interface AddressInputProps {
   value: string;
@@ -53,15 +15,6 @@ interface AddressInputProps {
   error?: string | null;
   onErrorChange?: (error: string | null) => void;
 }
-
-const customIcon = L.icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
 
 export default function AddressInput({
   value,
@@ -240,37 +193,54 @@ export default function AddressInput({
 
           {showMap && (
             <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
-              <MapContainer
-                center={[currentLocation.latitude, currentLocation.longitude]}
-                zoom={15}
-                scrollWheelZoom={false}
-                className="h-full w-full"
-                style={{ height: '100%', width: '100%' }}
+              <Map
+                initialViewState={{
+                  longitude: currentLocation.longitude,
+                  latitude: currentLocation.latitude,
+                  zoom: 15
+                }}
+                style={{ width: '100%', height: '100%' }}
+                mapStyle="mapbox://styles/mapbox/light-v11"
+                mapboxAccessToken={MAPBOX_TOKEN}
+                scrollZoom={false}
+                dragPan={true}
+                dragRotate={false}
+                touchZoomRotate={false}
               >
-                <MapResizer />
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
                 <Marker
-                  position={[currentLocation.latitude, currentLocation.longitude]}
-                  icon={customIcon}
+                  longitude={currentLocation.longitude}
+                  latitude={currentLocation.latitude}
+                  anchor="bottom"
                 >
-                  <Popup>
-                    <div className="text-center p-2">
-                      {profilePhoto && (
-                        <img
-                          src={profilePhoto}
-                          alt="Profil"
-                          className="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-belleya-200"
-                        />
-                      )}
-                      <p className="font-semibold text-gray-900 text-sm">Votre emplacement</p>
-                      <p className="text-xs text-gray-600 mt-1">{value}</p>
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full bg-red-500 border-4 border-white shadow-lg flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-white" />
                     </div>
-                  </Popup>
+                  </div>
                 </Marker>
-              </MapContainer>
+
+                <Popup
+                  longitude={currentLocation.longitude}
+                  latitude={currentLocation.latitude}
+                  anchor="top"
+                  offset={15}
+                  closeButton={false}
+                  closeOnClick={false}
+                  className="map-preview-popup"
+                >
+                  <div className="text-center p-2">
+                    {profilePhoto && (
+                      <img
+                        src={profilePhoto}
+                        alt="Profil"
+                        className="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-belleya-200"
+                      />
+                    )}
+                    <p className="font-semibold text-gray-900 text-sm">Votre emplacement</p>
+                    <p className="text-xs text-gray-600 mt-1">{value}</p>
+                  </div>
+                </Popup>
+              </Map>
             </div>
           )}
         </div>

@@ -177,26 +177,6 @@ button, a, [role="button"] {
   }
 }
 
-.custom-marker-icon {
-  background: transparent !important;
-  border: none !important;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.custom-marker-icon:hover {
-  transform: translateY(-2px);
-}
-
-.leaflet-popup-content-wrapper {
-  border-radius: 1rem;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-}
-
-.leaflet-popup-tip {
-  display: none;
-}
-
 /* Support for dvh with fallback for older browsers */
 @supports not (height: 100dvh) {
   .h-\[60dvh\] {
@@ -204,64 +184,106 @@ button, a, [role="button"] {
   }
 }
 
-/* Leaflet Map Container - Force proper rendering on mobile */
-.leaflet-container {
-  height: 100% !important;
-  width: 100% !important;
-  position: relative !important;
-  z-index: 0 !important;
-  background: #f0f0f0 !important;
+/* Mapbox GL Customization */
+.mapboxgl-map {
+  font-family: inherit;
+}
+
+.mapboxgl-canvas {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   touch-action: pan-x pan-y;
-  min-height: 500px;
 }
 
-.leaflet-pane {
-  z-index: auto !important;
+/* Mapbox Popup Customization */
+.mapbox-popup-custom .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  background: white;
 }
 
-.leaflet-tile-pane {
-  z-index: 1 !important;
+.mapbox-popup-custom .mapboxgl-popup-close-button {
+  font-size: 20px;
+  color: #374151;
+  padding: 8px;
+  right: 4px;
+  top: 4px;
+  background: transparent;
+  border: none;
 }
 
-.leaflet-overlay-pane {
-  z-index: 2 !important;
+.mapbox-popup-custom .mapboxgl-popup-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
 }
 
-.leaflet-shadow-pane {
-  z-index: 3 !important;
+.mapbox-popup-custom .mapboxgl-popup-tip {
+  border-top-color: white;
 }
 
-.leaflet-marker-pane {
-  z-index: 4 !important;
+/* Mapbox Controls Styling - Match gray/white theme */
+.mapboxgl-ctrl-group {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: white;
+  border: 1px solid #e5e7eb;
 }
 
-.leaflet-tooltip-pane {
-  z-index: 5 !important;
-}
-
-.leaflet-popup-pane {
-  z-index: 6 !important;
-}
-
-/* Ensure map tiles load properly */
-.leaflet-tile {
-  max-width: none !important;
-  max-height: none !important;
-}
-
-/* Better touch handling for mobile */
-.leaflet-touch .leaflet-control-layers,
-.leaflet-touch .leaflet-bar {
-  border: 2px solid rgba(0,0,0,0.2);
-  background-clip: padding-box;
-}
-
-/* Improve zoom controls on mobile */
-.leaflet-touch .leaflet-bar a {
+.mapboxgl-ctrl-group button {
   width: 36px;
   height: 36px;
-  line-height: 36px;
-  font-size: 22px;
+  background: white;
+  border: none;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  background-color: #f9fafb;
+}
+
+.mapboxgl-ctrl-geolocate {
+  border-radius: 8px;
+}
+
+/* Mapbox Attribution */
+.mapboxgl-ctrl-attrib {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.mapboxgl-ctrl-attrib a {
+  color: #6b7280;
+}
+
+/* Mapbox Marker Customization */
+.mapboxgl-marker {
+  cursor: pointer;
+}
+
+/* Navigation Control */
+.mapboxgl-ctrl-compass {
+  display: none;
+}
+
+/* Mobile optimizations for Mapbox */
+@media (max-width: 768px) {
+  .mapboxgl-ctrl-group {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  .mapboxgl-ctrl-group button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mapbox-popup-custom .mapboxgl-popup-content {
+    max-width: 280px;
+  }
 }
 
 /* Hide scrollbar but keep functionality */

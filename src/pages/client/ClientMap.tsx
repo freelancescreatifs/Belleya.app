@@ -1,119 +1,38 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { MapPin, Search, Navigation, Star, Calendar, Filter } from 'lucide-react';
-import L, { DivIcon } from 'leaflet';
+import Map, { Marker, Popup, NavigationControl, GeolocateControl } from 'react-map-gl';
+import { MapPin, Search, Navigation, Star, Filter } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { ProviderProfile, getNearbyProviders } from '../../lib/socialHelpers';
 import { getCurrentPosition, geocodeAddress } from '../../lib/geocodingHelpers';
 import ProviderMapMarker from '../../components/client/ProviderMapMarker';
-import 'leaflet/dist/leaflet.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-const DEFAULT_CENTER: [number, number] = [48.8566, 2.3522];
-const DEFAULT_ZOOM = 13;
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
+const DEFAULT_CENTER: { lng: number; lat: number } = { lng: 2.3522, lat: 48.8566 };
+const DEFAULT_ZOOM = 12;
 
-function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }) {
-  const map = useMap();
-
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-
-  return null;
-}
-
-function MapResizer() {
-  const map = useMap();
-
-  useEffect(() => {
-    const resizeMap = () => {
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
-    };
-
-    resizeMap();
-
-    window.addEventListener('resize', resizeMap);
-    window.addEventListener('orientationchange', resizeMap);
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        resizeMap();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    const observer = new ResizeObserver(() => {
-      resizeMap();
-    });
-
-    const container = map.getContainer();
-    if (container) {
-      observer.observe(container);
-    }
-
-    return () => {
-      window.removeEventListener('resize', resizeMap);
-      window.removeEventListener('orientationchange', resizeMap);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      observer.disconnect();
-    };
-  }, [map]);
-
-  return null;
+interface ViewState {
+  longitude: number;
+  latitude: number;
+  zoom: number;
 }
 
 export default function ClientMap() {
   const [providers, setProviders] = useState<ProviderProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
-  const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [viewState, setViewState] = useState<ViewState>({
+    longitude: DEFAULT_CENTER.lng,
+    latitude: DEFAULT_CENTER.lat,
+    zoom: DEFAULT_ZOOM,
+  });
   const [selectedProvider, setSelectedProvider] = useState<ProviderProfile | null>(null);
   const [searchAddress, setSearchAddress] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-
-  const createCustomIcon = (profilePhoto: string | null, companyName: string): DivIcon => {
-    const photoHtml = profilePhoto
-      ? `<img src="${profilePhoto}" alt="${companyName}" class="w-full h-full object-cover" />`
-      : `<div class="w-full h-full bg-gradient-to-br from-brand-600 to-brand-100 flex items-center justify-center text-white font-bold text-lg">${companyName.charAt(0)}</div>`;
-
-    return L.divIcon({
-      className: 'custom-marker-icon',
-      html: `
-        <div class="relative">
-          <div class="w-12 h-12 rounded-full border-3 border-white shadow-lg overflow-hidden ring-2 ring-brand-400 bg-white">
-            ${photoHtml}
-          </div>
-          <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-brand-500 border-2 border-white rounded-full"></div>
-        </div>
-      `,
-      iconSize: [48, 48],
-      iconAnchor: [24, 48],
-      popupAnchor: [0, -48],
-    });
-  };
-
-  const customIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  });
-
-  const userIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  });
+  const mapRef = useRef<any>(null);
 
   useEffect(() => {
     requestGeolocation();
@@ -142,8 +61,13 @@ export default function ClientMap() {
       }
 
       const position = await getCurrentPosition();
-      setUserLocation([position.latitude, position.longitude]);
-      setMapCenter([position.latitude, position.longitude]);
+      const newLocation = { lat: position.latitude, lng: position.longitude };
+      setUserLocation(newLocation);
+      setViewState({
+        longitude: position.longitude,
+        latitude: position.latitude,
+        zoom: 13,
+      });
       setShowGeolocationPrompt(false);
     } catch (error: any) {
       console.error('Geolocation error:', error);
@@ -165,7 +89,7 @@ export default function ClientMap() {
 
     setLoading(true);
     try {
-      const nearby = await getNearbyProviders(userLocation[0], userLocation[1], 50);
+      const nearby = await getNearbyProviders(userLocation.lat, userLocation.lng, 50);
 
       const eligibleProviders = nearby.filter(
         (p) =>
@@ -212,10 +136,13 @@ export default function ClientMap() {
     try {
       const result = await geocodeAddress(searchAddress);
       if (result) {
-        const newLocation: [number, number] = [result.latitude, result.longitude];
+        const newLocation = { lat: result.latitude, lng: result.longitude };
         setUserLocation(newLocation);
-        setMapCenter(newLocation);
-        setMapZoom(13);
+        setViewState({
+          longitude: result.longitude,
+          latitude: result.latitude,
+          zoom: 13,
+        });
         setShowGeolocationPrompt(false);
       } else {
         alert('Adresse introuvable. Veuillez réessayer avec une autre adresse.');
@@ -343,31 +270,37 @@ export default function ClientMap() {
         </div>
       </div>
 
-      <div className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0" style={{ height: '60dvh', minHeight: '500px', maxHeight: '700px' }}>
-        <MapContainer
-          center={mapCenter}
-          zoom={mapZoom}
-          scrollWheelZoom={true}
-          zoomControl={true}
-          className="h-full w-full"
-          style={{ height: '100%', width: '100%', position: 'relative', zIndex: 0 }}
+      <div className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0">
+        <Map
+          ref={mapRef}
+          {...viewState}
+          onMove={(evt) => setViewState(evt.viewState)}
+          mapboxAccessToken={MAPBOX_TOKEN}
+          mapStyle="mapbox://styles/mapbox/light-v11"
+          style={{ width: '100%', height: '100%' }}
+          attributionControl={true}
         >
-          <MapUpdater center={mapCenter} zoom={mapZoom} />
-          <MapResizer />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            maxZoom={19}
-            subdomains="abcd"
+          <NavigationControl position="top-right" />
+          <GeolocateControl
+            position="top-right"
+            trackUserLocation
+            showUserHeading
+            onGeolocate={(e) => {
+              setUserLocation({ lat: e.coords.latitude, lng: e.coords.longitude });
+            }}
           />
 
           {userLocation && (
-            <Marker position={userLocation} icon={userIcon}>
-              <Popup>
-                <div className="text-center">
-                  <p className="font-semibold text-blue-600">Vous êtes ici</p>
+            <Marker
+              longitude={userLocation.lng}
+              latitude={userLocation.lat}
+              anchor="bottom"
+            >
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full bg-blue-500 border-4 border-white shadow-lg flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-white"></div>
                 </div>
-              </Popup>
+              </div>
             </Marker>
           )}
 
@@ -377,22 +310,56 @@ export default function ClientMap() {
             return (
               <Marker
                 key={provider.user_id}
-                position={[provider.latitude, provider.longitude]}
-                icon={createCustomIcon(provider.profile_photo, provider.company_name)}
-                eventHandlers={{
-                  click: () => setSelectedProvider(provider),
-                }}
+                longitude={provider.longitude}
+                latitude={provider.latitude}
+                anchor="bottom"
               >
-                <Popup>
-                  <ProviderMapMarker
-                    provider={provider}
-                    onViewProfile={() => handleViewProfile(provider.user_id)}
-                  />
-                </Popup>
+                <div
+                  className="cursor-pointer transform transition-transform hover:scale-110"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedProvider(provider);
+                  }}
+                >
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-full border-3 border-white shadow-lg overflow-hidden ring-2 ring-gray-800 bg-white">
+                      {provider.profile_photo ? (
+                        <img
+                          src={provider.profile_photo}
+                          alt={provider.company_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white font-bold text-lg">
+                          {provider.company_name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-800 border-2 border-white rounded-full"></div>
+                  </div>
+                </div>
               </Marker>
             );
           })}
-        </MapContainer>
+
+          {selectedProvider && selectedProvider.latitude && selectedProvider.longitude && (
+            <Popup
+              longitude={selectedProvider.longitude}
+              latitude={selectedProvider.latitude}
+              anchor="bottom"
+              offset={20}
+              onClose={() => setSelectedProvider(null)}
+              closeButton={true}
+              closeOnClick={false}
+              className="mapbox-popup-custom"
+            >
+              <ProviderMapMarker
+                provider={selectedProvider}
+                onViewProfile={() => handleViewProfile(selectedProvider.user_id)}
+              />
+            </Popup>
+          )}
+        </Map>
       </div>
 
       <div className="p-4">
