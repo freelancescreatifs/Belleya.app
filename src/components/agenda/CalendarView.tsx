@@ -406,7 +406,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       return (
                         <div
                           key={`dragging-${dragState.item.id}`}
-                          className={`${getEventColor(dragState.item)} text-white overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto`}
+                          className={`${getEventColor(dragState.item)} text-white overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto mx-0 md:mx-1`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
@@ -460,7 +460,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       return (
                         <div
                           key={isGhost ? `${item.id}-ghost` : item.id}
-                          className={`${getEventColor(item)} text-white overflow-hidden select-none group relative ${
+                          className={`${getEventColor(item)} text-white overflow-hidden select-none group relative mx-0 md:mx-1 ${
                             isGhost
                               ? 'opacity-20 pointer-events-none'
                               : isBeingDragged
