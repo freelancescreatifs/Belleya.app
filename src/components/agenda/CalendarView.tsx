@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CalendarView as ViewType, CalendarItem } from '../../types/agenda';
 import { getMonthDays, getWeekDays, isSameDay, getItemsForDay, formatTime, getEventColor, calculateOverlappingPositions } from '../../lib/calendarHelpers';
 import { getStepEmoji } from '../../lib/productionStepsHelpers';
@@ -127,6 +127,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
   const today = new Date();
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [lastClickTime, setLastClickTime] = useState<{ time: number; dayIndex: number; hour: number } | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [dragState, setDragState] = useState<{
     item: CalendarItem | null;
@@ -151,6 +152,12 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
     dragStarted: false,
     hoveredDayIndex: null,
   });
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 7 * 48;
+    }
+  }, []);
 
   const getDateTimeFromPosition = (e: React.MouseEvent, dayElement: HTMLElement) => {
     const rect = dayElement.getBoundingClientRect();
@@ -339,7 +346,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
           );
         })}
       </div>
-      <div className="overflow-y-auto max-h-[500px] md:max-h-[600px]">
+      <div ref={scrollContainerRef} className="overflow-y-auto max-h-[500px] md:max-h-[600px]">
         <div className="grid grid-cols-8">
           <div className="border-r border-gray-100">
             {hours.map((hour) => (
@@ -386,7 +393,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                     }}
                   ></div>
                 ))}
-                <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 bottom-0 left-0 right-0 pointer-events-none" style={{ right: dayIndex === days.length - 1 ? '0' : '-1px' }}>
                   {dragState.dragStarted && dragState.currentStart && isSameDay(dragState.currentStart, days[dayIndex]) && dragState.item && (
                     (() => {
                       const start = dragState.currentStart;
@@ -556,6 +563,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
   const positionedItems = calculateOverlappingPositions(dayItems);
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [lastClickTime, setLastClickTime] = useState<{ time: number; hour: number } | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [dragState, setDragState] = useState<{
     item: CalendarItem | null;
@@ -580,6 +588,12 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
     dragStarted: false,
     hoveredDayIndex: null,
   });
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 7 * 80;
+    }
+  }, []);
 
   const getDateTimeFromPosition = (e: React.MouseEvent, dayElement: HTMLElement) => {
     const rect = dayElement.getBoundingClientRect();
@@ -750,7 +764,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
           })}
         </h3>
       </div>
-      <div className="overflow-y-auto max-h-[600px]">
+      <div ref={scrollContainerRef} className="overflow-y-auto max-h-[600px]">
         <div className="grid grid-cols-[80px_1fr]">
           <div className="border-r border-gray-200">
             {hours.map((hour) => (
