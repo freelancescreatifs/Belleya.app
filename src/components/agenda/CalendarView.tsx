@@ -17,7 +17,7 @@ interface CalendarViewProps {
 
 export default function CalendarView({ view, currentDate, items, onItemClick, onDayClick, onTimeSlotDoubleClick, onEventDrop, onEventResize, onDragComplete }: CalendarViewProps) {
   if (view === 'month') {
-    return <MonthView currentDate={currentDate} items={items} onItemClick={onItemClick} onDayClick={onDayClick} onEventDrop={onEventDrop} onEventResize={onEventResize} />;
+    return <MonthView currentDate={currentDate} items={items} onItemClick={onItemClick} onDayClick={onDayClick} />;
   }
 
   if (view === 'week') {
@@ -27,7 +27,7 @@ export default function CalendarView({ view, currentDate, items, onItemClick, on
   return <DayView currentDate={currentDate} items={items} onItemClick={onItemClick} onTimeSlotDoubleClick={onTimeSlotDoubleClick} onEventDrop={onEventDrop} onEventResize={onEventResize} onDragComplete={onDragComplete} />;
 }
 
-function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<CalendarViewProps, 'view' | 'onEventDrop' | 'onEventResize'>) {
+function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<CalendarViewProps, 'view' | 'onEventDrop' | 'onEventResize' | 'onTimeSlotDoubleClick' | 'onDragComplete'>) {
   const days = getMonthDays(currentDate.getFullYear(), currentDate.getMonth());
   const today = new Date();
   const currentMonth = currentDate.getMonth();
@@ -257,6 +257,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
       mouseStartX: e.clientX,
       mouseStartY: e.clientY,
       dragStarted: false,
+      hoveredDayIndex: null,
     });
   };
 
@@ -375,6 +376,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
       mouseStartX: null,
       mouseStartY: null,
       dragStarted: false,
+      hoveredDayIndex: null,
     });
   };
 
@@ -392,47 +394,113 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
               <div
                 key={day.toISOString()}
                 onClick={() => onDayClick(day)}
-                className={`py-3 px-1 text-center cursor-pointer active:bg-gray-100 transition-colors ${
+                className={`py-2 px-0.5 text-center cursor-pointer active:bg-gray-100 transition-colors ${
                   isToday ? 'bg-belleya-50' : ''
                 }`}
               >
-                <div className="text-[10px] text-gray-500 font-medium uppercase">
-                  {day.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3)}
+                <div className="text-[9px] text-gray-500 font-medium uppercase">
+                  {day.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 1)}
                 </div>
                 <div
-                  className={`text-lg font-semibold mt-1 ${
+                  className={`text-sm font-semibold mt-1 ${
                     isToday
-                      ? 'bg-belleya-500 text-white w-8 h-8 flex items-center justify-center rounded-full mx-auto'
+                      ? 'bg-belleya-500 text-white w-7 h-7 flex items-center justify-center rounded-full mx-auto'
                       : 'text-gray-900'
                   }`}
                 >
                   {day.getDate()}
                 </div>
                 {hasEvents && (
-                  <div className="flex items-center justify-center gap-0.5 mt-2 min-h-[8px]">
-                    {uniqueColors.slice(0, 4).map((colorClass, idx) => {
-                      const bgColor = colorClass.includes('bg-')
-                        ? colorClass.split(' ').find(c => c.startsWith('bg-'))?.replace('bg-', '') || 'gray-400'
-                        : 'gray-400';
+                  <div className="flex items-center justify-center gap-0.5 mt-1.5 min-h-[6px]">
+                    {uniqueColors.slice(0, 3).map((colorClass, idx) => {
                       return (
                         <span
                           key={idx}
-                          className={`w-[6px] h-[6px] rounded-full ${colorClass.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400'}`}
+                          className={`w-[5px] h-[5px] rounded-full ${colorClass.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400'}`}
                         />
                       );
                     })}
-                    {dayItems.length > 4 && (
-                      <span className="text-[8px] text-gray-500 ml-0.5">+{dayItems.length - 4}</span>
-                    )}
                   </div>
                 )}
-                {!hasEvents && <div className="min-h-[8px] mt-2" />}
+                {!hasEvents && <div className="min-h-[6px] mt-1.5" />}
               </div>
             );
           })}
         </div>
-        <div className="p-3 text-center text-xs text-gray-500 bg-gray-50 border-t border-gray-100">
-          Appuyez sur un jour pour voir les details
+        <div ref={scrollContainerRef} className="overflow-y-auto max-h-[500px]">
+          <div className="grid grid-cols-7">
+            {days.map((day, dayIndex) => {
+              const dayItems = getItemsForDay(items, day);
+              const positionedItems = calculateOverlappingPositions(dayItems);
+              const isToday = isSameDay(day, today);
+
+              return (
+                <div
+                  key={day.toISOString()}
+                  className={`border-r border-gray-100 last:border-r-0 relative min-h-[400px] ${
+                    isToday ? 'bg-belleya-50/20' : ''
+                  }`}
+                  data-day-index={dayIndex}
+                >
+                  {hours.map((hour) => (
+                    <div
+                      key={hour}
+                      className="h-10 border-b border-gray-50"
+                      onClick={() => {
+                        const targetDate = new Date(days[dayIndex]);
+                        targetDate.setHours(hour, 0, 0, 0);
+                        onDayClick(targetDate);
+                      }}
+                    ></div>
+                  ))}
+                  <div className="absolute top-0 bottom-0 left-0 right-0 pointer-events-none">
+                    {positionedItems.map((item) => {
+                      const isCancelled = item.type === 'event' && (item.data as any).status === 'cancelled';
+                      const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
+
+                      const startHour = item.start.getHours() + item.start.getMinutes() / 60;
+                      const endHour = item.end.getHours() + item.end.getMinutes() / 60;
+                      const top = startHour * 40;
+                      const height = (endHour - startHour) * 40;
+
+                      const widthPercent = 100 / item.totalColumns;
+                      const leftPercent = (item.column * widthPercent);
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`${getEventColor(item)} text-white overflow-hidden select-none rounded-sm pointer-events-auto ${
+                            isCancelled ? 'opacity-60 line-through' : ''
+                          }`}
+                          style={{
+                            position: 'absolute',
+                            top: `${top}px`,
+                            height: `${Math.max(height - 2, 16)}px`,
+                            left: `${leftPercent}%`,
+                            width: `${widthPercent}%`,
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onItemClick(item);
+                          }}
+                        >
+                          <div className="px-0.5 py-0.5 text-[8px] font-medium line-clamp-2 leading-tight">
+                            {productionStep && <span className="mr-0.5 text-[9px]">{getStepEmoji(productionStep)}</span>}
+                            {height > 30 ? item.title : item.title.slice(0, 15)}
+                          </div>
+                          {height > 20 && (
+                            <div className="px-0.5 text-[7px] opacity-90 truncate">
+                              {formatTime(item.start)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -498,7 +566,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                   <div
                     key={hour}
                     className="h-12 border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors"
-                    onClick={(e) => {
+                    onClick={() => {
                       if (dragState.dragStarted) return;
                       const now = Date.now();
                       const isDoubleClick = lastClickTime &&
@@ -569,7 +637,6 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                     const isGrabbed = isDragging && !dragState.dragStarted;
 
                     const isCancelled = item.type === 'event' && (item.data as any).status === 'cancelled';
-                    const isFormation = item.type === 'event' && (item.data as any).type === 'formation';
                     const dragLabel = dragState.mode === 'move' ? 'Déplacement...' : 'Redimensionnement...';
 
                     const widthPercent = 100 / item.totalColumns;
@@ -750,6 +817,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
       mouseStartX: e.clientX,
       mouseStartY: e.clientY,
       dragStarted: false,
+      hoveredDayIndex: null,
     });
   };
 
@@ -908,7 +976,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
               <div
                 key={hour}
                 className="h-20 border-b border-gray-100 hover:bg-gray-50/50 cursor-pointer transition-colors"
-                onClick={(e) => {
+                onClick={() => {
                   if (dragState.dragStarted) return;
                   const now = Date.now();
                   const isDoubleClick = lastClickTime &&
