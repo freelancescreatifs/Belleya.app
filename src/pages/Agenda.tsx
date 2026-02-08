@@ -453,8 +453,14 @@ export default function Agenda() {
   };
 
   const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
-    setShowEventForm(true);
+    const isMobile = window.innerWidth < 768;
+    if (isMobile && view === 'month') {
+      setCurrentDate(date);
+      setView('day');
+    } else {
+      setSelectedDate(date);
+      setShowEventForm(true);
+    }
   };
 
   const handleTimeSlotDoubleClick = (date: Date) => {
