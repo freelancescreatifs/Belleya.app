@@ -36,10 +36,31 @@ export default function AddressInput({
     if (!MAPBOX_TOKEN) {
       console.error('Token Mapbox manquant dans AddressInput');
       setMapError('Token Mapbox manquant');
-    } else if (!MAPBOX_TOKEN.startsWith('pk.')) {
+      return;
+    }
+
+    if (!MAPBOX_TOKEN.startsWith('pk.')) {
       console.error('Token Mapbox invalide dans AddressInput');
       setMapError('Token Mapbox invalide');
+      return;
     }
+
+    const validateToken = async () => {
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/styles/v1/mapbox/light-v11?access_token=${MAPBOX_TOKEN}`,
+          { method: 'GET' }
+        );
+
+        if (response.status === 401 || response.status === 403) {
+          setMapError('Token Mapbox invalide (erreur 401/403)');
+        }
+      } catch (err) {
+        console.warn('Validation token Mapbox echouee:', err);
+      }
+    };
+
+    validateToken();
   }, []);
 
   useEffect(() => {

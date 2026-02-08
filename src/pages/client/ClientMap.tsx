@@ -53,7 +53,31 @@ export default function ClientMap() {
       return;
     }
 
-    console.log('Mapbox token OK:', MAPBOX_TOKEN.substring(0, 20) + '...');
+    console.log('Mapbox token detecte:', MAPBOX_TOKEN.substring(0, 25) + '...');
+    console.log('Longueur token:', MAPBOX_TOKEN.length);
+
+    const validateToken = async () => {
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/styles/v1/mapbox/light-v11?access_token=${MAPBOX_TOKEN}`,
+          { method: 'GET' }
+        );
+
+        if (response.status === 401) {
+          console.error('Token Mapbox invalide (401)');
+          setMapError('Erreur 401 : Token Mapbox invalide, expire ou avec restrictions de domaine incompatibles.');
+        } else if (response.status === 403) {
+          console.error('Token Mapbox sans permissions (403)');
+          setMapError('Erreur 403 : Le token n\'a pas les permissions requises (styles:read).');
+        } else if (response.ok) {
+          console.log('Token Mapbox valide - carte prete a charger');
+        }
+      } catch (err) {
+        console.warn('Impossible de valider le token Mapbox:', err);
+      }
+    };
+
+    validateToken();
   }, []);
 
   useEffect(() => {
@@ -325,17 +349,32 @@ export default function ClientMap() {
       >
         {mapError ? (
           <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded-lg">
-            <div className="text-center p-6 max-w-md">
+            <div className="text-center p-6 max-w-lg">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Erreur de carte</h3>
               <p className="text-sm text-gray-600 mb-4">{mapError}</p>
+
+              {mapError.includes('401') && (
+                <div className="text-left bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                  <p className="text-sm font-medium text-gray-800 mb-2">Pour corriger cette erreur :</p>
+                  <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                    <li>Allez sur <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Mapbox Access Tokens</a></li>
+                    <li>Creez un nouveau token public (pk.)</li>
+                    <li>Scopes requis : <code className="bg-gray-100 px-1 rounded">styles:read</code>, <code className="bg-gray-100 px-1 rounded">tiles:read</code></li>
+                    <li>Supprimez les restrictions de domaine ou ajoutez votre domaine</li>
+                    <li>Copiez le token dans VITE_MAPBOX_TOKEN</li>
+                    <li>Redemarrez le serveur de dev</li>
+                  </ol>
+                </div>
+              )}
+
               <a
                 href="https://account.mapbox.com/access-tokens/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
               >
-                Obtenir un token Mapbox
+                Obtenir un nouveau token Mapbox
               </a>
             </div>
           </div>
@@ -353,12 +392,17 @@ export default function ClientMap() {
             }}
             onError={(e) => {
               console.error('Erreur Mapbox:', e);
-              if (e.error?.message?.includes('401')) {
-                setMapError('Token Mapbox invalide ou expiré (erreur 401)');
-              } else if (e.error?.message?.includes('style')) {
-                setMapError('Style de carte introuvable');
+              const errorMsg = e.error?.message || e.message || String(e);
+              console.error('Message erreur:', errorMsg);
+
+              if (errorMsg.includes('401') || errorMsg.toLowerCase().includes('unauthorized') || errorMsg.toLowerCase().includes('invalid') && errorMsg.toLowerCase().includes('token')) {
+                setMapError('Erreur 401 : Token Mapbox invalide, expire ou avec restrictions de domaine incompatibles.');
+              } else if (errorMsg.includes('403') || errorMsg.toLowerCase().includes('forbidden')) {
+                setMapError('Erreur 403 : Acces refuse. Verifiez les scopes du token (styles:read, tiles:read).');
+              } else if (errorMsg.toLowerCase().includes('style')) {
+                setMapError('Style de carte introuvable. Verifiez le style Mapbox.');
               } else {
-                setMapError('Erreur lors du chargement de la carte');
+                setMapError(`Erreur lors du chargement de la carte: ${errorMsg.substring(0, 100)}`);
               }
             }}
             mapboxAccessToken={MAPBOX_TOKEN}
