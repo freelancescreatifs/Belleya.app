@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test Mapbox</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        #map { height: 500px; border: 2px solid #e5e7eb; border-radius: 8px; }
+        .info {
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .success { color: #059669; font-weight: bold; }
+        .error { color: #dc2626; font-weight: bold; }
+        h1 { color: #1f2937; }
+        pre {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Test de la carte Mapbox</h1>
+
+    <div class="info">
+        <h2>Instructions :</h2>
+        <ol>
+            <li>Remplacez <code>VOTRE_TOKEN_ICI</code> par votre token Mapbox</li>
+            <li>Ouvrez ce fichier dans un navigateur</li>
+            <li>Si la carte s'affiche avec Paris au centre : ✅ Token valide</li>
+            <li>Si la carte est grise : ❌ Token invalide ou manquant</li>
+        </ol>
+    </div>
+
+    <div id="status"></div>
+    <div id="map"></div>
+
+    <script>
+        // 🔑 REMPLACEZ PAR VOTRE TOKEN MAPBOX
+        const MAPBOX_TOKEN = 'pk.eyJ1IjoiYmVsbGV5YSIsImEiOiJjbTRnejJnczQwYThtMmtzaDVscW9pNzN1In0.pVEm0cPnPFw9AQeVxlPQEA';
+
+        const statusDiv = document.getElementById('status');
+
+        function showStatus(message, type = 'info') {
+            const className = type === 'error' ? 'error' : 'success';
+            statusDiv.innerHTML = `<div class="info"><span class="${className}">${message}</span></div>`;
+        }
+
+        // Vérification du token
+        if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'VOTRE_TOKEN_ICI') {
+            showStatus('❌ ERREUR : Token Mapbox manquant ! Remplacez VOTRE_TOKEN_ICI par votre token.', 'error');
+        } else if (!MAPBOX_TOKEN.startsWith('pk.')) {
+            showStatus('❌ ERREUR : Token invalide ! Le token doit commencer par "pk."', 'error');
+        } else {
+            showStatus('✅ Token Mapbox détecté : ' + MAPBOX_TOKEN.substring(0, 20) + '...', 'success');
+
+            // Initialisation de la carte
+            mapboxgl.accessToken = MAPBOX_TOKEN;
+
+            try {
+                const map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/light-v11', // Style gris et blanc
+                    center: [2.3522, 48.8566], // Paris
+                    zoom: 11
+                });
+
+                map.on('load', () => {
+                    showStatus('✅ Carte chargée avec succès ! Le token est valide.', 'success');
+                    console.log('✅ Carte Mapbox chargée');
+
+                    // Ajouter un marker sur Paris
+                    new mapboxgl.Marker({ color: '#ef4444' })
+                        .setLngLat([2.3522, 48.8566])
+                        .setPopup(new mapboxgl.Popup().setHTML('<h3>Paris</h3><p>Centre par défaut</p>'))
+                        .addTo(map);
+
+                    // Ajouter les contrôles de navigation
+                    map.addControl(new mapboxgl.NavigationControl());
+                });
+
+                map.on('error', (e) => {
+                    console.error('Erreur Mapbox:', e);
+
+                    if (e.error && e.error.message) {
+                        if (e.error.message.includes('401')) {
+                            showStatus('❌ ERREUR 401 : Token invalide ou expiré. Créez un nouveau token sur https://account.mapbox.com/access-tokens/', 'error');
+                        } else if (e.error.message.includes('403')) {
+                            showStatus('❌ ERREUR 403 : Accès refusé. Vérifiez les restrictions du token.', 'error');
+                        } else if (e.error.message.includes('style')) {
+                            showStatus('❌ ERREUR : Style de carte introuvable.', 'error');
+                        } else {
+                            showStatus('❌ ERREUR : ' + e.error.message, 'error');
+                        }
+                    } else {
+                        showStatus('❌ ERREUR inconnue lors du chargement de la carte', 'error');
+                    }
+                });
+
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation:', error);
+                showStatus('❌ ERREUR : ' + error.message, 'error');
+            }
+        }
+    </script>
+
+    <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px;">
+        <h3>📋 Informations utiles :</h3>
+        <ul>
+            <li><strong>Token actuel :</strong> <code id="current-token"></code></li>
+            <li><strong>Style utilisé :</strong> <code>mapbox://styles/mapbox/light-v11</code></li>
+            <li><strong>Centre :</strong> Paris (2.3522, 48.8566)</li>
+            <li><strong>Zoom :</strong> 11</li>
+        </ul>
+        <p><a href="https://account.mapbox.com/access-tokens/" target="_blank" style="color: #2563eb;">🔗 Obtenir un token Mapbox</a></p>
+    </div>
+
+    <script>
+        document.getElementById('current-token').textContent = MAPBOX_TOKEN.substring(0, 30) + '...';
+    </script>
+</body>
+</html>

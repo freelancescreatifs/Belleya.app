@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Map, { Marker, Popup, NavigationControl, GeolocateControl } from 'react-map-gl';
-import { MapPin, Search, Navigation, Star, Filter } from 'lucide-react';
+import { MapPin, Search, Navigation, Star, Filter, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { ProviderProfile, getNearbyProviders } from '../../lib/socialHelpers';
 import { getCurrentPosition, geocodeAddress } from '../../lib/geocodingHelpers';
@@ -9,7 +9,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 const DEFAULT_CENTER: { lng: number; lat: number } = { lng: 2.3522, lat: 48.8566 };
-const DEFAULT_ZOOM = 12;
+const DEFAULT_ZOOM = 11;
 
 interface ViewState {
   longitude: number;
@@ -32,7 +32,29 @@ export default function ClientMap() {
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const mapRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!MAPBOX_TOKEN) {
+      console.error('MAPBOX TOKEN MANQUANT:', {
+        token: MAPBOX_TOKEN,
+        env: import.meta.env.VITE_MAPBOX_TOKEN
+      });
+      setMapError('Token Mapbox manquant. Veuillez configurer VITE_MAPBOX_TOKEN dans les variables d\'environnement.');
+      return;
+    }
+
+    if (!MAPBOX_TOKEN.startsWith('pk.')) {
+      console.error('TOKEN MAPBOX INVALIDE:', MAPBOX_TOKEN.substring(0, 10) + '...');
+      setMapError('Token Mapbox invalide. Le token doit commencer par "pk."');
+      return;
+    }
+
+    console.log('Mapbox token OK:', MAPBOX_TOKEN.substring(0, 20) + '...');
+  }, []);
 
   useEffect(() => {
     requestGeolocation();
@@ -45,6 +67,32 @@ export default function ClientMap() {
       loadProvidersWithoutLocation();
     }
   }, [userLocation]);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return;
+
+    const handleResize = () => {
+      requestAnimationFrame(() => {
+        if (mapRef.current) {
+          mapRef.current.resize();
+        }
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [mapLoaded]);
 
   const requestGeolocation = async () => {
     try {
@@ -270,16 +318,55 @@ export default function ClientMap() {
         </div>
       </div>
 
-      <div className="h-[60dvh] min-h-[500px] max-h-[700px] relative z-0">
-        <Map
-          ref={mapRef}
-          {...viewState}
-          onMove={(evt) => setViewState(evt.viewState)}
-          mapboxAccessToken={MAPBOX_TOKEN}
-          mapStyle="mapbox://styles/mapbox/light-v11"
-          style={{ width: '100%', height: '100%' }}
-          attributionControl={true}
-        >
+      <div
+        ref={containerRef}
+        className="relative z-0"
+        style={{ height: '60vh', minHeight: '500px', maxHeight: '700px' }}
+      >
+        {mapError ? (
+          <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded-lg">
+            <div className="text-center p-6 max-w-md">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Erreur de carte</h3>
+              <p className="text-sm text-gray-600 mb-4">{mapError}</p>
+              <a
+                href="https://account.mapbox.com/access-tokens/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+              >
+                Obtenir un token Mapbox
+              </a>
+            </div>
+          </div>
+        ) : (
+          <Map
+            ref={mapRef}
+            {...viewState}
+            onMove={(evt) => setViewState(evt.viewState)}
+            onLoad={() => {
+              console.log('Carte Mapbox chargée avec succès');
+              setMapLoaded(true);
+              if (mapRef.current) {
+                mapRef.current.resize();
+              }
+            }}
+            onError={(e) => {
+              console.error('Erreur Mapbox:', e);
+              if (e.error?.message?.includes('401')) {
+                setMapError('Token Mapbox invalide ou expiré (erreur 401)');
+              } else if (e.error?.message?.includes('style')) {
+                setMapError('Style de carte introuvable');
+              } else {
+                setMapError('Erreur lors du chargement de la carte');
+              }
+            }}
+            mapboxAccessToken={MAPBOX_TOKEN}
+            mapStyle="mapbox://styles/mapbox/light-v11"
+            style={{ width: '100%', height: '100%' }}
+            attributionControl={true}
+            reuseMaps
+          >
           <NavigationControl position="top-right" />
           <GeolocateControl
             position="top-right"
@@ -359,7 +446,8 @@ export default function ClientMap() {
               />
             </Popup>
           )}
-        </Map>
+          </Map>
+        )}
       </div>
 
       <div className="p-4">

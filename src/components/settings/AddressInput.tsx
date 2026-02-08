@@ -28,7 +28,19 @@ export default function AddressInput({
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingStatus, setGeocodingStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [showMap, setShowMap] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!MAPBOX_TOKEN) {
+      console.error('Token Mapbox manquant dans AddressInput');
+      setMapError('Token Mapbox manquant');
+    } else if (!MAPBOX_TOKEN.startsWith('pk.')) {
+      console.error('Token Mapbox invalide dans AddressInput');
+      setMapError('Token Mapbox invalide');
+    }
+  }, []);
 
   useEffect(() => {
     if (!value || value.length < 3) {
@@ -192,21 +204,43 @@ export default function AddressInput({
           </div>
 
           {showMap && (
-            <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
-              <Map
-                initialViewState={{
-                  longitude: currentLocation.longitude,
-                  latitude: currentLocation.latitude,
-                  zoom: 15
-                }}
-                style={{ width: '100%', height: '100%' }}
-                mapStyle="mapbox://styles/mapbox/light-v11"
-                mapboxAccessToken={MAPBOX_TOKEN}
-                scrollZoom={false}
-                dragPan={true}
-                dragRotate={false}
-                touchZoomRotate={false}
-              >
+            <div className="rounded-lg overflow-hidden border border-gray-300" style={{ height: '256px' }}>
+              {mapError ? (
+                <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                  <div className="text-center p-4">
+                    <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">{mapError}</p>
+                  </div>
+                </div>
+              ) : (
+                <Map
+                  ref={mapRef}
+                  initialViewState={{
+                    longitude: currentLocation.longitude,
+                    latitude: currentLocation.latitude,
+                    zoom: 15
+                  }}
+                  style={{ width: '100%', height: '100%' }}
+                  mapStyle="mapbox://styles/mapbox/light-v11"
+                  mapboxAccessToken={MAPBOX_TOKEN}
+                  scrollZoom={false}
+                  dragPan={true}
+                  dragRotate={false}
+                  touchZoomRotate={false}
+                  onLoad={() => {
+                    console.log('Carte prévisualisation chargée');
+                    if (mapRef.current) {
+                      setTimeout(() => {
+                        mapRef.current.resize();
+                      }, 100);
+                    }
+                  }}
+                  onError={(e) => {
+                    console.error('Erreur carte prévisualisation:', e);
+                    setMapError('Erreur lors du chargement de la carte');
+                  }}
+                  reuseMaps
+                >
                 <Marker
                   longitude={currentLocation.longitude}
                   latitude={currentLocation.latitude}
@@ -240,7 +274,8 @@ export default function AddressInput({
                     <p className="text-xs text-gray-600 mt-1">{value}</p>
                   </div>
                 </Popup>
-              </Map>
+                </Map>
+              )}
             </div>
           )}
         </div>
