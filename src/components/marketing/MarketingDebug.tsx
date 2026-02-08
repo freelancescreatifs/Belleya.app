@@ -9,10 +9,15 @@ interface MarketingDebugProps {
 export default function MarketingDebug({ debugInfo }: MarketingDebugProps) {
   const [expanded, setExpanded] = useState(false);
 
+  // Protection contre missing_data undefined
+  if (!debugInfo || !debugInfo.missing_data) {
+    return null;
+  }
+
   const hasMissingData =
     debugInfo.missing_data.no_last_appointment.length > 0 ||
     debugInfo.missing_data.no_frequency.length > 0 ||
-    debugInfo.missing_data.no_birthday.length > 0;
+    debugInfo.missing_data.no_birth_date.length > 0;
 
   if (!hasMissingData && debugInfo.clients_remindable > 0) {
     return null;
@@ -92,7 +97,7 @@ export default function MarketingDebug({ debugInfo }: MarketingDebugProps) {
                 Données manquantes
               </h4>
 
-              {debugInfo.missing_data.no_last_appointment.length > 0 && (
+              {debugInfo.missing_data?.no_last_appointment && debugInfo.missing_data.no_last_appointment.length > 0 && (
                 <div className="mb-3">
                   <div className="text-sm font-medium text-orange-800 mb-1">
                     Clientes sans dernier RDV ({debugInfo.missing_data.no_last_appointment.length})
@@ -108,7 +113,7 @@ export default function MarketingDebug({ debugInfo }: MarketingDebugProps) {
                 </div>
               )}
 
-              {debugInfo.missing_data.no_frequency.length > 0 && (
+              {debugInfo.missing_data?.no_frequency && debugInfo.missing_data.no_frequency.length > 0 && (
                 <div className="mb-3">
                   <div className="text-sm font-medium text-yellow-800 mb-1">
                     Clientes sans fréquence recommandée ({debugInfo.missing_data.no_frequency.length})
@@ -124,7 +129,7 @@ export default function MarketingDebug({ debugInfo }: MarketingDebugProps) {
                 </div>
               )}
 
-              {debugInfo.missing_data.no_birth_date.length > 0 && (
+              {debugInfo.missing_data?.no_birth_date && debugInfo.missing_data.no_birth_date.length > 0 && (
                 <div>
                   <div className="text-sm font-medium text-blue-800 mb-1">
                     Clientes sans date anniversaire ({debugInfo.missing_data.no_birth_date.length})
