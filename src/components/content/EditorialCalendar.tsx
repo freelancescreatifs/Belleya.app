@@ -72,7 +72,6 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   const [pillars, setPillars] = useState<EditorialPillar[]>([]);
   const [professionType, setProfessionType] = useState('');
   const [expandedContents, setExpandedContents] = useState<Set<string>>(new Set());
-  const [productionTasksMap, setProductionTasksMap] = useState<Map<string, Map<string, boolean>>>(new Map());
   const [loadingSteps, setLoadingSteps] = useState<Set<string>>(new Set());
 
   const sensors = useSensors(
@@ -86,15 +85,8 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   useEffect(() => {
     if (user) {
       loadProfessionAndPillars();
-      loadProductionTasks();
     }
   }, [user]);
-
-  useEffect(() => {
-    if (user && contents.length > 0) {
-      loadProductionTasks();
-    }
-  }, [contents]);
 
   async function loadProfessionAndPillars() {
     if (!user) return;
@@ -140,58 +132,6 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
     }
   }
 
-  async function loadProductionTasks() {
-    if (!user || contents.length === 0) return;
-
-    try {
-      const tasksMap = new Map<string, Map<string, boolean>>();
-
-      // Charger toutes les tâches de production en une seule requête
-      const contentIds = contents.map(c => c.id);
-
-      const { data: productionTasks, error } = await supabase
-        .from('production_tasks')
-        .select(`
-          content_id,
-          production_step,
-          task_id,
-          tasks!inner(completed)
-        `)
-        .in('content_id', contentIds);
-
-      if (error) {
-        console.error('Error loading production tasks:', error);
-        return;
-      }
-
-      // Construire la map avec le vrai statut completed
-      for (const content of contents) {
-        const contentTasksMap = new Map<string, boolean>();
-
-        // Récupérer les tâches pour ce contenu
-        const contentProductionTasks = productionTasks?.filter(pt => pt.content_id === content.id) || [];
-
-        // Pour chaque étape, vérifier si une tâche existe et son statut
-        const scriptTask = contentProductionTasks.find(pt => pt.production_step === 'script');
-        contentTasksMap.set('date_script', scriptTask?.tasks?.completed || false);
-
-        const shootingTask = contentProductionTasks.find(pt => pt.production_step === 'shooting');
-        contentTasksMap.set('date_shooting', shootingTask?.tasks?.completed || false);
-
-        const editingTask = contentProductionTasks.find(pt => pt.production_step === 'editing');
-        contentTasksMap.set('date_editing', editingTask?.tasks?.completed || false);
-
-        const schedulingTask = contentProductionTasks.find(pt => pt.production_step === 'scheduling');
-        contentTasksMap.set('date_scheduling', schedulingTask?.tasks?.completed || false);
-
-        tasksMap.set(content.id, contentTasksMap);
-      }
-
-      setProductionTasksMap(tasksMap);
-    } catch (error) {
-      console.error('Error loading production tasks:', error);
-    }
-  }
 
   async function toggleProductionStep(contentId: string, stepKey: string, currentCompleted: boolean) {
     if (!user) return;
@@ -226,39 +166,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
       if (error) throw error;
 
-      // Recharger le statut completed réel depuis les tâches
-      const { data: productionTasks, error: fetchError } = await supabase
-        .from('production_tasks')
-        .select(`
-          production_step,
-          tasks!inner(completed)
-        `)
-        .eq('content_id', contentId);
-
-      if (!fetchError && productionTasks) {
-        // Mettre à jour la map avec le vrai statut completed
-        const contentTasksMap = new Map<string, boolean>();
-
-        const scriptTask = productionTasks.find(pt => pt.production_step === 'script');
-        contentTasksMap.set('date_script', scriptTask?.tasks?.completed || false);
-
-        const shootingTask = productionTasks.find(pt => pt.production_step === 'shooting');
-        contentTasksMap.set('date_shooting', shootingTask?.tasks?.completed || false);
-
-        const editingTask = productionTasks.find(pt => pt.production_step === 'editing');
-        contentTasksMap.set('date_editing', editingTask?.tasks?.completed || false);
-
-        const schedulingTask = productionTasks.find(pt => pt.production_step === 'scheduling');
-        contentTasksMap.set('date_scheduling', schedulingTask?.tasks?.completed || false);
-
-        setProductionTasksMap(prev => {
-          const newMap = new Map(prev);
-          newMap.set(contentId, contentTasksMap);
-          return newMap;
-        });
-      }
-
-      // Notifier le parent pour recharger les contenus
+      // Notifier le parent pour recharger les contenus (avec les nouvelles dates)
       onContentUpdated();
     } catch (error) {
       console.error('Error toggling production step:', error);
@@ -278,12 +186,14 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   async function handleTogglePublished(content: ContentItem, newPublishedStatus: boolean) {
     try {
       if (newPublishedStatus) {
+        // Cocher "Planifié" pour publier
         await supabase.rpc('cascade_production_steps', {
           p_content_id: content.id,
-          p_step: 'published',
+          p_step: 'scheduling',
           p_checked: true
         });
       } else {
+        // Décocher "Planifié" pour dépublier
         await supabase.rpc('cascade_production_steps', {
           p_content_id: content.id,
           p_step: 'scheduling',
@@ -291,38 +201,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
         });
       }
 
-      // Recharger le statut completed réel depuis les tâches
-      const { data: productionTasks, error: fetchError } = await supabase
-        .from('production_tasks')
-        .select(`
-          production_step,
-          tasks!inner(completed)
-        `)
-        .eq('content_id', content.id);
-
-      if (!fetchError && productionTasks) {
-        const contentTasksMap = new Map<string, boolean>();
-
-        const scriptTask = productionTasks.find(pt => pt.production_step === 'script');
-        contentTasksMap.set('date_script', scriptTask?.tasks?.completed || false);
-
-        const shootingTask = productionTasks.find(pt => pt.production_step === 'shooting');
-        contentTasksMap.set('date_shooting', shootingTask?.tasks?.completed || false);
-
-        const editingTask = productionTasks.find(pt => pt.production_step === 'editing');
-        contentTasksMap.set('date_editing', editingTask?.tasks?.completed || false);
-
-        const schedulingTask = productionTasks.find(pt => pt.production_step === 'scheduling');
-        contentTasksMap.set('date_scheduling', schedulingTask?.tasks?.completed || false);
-
-        setProductionTasksMap(prev => {
-          const newMap = new Map(prev);
-          newMap.set(content.id, contentTasksMap);
-          return newMap;
-        });
-      }
-
-      // Notifier le parent pour recharger les contenus
+      // Notifier le parent pour recharger les contenus (avec les nouvelles dates)
       onContentUpdated();
     } catch (error) {
       console.error('Error toggling published status:', error);
@@ -555,14 +434,31 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
   function getProductionStepsWithRealStatus(content: ContentItem) {
     const allSteps = getProductionSteps(content);
-    const contentTasks = productionTasksMap.get(content.id);
 
-    if (!contentTasks) return allSteps;
+    // Une étape est complétée si sa date existe dans content_calendar
+    return allSteps.map(step => {
+      let isCompleted = false;
 
-    return allSteps.map(step => ({
-      ...step,
-      isCompleted: contentTasks.get(step.key) || false
-    }));
+      switch (step.key) {
+        case 'date_script':
+          isCompleted = !!content.date_script;
+          break;
+        case 'date_shooting':
+          isCompleted = !!content.date_shooting;
+          break;
+        case 'date_editing':
+          isCompleted = !!content.date_editing;
+          break;
+        case 'date_scheduling':
+          isCompleted = !!content.date_scheduling;
+          break;
+      }
+
+      return {
+        ...step,
+        isCompleted
+      };
+    });
   }
 
   function renderDayView() {
