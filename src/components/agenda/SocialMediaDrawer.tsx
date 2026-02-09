@@ -112,7 +112,7 @@ export default function SocialMediaDrawer({ content, onClose, onEdit }: SocialMe
               <img
                 src={content.image_url}
                 alt={content.enriched_title || content.title}
-                className="w-full h-auto"
+                className="w-full h-auto max-h-64 object-cover"
               />
             </div>
           )}
