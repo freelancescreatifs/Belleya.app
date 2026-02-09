@@ -25,6 +25,7 @@ import Marketing from './pages/Marketing';
 import Inspiration from './pages/Inspiration';
 import PublicProfile from './pages/PublicProfile';
 import Notifications from './pages/Notifications';
+import ProviderPublicProfile from './pages/ProviderPublicProfile';
 import ClientLayout from './components/client/ClientLayout';
 import ClientHome from './pages/client/ClientHome';
 import ClientBookings from './pages/client/ClientBookings';
@@ -103,6 +104,7 @@ function AppContent() {
   const pathname = window.location.pathname;
   const isBookingPage = pathname.startsWith('/book/');
   const isProviderProfilePage = pathname.startsWith('/provider/');
+  const isPublicProfilePage = pathname.startsWith('/profile/');
   const isStudentDetailPage = pathname.startsWith('/training/students/');
 
   if (isBookingPage) {
@@ -120,6 +122,16 @@ function AppContent() {
     return (
       <>
         <ProviderProfile slug={slug} />
+        <ChatBot />
+      </>
+    );
+  }
+
+  if (isPublicProfilePage) {
+    const slug = pathname.replace('/profile/', '');
+    return (
+      <>
+        <ProviderPublicProfile />
         <ChatBot />
       </>
     );
