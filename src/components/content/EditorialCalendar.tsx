@@ -73,6 +73,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   const [professionType, setProfessionType] = useState('');
   const [expandedContents, setExpandedContents] = useState<Set<string>>(new Set());
   const [productionTasksMap, setProductionTasksMap] = useState<Map<string, Map<string, boolean>>>(new Map());
+  const [loadingSteps, setLoadingSteps] = useState<Set<string>>(new Set());
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -195,6 +196,11 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   async function toggleProductionStep(contentId: string, stepKey: string, currentCompleted: boolean) {
     if (!user) return;
 
+    const loadingKey = `${contentId}-${stepKey}`;
+
+    // Éviter les double-clics
+    if (loadingSteps.has(loadingKey)) return;
+
     const stepMapping: Record<string, string> = {
       'date_script': 'script',
       'date_shooting': 'shooting',
@@ -206,6 +212,9 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
     if (!productionStepName) return;
 
     const newCompleted = !currentCompleted;
+
+    // Ajouter au loading state
+    setLoadingSteps(prev => new Set(prev).add(loadingKey));
 
     try {
       const { data, error } = await supabase
@@ -255,6 +264,13 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
       console.error('Error toggling production step:', error);
       // En cas d'erreur, recharger quand même pour synchroniser
       onContentUpdated();
+    } finally {
+      // Retirer du loading state
+      setLoadingSteps(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(loadingKey);
+        return newSet;
+      });
     }
   }
 
@@ -697,6 +713,8 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
                             year: 'numeric'
                           }) : null;
 
+                          const isStepLoading = loadingSteps.has(`${content.id}-${step.key}`);
+
                           return (
                             <div
                               key={idx}
@@ -706,13 +724,14 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
                                   : step.isOverdue
                                   ? 'bg-red-50 border-red-200'
                                   : 'bg-white border-gray-200'
-                              }`}
+                              } ${isStepLoading ? 'opacity-50' : ''}`}
                             >
                               <input
                                 type="checkbox"
                                 checked={step.isCompleted}
+                                disabled={isStepLoading}
                                 onChange={() => toggleProductionStep(content.id, step.key, step.isCompleted)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                               />
                               <div className="flex-shrink-0">
                                 {step.icon}
