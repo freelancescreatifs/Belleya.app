@@ -1,23 +1,51 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Phone, Mail, ArrowLeft, Check, LogIn, UserPlus, Tag, Plus } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  ArrowLeft,
+  Check,
+  Tag,
+  Plus,
+  Star,
+  Heart,
+  Scissors,
+  Image as ImageIcon,
+  Sparkles,
+  X,
+  Upload,
+  User,
+  Mail,
+  Phone as PhoneIcon,
+  Lock
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { CalendarItem, Event } from '../types/agenda';
+import { Event } from '../types/agenda';
 import { formatMonthYear, getDaysInMonth, getFirstDayOfMonth } from '../lib/calendarHelpers';
 import { generateTimeSlots } from '../lib/availabilityHelpers';
+import {
+  getProviderReviews,
+  createReview,
+  Review
+} from '../lib/socialHelpers';
 
 interface PublicBookingProps {
   slug: string;
 }
 
 interface ProProfile {
-  id: string;
-  slug: string;
-  business_name: string;
-  profession: string;
-  bio: string;
-  is_accepting_bookings: boolean;
   user_id: string;
+  slug: string;
+  company_name: string;
+  activity_type: string;
+  bio: string;
+  city: string;
+  profile_photo: string | null;
+  is_accepting_bookings: boolean;
+  average_rating: number;
+  reviews_count: number;
+  followers_count: number;
 }
 
 interface Supplement {
@@ -35,7 +63,16 @@ interface Service {
   price: number;
   special_offer: string | null;
   offer_type: string | null;
+  photo_url?: string | null;
+  service_type?: string;
   supplements?: Supplement[];
+}
+
+interface ClientPhoto {
+  id: string;
+  photo_url: string;
+  service_name: string;
+  created_at: string;
 }
 
 interface TimeSlot {
@@ -57,14 +94,24 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const [loading, setLoading] = useState(true);
   const [proProfile, setProProfile] = useState<ProProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
+  const [photos, setPhotos] = useState<ClientPhoto[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [weeklyAvailability, setWeeklyAvailability] = useState<WeeklyAvailability | null>(null);
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'services' | 'gallery' | 'reviews'>('services');
+
+  // Booking state
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [bookingStep, setBookingStep] = useState<'service' | 'date' | 'time' | 'info' | 'success' | 'account'>('service');
-  const [showAccountCreation, setShowAccountCreation] = useState(false);
+  const [bookingStep, setBookingStep] = useState<'service' | 'date' | 'time' | 'account' | 'success'>('service');
+  const [selectedSupplements, setSelectedSupplements] = useState<string[]>([]);
+  const [bookingNotes, setBookingNotes] = useState('');
+
+  // Client info & auth state
   const [clientInfo, setClientInfo] = useState({
     firstName: '',
     lastName: '',
@@ -72,13 +119,14 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     phone: '',
     password: '',
   });
-  const [wantsAccount, setWantsAccount] = useState(true);
+  const [hasAccount, setHasAccount] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [bookingNotes, setBookingNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [bookingId, setBookingId] = useState<string | null>(null);
-  const [selectedSupplements, setSelectedSupplements] = useState<string[]>([]);
+
+  // Review state
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', photo: null as File | null });
 
   useEffect(() => {
     if (slug) {
@@ -91,6 +139,8 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       loadServices();
       loadEvents();
       loadWeeklyAvailability();
+      loadPhotos();
+      loadReviews();
     }
   }, [proProfile]);
 
@@ -98,7 +148,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id, company_name, is_accepting_bookings')
+        .select('user_id, company_name, is_accepting_bookings, id')
         .eq('booking_slug', slug)
         .maybeSingle();
 
@@ -108,23 +158,21 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         return;
       }
 
-      const { data: userProfileData } = await supabase
-        .from('user_profiles')
-        .select('first_name, last_name')
+      const { data: providerData, error: providerError } = await supabase
+        .from('public_provider_profiles')
+        .select('*')
         .eq('user_id', companyData.user_id)
         .maybeSingle();
 
-      const fullName = userProfileData
-        ? `${userProfileData.first_name} ${userProfileData.last_name}`.trim()
-        : '';
+      if (providerError || !providerData) {
+        console.error('Error loading provider:', providerError);
+        setLoading(false);
+        return;
+      }
 
       setProProfile({
-        id: companyData.user_id,
+        ...providerData,
         slug: slug,
-        business_name: companyData.company_name,
-        profession: fullName || 'Professionnelle',
-        bio: '',
-        user_id: companyData.user_id,
         is_accepting_bookings: companyData.is_accepting_bookings ?? true,
       });
     } catch (error) {
@@ -137,55 +185,57 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const loadServices = async () => {
     if (!proProfile) return;
 
-    const { data: userProfile } = await supabase
-      .from('user_profiles')
-      .select('user_id')
-      .eq('user_id', proProfile.user_id)
-      .maybeSingle();
-
-    if (!userProfile) return;
-
     const { data, error } = await supabase
       .from('services')
-      .select('id, name, description, duration, price, special_offer, offer_type')
-      .eq('user_id', userProfile.user_id)
+      .select(`
+        *,
+        supplements:service_supplements(id, name, price, duration_minutes)
+      `)
+      .eq('user_id', proProfile.user_id)
       .eq('status', 'active')
       .order('name');
 
     if (!error && data) {
-      const servicesWithSupplements = await Promise.all(
-        data.map(async (service) => {
-          const { data: supplements } = await supabase
-            .from('service_supplements')
-            .select('id, name, price, duration_minutes')
-            .eq('service_id', service.id)
-            .order('name');
-
-          return {
-            ...service,
-            supplements: supplements || []
-          };
-        })
-      );
-      setServices(servicesWithSupplements);
+      setServices(data);
     }
+  };
+
+  const loadPhotos = async () => {
+    if (!proProfile) return;
+
+    const { data: companyData } = await supabase
+      .from('company_profiles')
+      .select('id')
+      .eq('user_id', proProfile.user_id)
+      .maybeSingle();
+
+    if (!companyData) return;
+
+    const { data, error } = await supabase
+      .from('client_results_photos')
+      .select('id, photo_url, service_name, created_at')
+      .eq('company_id', companyData.id)
+      .eq('show_in_gallery', true)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setPhotos(data);
+    }
+  };
+
+  const loadReviews = async () => {
+    if (!proProfile) return;
+    const reviewsData = await getProviderReviews(proProfile.user_id);
+    setReviews(reviewsData);
   };
 
   const loadEvents = async () => {
     if (!proProfile) return;
 
-    const { data: userProfile } = await supabase
-      .from('user_profiles')
-      .select('user_id')
-      .eq('user_id', proProfile.user_id)
-      .maybeSingle();
-
-    if (!userProfile) return;
-
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .eq('user_id', userProfile.user_id)
+      .eq('user_id', proProfile.user_id)
       .gte('start_at', new Date().toISOString())
       .order('start_at');
 
@@ -263,6 +313,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     setSelectedService(service);
     setSelectedSupplements([]);
     setBookingStep('date');
+    setActiveTab('services');
   };
 
   const toggleSupplement = (supplementId: string) => {
@@ -280,51 +331,55 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
-    setBookingStep('info');
+    setBookingStep('account');
   };
 
-  const handleClientInfoSubmit = async (e: React.FormEvent) => {
+  const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
 
-    if (wantsAccount && !clientInfo.password) {
-      alert('Veuillez définir un mot de passe pour créer votre compte');
-      return;
+    try {
+      if (hasAccount) {
+        await signIn(clientInfo.email, clientInfo.password);
+      } else {
+        if (clientInfo.password.length < 6) {
+          setAuthError('Le mot de passe doit contenir au moins 6 caractères');
+          setAuthLoading(false);
+          return;
+        }
+
+        await signUp(
+          clientInfo.email,
+          clientInfo.password,
+          'client',
+          clientInfo.firstName,
+          clientInfo.lastName
+        );
+      }
+
+      await handleSubmitBooking();
+    } catch (error: any) {
+      if (hasAccount) {
+        setAuthError('Email ou mot de passe incorrect');
+      } else {
+        if (error.message?.includes('already registered')) {
+          setAuthError('Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.');
+        } else {
+          setAuthError('Erreur lors de la création du compte');
+        }
+      }
+    } finally {
+      setAuthLoading(false);
     }
-
-    if (wantsAccount && clientInfo.password.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-
-    handleSubmitBooking();
   };
 
   const handleSubmitBooking = async () => {
     if (!selectedDate || !selectedTime || !selectedService || !proProfile) return;
-    if (!clientInfo.firstName || !clientInfo.lastName || !clientInfo.email) {
-      alert('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
 
     setSubmitting(true);
 
     try {
-      if (wantsAccount && clientInfo.password) {
-        try {
-          await signUp(
-            clientInfo.email,
-            clientInfo.password,
-            'client',
-            clientInfo.firstName,
-            clientInfo.lastName
-          );
-        } catch (error: any) {
-          if (!error.message?.includes('already registered')) {
-            throw error;
-          }
-        }
-      }
-
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const appointmentDate = new Date(selectedDate);
       appointmentDate.setHours(hours, minutes, 0, 0);
@@ -370,11 +425,42 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         throw new Error(result.error || 'Erreur lors de la réservation');
       }
 
-      setBookingId(result.bookingId);
       setBookingStep('success');
     } catch (error) {
       console.error('Error submitting booking:', error);
       alert(error instanceof Error ? error.message : 'Erreur lors de la réservation. Veuillez réessayer.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!proProfile || !user) {
+      alert('Vous devez être connecté pour laisser un avis');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await createReview(
+        proProfile.user_id,
+        reviewForm.rating,
+        reviewForm.comment,
+        undefined,
+        reviewForm.photo
+      );
+
+      if (result.success) {
+        setShowReviewForm(false);
+        setReviewForm({ rating: 5, comment: '', photo: null });
+        await loadReviews();
+        alert('Votre avis a été publié avec succès !');
+      } else {
+        alert(result.error || 'Erreur lors de la publication de l\'avis');
+      }
+    } catch (error) {
+      alert('Erreur lors de la publication de l\'avis');
     } finally {
       setSubmitting(false);
     }
@@ -459,7 +545,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Réservations fermées</h1>
           <p className="text-gray-600 mb-6">
-            {proProfile.business_name} n'accepte pas de réservations en ligne pour le moment.
+            {proProfile.company_name} n'accepte pas de réservations en ligne pour le moment.
           </p>
           <button
             onClick={() => window.location.href = '/'}
@@ -472,192 +558,165 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <button
-          onClick={() => window.location.href = '/'}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Retour
-        </button>
-
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-rose-400 to-pink-500 p-8 text-white">
-            <h1 className="text-4xl font-bold mb-2">{proProfile.business_name}</h1>
-            <p className="text-belleya-100 text-lg">{proProfile.profession}</p>
-            {proProfile.bio && <p className="mt-4 text-belleya-50">{proProfile.bio}</p>}
+  if (bookingStep === 'success') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-green-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Réservation envoyée</h2>
+            <p className="text-gray-600 mb-8">
+              Votre demande de réservation a été transmise à {proProfile.company_name}. Vous recevrez une
+              confirmation par email à {clientInfo.email}.
+            </p>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-belleya-100 text-white rounded-lg hover:from-orange-600 hover:to-belleya-primary transition-all font-medium"
+            >
+              Retour à l'accueil
+            </button>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        {bookingStep === 'success' ? (
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            <div className="max-w-md mx-auto text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="w-8 h-8 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Réservation envoyée !</h2>
-              <p className="text-gray-600 mb-8">
-                Votre demande de réservation a été transmise à {proProfile.business_name}. Vous recevrez une
-                confirmation par email à {clientInfo.email}.
-              </p>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+      {/* Header Profile */}
+      <div className="bg-gradient-to-r from-orange-500 to-belleya-100 text-white">
+        <div className="container mx-auto px-4 py-6">
+          <button
+            onClick={() => window.location.href = '/'}
+            className="flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Retour
+          </button>
 
-              {!user && (
-                <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-6 mb-6 border-2 border-belleya-200">
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <UserPlus className="w-6 h-6 text-belleya-primary" />
-                    <h3 className="text-lg font-bold text-gray-900">Créez votre compte Belleya</h3>
-                  </div>
-                  <p className="text-gray-700 text-sm mb-4">
-                    Retrouvez tous vos rendez-vous et facilitez vos prochaines réservations
-                  </p>
-
-                  {!showAccountCreation ? (
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => setShowAccountCreation(true)}
-                        className="w-full py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg"
-                      >
-                        Créer mon compte
-                      </button>
-                      <button
-                        onClick={() => window.location.href = '/'}
-                        className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
-                      >
-                        Plus tard
-                      </button>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleAccountCreation} className="space-y-4 text-left">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input
-                          type="email"
-                          value={clientInfo.email}
-                          disabled
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
-                        <input
-                          type="password"
-                          required
-                          value={accountForm.password}
-                          onChange={(e) => setAccountForm({ password: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
-                          minLength={6}
-                          placeholder="Minimum 6 caractères"
-                        />
-                      </div>
-
-                      {authError && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
-                          {authError}
-                        </div>
-                      )}
-
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setShowAccountCreation(false)}
-                          className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          Annuler
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={authLoading}
-                          className="flex-1 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50"
-                        >
-                          {authLoading ? 'Création...' : 'Créer'}
-                        </button>
-                      </div>
-                    </form>
-                  )}
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              {proProfile.profile_photo ? (
+                <img
+                  src={proProfile.profile_photo}
+                  alt={proProfile.company_name}
+                  className="w-24 h-24 rounded-2xl object-cover border-4 border-white/30"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center border-4 border-white/30">
+                  <span className="text-white font-bold text-3xl">
+                    {proProfile.company_name.charAt(0)}
+                  </span>
                 </div>
               )}
+            </div>
 
-              {user && (
-                <button
-                  onClick={() => window.location.href = '/'}
-                  className="px-6 py-3 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
-                >
-                  Retour à mes rendez-vous
-                </button>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-2">{proProfile.company_name}</h1>
+              {proProfile.activity_type && (
+                <p className="text-lg mb-3 text-white font-medium">{proProfile.activity_type}</p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                {proProfile.reviews_count > 0 && (
+                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full">
+                    <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+                    <span className="font-bold">{proProfile.average_rating.toFixed(1)}</span>
+                    <span className="text-sm">({proProfile.reviews_count})</span>
+                  </div>
+                )}
+
+                {proProfile.followers_count > 0 && (
+                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
+                    <Heart className="w-4 h-4" />
+                    <span>{proProfile.followers_count} abonné{proProfile.followers_count > 1 ? 's' : ''}</span>
+                  </div>
+                )}
+
+                {proProfile.city && (
+                  <div className="flex items-center gap-1 text-sm">
+                    <MapPin className="w-4 h-4" />
+                    <span>{proProfile.city}</span>
+                  </div>
+                )}
+              </div>
+
+              {proProfile.bio && (
+                <p className="text-white mb-4">{proProfile.bio}</p>
               )}
             </div>
           </div>
-        ) : (
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-              <div
-                className={`flex items-center gap-2 whitespace-nowrap ${
-                  bookingStep === 'service' ? 'text-belleya-primary font-semibold' : 'text-gray-400'
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    bookingStep === 'service' ? 'bg-belleya-500 text-white' : 'bg-gray-200'
-                  }`}
-                >
-                  1
-                </div>
-                Prestation
-              </div>
-              <div className="flex-1 h-1 bg-gray-200 min-w-[20px]" />
-              <div
-                className={`flex items-center gap-2 whitespace-nowrap ${
-                  bookingStep === 'date' ? 'text-belleya-primary font-semibold' : 'text-gray-400'
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    bookingStep === 'date' ? 'bg-belleya-500 text-white' : 'bg-gray-200'
-                  }`}
-                >
-                  2
-                </div>
-                Date
-              </div>
-              <div className="flex-1 h-1 bg-gray-200 min-w-[20px]" />
-              <div
-                className={`flex items-center gap-2 whitespace-nowrap ${
-                  bookingStep === 'time' ? 'text-belleya-primary font-semibold' : 'text-gray-400'
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    bookingStep === 'time' ? 'bg-belleya-500 text-white' : 'bg-gray-200'
-                  }`}
-                >
-                  3
-                </div>
-                Heure
-              </div>
-              <div className="flex-1 h-1 bg-gray-200 min-w-[20px]" />
-              <div
-                className={`flex items-center gap-2 whitespace-nowrap ${
-                  bookingStep === 'info' ? 'text-belleya-primary font-semibold' : 'text-gray-400'
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    bookingStep === 'info' ? 'bg-belleya-500 text-white' : 'bg-gray-200'
-                  }`}
-                >
-                  4
-                </div>
-                Vos infos
-              </div>
-            </div>
+        </div>
+      </div>
 
+      {/* Tabs */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="container mx-auto px-4">
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                setActiveTab('services');
+                if (bookingStep !== 'service' && bookingStep !== 'success') {
+                  setBookingStep('service');
+                  setSelectedService(null);
+                  setSelectedDate(null);
+                  setSelectedTime(null);
+                }
+              }}
+              className={`flex-1 py-4 px-4 font-semibold transition-all ${
+                activeTab === 'services'
+                  ? 'text-orange-600 border-b-2 border-orange-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Scissors className="w-5 h-5" />
+                <span>Services</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('gallery')}
+              className={`flex-1 py-4 px-4 font-semibold transition-all ${
+                activeTab === 'gallery'
+                  ? 'text-orange-600 border-b-2 border-orange-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <ImageIcon className="w-5 h-5" />
+                <span>Galerie</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`flex-1 py-4 px-4 font-semibold transition-all ${
+                activeTab === 'reviews'
+                  ? 'text-orange-600 border-b-2 border-orange-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Star className="w-5 h-5" />
+                <span>Avis</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {activeTab === 'services' && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm">
             {bookingStep === 'service' && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Choisissez une prestation</h2>
                 {services.length === 0 ? (
-                  <p className="text-gray-600">Aucune prestation disponible pour le moment.</p>
+                  <p className="text-gray-600 text-center py-8">Aucune prestation disponible pour le moment.</p>
                 ) : (
                   <div className="grid gap-4">
                     {services.map((service) => {
@@ -672,7 +731,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                           className="p-6 border-2 border-gray-200 rounded-xl hover:border-belleya-500 hover:bg-belleya-50 transition-all text-left relative"
                         >
                           {hasOffer && (
-                            <div className="absolute top-4 right-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                               <Tag className="w-3 h-3" />
                               {service.offer_type === 'percentage'
                                 ? `-${service.special_offer}%`
@@ -820,15 +879,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Choisissez une heure</h2>
 
-                {weeklyAvailability && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-                    <p className="text-sm text-blue-800">
-                      Les horaires affichés correspondent aux heures d'ouverture du salon. Les créneaux grisés sont déjà réservés ou indisponibles.
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                   {getAvailableTimeSlots(selectedDate).map((slot) => (
                     <div key={slot.time} className="relative group">
                       <button
@@ -839,30 +890,16 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             ? 'bg-belleya-100 text-belleya-deep hover:bg-belleya-500 hover:text-white'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
-                        title={
-                          !slot.available && slot.reason === 'booked'
-                            ? 'Créneau déjà réservé'
-                            : !slot.available && slot.reason === 'closed'
-                            ? 'Salon fermé'
-                            : undefined
-                        }
                       >
                         {slot.time}
                       </button>
-                      {!slot.available && slot.reason && (
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                          {slot.reason === 'booked' && 'Créneau déjà réservé'}
-                          {slot.reason === 'closed' && 'Salon fermé'}
-                          {slot.reason === 'past' && 'Créneau passé'}
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {bookingStep === 'info' && selectedDate && selectedService && selectedTime && (
+            {bookingStep === 'account' && selectedDate && selectedService && selectedTime && (
               <div>
                 <button
                   onClick={() => setBookingStep('time')}
@@ -871,21 +908,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   <ArrowLeft className="w-4 h-4" />
                   Changer d'heure
                 </button>
+
                 <div className="bg-belleya-50 border border-belleya-200 rounded-lg p-4 mb-6">
                   <p className="text-sm font-medium text-gray-900 mb-2">{selectedService.name}</p>
-                  {selectedSupplements.length > 0 && (
-                    <div className="text-xs text-gray-600 mb-2 space-y-1">
-                      {selectedSupplements.map(suppId => {
-                        const supp = selectedService.supplements?.find(s => s.id === suppId);
-                        return supp ? (
-                          <div key={suppId} className="flex items-center gap-2">
-                            <Plus className="w-3 h-3" />
-                            <span>{supp.name} (+{Number(supp.price).toFixed(2)} €)</span>
-                          </div>
-                        ) : null;
-                      })}
-                    </div>
-                  )}
                   <p className="text-sm text-gray-600">
                     {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à {selectedTime}
                   </p>
@@ -894,34 +919,74 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                     <span className="text-lg font-bold text-belleya-primary">{calculateTotalPrice().toFixed(2)} €</span>
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Vos informations</h2>
 
-                <form onSubmit={handleClientInfoSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
-                      <input
-                        type="text"
-                        required
-                        value={clientInfo.firstName}
-                        onChange={(e) => setClientInfo({ ...clientInfo, firstName: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
-                      />
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-orange-200 rounded-xl p-6 mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Inscription obligatoire</h3>
+                  <p className="text-sm text-gray-700">
+                    Pour valider votre rendez-vous, vous devez créer un compte ou vous connecter.
+                  </p>
+                </div>
+
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => setHasAccount(false)}
+                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
+                      !hasAccount
+                        ? 'bg-gradient-to-r from-orange-500 to-belleya-100 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Créer un compte
+                  </button>
+                  <button
+                    onClick={() => setHasAccount(true)}
+                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
+                      hasAccount
+                        ? 'bg-gradient-to-r from-orange-500 to-belleya-100 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    J'ai un compte
+                  </button>
+                </div>
+
+                <form onSubmit={handleAccountSubmit} className="space-y-4">
+                  {!hasAccount && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <User className="w-4 h-4 inline mr-1" />
+                          Prénom *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={clientInfo.firstName}
+                          onChange={(e) => setClientInfo({ ...clientInfo, firstName: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <User className="w-4 h-4 inline mr-1" />
+                          Nom *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={clientInfo.lastName}
+                          onChange={(e) => setClientInfo({ ...clientInfo, lastName: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
-                      <input
-                        type="text"
-                        required
-                        value={clientInfo.lastName}
-                        onChange={(e) => setClientInfo({ ...clientInfo, lastName: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
-                      />
-                    </div>
-                  </div>
+                  )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Mail className="w-4 h-4 inline mr-1" />
+                      Email *
+                    </label>
                     <input
                       type="email"
                       required
@@ -932,78 +997,247 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                    <input
-                      type="tel"
-                      value={clientInfo.phone}
-                      onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
-                      placeholder="06 12 34 56 78"
-                    />
-                  </div>
-
-                  {!user && (
-                    <div className="bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-belleya-200 rounded-xl p-5">
-                      <div className="flex items-start gap-3 mb-4">
-                        <input
-                          type="checkbox"
-                          id="wantsAccount"
-                          checked={wantsAccount}
-                          onChange={(e) => setWantsAccount(e.target.checked)}
-                          className="mt-1 w-5 h-5 text-belleya-500 rounded focus:ring-2 focus:ring-belleya-primary"
-                        />
-                        <div className="flex-1">
-                          <label htmlFor="wantsAccount" className="font-semibold text-gray-900 cursor-pointer">
-                            Créer mon compte BelleYa
-                          </label>
-                          <p className="text-sm text-gray-600 mt-1">
-                            Suivez vos rendez-vous, découvrez de nouvelles pros et gérez vos favoris facilement
-                          </p>
-                        </div>
-                      </div>
-
-                      {wantsAccount && (
-                        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Mot de passe *
-                          </label>
-                          <input
-                            type="password"
-                            required={wantsAccount}
-                            value={clientInfo.password}
-                            onChange={(e) => setClientInfo({ ...clientInfo, password: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
-                            placeholder="Minimum 6 caractères"
-                            minLength={6}
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Vous pourrez vous connecter immédiatement après votre réservation
-                          </p>
-                        </div>
-                      )}
+                  {!hasAccount && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <PhoneIcon className="w-4 h-4 inline mr-1" />
+                        Téléphone
+                      </label>
+                      <input
+                        type="tel"
+                        value={clientInfo.phone}
+                        onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                        placeholder="06 12 34 56 78"
+                      />
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Notes (optionnel)</label>
-                    <textarea
-                      value={bookingNotes}
-                      onChange={(e) => setBookingNotes(e.target.value)}
-                      rows={3}
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Lock className="w-4 h-4 inline mr-1" />
+                      Mot de passe *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={clientInfo.password}
+                      onChange={(e) => setClientInfo({ ...clientInfo, password: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
-                      placeholder="Informations supplémentaires pour votre rendez-vous..."
+                      placeholder="Minimum 6 caractères"
+                      minLength={6}
                     />
                   </div>
 
+                  {!hasAccount && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Notes (optionnel)</label>
+                      <textarea
+                        value={bookingNotes}
+                        onChange={(e) => setBookingNotes(e.target.value)}
+                        rows={3}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                        placeholder="Informations supplémentaires..."
+                      />
+                    </div>
+                  )}
+
+                  {authError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
+                      {authError}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    disabled={submitting}
-                    className="w-full py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg disabled:opacity-50"
+                    disabled={authLoading || submitting}
+                    className="w-full py-3 bg-gradient-to-r from-orange-500 to-belleya-100 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-belleya-primary transition-all shadow-lg disabled:opacity-50"
                   >
-                    {submitting ? 'Réservation en cours...' : 'Confirmer la réservation'}
+                    {authLoading || submitting
+                      ? 'Validation en cours...'
+                      : hasAccount
+                      ? 'Se connecter et réserver'
+                      : 'Créer mon compte et réserver'
+                    }
                   </button>
                 </form>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'gallery' && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm">
+            {photos.length === 0 ? (
+              <div className="text-center py-12">
+                <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Aucune photo disponible</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {photos.map((photo) => (
+                  <div key={photo.id} className="relative group aspect-square">
+                    <img
+                      src={photo.photo_url}
+                      alt={photo.service_name || 'Photo'}
+                      className="w-full h-full object-cover rounded-xl"
+                    />
+                    {photo.service_name && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl">
+                        <p className="text-white text-sm font-medium">{photo.service_name}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'reviews' && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm">
+            {user && (
+              <div className="mb-6">
+                {!showReviewForm ? (
+                  <button
+                    onClick={() => setShowReviewForm(true)}
+                    className="w-full py-3 border-2 border-orange-300 text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all"
+                  >
+                    Laisser un avis
+                  </button>
+                ) : (
+                  <form onSubmit={handleSubmitReview} className="p-4 border-2 border-orange-300 rounded-xl">
+                    <h3 className="font-bold text-gray-900 mb-4">Votre avis</h3>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                      <div className="flex gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                            className="focus:outline-none"
+                          >
+                            <Star
+                              className={`w-8 h-8 ${
+                                star <= reviewForm.rating
+                                  ? 'text-amber-500 fill-amber-500'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Commentaire</label>
+                      <textarea
+                        value={reviewForm.comment}
+                        onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                        rows={4}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        placeholder="Partagez votre expérience..."
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Photo (optionnelle)</label>
+                      <div className="flex items-center gap-4">
+                        {reviewForm.photo ? (
+                          <div className="relative">
+                            <img
+                              src={URL.createObjectURL(reviewForm.photo)}
+                              alt="Preview"
+                              className="w-24 h-24 object-cover rounded-lg border-2 border-orange-300"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setReviewForm({ ...reviewForm, photo: null })}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-all">
+                            <Upload className="w-5 h-5 text-gray-400" />
+                            <span className="text-sm text-gray-600">Ajouter une photo</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setReviewForm({ ...reviewForm, photo: file });
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowReviewForm(false)}
+                        className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-belleya-100 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-belleya-primary transition-all disabled:opacity-50"
+                      >
+                        {submitting ? 'Publication...' : 'Publier'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {reviews.length === 0 ? (
+              <div className="text-center py-12">
+                <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Aucun avis pour le moment</p>
+                <p className="text-sm text-gray-500 mt-2">Soyez le premier à laisser un avis !</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div key={review.id} className="p-4 border border-gray-200 rounded-xl">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-semibold text-gray-900">{review.client_name}</p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(review.created_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: review.rating }).map((_, i) => (
+                          <Star key={i} className="w-4 h-4 text-amber-500 fill-amber-500" />
+                        ))}
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="text-gray-700 mb-3">{review.comment}</p>
+                    )}
+                    {review.photo_url && (
+                      <div className="mt-3">
+                        <img
+                          src={review.photo_url}
+                          alt="Photo de l'avis"
+                          className="w-full max-w-xs rounded-lg border border-gray-200"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
