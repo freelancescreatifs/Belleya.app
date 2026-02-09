@@ -145,13 +145,43 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
     try {
       const tasksMap = new Map<string, Map<string, boolean>>();
 
+      // Charger toutes les tâches de production en une seule requête
+      const contentIds = contents.map(c => c.id);
+
+      const { data: productionTasks, error } = await supabase
+        .from('production_tasks')
+        .select(`
+          content_id,
+          production_step,
+          task_id,
+          tasks!inner(completed)
+        `)
+        .in('content_id', contentIds);
+
+      if (error) {
+        console.error('Error loading production tasks:', error);
+        return;
+      }
+
+      // Construire la map avec le vrai statut completed
       for (const content of contents) {
         const contentTasksMap = new Map<string, boolean>();
 
-        contentTasksMap.set('date_script', !!content.date_script);
-        contentTasksMap.set('date_shooting', !!content.date_shooting);
-        contentTasksMap.set('date_editing', !!content.date_editing);
-        contentTasksMap.set('date_scheduling', !!content.date_scheduling);
+        // Récupérer les tâches pour ce contenu
+        const contentProductionTasks = productionTasks?.filter(pt => pt.content_id === content.id) || [];
+
+        // Pour chaque étape, vérifier si une tâche existe et son statut
+        const scriptTask = contentProductionTasks.find(pt => pt.production_step === 'script');
+        contentTasksMap.set('date_script', scriptTask?.tasks?.completed || false);
+
+        const shootingTask = contentProductionTasks.find(pt => pt.production_step === 'shooting');
+        contentTasksMap.set('date_shooting', shootingTask?.tasks?.completed || false);
+
+        const editingTask = contentProductionTasks.find(pt => pt.production_step === 'editing');
+        contentTasksMap.set('date_editing', editingTask?.tasks?.completed || false);
+
+        const schedulingTask = contentProductionTasks.find(pt => pt.production_step === 'scheduling');
+        contentTasksMap.set('date_scheduling', schedulingTask?.tasks?.completed || false);
 
         tasksMap.set(content.id, contentTasksMap);
       }
@@ -187,20 +217,30 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
       if (error) throw error;
 
-      // Recharger le contenu depuis la base pour avoir l'état à jour
-      const { data: updatedContent, error: fetchError } = await supabase
-        .from('content_calendar')
-        .select('id, date_script, date_shooting, date_editing, date_scheduling')
-        .eq('id', contentId)
-        .maybeSingle();
+      // Recharger le statut completed réel depuis les tâches
+      const { data: productionTasks, error: fetchError } = await supabase
+        .from('production_tasks')
+        .select(`
+          production_step,
+          tasks!inner(completed)
+        `)
+        .eq('content_id', contentId);
 
-      if (!fetchError && updatedContent) {
-        // Mettre à jour la map des tâches avec les vraies valeurs depuis la base
+      if (!fetchError && productionTasks) {
+        // Mettre à jour la map avec le vrai statut completed
         const contentTasksMap = new Map<string, boolean>();
-        contentTasksMap.set('date_script', !!updatedContent.date_script);
-        contentTasksMap.set('date_shooting', !!updatedContent.date_shooting);
-        contentTasksMap.set('date_editing', !!updatedContent.date_editing);
-        contentTasksMap.set('date_scheduling', !!updatedContent.date_scheduling);
+
+        const scriptTask = productionTasks.find(pt => pt.production_step === 'script');
+        contentTasksMap.set('date_script', scriptTask?.tasks?.completed || false);
+
+        const shootingTask = productionTasks.find(pt => pt.production_step === 'shooting');
+        contentTasksMap.set('date_shooting', shootingTask?.tasks?.completed || false);
+
+        const editingTask = productionTasks.find(pt => pt.production_step === 'editing');
+        contentTasksMap.set('date_editing', editingTask?.tasks?.completed || false);
+
+        const schedulingTask = productionTasks.find(pt => pt.production_step === 'scheduling');
+        contentTasksMap.set('date_scheduling', schedulingTask?.tasks?.completed || false);
 
         setProductionTasksMap(prev => {
           const newMap = new Map(prev);
@@ -235,19 +275,29 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
         });
       }
 
-      // Recharger le contenu depuis la base pour avoir l'état à jour
-      const { data: updatedContent, error: fetchError } = await supabase
-        .from('content_calendar')
-        .select('id, date_script, date_shooting, date_editing, date_scheduling')
-        .eq('id', content.id)
-        .maybeSingle();
+      // Recharger le statut completed réel depuis les tâches
+      const { data: productionTasks, error: fetchError } = await supabase
+        .from('production_tasks')
+        .select(`
+          production_step,
+          tasks!inner(completed)
+        `)
+        .eq('content_id', content.id);
 
-      if (!fetchError && updatedContent) {
+      if (!fetchError && productionTasks) {
         const contentTasksMap = new Map<string, boolean>();
-        contentTasksMap.set('date_script', !!updatedContent.date_script);
-        contentTasksMap.set('date_shooting', !!updatedContent.date_shooting);
-        contentTasksMap.set('date_editing', !!updatedContent.date_editing);
-        contentTasksMap.set('date_scheduling', !!updatedContent.date_scheduling);
+
+        const scriptTask = productionTasks.find(pt => pt.production_step === 'script');
+        contentTasksMap.set('date_script', scriptTask?.tasks?.completed || false);
+
+        const shootingTask = productionTasks.find(pt => pt.production_step === 'shooting');
+        contentTasksMap.set('date_shooting', shootingTask?.tasks?.completed || false);
+
+        const editingTask = productionTasks.find(pt => pt.production_step === 'editing');
+        contentTasksMap.set('date_editing', editingTask?.tasks?.completed || false);
+
+        const schedulingTask = productionTasks.find(pt => pt.production_step === 'scheduling');
+        contentTasksMap.set('date_scheduling', schedulingTask?.tasks?.completed || false);
 
         setProductionTasksMap(prev => {
           const newMap = new Map(prev);
