@@ -177,9 +177,6 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
     const newCompleted = !currentCompleted;
 
-    // Ne pas faire de mise à jour optimiste locale pour éviter la désynchronisation
-    // La RPC gère la cascade et on recharge juste après
-
     try {
       const { data, error } = await supabase
         .rpc('cascade_production_steps', {
@@ -190,12 +187,34 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
       if (error) throw error;
 
-      // Recharger immédiatement après la RPC pour synchroniser l'état
-      await loadProductionTasks();
+      // Recharger le contenu depuis la base pour avoir l'état à jour
+      const { data: updatedContent, error: fetchError } = await supabase
+        .from('content_calendar')
+        .select('id, date_script, date_shooting, date_editing, date_scheduling')
+        .eq('id', contentId)
+        .maybeSingle();
+
+      if (!fetchError && updatedContent) {
+        // Mettre à jour la map des tâches avec les vraies valeurs depuis la base
+        const contentTasksMap = new Map<string, boolean>();
+        contentTasksMap.set('date_script', !!updatedContent.date_script);
+        contentTasksMap.set('date_shooting', !!updatedContent.date_shooting);
+        contentTasksMap.set('date_editing', !!updatedContent.date_editing);
+        contentTasksMap.set('date_scheduling', !!updatedContent.date_scheduling);
+
+        setProductionTasksMap(prev => {
+          const newMap = new Map(prev);
+          newMap.set(contentId, contentTasksMap);
+          return newMap;
+        });
+      }
+
+      // Notifier le parent pour recharger les contenus
       onContentUpdated();
     } catch (error) {
       console.error('Error toggling production step:', error);
-      await loadProductionTasks();
+      // En cas d'erreur, recharger quand même pour synchroniser
+      onContentUpdated();
     }
   }
 
@@ -216,13 +235,32 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
         });
       }
 
-      setTimeout(async () => {
-        await loadProductionTasks();
-        onContentUpdated();
-      }, 300);
+      // Recharger le contenu depuis la base pour avoir l'état à jour
+      const { data: updatedContent, error: fetchError } = await supabase
+        .from('content_calendar')
+        .select('id, date_script, date_shooting, date_editing, date_scheduling')
+        .eq('id', content.id)
+        .maybeSingle();
+
+      if (!fetchError && updatedContent) {
+        const contentTasksMap = new Map<string, boolean>();
+        contentTasksMap.set('date_script', !!updatedContent.date_script);
+        contentTasksMap.set('date_shooting', !!updatedContent.date_shooting);
+        contentTasksMap.set('date_editing', !!updatedContent.date_editing);
+        contentTasksMap.set('date_scheduling', !!updatedContent.date_scheduling);
+
+        setProductionTasksMap(prev => {
+          const newMap = new Map(prev);
+          newMap.set(content.id, contentTasksMap);
+          return newMap;
+        });
+      }
+
+      // Notifier le parent pour recharger les contenus
+      onContentUpdated();
     } catch (error) {
       console.error('Error toggling published status:', error);
-      await loadProductionTasks();
+      onContentUpdated();
     }
   }
 
