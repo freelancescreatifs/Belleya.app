@@ -41,11 +41,15 @@ interface ProProfile {
   activity_type: string;
   bio: string;
   city: string;
+  address: string | null;
   profile_photo: string | null;
   is_accepting_bookings: boolean;
   average_rating: number;
   reviews_count: number;
   followers_count: number;
+  likesCount: number;
+  photosCount: number;
+  institute_photos: Array<{ id: string; url: string; order: number }>;
 }
 
 interface Supplement {
@@ -100,7 +104,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const [weeklyAvailability, setWeeklyAvailability] = useState<WeeklyAvailability | null>(null);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'services' | 'gallery' | 'reviews'>('services');
+  const [activeTab, setActiveTab] = useState<'services' | 'gallery' | 'reviews' | 'institute'>('services');
 
   // Booking state
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -148,7 +152,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id, company_name, is_accepting_bookings, id')
+        .select('user_id, company_name, is_accepting_bookings, id, address, institute_photos')
         .eq('booking_slug', slug)
         .maybeSingle();
 
@@ -170,10 +174,25 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         return;
       }
 
+      const { count: photosCount } = await supabase
+        .from('client_results_photos')
+        .select('*', { count: 'exact', head: true })
+        .eq('company_id', companyData.id)
+        .eq('show_in_gallery', true);
+
+      const { data: likesData } = await supabase
+        .from('content_likes')
+        .select('id')
+        .eq('content_type', 'client_photo');
+
       setProProfile({
         ...providerData,
         slug: slug,
         is_accepting_bookings: companyData.is_accepting_bookings ?? true,
+        address: companyData.address,
+        likesCount: likesData?.length || 0,
+        photosCount: photosCount || 0,
+        institute_photos: Array.isArray(companyData.institute_photos) ? companyData.institute_photos : [],
       });
     } catch (error) {
       console.error('Error:', error);
@@ -234,13 +253,18 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select('start, end, type')
       .eq('user_id', proProfile.user_id)
-      .gte('start_at', new Date().toISOString())
-      .order('start_at');
+      .gte('start', new Date().toISOString())
+      .order('start');
 
     if (!error && data) {
-      setEvents(data as Event[]);
+      const formattedEvents = data.map(event => ({
+        start_at: event.start,
+        end_at: event.end,
+        type: event.type
+      }));
+      setEvents(formattedEvents as Event[]);
     }
   };
 
@@ -498,12 +522,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           onClick={() => handleDateSelect(date)}
           className={`h-12 flex items-center justify-center rounded-lg transition-all ${
             isSelected
-              ? 'bg-belleya-500 text-white font-bold'
+              ? 'bg-rose-500 text-white font-bold'
               : isToday
-              ? 'bg-belleya-100 text-belleya-deep font-semibold'
+              ? 'bg-rose-100 text-rose-900 font-semibold'
               : isPast
               ? 'text-gray-300 cursor-not-allowed'
-              : 'hover:bg-belleya-50 text-gray-700'
+              : 'hover:bg-rose-50 text-gray-700'
           }`}
         >
           {day}
@@ -530,7 +554,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           <p className="text-gray-600 mb-6">Ce lien de réservation n'existe pas ou n'est plus actif.</p>
           <button
             onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
           >
             Retour à l'accueil
           </button>
@@ -549,7 +573,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           </p>
           <button
             onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
           >
             Retour à l'accueil
           </button>
@@ -573,7 +597,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
             </p>
             <button
               onClick={() => window.location.href = '/'}
-              className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-belleya-100 text-white rounded-lg hover:from-orange-600 hover:to-belleya-primary transition-all font-medium"
+              className="w-full px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium"
             >
               Retour à l'accueil
             </button>
@@ -586,7 +610,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header Profile */}
-      <div className="bg-gradient-to-r from-orange-500 to-belleya-100 text-white">
+      <div className="bg-gradient-to-r from-rose-400 to-pink-500 text-white">
         <div className="container mx-auto px-4 py-6">
           <button
             onClick={() => window.location.href = '/'}
@@ -602,7 +626,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 <img
                   src={proProfile.profile_photo}
                   alt={proProfile.company_name}
-                  className="w-24 h-24 rounded-2xl object-cover border-4 border-white/30"
+                  className="w-24 h-24 rounded-2xl object-cover border-4 border-white/30 shadow-lg"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center border-4 border-white/30">
@@ -619,9 +643,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 <p className="text-lg mb-3 text-white font-medium">{proProfile.activity_type}</p>
               )}
 
-              <div className="flex flex-wrap items-center gap-4 mb-4">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
                 {proProfile.reviews_count > 0 && (
-                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full">
+                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
                     <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
                     <span className="font-bold">{proProfile.average_rating.toFixed(1)}</span>
                     <span className="text-sm">({proProfile.reviews_count})</span>
@@ -629,22 +653,33 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 )}
 
                 {proProfile.followers_count > 0 && (
-                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
+                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
                     <Heart className="w-4 h-4" />
                     <span>{proProfile.followers_count} abonné{proProfile.followers_count > 1 ? 's' : ''}</span>
                   </div>
                 )}
 
-                {proProfile.city && (
-                  <div className="flex items-center gap-1 text-sm">
-                    <MapPin className="w-4 h-4" />
-                    <span>{proProfile.city}</span>
+                {(proProfile.likesCount > 0 || proProfile.photosCount > 0) && (
+                  <div className="flex items-center gap-1 text-xs text-white/90">
+                    <Sparkles className="w-3 h-3" />
+                    <span>
+                      {proProfile.likesCount > 0 && `${proProfile.likesCount} likes`}
+                      {proProfile.likesCount > 0 && proProfile.photosCount > 0 && ' • '}
+                      {proProfile.photosCount > 0 && `${proProfile.photosCount} photos`}
+                    </span>
                   </div>
                 )}
               </div>
 
               {proProfile.bio && (
-                <p className="text-white mb-4">{proProfile.bio}</p>
+                <p className="text-white mb-3">{proProfile.bio}</p>
+              )}
+
+              {proProfile.address && (
+                <div className="flex items-start gap-1 text-sm text-white/90">
+                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>{proProfile.address}</span>
+                </div>
               )}
             </div>
           </div>
@@ -654,7 +689,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       {/* Tabs */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-4">
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto">
             <button
               onClick={() => {
                 setActiveTab('services');
@@ -665,9 +700,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   setSelectedTime(null);
                 }
               }}
-              className={`flex-1 py-4 px-4 font-semibold transition-all ${
+              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
                 activeTab === 'services'
-                  ? 'text-orange-600 border-b-2 border-orange-600'
+                  ? 'text-rose-600 border-b-2 border-rose-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -679,9 +714,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
             <button
               onClick={() => setActiveTab('gallery')}
-              className={`flex-1 py-4 px-4 font-semibold transition-all ${
+              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
                 activeTab === 'gallery'
-                  ? 'text-orange-600 border-b-2 border-orange-600'
+                  ? 'text-rose-600 border-b-2 border-rose-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -693,15 +728,29 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`flex-1 py-4 px-4 font-semibold transition-all ${
+              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
                 activeTab === 'reviews'
-                  ? 'text-orange-600 border-b-2 border-orange-600'
+                  ? 'text-rose-600 border-b-2 border-rose-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
                 <Star className="w-5 h-5" />
                 <span>Avis</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('institute')}
+              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
+                activeTab === 'institute'
+                  ? 'text-rose-600 border-b-2 border-rose-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <ImageIcon className="w-5 h-5" />
+                <span>Institut</span>
               </div>
             </button>
           </div>
@@ -728,11 +777,11 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         <button
                           key={service.id}
                           onClick={() => handleServiceSelect(service)}
-                          className="p-6 border-2 border-gray-200 rounded-xl hover:border-belleya-500 hover:bg-belleya-50 transition-all text-left relative"
+                          className="border-2 border-gray-200 rounded-xl hover:border-rose-500 hover:bg-rose-50 transition-all text-left overflow-hidden relative"
                         >
                           {hasOffer && (
-                            <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                              <Tag className="w-3 h-3" />
+                            <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
+                              <Sparkles className="w-3 h-3" />
                               {service.offer_type === 'percentage'
                                 ? `-${service.special_offer}%`
                                 : `-${service.special_offer}€`
@@ -740,29 +789,74 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             </div>
                           )}
 
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2 pr-20">{service.name}</h3>
-                          {service.description && <p className="text-gray-600 text-sm mb-3">{service.description}</p>}
+                          <div className="flex gap-3">
+                            {service.photo_url ? (
+                              <div className="w-24 h-24 flex-shrink-0">
+                                <img
+                                  src={service.photo_url}
+                                  alt={service.name}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
+                                <Scissors className="w-10 h-10 text-rose-400" />
+                              </div>
+                            )}
 
-                          {hasSupplements && (
-                            <div className="mb-3 text-xs text-gray-500 flex items-center gap-1">
-                              <Plus className="w-3 h-3" />
-                              {service.supplements!.length} supplément{service.supplements!.length > 1 ? 's' : ''} disponible{service.supplements!.length > 1 ? 's' : ''}
-                            </div>
-                          )}
+                            <div className="flex-1 p-3 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{service.name}</h3>
+                                  {service.service_type && <p className="text-xs text-gray-500 mb-2">{service.service_type}</p>}
+                                  {service.description && <p className="text-gray-600 text-sm mb-2">{service.description}</p>}
 
-                          <div className="flex items-center gap-4 text-sm text-gray-700">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {service.duration} min
-                            </span>
-                            <div className="flex items-center gap-2">
-                              {hasOffer ? (
-                                <>
-                                  <span className="text-gray-400 line-through">{pricing.original.toFixed(2)} €</span>
-                                  <span className="font-bold text-belleya-primary text-lg">{pricing.discounted!.toFixed(2)} €</span>
-                                </>
-                              ) : (
-                                <span className="font-semibold text-belleya-primary">{pricing.original.toFixed(2)} €</span>
+                                  <div className="flex items-center gap-4 text-sm text-gray-700">
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-4 h-4" />
+                                      {service.duration} min
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="text-right">
+                                  {hasOffer && (
+                                    <div className="text-xs text-gray-400 line-through mb-0.5">
+                                      {pricing.original.toFixed(2)} €
+                                    </div>
+                                  )}
+                                  <span className="font-bold text-rose-500 text-sm whitespace-nowrap">
+                                    {(hasOffer ? pricing.discounted! : pricing.original).toFixed(2)} €
+                                  </span>
+                                </div>
+                              </div>
+
+                              {hasSupplements && (
+                                <div className="mt-3 pt-3 border-t border-gray-100">
+                                  <p className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-rose-400" />
+                                    Options disponibles:
+                                  </p>
+                                  <div className="space-y-1">
+                                    {service.supplements!.map((supplement) => (
+                                      <div
+                                        key={supplement.id}
+                                        className="flex items-center justify-between text-xs"
+                                      >
+                                        <span className="text-gray-600">+ {supplement.name}</span>
+                                        <div className="flex items-center gap-2">
+                                          {supplement.duration_minutes && (
+                                            <span className="text-gray-500">{supplement.duration_minutes} min</span>
+                                          )}
+                                          <span className="font-semibold text-rose-500">
+                                            +{Number(supplement.price).toFixed(2)} €
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -783,7 +877,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   <ArrowLeft className="w-4 h-4" />
                   Changer de prestation
                 </button>
-                <div className="bg-belleya-50 border border-belleya-200 rounded-lg p-4 mb-6">
+                <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
                   <p className="text-sm font-medium text-gray-900">{selectedService.name}</p>
                   <p className="text-sm text-gray-600">
                     {calculateTotalDuration()} min - {calculateTotalPrice().toFixed(2)} €
@@ -791,7 +885,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 </div>
 
                 {selectedService.supplements && selectedService.supplements.length > 0 && (
-                  <div className="mb-6 bg-white border-2 border-belleya-200 rounded-xl p-5">
+                  <div className="mb-6 bg-white border-2 border-rose-200 rounded-xl p-5">
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                       <Plus className="w-5 h-5 text-belleya-500" />
                       Suppléments disponibles
@@ -800,13 +894,13 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                       {selectedService.supplements.map((supplement) => (
                         <label
                           key={supplement.id}
-                          className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-belleya-50 cursor-pointer transition-colors"
+                          className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-rose-50 cursor-pointer transition-colors"
                         >
                           <input
                             type="checkbox"
                             checked={selectedSupplements.includes(supplement.id)}
                             onChange={() => toggleSupplement(supplement.id)}
-                            className="mt-1 w-5 h-5 text-belleya-500 rounded focus:ring-2 focus:ring-belleya-primary"
+                            className="mt-1 w-5 h-5 text-belleya-500 rounded focus:ring-2 focus:ring-rose-600"
                           />
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{supplement.name}</p>
@@ -817,7 +911,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                   +{supplement.duration_minutes} min
                                 </span>
                               )}
-                              <span className="font-semibold text-belleya-primary">+{Number(supplement.price).toFixed(2)} €</span>
+                              <span className="font-semibold text-rose-600">+{Number(supplement.price).toFixed(2)} €</span>
                             </div>
                           </div>
                         </label>
@@ -868,7 +962,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   <ArrowLeft className="w-4 h-4" />
                   Changer de date
                 </button>
-                <div className="bg-belleya-50 border border-belleya-200 rounded-lg p-4 mb-6">
+                <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
                   <p className="text-sm font-medium text-gray-900">{selectedService.name}</p>
                   <p className="text-sm text-gray-600">
                     {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -887,7 +981,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         onClick={() => handleTimeSelect(slot.time)}
                         className={`w-full p-3 rounded-lg font-medium transition-all ${
                           slot.available
-                            ? 'bg-belleya-100 text-belleya-deep hover:bg-belleya-500 hover:text-white'
+                            ? 'bg-rose-100 text-rose-900 hover:bg-rose-500 hover:text-white'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
                       >
@@ -909,18 +1003,18 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   Changer d'heure
                 </button>
 
-                <div className="bg-belleya-50 border border-belleya-200 rounded-lg p-4 mb-6">
+                <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
                   <p className="text-sm font-medium text-gray-900 mb-2">{selectedService.name}</p>
                   <p className="text-sm text-gray-600">
                     {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à {selectedTime}
                   </p>
-                  <div className="mt-2 pt-2 border-t border-belleya-200 flex justify-between items-center">
+                  <div className="mt-2 pt-2 border-t border-rose-200 flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Total</span>
-                    <span className="text-lg font-bold text-belleya-primary">{calculateTotalPrice().toFixed(2)} €</span>
+                    <span className="text-lg font-bold text-rose-600">{calculateTotalPrice().toFixed(2)} €</span>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-orange-200 rounded-xl p-6 mb-6">
+                <div className="bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-orange-200 rounded-xl p-6 mb-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-2">Inscription obligatoire</h3>
                   <p className="text-sm text-gray-700">
                     Pour valider votre rendez-vous, vous devez créer un compte ou vous connecter.
@@ -932,7 +1026,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                     onClick={() => setHasAccount(false)}
                     className={`flex-1 py-3 rounded-lg font-medium transition-all ${
                       !hasAccount
-                        ? 'bg-gradient-to-r from-orange-500 to-belleya-100 text-white'
+                        ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -942,7 +1036,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                     onClick={() => setHasAccount(true)}
                     className={`flex-1 py-3 rounded-lg font-medium transition-all ${
                       hasAccount
-                        ? 'bg-gradient-to-r from-orange-500 to-belleya-100 text-white'
+                        ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -963,7 +1057,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                           required
                           value={clientInfo.firstName}
                           onChange={(e) => setClientInfo({ ...clientInfo, firstName: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -976,7 +1070,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                           required
                           value={clientInfo.lastName}
                           onChange={(e) => setClientInfo({ ...clientInfo, lastName: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -992,7 +1086,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                       required
                       value={clientInfo.email}
                       onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
                       placeholder="votre@email.com"
                     />
                   </div>
@@ -1007,7 +1101,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         type="tel"
                         value={clientInfo.phone}
                         onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
                         placeholder="06 12 34 56 78"
                       />
                     </div>
@@ -1023,7 +1117,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                       required
                       value={clientInfo.password}
                       onChange={(e) => setClientInfo({ ...clientInfo, password: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
                       placeholder="Minimum 6 caractères"
                       minLength={6}
                     />
@@ -1036,7 +1130,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         value={bookingNotes}
                         onChange={(e) => setBookingNotes(e.target.value)}
                         rows={3}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
                         placeholder="Informations supplémentaires..."
                       />
                     </div>
@@ -1051,7 +1145,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   <button
                     type="submit"
                     disabled={authLoading || submitting}
-                    className="w-full py-3 bg-gradient-to-r from-orange-500 to-belleya-100 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-belleya-primary transition-all shadow-lg disabled:opacity-50"
+                    className="w-full py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg disabled:opacity-50"
                   >
                     {authLoading || submitting
                       ? 'Validation en cours...'
@@ -1094,6 +1188,30 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           </div>
         )}
 
+        {activeTab === 'institute' && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm">
+            {proProfile.institute_photos.length === 0 ? (
+              <div className="text-center py-12">
+                <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Aucune photo de l'institut</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {proProfile.institute_photos.map((photo) => (
+                  <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden">
+                    <img
+                      src={photo.url}
+                      alt="Institut"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'reviews' && (
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             {user && (
@@ -1101,12 +1219,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 {!showReviewForm ? (
                   <button
                     onClick={() => setShowReviewForm(true)}
-                    className="w-full py-3 border-2 border-orange-300 text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all"
+                    className="w-full py-3 border-2 border-rose-300 text-rose-600 rounded-xl font-semibold hover:bg-rose-50 transition-all"
                   >
                     Laisser un avis
                   </button>
                 ) : (
-                  <form onSubmit={handleSubmitReview} className="p-4 border-2 border-orange-300 rounded-xl">
+                  <form onSubmit={handleSubmitReview} className="p-4 border-2 border-rose-300 rounded-xl">
                     <h3 className="font-bold text-gray-900 mb-4">Votre avis</h3>
 
                     <div className="mb-4">
@@ -1137,7 +1255,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         value={reviewForm.comment}
                         onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                         rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                         placeholder="Partagez votre expérience..."
                       />
                     </div>
@@ -1150,7 +1268,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             <img
                               src={URL.createObjectURL(reviewForm.photo)}
                               alt="Preview"
-                              className="w-24 h-24 object-cover rounded-lg border-2 border-orange-300"
+                              className="w-24 h-24 object-cover rounded-lg border-2 border-rose-300"
                             />
                             <button
                               type="button"
@@ -1161,7 +1279,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             </button>
                           </div>
                         ) : (
-                          <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-all">
+                          <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 hover:bg-rose-50 transition-all">
                             <Upload className="w-5 h-5 text-gray-400" />
                             <span className="text-sm text-gray-600">Ajouter une photo</span>
                             <input
@@ -1191,7 +1309,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-belleya-100 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-belleya-primary transition-all disabled:opacity-50"
+                        className="flex-1 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50"
                       >
                         {submitting ? 'Publication...' : 'Publier'}
                       </button>
