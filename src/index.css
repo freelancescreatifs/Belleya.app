@@ -324,3 +324,89 @@ button, a, [role="button"] {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
+
+/* Leaflet Map Styles */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0;
+  background: #f8f9fa;
+}
+
+.leaflet-container a {
+  color: #0066cc;
+}
+
+/* Custom Marker Styles */
+.custom-user-marker,
+.custom-provider-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-user-marker > div,
+.custom-provider-marker > div {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* Custom Popup Styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  min-width: 250px;
+}
+
+.leaflet-popup-close-button {
+  font-size: 24px !important;
+  padding: 8px 12px !important;
+  color: #666 !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #000 !important;
+}
+
+/* Leaflet Controls - Better positioning on mobile */
+@media (max-width: 768px) {
+  .leaflet-control-zoom {
+    margin-right: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .leaflet-popup-content {
+    min-width: 200px;
+  }
+}
+
+/* Fix for Leaflet map rendering on mobile */
+.leaflet-map-pane {
+  z-index: 1;
+}
+
+.leaflet-tile-pane {
+  z-index: 1;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2;
+}
+
+.leaflet-marker-pane {
+  z-index: 3;
+}
+
+.leaflet-popup-pane {
+  z-index: 4;
+}
+
+/* Ensure map tiles load properly */
+.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+}

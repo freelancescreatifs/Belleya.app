@@ -1,84 +1,83 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import Map, { Marker, Popup, NavigationControl, GeolocateControl } from 'react-map-gl';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
 import { MapPin, Search, Navigation, Star, Filter, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { ProviderProfile, getNearbyProviders } from '../../lib/socialHelpers';
 import { getCurrentPosition, geocodeAddress } from '../../lib/geocodingHelpers';
 import ProviderMapMarker from '../../components/client/ProviderMapMarker';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import 'leaflet/dist/leaflet.css';
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
-const DEFAULT_CENTER: { lng: number; lat: number } = { lng: 2.3522, lat: 48.8566 };
+const DEFAULT_CENTER: [number, number] = [48.8566, 2.3522];
 const DEFAULT_ZOOM = 11;
 
-interface ViewState {
-  longitude: number;
-  latitude: number;
-  zoom: number;
+// Composant pour contrôler la vue de la carte
+function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+
+  return null;
+}
+
+// Composant pour gérer les events de clic sur la carte
+function MapEventHandler({ onMapClick }: { onMapClick: () => void }) {
+  useMapEvents({
+    click: () => {
+      onMapClick();
+    }
+  });
+  return null;
 }
 
 export default function ClientMap() {
   const [providers, setProviders] = useState<ProviderProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [viewState, setViewState] = useState<ViewState>({
-    longitude: DEFAULT_CENTER.lng,
-    latitude: DEFAULT_CENTER.lat,
-    zoom: DEFAULT_ZOOM,
-  });
+  const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
+  const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
   const [selectedProvider, setSelectedProvider] = useState<ProviderProfile | null>(null);
   const [searchAddress, setSearchAddress] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const mapRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!MAPBOX_TOKEN) {
-      console.error('MAPBOX TOKEN MANQUANT:', {
-        token: MAPBOX_TOKEN,
-        env: import.meta.env.VITE_MAPBOX_TOKEN
-      });
-      setMapError('Token Mapbox manquant. Veuillez configurer VITE_MAPBOX_TOKEN dans les variables d\'environnement.');
-      return;
-    }
+  // Créer des icônes personnalisées pour Leaflet
+  const userIcon = useMemo(() => L.divIcon({
+    html: `
+      <div class="relative flex items-center justify-center">
+        <div class="w-10 h-10 rounded-full bg-blue-500 border-4 border-white shadow-lg flex items-center justify-center">
+          <div class="w-3 h-3 rounded-full bg-white"></div>
+        </div>
+      </div>
+    `,
+    className: 'custom-user-marker',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  }), []);
 
-    if (!MAPBOX_TOKEN.startsWith('pk.')) {
-      console.error('TOKEN MAPBOX INVALIDE:', MAPBOX_TOKEN.substring(0, 10) + '...');
-      setMapError('Token Mapbox invalide. Le token doit commencer par "pk."');
-      return;
-    }
+  const createProviderIcon = (provider: ProviderProfile) => {
+    const photoHtml = provider.profile_photo
+      ? `<img src="${provider.profile_photo}" alt="${provider.company_name}" class="w-full h-full object-cover" />`
+      : `<div class="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white font-bold text-lg">${provider.company_name.charAt(0)}</div>`;
 
-    console.log('Mapbox token detecte:', MAPBOX_TOKEN.substring(0, 25) + '...');
-    console.log('Longueur token:', MAPBOX_TOKEN.length);
-
-    const validateToken = async () => {
-      try {
-        const response = await fetch(
-          `https://api.mapbox.com/styles/v1/mapbox/light-v11?access_token=${MAPBOX_TOKEN}`,
-          { method: 'GET' }
-        );
-
-        if (response.status === 401) {
-          console.error('Token Mapbox invalide (401)');
-          setMapError('Erreur 401 : Token Mapbox invalide, expire ou avec restrictions de domaine incompatibles.');
-        } else if (response.status === 403) {
-          console.error('Token Mapbox sans permissions (403)');
-          setMapError('Erreur 403 : Le token n\'a pas les permissions requises (styles:read).');
-        } else if (response.ok) {
-          console.log('Token Mapbox valide - carte prete a charger');
-        }
-      } catch (err) {
-        console.warn('Impossible de valider le token Mapbox:', err);
-      }
-    };
-
-    validateToken();
-  }, []);
+    return L.divIcon({
+      html: `
+        <div class="relative transform transition-transform hover:scale-110">
+          <div class="w-12 h-12 rounded-full border-3 border-white shadow-lg overflow-hidden ring-2 ring-gray-800 bg-white">
+            ${photoHtml}
+          </div>
+          <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-800 border-2 border-white rounded-full"></div>
+        </div>
+      `,
+      className: 'custom-provider-marker',
+      iconSize: [48, 56],
+      iconAnchor: [24, 56]
+    });
+  };
 
   useEffect(() => {
     requestGeolocation();
@@ -91,32 +90,6 @@ export default function ClientMap() {
       loadProvidersWithoutLocation();
     }
   }, [userLocation]);
-
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded) return;
-
-    const handleResize = () => {
-      requestAnimationFrame(() => {
-        if (mapRef.current) {
-          mapRef.current.resize();
-        }
-      });
-    };
-
-    const resizeObserver = new ResizeObserver(handleResize);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-    };
-  }, [mapLoaded]);
 
   const requestGeolocation = async () => {
     try {
@@ -135,11 +108,8 @@ export default function ClientMap() {
       const position = await getCurrentPosition();
       const newLocation = { lat: position.latitude, lng: position.longitude };
       setUserLocation(newLocation);
-      setViewState({
-        longitude: position.longitude,
-        latitude: position.latitude,
-        zoom: 13,
-      });
+      setMapCenter([position.latitude, position.longitude]);
+      setMapZoom(13);
       setShowGeolocationPrompt(false);
     } catch (error: any) {
       console.error('Geolocation error:', error);
@@ -210,11 +180,8 @@ export default function ClientMap() {
       if (result) {
         const newLocation = { lat: result.latitude, lng: result.longitude };
         setUserLocation(newLocation);
-        setViewState({
-          longitude: result.longitude,
-          latitude: result.latitude,
-          zoom: 13,
-        });
+        setMapCenter([result.latitude, result.longitude]);
+        setMapZoom(13);
         setShowGeolocationPrompt(false);
       } else {
         alert('Adresse introuvable. Veuillez réessayer avec une autre adresse.');
@@ -343,96 +310,29 @@ export default function ClientMap() {
       </div>
 
       <div
-        ref={containerRef}
-        className="relative z-0"
+        className="relative z-0 w-full"
         style={{ height: '60vh', minHeight: '500px', maxHeight: '700px' }}
       >
-        {mapError ? (
-          <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded-lg">
-            <div className="text-center p-6 max-w-lg">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Erreur de carte</h3>
-              <p className="text-sm text-gray-600 mb-4">{mapError}</p>
-
-              {mapError.includes('401') && (
-                <div className="text-left bg-white p-4 rounded-lg border border-gray-200 mb-4">
-                  <p className="text-sm font-medium text-gray-800 mb-2">Pour corriger cette erreur :</p>
-                  <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
-                    <li>Allez sur <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Mapbox Access Tokens</a></li>
-                    <li>Creez un nouveau token public (pk.)</li>
-                    <li>Scopes requis : <code className="bg-gray-100 px-1 rounded">styles:read</code>, <code className="bg-gray-100 px-1 rounded">tiles:read</code></li>
-                    <li>Supprimez les restrictions de domaine ou ajoutez votre domaine</li>
-                    <li>Copiez le token dans VITE_MAPBOX_TOKEN</li>
-                    <li>Redemarrez le serveur de dev</li>
-                  </ol>
-                </div>
-              )}
-
-              <a
-                href="https://account.mapbox.com/access-tokens/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-              >
-                Obtenir un nouveau token Mapbox
-              </a>
-            </div>
-          </div>
-        ) : (
-          <Map
-            ref={mapRef}
-            {...viewState}
-            onMove={(evt) => setViewState(evt.viewState)}
-            onLoad={() => {
-              console.log('Carte Mapbox chargée avec succès');
-              setMapLoaded(true);
-              if (mapRef.current) {
-                mapRef.current.resize();
-              }
-            }}
-            onError={(e) => {
-              console.error('Erreur Mapbox:', e);
-              const errorMsg = e.error?.message || e.message || String(e);
-              console.error('Message erreur:', errorMsg);
-
-              if (errorMsg.includes('401') || errorMsg.toLowerCase().includes('unauthorized') || errorMsg.toLowerCase().includes('invalid') && errorMsg.toLowerCase().includes('token')) {
-                setMapError('Erreur 401 : Token Mapbox invalide, expire ou avec restrictions de domaine incompatibles.');
-              } else if (errorMsg.includes('403') || errorMsg.toLowerCase().includes('forbidden')) {
-                setMapError('Erreur 403 : Acces refuse. Verifiez les scopes du token (styles:read, tiles:read).');
-              } else if (errorMsg.toLowerCase().includes('style')) {
-                setMapError('Style de carte introuvable. Verifiez le style Mapbox.');
-              } else {
-                setMapError(`Erreur lors du chargement de la carte: ${errorMsg.substring(0, 100)}`);
-              }
-            }}
-            mapboxAccessToken={MAPBOX_TOKEN}
-            mapStyle="mapbox://styles/mapbox/light-v11"
-            style={{ width: '100%', height: '100%' }}
-            attributionControl={true}
-            reuseMaps
-          >
-          <NavigationControl position="top-right" />
-          <GeolocateControl
-            position="top-right"
-            trackUserLocation
-            showUserHeading
-            onGeolocate={(e) => {
-              setUserLocation({ lat: e.coords.latitude, lng: e.coords.longitude });
-            }}
+        <MapContainer
+          center={mapCenter}
+          zoom={mapZoom}
+          className="w-full h-full"
+          scrollWheelZoom={true}
+          zoomControl={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+
+          <MapViewController center={mapCenter} zoom={mapZoom} />
+          <MapEventHandler onMapClick={() => setSelectedProvider(null)} />
 
           {userLocation && (
             <Marker
-              longitude={userLocation.lng}
-              latitude={userLocation.lat}
-              anchor="bottom"
-            >
-              <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-blue-500 border-4 border-white shadow-lg flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-white"></div>
-                </div>
-              </div>
-            </Marker>
+              position={[userLocation.lat, userLocation.lng]}
+              icon={userIcon}
+            />
           )}
 
           {filteredProviders.map((provider) => {
@@ -441,57 +341,31 @@ export default function ClientMap() {
             return (
               <Marker
                 key={provider.user_id}
-                longitude={provider.longitude}
-                latitude={provider.latitude}
-                anchor="bottom"
-              >
-                <div
-                  className="cursor-pointer transform transition-transform hover:scale-110"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                position={[provider.latitude, provider.longitude]}
+                icon={createProviderIcon(provider)}
+                eventHandlers={{
+                  click: (e) => {
+                    L.DomEvent.stopPropagation(e);
                     setSelectedProvider(provider);
-                  }}
-                >
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full border-3 border-white shadow-lg overflow-hidden ring-2 ring-gray-800 bg-white">
-                      {provider.profile_photo ? (
-                        <img
-                          src={provider.profile_photo}
-                          alt={provider.company_name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white font-bold text-lg">
-                          {provider.company_name.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-800 border-2 border-white rounded-full"></div>
-                  </div>
-                </div>
+                  }
+                }}
+              >
+                {selectedProvider?.user_id === provider.user_id && (
+                  <Popup
+                    closeButton={true}
+                    onClose={() => setSelectedProvider(null)}
+                    className="custom-popup"
+                  >
+                    <ProviderMapMarker
+                      provider={provider}
+                      onViewProfile={() => handleViewProfile(provider.user_id)}
+                    />
+                  </Popup>
+                )}
               </Marker>
             );
           })}
-
-          {selectedProvider && selectedProvider.latitude && selectedProvider.longitude && (
-            <Popup
-              longitude={selectedProvider.longitude}
-              latitude={selectedProvider.latitude}
-              anchor="bottom"
-              offset={20}
-              onClose={() => setSelectedProvider(null)}
-              closeButton={true}
-              closeOnClick={false}
-              className="mapbox-popup-custom"
-            >
-              <ProviderMapMarker
-                provider={selectedProvider}
-                onViewProfile={() => handleViewProfile(selectedProvider.user_id)}
-              />
-            </Popup>
-          )}
-          </Map>
-        )}
+        </MapContainer>
       </div>
 
       <div className="p-4">
