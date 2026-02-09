@@ -310,19 +310,19 @@ export default function ClientMap() {
       </div>
 
       <div
-        className="relative z-0 w-full"
-        style={{ height: '60vh', minHeight: '500px', maxHeight: '700px' }}
+        className="relative z-0 w-full map-container-responsive"
       >
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
-          className="w-full h-full"
+          className="w-full h-full grayscale-map"
           scrollWheelZoom={true}
           zoomControl={true}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            maxZoom={20}
           />
 
           <MapViewController center={mapCenter} zoom={mapZoom} />
