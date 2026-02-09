@@ -220,14 +220,14 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
 
   useEffect(() => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 7 * 48;
+      scrollContainerRef.current.scrollTop = 7 * 64;
     }
   }, []);
 
   const getDateTimeFromPosition = (e: React.MouseEvent, dayElement: HTMLElement) => {
     const rect = dayElement.getBoundingClientRect();
     const y = e.clientY - rect.top;
-    const hourHeight = 48;
+    const hourHeight = 64;
     const totalHours = y / hourHeight;
     const hours = Math.floor(totalHours);
     const minutes = Math.round((totalHours - hours) * 60 / 15) * 15;
@@ -383,7 +383,8 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
   if (isMobile) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-gray-100">
+        <div className="grid grid-cols-8 border-b border-gray-100">
+          <div className="py-2 text-center text-xs font-semibold text-gray-500 w-12"></div>
           {days.map((day) => {
             const isToday = isSameDay(day, today);
             const dayItems = getItemsForDay(items, day);
@@ -402,33 +403,40 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                   {day.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 1)}
                 </div>
                 <div
-                  className={`text-sm font-semibold mt-1 ${
+                  className={`text-sm font-semibold mt-0.5 ${
                     isToday
-                      ? 'bg-belleya-500 text-white w-7 h-7 flex items-center justify-center rounded-full mx-auto'
+                      ? 'bg-belleya-500 text-white w-6 h-6 flex items-center justify-center rounded-full mx-auto'
                       : 'text-gray-900'
                   }`}
                 >
                   {day.getDate()}
                 </div>
                 {hasEvents && (
-                  <div className="flex items-center justify-center gap-0.5 mt-1.5 min-h-[6px]">
-                    {uniqueColors.slice(0, 3).map((colorClass, idx) => {
+                  <div className="flex items-center justify-center gap-0.5 mt-1 min-h-[6px]">
+                    {uniqueColors.slice(0, 2).map((colorClass, idx) => {
                       return (
                         <span
                           key={idx}
-                          className={`w-[5px] h-[5px] rounded-full ${colorClass.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400'}`}
+                          className={`w-[4px] h-[4px] rounded-full ${colorClass.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400'}`}
                         />
                       );
                     })}
                   </div>
                 )}
-                {!hasEvents && <div className="min-h-[6px] mt-1.5" />}
+                {!hasEvents && <div className="min-h-[6px] mt-1" />}
               </div>
             );
           })}
         </div>
         <div ref={scrollContainerRef} className="overflow-y-auto max-h-[500px]">
-          <div className="grid grid-cols-7">
+          <div className="grid grid-cols-8">
+            <div className="border-r border-gray-100 w-12">
+              {hours.map((hour) => (
+                <div key={hour} className="h-12 py-0.5 px-1 text-[9px] text-gray-400 border-b border-gray-50 leading-tight">
+                  {hour.toString().padStart(2, '0')}h
+                </div>
+              ))}
+            </div>
             {days.map((day, dayIndex) => {
               const dayItems = getItemsForDay(items, day);
               const positionedItems = calculateOverlappingPositions(dayItems);
@@ -437,7 +445,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
               return (
                 <div
                   key={day.toISOString()}
-                  className={`border-r border-gray-100 last:border-r-0 relative min-h-[400px] ${
+                  className={`border-r border-gray-100 last:border-r-0 relative ${
                     isToday ? 'bg-belleya-50/20' : ''
                   }`}
                   data-day-index={dayIndex}
@@ -445,7 +453,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="h-10 border-b border-gray-50"
+                      className="h-12 border-b border-gray-50"
                       onClick={() => {
                         const targetDate = new Date(days[dayIndex]);
                         targetDate.setHours(hour, 0, 0, 0);
@@ -460,8 +468,8 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
 
                       const startHour = item.start.getHours() + item.start.getMinutes() / 60;
                       const endHour = item.end.getHours() + item.end.getMinutes() / 60;
-                      const top = startHour * 40;
-                      const height = (endHour - startHour) * 40;
+                      const top = startHour * 48;
+                      const height = (endHour - startHour) * 48;
 
                       const widthPercent = 100 / item.totalColumns;
                       const leftPercent = (item.column * widthPercent);
@@ -469,27 +477,27 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       return (
                         <div
                           key={item.id}
-                          className={`${getEventColor(item)} text-white overflow-hidden select-none rounded-sm pointer-events-auto ${
+                          className={`${getEventColor(item)} text-white overflow-hidden select-none rounded pointer-events-auto ${
                             isCancelled ? 'opacity-60 line-through' : ''
                           }`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
-                            height: `${Math.max(height - 2, 16)}px`,
-                            left: `${leftPercent}%`,
-                            width: `${widthPercent}%`,
+                            height: `${Math.max(height - 3, 20)}px`,
+                            left: `calc(${leftPercent}% + 2px)`,
+                            width: `calc(${widthPercent}% - 4px)`,
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
                             onItemClick(item);
                           }}
                         >
-                          <div className="px-0.5 py-0.5 text-[8px] font-medium line-clamp-2 leading-tight">
-                            {productionStep && <span className="mr-0.5 text-[9px]">{getStepEmoji(productionStep)}</span>}
-                            {height > 30 ? item.title : item.title.slice(0, 15)}
+                          <div className="px-1 py-0.5 text-[9px] font-medium line-clamp-2 leading-tight">
+                            {productionStep && <span className="mr-0.5">{getStepEmoji(productionStep)}</span>}
+                            {height > 35 ? item.title : item.title.slice(0, 12)}
                           </div>
-                          {height > 20 && (
-                            <div className="px-0.5 text-[7px] opacity-90 truncate">
+                          {height > 24 && (
+                            <div className="px-1 text-[8px] opacity-90 truncate">
                               {formatTime(item.start)}
                             </div>
                           )}
@@ -512,24 +520,24 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      <div className="grid grid-cols-8 border-b border-gray-100">
-        <div className="py-2 text-center text-xs font-semibold text-gray-500 border-r border-gray-100"></div>
+      <div className="grid grid-cols-8 border-b border-gray-200">
+        <div className="py-3 px-3 text-center text-xs font-semibold text-gray-500 border-r border-gray-200"></div>
         {days.map((day) => {
           const isToday = isSameDay(day, today);
           return (
             <div
               key={day.toISOString()}
               onClick={() => onDayClick(day)}
-              className={`py-2 px-1 text-center border-r border-gray-100 last:border-r-0 cursor-pointer hover:bg-gray-50 transition-colors ${
-                isToday ? 'bg-belleya-50/30' : ''
+              className={`py-3 px-2 text-center border-r border-gray-200 last:border-r-0 cursor-pointer hover:bg-gray-50 transition-colors ${
+                isToday ? 'bg-belleya-50/40' : ''
               }`}
             >
-              <div className="text-xs text-gray-500 font-medium">
+              <div className="text-xs text-gray-500 font-medium uppercase">
                 {day.toLocaleDateString('fr-FR', { weekday: 'short' })}
               </div>
               <div
-                className={`text-base font-semibold mt-0.5 ${
-                  isToday ? 'text-belleya-500' : 'text-gray-900'
+                className={`text-lg font-semibold mt-1 ${
+                  isToday ? 'text-belleya-600' : 'text-gray-900'
                 }`}
               >
                 {day.getDate()}
@@ -539,22 +547,25 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
         })}
       </div>
       <div ref={scrollContainerRef} className="overflow-y-auto max-h-[600px]">
-        <div className="grid grid-cols-8">
-          <div className="border-r border-gray-100">
+        <div className="grid grid-cols-8 gap-x-0">
+          <div className="border-r border-gray-200">
             {hours.map((hour) => (
-              <div key={hour} className="h-12 py-1 px-2 text-xs text-gray-400 border-b border-gray-50">
-                {hour.toString().padStart(2, '0')}h
+              <div key={hour} className="h-16 py-2 px-3 text-xs text-gray-400 border-b border-gray-100">
+                {hour.toString().padStart(2, '0')}:00
               </div>
             ))}
           </div>
           {days.map((day, dayIndex) => {
             const dayItems = getItemsForDay(items, day);
             const positionedItems = calculateOverlappingPositions(dayItems);
+            const isToday = isSameDay(day, today);
 
             return (
               <div
                 key={day.toISOString()}
-                className={`border-r border-gray-100 last:border-r-0 relative transition-all duration-200 ${
+                className={`border-r border-gray-200 last:border-r-0 relative transition-all duration-200 ${
+                  isToday ? 'bg-belleya-50/10' : ''
+                } ${
                   dragState.dragStarted && dragState.hoveredDayIndex === dayIndex
                     ? 'bg-blue-50/70 ring-2 ring-inset ring-blue-400'
                     : ''
@@ -565,7 +576,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                 {hours.map((hour) => (
                   <div
                     key={hour}
-                    className="h-12 border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors"
+                    className="h-16 border-b border-gray-100 hover:bg-gray-50/50 cursor-pointer transition-colors"
                     onClick={() => {
                       if (dragState.dragStarted) return;
                       const now = Date.now();
@@ -592,39 +603,39 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                       const end = dragState.currentEnd!;
                       const startHour = start.getHours() + start.getMinutes() / 60;
                       const endHour = end.getHours() + end.getMinutes() / 60;
-                      const top = startHour * 48;
-                      const height = (endHour - startHour) * 48;
+                      const top = startHour * 64;
+                      const height = (endHour - startHour) * 64;
 
                       return (
                         <div
                           key={`dragging-${dragState.item.id}`}
-                          className={`${getEventColor(dragState.item)} text-white overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto mx-0 md:mx-1`}
+                          className={`${getEventColor(dragState.item)} text-white rounded-md overflow-hidden select-none relative opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 pointer-events-auto`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
-                            height: `${Math.max(height - 3, 20)}px`,
-                            left: '0',
-                            right: '0',
+                            height: `${Math.max(height - 4, 28)}px`,
+                            left: '4px',
+                            right: '4px',
                             zIndex: 100,
                           }}
                         >
                           <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none">
-                            <span className="text-white font-semibold text-[9px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 bg-black/60 rounded shadow-lg">
+                            <span className="text-white font-semibold text-xs px-2 py-1 bg-black/60 rounded shadow-lg">
                               {dragState.mode === 'move' ? 'Déplacement...' : 'Redimensionnement...'}
                             </span>
                           </div>
-                          <div className="px-1 md:px-1.5 py-0.5 md:py-1 font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs">
+                          <div className="px-2 py-1 font-medium line-clamp-2 text-xs leading-snug">
                             {(() => {
                               const productionStep = dragState.item.type === 'task' ? (dragState.item.data as any).production_step : null;
                               return (
                                 <>
-                                  {productionStep && <span className="mr-0.5 text-[10px] md:text-xs">{getStepEmoji(productionStep)}</span>}
+                                  {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
                                   {dragState.item.title}
                                 </>
                               );
                             })()}
                           </div>
-                          <div className="px-1 md:px-1.5 text-[8px] md:text-xs opacity-90 truncate">
+                          <div className="px-2 text-xs opacity-90 truncate">
                             {formatTime(start)} - {formatTime(end)}
                           </div>
                         </div>
@@ -645,27 +656,27 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                     const renderEvent = (start: Date, end: Date, isGhost: boolean) => {
                       const startHour = start.getHours() + start.getMinutes() / 60;
                       const endHour = end.getHours() + end.getMinutes() / 60;
-                      const top = startHour * 48;
-                      const height = (endHour - startHour) * 48;
+                      const top = startHour * 64;
+                      const height = (endHour - startHour) * 64;
 
                       return (
                         <div
                           key={isGhost ? `${item.id}-ghost` : item.id}
-                          className={`${getEventColor(item)} text-white overflow-hidden select-none group relative mx-0 md:mx-1 ${
+                          className={`${getEventColor(item)} text-white rounded-md overflow-hidden select-none group relative ${
                             isGhost
                               ? 'opacity-20 pointer-events-none'
                               : isBeingDragged
-                              ? 'opacity-65 cursor-grabbing shadow-2xl ring-2 md:ring-4 ring-white scale-105 z-50 pointer-events-auto'
+                              ? 'opacity-65 cursor-grabbing shadow-2xl ring-4 ring-white scale-105 z-50 pointer-events-auto'
                               : isGrabbed
-                              ? 'scale-105 cursor-grabbing shadow-lg ring-1 md:ring-2 ring-white/50 transition-transform duration-150 pointer-events-auto'
-                              : 'cursor-grab hover:opacity-90 transition-all duration-200 hover:scale-102 pointer-events-auto'
+                              ? 'scale-105 cursor-grabbing shadow-lg ring-2 ring-white/50 transition-transform duration-150 pointer-events-auto'
+                              : 'cursor-grab hover:opacity-90 hover:shadow-md transition-all duration-200 pointer-events-auto'
                           }`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
-                            height: `${Math.max(height - 3, 20)}px`,
-                            left: `${leftPercent}%`,
-                            width: `${widthPercent}%`,
+                            height: `${Math.max(height - 4, 28)}px`,
+                            left: `calc(${leftPercent}% + 4px)`,
+                            width: `calc(${widthPercent}% - 8px)`,
                             transform: isBeingDragged && !isGhost ? 'scale(1.05)' : undefined,
                             transition: isBeingDragged ? 'none' : undefined,
                           }}
@@ -692,34 +703,34 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                         >
                           {(isBeingDragged || isGrabbed) && !isGhost && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none">
-                              <span className="text-white font-semibold text-[9px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 bg-black/60 rounded shadow-lg">
+                              <span className="text-white font-semibold text-xs px-2 py-1 bg-black/60 rounded shadow-lg">
                                 {isBeingDragged ? dragLabel : 'Prêt...'}
                               </span>
                             </div>
                           )}
                           {!isGhost && (
                             <div
-                              className="absolute top-0 left-0 right-0 h-1.5 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
                               style={{ background: 'rgba(255,255,255,0.3)' }}
                             />
                           )}
-                          <div className={`px-1 md:px-1.5 py-0.5 md:py-1 font-medium line-clamp-1 md:line-clamp-2 text-[9px] md:text-xs leading-tight ${isCancelled ? 'line-through' : ''}`}>
+                          <div className={`px-2 py-1 font-medium line-clamp-2 text-xs leading-snug ${isCancelled ? 'line-through' : ''}`}>
                             {(() => {
                               const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
                               return (
                                 <>
-                                  {productionStep && <span className="mr-0.5 text-[10px] md:text-xs">{getStepEmoji(productionStep)}</span>}
+                                  {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
                                   {item.title}
                                 </>
                               );
                             })()}
                           </div>
-                          <div className={`px-1 md:px-1.5 pb-0.5 md:pb-1 text-[8px] md:text-[10px] opacity-90 truncate ${isCancelled ? 'line-through' : ''}`}>
+                          <div className={`px-2 text-xs opacity-90 truncate ${isCancelled ? 'line-through' : ''}`}>
                             {formatTime(start)} - {formatTime(end)}
                           </div>
                           {!isGhost && (
                             <div
-                              className="absolute bottom-0 left-0 right-0 h-1.5 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize opacity-0 group-hover:opacity-100 transition-opacity"
                               style={{ background: 'rgba(255,255,255,0.3)' }}
                             />
                           )}
