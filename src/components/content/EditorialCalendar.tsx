@@ -17,6 +17,7 @@ import {
   getNextProductionStep,
   getProgressPercent
 } from '../../lib/productionStepsHelpers';
+import { updateProductionStepCompleted, forcePublishContent, type ProductionStep } from '../../lib/productionHelpers';
 
 interface ContentItem {
   id: string;
@@ -157,16 +158,10 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
     setLoadingSteps(prev => new Set(prev).add(loadingKey));
 
     try {
-      const { data, error } = await supabase
-        .rpc('cascade_production_steps', {
-          p_content_id: contentId,
-          p_step: productionStepName,
-          p_checked: newCompleted
-        });
+      // Utiliser les nouveaux helpers (ne modifie PAS les dates, seulement les checkboxes)
+      await updateProductionStepCompleted(contentId, productionStepName as ProductionStep, newCompleted);
 
-      if (error) throw error;
-
-      // Notifier le parent pour recharger les contenus (avec les nouvelles dates)
+      // Notifier le parent pour recharger les contenus
       onContentUpdated();
     } catch (error) {
       console.error('Error toggling production step:', error);
@@ -186,22 +181,17 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   async function handleTogglePublished(content: ContentItem, newPublishedStatus: boolean) {
     try {
       if (newPublishedStatus) {
-        // Cocher "Planifié" pour publier
-        await supabase.rpc('cascade_production_steps', {
-          p_content_id: content.id,
-          p_step: 'scheduling',
-          p_checked: true
-        });
+        // Forcer le tag "Publié" (coche toutes les étapes + marque tâches terminées)
+        const result = await forcePublishContent(content.id);
+        if (!result.success) {
+          throw new Error(result.error || 'Erreur lors du forçage de la publication');
+        }
       } else {
-        // Décocher "Planifié" pour dépublier
-        await supabase.rpc('cascade_production_steps', {
-          p_content_id: content.id,
-          p_step: 'scheduling',
-          p_checked: false
-        });
+        // Décocher l'étape "Programmation" pour dépublier
+        await updateProductionStepCompleted(content.id, 'scheduling', false);
       }
 
-      // Notifier le parent pour recharger les contenus (avec les nouvelles dates)
+      // Notifier le parent pour recharger les contenus
       onContentUpdated();
     } catch (error) {
       console.error('Error toggling published status:', error);

@@ -3,6 +3,7 @@ import { Edit2, Save, X, Image as ImageIcon, Calendar, Target, Filter, Instagram
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import PublishDateGuardModal from './PublishDateGuardModal';
+import { forcePublishContent, updateProductionStepCompleted, getRelevantSteps, type ProductionStep } from '../../lib/productionHelpers';
 
 interface ContentItem {
   id: string;
@@ -22,6 +23,10 @@ interface ContentItem {
   date_shooting?: string;
   date_editing?: string;
   date_scheduling?: string;
+  step_script_completed?: boolean;
+  step_shooting_completed?: boolean;
+  step_editing_completed?: boolean;
+  step_scheduling_completed?: boolean;
   is_published?: boolean;
 }
 
@@ -168,28 +173,20 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
 
     try {
       if (step === 'none') {
-        // Décocher toutes les étapes en décochant la dernière étape pertinente
-        await supabase.rpc('cascade_production_steps', {
-          p_content_id: content.id,
-          p_step: 'script',
-          p_checked: false
-        });
+        // Décocher toutes les étapes
+        const relevantSteps = getRelevantSteps(content.content_type);
+        for (const s of relevantSteps) {
+          await updateProductionStepCompleted(content.id, s as ProductionStep, false);
+        }
       } else if (step === 'published') {
-        // Utiliser la RPC avec le step spécial "published"
-        await supabase.rpc('cascade_production_steps', {
-          p_content_id: content.id,
-          p_step: 'published',
-          p_checked: true
-        });
+        // Forcer le tag "Publié" (coche toutes les étapes + marque tâches terminées)
+        const result = await forcePublishContent(content.id);
+        if (!result.success) {
+          throw new Error(result.error || 'Erreur lors du forçage de la publication');
+        }
       } else {
-        // Pour les autres étapes, utiliser la RPC qui gère la cascade
-        const { error } = await supabase.rpc('cascade_production_steps', {
-          p_content_id: content.id,
-          p_step: step,
-          p_checked: true
-        });
-
-        if (error) throw error;
+        // Cocher l'étape spécifique (la synchronisation avec les tâches est automatique)
+        await updateProductionStepCompleted(content.id, step as ProductionStep, true);
       }
 
       onContentUpdated();
@@ -210,14 +207,11 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
 
       if (updateError) throw updateError;
 
-      const { error: cascadeError } = await supabase
-        .rpc('cascade_production_steps', {
-          p_content_id: pendingPublishContent.id,
-          p_step: 'published',
-          p_checked: true
-        });
-
-      if (cascadeError) throw cascadeError;
+      // Forcer le tag "Publié"
+      const result = await forcePublishContent(pendingPublishContent.id);
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur lors du forçage de la publication');
+      }
 
       setShowDateGuardModal(false);
       setPendingPublishContent(null);
@@ -229,11 +223,18 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
   }
 
   function getHighestProductionStep(content: ContentItem): string {
+    // Le tag "Publié" est prioritaire
     if (content.is_published) return 'published';
-    if (content.date_scheduling) return 'scheduling';
-    if (content.date_editing) return 'editing';
-    if (content.date_shooting) return 'shooting';
-    if (content.date_script) return 'script';
+
+    // Sinon, chercher la dernière étape cochée
+    const relevantSteps = getRelevantSteps(content.content_type);
+
+    // Vérifier dans l'ordre inverse (de la fin vers le début)
+    if (relevantSteps.includes('scheduling') && content.step_scheduling_completed) return 'scheduling';
+    if (relevantSteps.includes('editing') && content.step_editing_completed) return 'editing';
+    if (relevantSteps.includes('shooting') && content.step_shooting_completed) return 'shooting';
+    if (relevantSteps.includes('script') && content.step_script_completed) return 'script';
+
     return 'none';
   }
 
