@@ -554,7 +554,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           <p className="text-gray-600 mb-6">Ce lien de réservation n'existe pas ou n'est plus actif.</p>
           <button
             onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
           >
             Retour à l'accueil
           </button>
@@ -573,7 +573,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           </p>
           <button
             onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
           >
             Retour à l'accueil
           </button>
@@ -887,7 +887,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 {selectedService.supplements && selectedService.supplements.length > 0 && (
                   <div className="mb-6 bg-white border-2 border-rose-200 rounded-xl p-5">
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Plus className="w-5 h-5 text-belleya-500" />
+                      <Plus className="w-5 h-5 text-rose-500" />
                       Suppléments disponibles
                     </h3>
                     <div className="space-y-3">
@@ -900,7 +900,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             type="checkbox"
                             checked={selectedSupplements.includes(supplement.id)}
                             onChange={() => toggleSupplement(supplement.id)}
-                            className="mt-1 w-5 h-5 text-belleya-500 rounded focus:ring-2 focus:ring-rose-600"
+                            className="mt-1 w-5 h-5 text-rose-500 rounded focus:ring-2 focus:ring-rose-600"
                           />
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{supplement.name}</p>
