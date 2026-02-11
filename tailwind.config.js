@@ -29,7 +29,7 @@ export default {
           'from': '#ffeae0',
           'to': '#faa77e',
           '50': '#ffddcb',
-          '100': '#ffdcc4',
+          '100': '#c7045e',
           '200': '#ffcfaf',
           '300': '#ffb89a',
           '400': '#f5a08c',
