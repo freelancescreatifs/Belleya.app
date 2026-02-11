@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Save, Calendar, Clock, Image as ImageIcon, Upload, Sparkles, Info, Link as LinkIcon, Trash2, Wand2, FileText, Video, Scissors, CheckCircle, Send, FileEdit, AlertTriangle, Plus, X, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { normalizeTime } from '../../lib/timeHelpers';
 import { generateContentAI, generateContentIdeas } from '../../lib/contentAIGenerator';
 import { type ProfessionKey } from '../../lib/professionHelpers';
 import MediaUploader from './MediaUploader';
@@ -563,17 +564,17 @@ export default function ContentForm({
         media_urls: mediaUrls.length > 0 ? JSON.stringify(mediaUrls) : null,
         media_type: mediaType || null,
         date_script: formData.date_script?.trim() || null,
-        date_script_time: (formData.date_script?.trim() ? (formData.date_script_time?.trim() || null) : null),
-        date_script_end_time: (formData.date_script?.trim() ? (formData.date_script_end_time?.trim() || null) : null),
+        date_script_time: formData.date_script?.trim() ? normalizeTime(formData.date_script_time) : null,
+        date_script_end_time: formData.date_script?.trim() ? normalizeTime(formData.date_script_end_time) : null,
         date_shooting: formData.date_shooting?.trim() || null,
-        date_shooting_time: (formData.date_shooting?.trim() ? (formData.date_shooting_time?.trim() || null) : null),
-        date_shooting_end_time: (formData.date_shooting?.trim() ? (formData.date_shooting_end_time?.trim() || null) : null),
+        date_shooting_time: formData.date_shooting?.trim() ? normalizeTime(formData.date_shooting_time) : null,
+        date_shooting_end_time: formData.date_shooting?.trim() ? normalizeTime(formData.date_shooting_end_time) : null,
         date_editing: formData.date_editing?.trim() || null,
-        date_editing_time: (formData.date_editing?.trim() ? (formData.date_editing_time?.trim() || null) : null),
-        date_editing_end_time: (formData.date_editing?.trim() ? (formData.date_editing_end_time?.trim() || null) : null),
+        date_editing_time: formData.date_editing?.trim() ? normalizeTime(formData.date_editing_time) : null,
+        date_editing_end_time: formData.date_editing?.trim() ? normalizeTime(formData.date_editing_end_time) : null,
         date_scheduling: formData.date_scheduling?.trim() || null,
-        date_scheduling_time: (formData.date_scheduling?.trim() ? (formData.date_scheduling_time?.trim() || null) : null),
-        date_scheduling_end_time: (formData.date_scheduling?.trim() ? (formData.date_scheduling_end_time?.trim() || null) : null),
+        date_scheduling_time: formData.date_scheduling?.trim() ? normalizeTime(formData.date_scheduling_time) : null,
+        date_scheduling_end_time: formData.date_scheduling?.trim() ? normalizeTime(formData.date_scheduling_end_time) : null,
         production_start_date: formData.production_start_date?.trim() || null,
       };
 

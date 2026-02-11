@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Users, Eye, EyeOff, ChevronLeft, ChevronRight, Pencil, X, Trash2, Calendar, Clock, AlertCircle, FolderKanban, Image, Instagram, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { normalizeTime } from '../lib/timeHelpers';
 import TimelineView from '../components/tasks/TimelineView';
 import ProjectCard from '../components/tasks/ProjectCard';
 import ProjectSelector from '../components/tasks/ProjectSelector';
@@ -310,8 +311,8 @@ export default function Tasks() {
       priority: formData.priority,
       start_date: formData.start_date || null,
       end_date: formData.end_date || null,
-      start_time: (formData.start_time?.trim() || null),
-      end_time: (formData.end_time?.trim() || null),
+      start_time: normalizeTime(formData.start_time),
+      end_time: normalizeTime(formData.end_time),
       status: 'todo',
       is_recurring: formData.is_recurring,
       recurrence_pattern: formData.recurrence_pattern || null,
@@ -382,8 +383,8 @@ export default function Tasks() {
       priority: formData.priority,
       start_date: formData.start_date || null,
       end_date: formData.end_date || null,
-      start_time: (formData.start_time?.trim() || null),
-      end_time: (formData.end_time?.trim() || null),
+      start_time: normalizeTime(formData.start_time),
+      end_time: normalizeTime(formData.end_time),
       is_recurring: formData.is_recurring,
       recurrence_pattern: formData.recurrence_pattern || null,
       collaborator_id: formData.collaborator_id || null,
@@ -531,7 +532,7 @@ export default function Tasks() {
           category: 'other',
           priority: 'medium',
           start_date: task.start_date || null,
-          start_time: (task.start_time?.trim() || null),
+          start_time: normalizeTime(task.start_time),
           end_date: null,
           end_time: null,
           status: 'todo',
