@@ -350,48 +350,45 @@ button, a, [role="button"] {
 }
 
 /* Client Map Wrapper - Fixed dimensions for stable rendering */
-.map-wrapper-client {
+.map-wrapper-client,
+.map-wrapper-client *[class*="leaflet"] {
   width: 100% !important;
   max-width: 100% !important;
-  height: 50vh !important;
-  min-height: 260px !important;
-  position: relative;
-  overflow: hidden;
-  background: #e8e8e8;
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
 }
 
-@media (min-width: 768px) {
-  .map-wrapper-client {
-    height: 420px !important;
-    min-height: 420px !important;
-  }
+.map-wrapper-client {
+  position: relative !important;
+  overflow: hidden !important;
+  background: #e8e8e8 !important;
 }
 
-@media (max-width: 480px) {
-  .map-wrapper-client {
-    height: 45vh !important;
-    min-height: 260px !important;
-  }
-}
-
-/* Client Leaflet Container - Force full size */
-.leaflet-map-client {
+/* Client Leaflet Container - Force full size and override any fixed dimensions */
+.map-wrapper-client .leaflet-container,
+.map-wrapper-client .leaflet-map-client {
   width: 100% !important;
+  max-width: 100% !important;
   height: 100% !important;
   min-height: 100% !important;
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
+  block-size: 100% !important;
+  min-block-size: 100% !important;
+  max-block-size: none !important;
+}
+
+.leaflet-map-client {
   position: absolute !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 0 !important;
 }
 
 .leaflet-map-client .leaflet-container {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  background: #e8e8e8;
+  background: #e8e8e8 !important;
 }
 
 /* Apply grayscale to client map */
