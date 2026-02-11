@@ -99,7 +99,14 @@ function generateCarrousel(title: string, platform: Platform, description?: stri
 📍 SLIDES 2-7 - CONTENU
 → Une idée de valeur par slide`;
 
-  const caption = `📚 ${title}`;
+  const caption = generateProfessionalCaption({
+    title,
+    contentType: 'carrousel',
+    platform,
+    description,
+    context
+  });
+
   const hashtags = generateHashtags(title, 'carrousel', platform);
 
   return { contentStructure, caption, hashtags };
@@ -107,7 +114,15 @@ function generateCarrousel(title: string, platform: Platform, description?: stri
 
 function generateReel(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
   const contentStructure = `🎬 REEL - ${title}`;
-  const caption = `🎬 ${title}`;
+
+  const caption = generateProfessionalCaption({
+    title,
+    contentType: 'reel',
+    platform,
+    description,
+    context
+  });
+
   const hashtags = generateHashtags(title, 'reel', platform);
 
   return { contentStructure, caption, hashtags };
@@ -115,7 +130,15 @@ function generateReel(title: string, platform: Platform, description?: string, c
 
 function generateStory(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
   const contentStructure = `📱 STORY - ${title}`;
-  const caption = `📱 ${title}`;
+
+  const caption = generateProfessionalCaption({
+    title,
+    contentType: 'story',
+    platform,
+    description,
+    context
+  });
+
   const hashtags = generateHashtags(title, 'story', platform);
 
   return { contentStructure, caption, hashtags };
@@ -123,10 +146,257 @@ function generateStory(title: string, platform: Platform, description?: string, 
 
 function generatePost(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
   const contentStructure = `📸 POST - ${title}`;
-  const caption = `${title}`;
+
+  const caption = generateProfessionalCaption({
+    title,
+    contentType: 'post',
+    platform,
+    description,
+    context
+  });
+
   const hashtags = generateHashtags(title, 'post', platform);
 
   return { contentStructure, caption, hashtags };
+}
+
+interface CaptionParams {
+  title: string;
+  contentType: ContentType;
+  platform: Platform;
+  description?: string;
+  context?: string;
+}
+
+function generateProfessionalCaption(params: CaptionParams): string {
+  const { title, contentType, platform, description, context } = params;
+
+  const objective = extractObjective(context);
+  const profession = extractProfession(context);
+
+  const hook = generateCaptionHook(title, platform, contentType);
+  const emotionalParagraph = generateEmotionalParagraph(title, platform, profession);
+  const coreMessage = generateCoreMessage(title, platform, contentType, profession);
+  const authorityPositioning = generateAuthorityPositioning(platform, profession);
+  const cta = generateStrategicCTA(platform, objective, contentType);
+
+  let caption = '';
+
+  if (platform === 'instagram') {
+    caption = `${hook}
+
+${emotionalParagraph}
+
+${coreMessage}
+
+${authorityPositioning}
+
+${cta}`;
+  } else if (platform === 'linkedin') {
+    caption = `${hook}
+
+${coreMessage}
+
+${authorityPositioning}
+
+${emotionalParagraph}
+
+${cta}`;
+  } else if (platform === 'tiktok') {
+    caption = `${hook}
+
+${emotionalParagraph}
+
+${coreMessage}
+
+${cta}`;
+  } else {
+    caption = `${hook}
+
+${emotionalParagraph}
+
+${coreMessage}
+
+${authorityPositioning}
+
+${cta}`;
+  }
+
+  return caption;
+}
+
+function extractObjective(context?: string): string {
+  if (!context) return 'éduquer';
+  if (context.includes('attirer')) return 'attirer';
+  if (context.includes('convertir')) return 'convertir';
+  if (context.includes('fidéliser')) return 'fidéliser';
+  return 'éduquer';
+}
+
+function extractProfession(context?: string): string {
+  if (!context) return 'beauté';
+  if (context.includes('nail')) return 'onglerie';
+  if (context.includes('esthétique')) return 'esthétique';
+  if (context.includes('coiffure')) return 'coiffure';
+  if (context.includes('cils')) return 'extensions de cils';
+  if (context.includes('sourcils')) return 'sourcils';
+  if (context.includes('visage')) return 'soins du visage';
+  return 'beauté';
+}
+
+function generateCaptionHook(title: string, platform: Platform, contentType: ContentType): string {
+  const hooks = [
+    `${title} ? Ce n'est pas ce que tu crois.`,
+    `Parlons de ${title.toLowerCase()} (sans filtre).`,
+    `${title}. Voilà ce que personne ne dit.`,
+    `La vérité sur ${title.toLowerCase()}.`,
+    `${title} : arrêtons les fausses croyances.`,
+    `Tu te demandes comment ${title.toLowerCase()} ? Voici la réalité.`,
+    `${title}. Et si on en parlait vraiment ?`,
+    `Tout ce qu'on ne t'a jamais dit sur ${title.toLowerCase()}.`,
+  ];
+
+  const seed = title.length + (platform === 'instagram' ? 0 : platform === 'linkedin' ? 10 : 20);
+  return hooks[seed % hooks.length];
+}
+
+function generateEmotionalParagraph(title: string, platform: Platform, profession: string): string {
+  const paragraphs = [
+    `La plupart des clientes pensent que c'est compliqué, irréversible, ou hors de portée.\nEn réalité, ce n'est ni une question de chance… ni une question de budget.`,
+
+    `Beaucoup me disent qu'elles ont essayé, que ça n'a pas marché, qu'elles ont abandonné.\nMais voici ce qu'on ne leur a jamais expliqué.`,
+
+    `Tu sais ce moment où tu te dis "pourquoi ça ne fonctionne jamais pour moi" ?\nCe n'est pas toi. C'est juste qu'on ne t'a pas donné les bonnes clés.`,
+
+    `Pendant longtemps, j'ai cru que c'était normal.\nQue c'était "comme ça" et qu'il fallait faire avec.\nPuis j'ai compris que non.`,
+
+    `Si tu te reconnais dans cette situation, sache une chose :\nCe n'est pas une fatalité. Et ce n'est pas de ta faute.`,
+
+    `J'entends souvent cette phrase : "Je ne sais pas si c'est pour moi".\nEt à chaque fois, ma réponse est la même : si tu te poses la question, c'est que tu en as besoin.`,
+
+    `Ce que je vais te dire va peut-être te surprendre.\nMais c'est exactement ce que mes clientes me disent après coup : "Pourquoi personne ne m'a dit ça avant ?"`,
+  ];
+
+  const seed = title.length + profession.length;
+  return paragraphs[seed % paragraphs.length];
+}
+
+function generateCoreMessage(title: string, platform: Platform, contentType: ContentType, profession: string): string {
+  const messages = [
+    `Voici ce que la plupart des gens ne comprennent pas :
+
+Ce n'est pas une question de technique parfaite.
+Ce n'est pas une question de produit magique.
+C'est une question de méthode adaptée à TOI.
+
+Quand c'est fait correctement :
+✔️ Le résultat tient dans le temps
+✔️ Tu te sens en confiance
+✔️ Tu n'as plus besoin de corriger ou de cacher
+
+Et surtout… tu retrouves ce sentiment de bien-être que tu cherchais.`,
+
+    `Ce que personne ne te dit :
+
+Plus tu essaies de "réparer" seule, plus tu risques d'aggraver.
+Plus c'est mal fait, plus c'est difficile à rattraper.
+Et plus tu attends, plus tu perds confiance.
+
+Avec la bonne approche :
+✔️ On comprend d'abord ton besoin réel
+✔️ On adapte la solution à ta situation
+✔️ On obtient un résultat durable et naturel
+
+La différence ne se voit pas que dans le résultat.\nElle se voit dans la posture, dans le regard, dans la confiance retrouvée.`,
+
+    `Pourquoi ça fonctionne quand c'est bien fait :
+
+1️⃣ Parce qu'on ne force rien
+2️⃣ Parce qu'on respecte ce qui est déjà là
+3️⃣ Parce qu'on travaille AVEC toi, pas contre toi
+
+Le résultat ?
+→ Plus besoin de stresser
+→ Plus besoin de tout surveiller
+→ Juste profiter du résultat
+
+Et c'est exactement ce que mes clientes me disent à chaque fois.`,
+
+    `Voici la réalité que beaucoup ignorent :
+
+Ce n'est pas "grave" ou "perdu d'avance".\nC'est juste qu'il faut la bonne méthode.
+
+Quand c'est adapté à toi :
+✔️ Ça tient beaucoup plus longtemps
+✔️ C'est beaucoup plus confortable
+✔️ Tu retrouves une vraie sérénité
+
+Et ça… ça change tout.
+
+Pas seulement au niveau du résultat visible.\nMais surtout au niveau de ce que TU ressens.`,
+
+    `Ce qui fait toute la différence :
+
+❌ Penser que "c'est comme ça" et qu'on ne peut rien y faire
+✔️ Comprendre qu'avec la bonne approche, tout change
+
+❌ Essayer des solutions génériques qui ne fonctionnent pas
+✔️ Avoir une solution personnalisée, adaptée à TOI
+
+❌ Perdre du temps et de l'argent dans des options inadaptées
+✔️ Investir intelligemment dans ce qui fonctionne vraiment
+
+Le résultat ? Mes clientes reviennent.\nPas par obligation. Par choix.`,
+  ];
+
+  const seed = title.length * contentType.length;
+  return messages[seed % messages.length];
+}
+
+function generateAuthorityPositioning(platform: Platform, profession: string): string {
+  const positionings = [
+    `J'ai accompagné des dizaines de clientes dans cette transformation.\nEt chaque fois, c'est la même chose : ce n'est pas juste le résultat qui change.\nC'est la confiance qui revient.`,
+
+    `Après des années dans ce métier, je peux te dire une chose :\nLa technique, tout le monde peut l'apprendre.\nCe qui fait la différence, c'est l'écoute et l'adaptation.`,
+
+    `Ce que j'ai appris avec le temps :\nChaque personne est différente.\nChaque situation demande une approche unique.\nEt c'est exactement ce que je fais.`,
+
+    `Mon approche est simple :\nJe ne propose jamais la même chose à tout le monde.\nParce que tu n'es pas "tout le monde".`,
+
+    `Ce qui me passionne dans mon métier ?\nCe n'est pas le geste technique.\nC'est le moment où ma cliente réalise que oui, c'est possible pour elle aussi.`,
+  ];
+
+  const seed = profession.length + platform.length;
+  return positionings[seed % positionings.length];
+}
+
+function generateStrategicCTA(platform: Platform, objective: string, contentType: ContentType): string {
+  const ctas: Record<string, string[]> = {
+    attirer: [
+      `Si ce post résonne pour toi :\n💬 Commente "OUI" ou partage-le en story\n📌 Sauvegarde-le pour le relire plus tard`,
+      `Tu te reconnais dans ce post ?\n💾 Sauvegarde-le\n📤 Partage-le à quelqu'un qui en a besoin`,
+      `Ce post t'a parlé ?\n💬 Dis-moi en commentaire\n📩 Ou partage-le avec une amie`,
+    ],
+    éduquer: [
+      `Tu veux en savoir plus ?\n💬 Pose-moi tes questions en commentaire\n📩 Ou envoie-moi un DM, je te réponds avec plaisir`,
+      `Des questions sur ce sujet ?\n💬 Écris-les en commentaire\n📌 Et sauvegarde ce post pour ne pas l'oublier`,
+      `Besoin de plus de détails ?\n📩 DM-moi, je t'explique tout\n💾 Sauvegarde ce post pour le retrouver facilement`,
+    ],
+    convertir: [
+      `Si tu te reconnais dans ce post :\n📍 Prends rendez-vous maintenant (lien en bio)\n💬 Ou écris-moi "RDV" en commentaire`,
+      `Prête à passer à l'action ?\n📲 Réserve ton créneau (lien en bio)\n💬 Ou DM-moi "RÉSERVATION" pour qu'on en parle`,
+      `Tu veux vivre cette transformation ?\n📍 Clique sur le lien en bio\n💬 Ou commente "GO" et je t'explique tout`,
+    ],
+    fidéliser: [
+      `Tu fais déjà partie de mes clientes ?\n💬 Dis-moi en commentaire ce que tu as préféré lors de ton dernier RDV\n📌 Et n'oublie pas de réserver ton prochain créneau`,
+      `Mes clientes régulières, ce post est pour vous :\n💬 Partagez votre expérience en commentaire\n📩 Et n'hésitez pas à me DM si besoin`,
+      `Si tu es déjà passée entre mes mains :\n💬 Raconte-moi ce qui a changé pour toi\n📌 Et pense à réserver ton prochain RDV (lien en bio)`,
+    ],
+  };
+
+  const objectiveCTAs = ctas[objective] || ctas['éduquer'];
+  const seed = objective.length + contentType.length;
+  return objectiveCTAs[seed % objectiveCTAs.length];
 }
 
 export function generateHashtags(
