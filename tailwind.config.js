@@ -26,9 +26,9 @@ export default {
           900: '#882761',
         },
         'brand': {
-          'from': '#d8629b',
+          'from': '#ffeae0',
           'to': '#faa77e',
-          '50': '#fff1ea',
+          '50': '#ffddcb',
           '100': '#ffdcc4',
           '200': '#ffcfaf',
           '300': '#ffb89a',
