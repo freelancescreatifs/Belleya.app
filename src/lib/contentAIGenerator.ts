@@ -112,7 +112,8 @@ function generateCarrousel(title: string, platform: Platform, description?: stri
     contentType: 'carrousel',
     platform,
     description,
-    context
+    context,
+    originalTheme: developTitle ? title : undefined
   });
 
   const hashtags = generateHashtags(title, 'carrousel', platform);
@@ -137,7 +138,8 @@ ${developedSection}Script adapté pour format vidéo court avec hook visuel fort
     contentType: 'reel',
     platform,
     description,
-    context
+    context,
+    originalTheme: developTitle ? title : undefined
   });
 
   const hashtags = generateHashtags(title, 'reel', platform);
@@ -162,7 +164,8 @@ ${developedSection}Format story : court, direct, authentique`;
     contentType: 'story',
     platform,
     description,
-    context
+    context,
+    originalTheme: developTitle ? title : undefined
   });
 
   const hashtags = generateHashtags(title, 'story', platform);
@@ -187,7 +190,8 @@ ${developedSection}Contenu statique avec légende engageante`;
     contentType: 'post',
     platform,
     description,
-    context
+    context,
+    originalTheme: developTitle ? title : undefined
   });
 
   const hashtags = generateHashtags(title, 'post', platform);
@@ -201,6 +205,13 @@ interface CaptionParams {
   platform: Platform;
   description?: string;
   context?: string;
+  originalTheme?: string;
+}
+
+function extractTopicKeywords(rawTitle: string): string[] {
+  const stopWords = ['en', 'de', 'la', 'le', 'les', 'un', 'une', 'des', 'du', 'et', 'ou', 'à', 'au', 'pour', 'dans', 'sur', 'avec', 'sans', 'par', '2024', '2025', '2026', '2027'];
+  const words = rawTitle.toLowerCase().split(/\s+/);
+  return words.filter(w => w.length > 2 && !stopWords.includes(w));
 }
 
 function developContentTitle(rawTitle: string, contentType: ContentType, platform: Platform, context?: string): string {
@@ -209,40 +220,40 @@ function developContentTitle(rawTitle: string, contentType: ContentType, platfor
 
   const titlePatterns = {
     attirer: [
-      `Pourquoi ${rawTitle.toLowerCase()} (et ce que tu dois savoir)`,
+      `Pourquoi ${rawTitle} (et ce que tu dois savoir)`,
       `${rawTitle} : ce que personne ne te dit`,
-      `La vérité sur ${rawTitle.toLowerCase()}`,
+      `La vérité sur ${rawTitle}`,
       `${rawTitle} : arrête de faire ces erreurs`,
-      `Ce que tu ignores sur ${rawTitle.toLowerCase()}`,
+      `Ce que tu ignores sur ${rawTitle}`,
       `${rawTitle} : le guide que j'aurais aimé avoir`,
-      `Tout ce qu'on ne t'a jamais dit sur ${rawTitle.toLowerCase()}`,
+      `Tout ce qu'on ne t'a jamais dit sur ${rawTitle}`,
       `${rawTitle} : les 3 erreurs les plus courantes`,
     ],
     éduquer: [
-      `Comment ${rawTitle.toLowerCase()} (la bonne méthode)`,
+      `Comment ${rawTitle} (la bonne méthode)`,
       `${rawTitle} : le guide complet`,
-      `Comprendre ${rawTitle.toLowerCase()} en 5 points`,
+      `Comprendre ${rawTitle} en 5 points`,
       `${rawTitle} : explications et solutions`,
-      `Pourquoi ${rawTitle.toLowerCase()} et comment y remédier`,
+      `Pourquoi ${rawTitle} et comment y remédier`,
       `${rawTitle} : ce que tu dois absolument savoir`,
-      `Les bases de ${rawTitle.toLowerCase()} expliquées simplement`,
+      `Les bases de ${rawTitle} expliquées simplement`,
       `${rawTitle} : décryptage et conseils pratiques`,
     ],
     convertir: [
       `${rawTitle} : la solution que tu cherchais`,
-      `Arrête de ${rawTitle.toLowerCase()} (j'ai la solution)`,
       `${rawTitle} : comment je peux t'aider`,
-      `Tu veux ${rawTitle.toLowerCase()} ? Voici comment`,
-      `${rawTitle} : réserve maintenant pour un résultat garanti`,
       `${rawTitle} : la transformation que mes clientes adorent`,
+      `${rawTitle} : réserve maintenant pour un résultat garanti`,
       `${rawTitle} : pourquoi mes clientes ne vont plus ailleurs`,
-      `La méthode ${rawTitle.toLowerCase()} qui change tout`,
+      `La méthode ${rawTitle} qui change tout`,
+      `${rawTitle} : arrête de souffrir, j'ai la solution`,
+      `${rawTitle} : voici comment obtenir un résultat durable`,
     ],
     fidéliser: [
       `${rawTitle} : pourquoi mes clientes reviennent toujours`,
       `${rawTitle} : l'expérience que tu mérites`,
       `${rawTitle} : ce qui fait la différence chez moi`,
-      `Mes clientes adorent ${rawTitle.toLowerCase()} (voici pourquoi)`,
+      `Mes clientes adorent ${rawTitle} (voici pourquoi)`,
       `${rawTitle} : le secret de mes clientes fidèles`,
       `${rawTitle} : ton moment rien qu'à toi`,
       `${rawTitle} : l'attention que je porte à chaque détail`,
@@ -256,16 +267,16 @@ function developContentTitle(rawTitle: string, contentType: ContentType, platfor
 }
 
 function generateProfessionalCaption(params: CaptionParams): string {
-  const { title, contentType, platform, description, context } = params;
+  const { title, contentType, platform, description, context, originalTheme } = params;
 
   const objective = extractObjective(context);
   const profession = extractProfession(context);
 
   const hook = generateCaptionHook(title, platform, contentType);
-  const emotionalParagraph = generateEmotionalParagraph(title, platform, profession);
-  const coreMessage = generateCoreMessage(title, platform, contentType, profession);
+  const emotionalParagraph = generateEmotionalParagraph(title, platform, profession, originalTheme);
+  const coreMessage = generateCoreMessage(title, platform, contentType, profession, originalTheme);
   const authorityPositioning = generateAuthorityPositioning(platform, profession);
-  const cta = generateStrategicCTA(platform, objective, contentType);
+  const cta = generateStrategicCTA(platform, objective, contentType, originalTheme);
 
   let caption = '';
 
@@ -335,13 +346,14 @@ function generateCaptionHook(title: string, platform: Platform, contentType: Con
   const extractCoreTheme = (developedTitle: string): string => {
     const lower = developedTitle.toLowerCase();
     if (lower.includes('pourquoi')) {
-      const match = lower.match(/pourquoi (.+?) (?:\(|et|:)/);
-      return match ? match[1].trim() : developedTitle.substring(0, 50);
+      const match = lower.match(/pourquoi (.+?)(?:\(| et | : |$)/);
+      if (match) return match[1].trim();
     }
     if (lower.includes(':')) {
-      return developedTitle.split(':')[0].trim();
+      const parts = developedTitle.split(':');
+      if (parts[0].length > 10) return parts[0].trim();
     }
-    return developedTitle.substring(0, 60);
+    return developedTitle.substring(0, 80);
   };
 
   const coreTheme = extractCoreTheme(title);
@@ -352,7 +364,7 @@ function generateCaptionHook(title: string, platform: Platform, contentType: Con
     `${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)}. Voilà ce que personne ne dit.`,
     `La vérité sur ${coreTheme}.`,
     `${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)} : arrêtons les fausses croyances.`,
-    `Tu te demandes ${coreTheme} ? Voici la réalité.`,
+    `Tu te demandes pourquoi ${coreTheme} ? Voici la réalité.`,
     `${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)}. Et si on en parlait vraiment ?`,
     `Tout ce qu'on ne t'a jamais dit sur ${coreTheme}.`,
   ];
@@ -361,73 +373,77 @@ function generateCaptionHook(title: string, platform: Platform, contentType: Con
   return hooks[seed % hooks.length];
 }
 
-function generateEmotionalParagraph(title: string, platform: Platform, profession: string): string {
+function generateEmotionalParagraph(title: string, platform: Platform, profession: string, originalTheme?: string): string {
+  const theme = originalTheme || title;
+
   const paragraphs = [
-    `La plupart des clientes pensent que c'est compliqué, irréversible, ou hors de portée.\nEn réalité, ce n'est ni une question de chance… ni une question de budget.`,
+    `La plupart des clientes pensent que ${theme.toLowerCase()}, c'est compliqué ou hors de portée.\nEn réalité, ce n'est ni une question de chance… ni une question de budget.`,
 
-    `Beaucoup me disent qu'elles ont essayé, que ça n'a pas marché, qu'elles ont abandonné.\nMais voici ce qu'on ne leur a jamais expliqué.`,
+    `Beaucoup me disent qu'elles ont essayé avec ${theme.toLowerCase()}, que ça n'a pas marché, qu'elles ont abandonné.\nMais voici ce qu'on ne leur a jamais expliqué.`,
 
-    `Tu sais ce moment où tu te dis "pourquoi ça ne fonctionne jamais pour moi" ?\nCe n'est pas toi. C'est juste qu'on ne t'a pas donné les bonnes clés.`,
+    `Tu sais ce moment où tu te dis "pourquoi ${theme.toLowerCase()} ne fonctionne jamais pour moi" ?\nCe n'est pas toi. C'est juste qu'on ne t'a pas donné les bonnes clés.`,
 
-    `Pendant longtemps, j'ai cru que c'était normal.\nQue c'était "comme ça" et qu'il fallait faire avec.\nPuis j'ai compris que non.`,
+    `Pendant longtemps, j'ai cru que ${theme.toLowerCase()} était normal.\nQue c'était "comme ça" et qu'il fallait faire avec.\nPuis j'ai compris que non.`,
 
-    `Si tu te reconnais dans cette situation, sache une chose :\nCe n'est pas une fatalité. Et ce n'est pas de ta faute.`,
+    `Si ${theme.toLowerCase()} te concerne, sache une chose :\nCe n'est pas une fatalité. Et ce n'est pas de ta faute.`,
 
-    `J'entends souvent cette phrase : "Je ne sais pas si c'est pour moi".\nEt à chaque fois, ma réponse est la même : si tu te poses la question, c'est que tu en as besoin.`,
+    `J'entends souvent cette phrase au sujet de ${theme.toLowerCase()} : "Je ne sais pas si c'est pour moi".\nEt à chaque fois, ma réponse est la même : si tu te poses la question, c'est que tu en as besoin.`,
 
-    `Ce que je vais te dire va peut-être te surprendre.\nMais c'est exactement ce que mes clientes me disent après coup : "Pourquoi personne ne m'a dit ça avant ?"`,
+    `Ce que je vais te dire sur ${theme.toLowerCase()} va peut-être te surprendre.\nMais c'est exactement ce que mes clientes me disent après coup : "Pourquoi personne ne m'a dit ça avant ?"`,
   ];
 
   const seed = title.length + profession.length;
   return paragraphs[seed % paragraphs.length];
 }
 
-function generateCoreMessage(title: string, platform: Platform, contentType: ContentType, profession: string): string {
+function generateCoreMessage(title: string, platform: Platform, contentType: ContentType, profession: string, originalTheme?: string): string {
+  const theme = originalTheme || title;
+
   const messages = [
-    `Voici ce que la plupart des gens ne comprennent pas :
+    `Voici ce que la plupart des gens ne comprennent pas concernant ${theme.toLowerCase()} :
 
 Ce n'est pas une question de technique parfaite.
 Ce n'est pas une question de produit magique.
 C'est une question de méthode adaptée à TOI.
 
-Quand c'est fait correctement :
+Quand ${theme.toLowerCase()} est traité correctement :
 ✔️ Le résultat tient dans le temps
 ✔️ Tu te sens en confiance
 ✔️ Tu n'as plus besoin de corriger ou de cacher
 
 Et surtout… tu retrouves ce sentiment de bien-être que tu cherchais.`,
 
-    `Ce que personne ne te dit :
+    `Ce que personne ne te dit sur ${theme.toLowerCase()} :
 
 Plus tu essaies de "réparer" seule, plus tu risques d'aggraver.
 Plus c'est mal fait, plus c'est difficile à rattraper.
 Et plus tu attends, plus tu perds confiance.
 
-Avec la bonne approche :
+Avec la bonne approche pour ${theme.toLowerCase()} :
 ✔️ On comprend d'abord ton besoin réel
 ✔️ On adapte la solution à ta situation
 ✔️ On obtient un résultat durable et naturel
 
 La différence ne se voit pas que dans le résultat.\nElle se voit dans la posture, dans le regard, dans la confiance retrouvée.`,
 
-    `Pourquoi ça fonctionne quand c'est bien fait :
+    `Pourquoi ${theme.toLowerCase()} fonctionne quand c'est bien fait :
 
 1️⃣ Parce qu'on ne force rien
 2️⃣ Parce qu'on respecte ce qui est déjà là
 3️⃣ Parce qu'on travaille AVEC toi, pas contre toi
 
-Le résultat ?
+Le résultat avec ${theme.toLowerCase()} ?
 → Plus besoin de stresser
 → Plus besoin de tout surveiller
 → Juste profiter du résultat
 
 Et c'est exactement ce que mes clientes me disent à chaque fois.`,
 
-    `Voici la réalité que beaucoup ignorent :
+    `Voici la réalité que beaucoup ignorent concernant ${theme.toLowerCase()} :
 
 Ce n'est pas "grave" ou "perdu d'avance".\nC'est juste qu'il faut la bonne méthode.
 
-Quand c'est adapté à toi :
+Quand ${theme.toLowerCase()} est traité de manière adaptée :
 ✔️ Ça tient beaucoup plus longtemps
 ✔️ C'est beaucoup plus confortable
 ✔️ Tu retrouves une vraie sérénité
@@ -436,7 +452,7 @@ Et ça… ça change tout.
 
 Pas seulement au niveau du résultat visible.\nMais surtout au niveau de ce que TU ressens.`,
 
-    `Ce qui fait toute la différence :
+    `Ce qui fait toute la différence avec ${theme.toLowerCase()} :
 
 ❌ Penser que "c'est comme ça" et qu'on ne peut rien y faire
 ✔️ Comprendre qu'avec la bonne approche, tout change
@@ -471,27 +487,29 @@ function generateAuthorityPositioning(platform: Platform, profession: string): s
   return positionings[seed % positionings.length];
 }
 
-function generateStrategicCTA(platform: Platform, objective: string, contentType: ContentType): string {
+function generateStrategicCTA(platform: Platform, objective: string, contentType: ContentType, originalTheme?: string): string {
+  const themeContext = originalTheme ? ` concernant ${originalTheme.toLowerCase()}` : '';
+
   const ctas: Record<string, string[]> = {
     attirer: [
-      `Si ce post résonne pour toi :\n💬 Commente "OUI" ou partage-le en story\n📌 Sauvegarde-le pour le relire plus tard`,
-      `Tu te reconnais dans ce post ?\n💾 Sauvegarde-le\n📤 Partage-le à quelqu'un qui en a besoin`,
-      `Ce post t'a parlé ?\n💬 Dis-moi en commentaire\n📩 Ou partage-le avec une amie`,
+      `Si ce post${themeContext} résonne pour toi :\n💬 Commente "OUI" ou partage-le en story\n📌 Sauvegarde-le pour le relire plus tard`,
+      `Tu te reconnais dans ce post${themeContext} ?\n💾 Sauvegarde-le\n📤 Partage-le à quelqu'un qui en a besoin`,
+      `Ce post${themeContext} t'a parlé ?\n💬 Dis-moi en commentaire\n📩 Ou partage-le avec une amie`,
     ],
     éduquer: [
-      `Tu veux en savoir plus ?\n💬 Pose-moi tes questions en commentaire\n📩 Ou envoie-moi un DM, je te réponds avec plaisir`,
-      `Des questions sur ce sujet ?\n💬 Écris-les en commentaire\n📌 Et sauvegarde ce post pour ne pas l'oublier`,
-      `Besoin de plus de détails ?\n📩 DM-moi, je t'explique tout\n💾 Sauvegarde ce post pour le retrouver facilement`,
+      `Tu veux en savoir plus${themeContext} ?\n💬 Pose-moi tes questions en commentaire\n📩 Ou envoie-moi un DM, je te réponds avec plaisir`,
+      `Des questions sur ce sujet${themeContext} ?\n💬 Écris-les en commentaire\n📌 Et sauvegarde ce post pour ne pas l'oublier`,
+      `Besoin de plus de détails${themeContext} ?\n📩 DM-moi, je t'explique tout\n💾 Sauvegarde ce post pour le retrouver facilement`,
     ],
     convertir: [
-      `Si tu te reconnais dans ce post :\n📍 Prends rendez-vous maintenant (lien en bio)\n💬 Ou écris-moi "RDV" en commentaire`,
-      `Prête à passer à l'action ?\n📲 Réserve ton créneau (lien en bio)\n💬 Ou DM-moi "RÉSERVATION" pour qu'on en parle`,
-      `Tu veux vivre cette transformation ?\n📍 Clique sur le lien en bio\n💬 Ou commente "GO" et je t'explique tout`,
+      `Si${themeContext} te concerne :\n📍 Prends rendez-vous maintenant (lien en bio)\n💬 Ou écris-moi "RDV" en commentaire`,
+      `Prête à passer à l'action${themeContext} ?\n📲 Réserve ton créneau (lien en bio)\n💬 Ou DM-moi "RÉSERVATION" pour qu'on en parle`,
+      `Tu veux résoudre ${originalTheme || 'ce problème'} ?\n📍 Clique sur le lien en bio\n💬 Ou commente "GO" et je t'explique tout`,
     ],
     fidéliser: [
       `Tu fais déjà partie de mes clientes ?\n💬 Dis-moi en commentaire ce que tu as préféré lors de ton dernier RDV\n📌 Et n'oublie pas de réserver ton prochain créneau`,
-      `Mes clientes régulières, ce post est pour vous :\n💬 Partagez votre expérience en commentaire\n📩 Et n'hésitez pas à me DM si besoin`,
-      `Si tu es déjà passée entre mes mains :\n💬 Raconte-moi ce qui a changé pour toi\n📌 Et pense à réserver ton prochain RDV (lien en bio)`,
+      `Mes clientes régulières, ce post${themeContext} est pour vous :\n💬 Partagez votre expérience en commentaire\n📩 Et n'hésitez pas à me DM si besoin`,
+      `Si tu es déjà passée entre mes mains :\n💬 Raconte-moi ce qui a changé pour toi${themeContext}\n📌 Et pense à réserver ton prochain RDV (lien en bio)`,
     ],
   };
 
@@ -636,6 +654,108 @@ function generateStrategicIdeas(
   return ideas;
 }
 
+function generateTopicAlignedScript(
+  customTitle: string,
+  format: string,
+  platform: string,
+  objective: string,
+  professionContext: string
+): string {
+  const keywords = extractTopicKeywords(customTitle);
+  const mainTopic = customTitle;
+
+  if (format === 'carrousel') {
+    return `→ SLIDE 1 (Hook - DOIT mentionner "${mainTopic}")
+"${mainTopic} ?"
+Ce n'est pas ce que tu crois.
+
+→ SLIDE 2 (Problème - reste sur le sujet)
+La plupart des gens pensent que ${mainTopic.toLowerCase()}…
+Mais voici la vérité.
+
+→ SLIDE 3 (Cause réelle)
+Ce n'est pas une fatalité.
+C'est une question de méthode.
+
+→ SLIDE 4 (Solution concrète)
+Voici ce qui fonctionne vraiment pour ${mainTopic.toLowerCase()} :
+✔️ Comprendre la cause
+✔️ Adapter la solution
+✔️ Obtenir un résultat durable
+
+→ SLIDE 5 (Résultat)
+Imagine ne plus avoir à gérer ${mainTopic.toLowerCase()}.
+Juste profiter du résultat.
+
+→ SLIDE 6 (Preuve)
+Mes clientes me disent :
+"Pourquoi personne ne m'a dit ça avant ?"
+
+→ SLIDE 7 (CTA)
+Si ${mainTopic.toLowerCase()} te concerne :
+Réserve maintenant (lien en bio)`;
+  }
+
+  if (format === 'reel' || format === 'video') {
+    return `→ 0-3s HOOK (DOIT mentionner "${mainTopic}")
+"${mainTopic}"
+[Arrêt brutal]
+
+→ 3-8s PROBLÈME
+Tu te reconnais ?
+[Montrer la situation]
+
+→ 8-13s SOLUTION
+Voici ce qui change tout pour ${mainTopic.toLowerCase()}
+[Montrer la méthode]
+
+→ 13-17s RÉSULTAT
+Le résultat : mes clientes ne revivent plus ${mainTopic.toLowerCase()}
+[Avant/après]
+
+→ 17-20s CTA
+Tu veux la même chose ?
+→ Réserve (lien en bio)`;
+  }
+
+  return `HOOK : ${mainTopic} ? Voici la vérité.
+
+CONTENU : Explication détaillée qui reste 100% alignée avec ${mainTopic}.
+
+CTA : Si ${mainTopic.toLowerCase()} te concerne, réserve maintenant.`;
+}
+
+function verifyTopicCoherence(customTitle: string, script: string): { aligned: boolean; issues: string[] } {
+  const keywords = extractTopicKeywords(customTitle);
+  const scriptLower = script.toLowerCase();
+  const issues: string[] = [];
+
+  const keywordMatches = keywords.filter(kw => scriptLower.includes(kw.toLowerCase()));
+
+  if (keywordMatches.length === 0) {
+    issues.push(`❌ AUCUN mot-clé du thème "${customTitle}" trouvé dans le script`);
+  }
+
+  const mainTopicMentioned = scriptLower.includes(customTitle.toLowerCase().substring(0, 15));
+  if (!mainTopicMentioned) {
+    issues.push(`❌ Le thème "${customTitle}" n'est pas mentionné explicitement`);
+  }
+
+  const genericTopics = ['annulation', 'réservation', 'planning', 'communication'];
+  const hasGenericDrift = genericTopics.some(topic =>
+    scriptLower.includes(topic) && !customTitle.toLowerCase().includes(topic)
+  );
+
+  if (hasGenericDrift) {
+    issues.push(`⚠️ Possible dérive vers un sujet générique non lié à "${customTitle}"`);
+  }
+
+  return {
+    aligned: issues.length === 0,
+    issues
+  };
+}
+
 function generateUltraStrategicIdea(
   professionContext: string,
   format: string,
@@ -646,21 +766,50 @@ function generateUltraStrategicIdea(
   index: number,
   seed: number
 ): ContentIdea {
-  const hookExample = generatePatternInterruptHook(format, platform, objective, professionContext, index, seed);
-  const psychologicalTriggers = getPsychologicalTriggers(objective, format, index, seed);
-  const contentAngle = generateStrategicAngle(format, platform, objective, professionContext, index, seed);
-  const fullScript = generateCompleteScript(format, platform, objective, professionContext, index, seed);
-  const retentionStructure = getRetentionStructure(format, platform, index, seed);
-  const conversionVersion = getConversionVersion(format, platform, objective, professionContext, index, seed);
-  const alignment = getAlignmentNote(format, platform, objective, pillar, professionContext);
-
   let ideaTitle: string;
+  let fullScript: string;
+  let coherenceCheck = '';
+
   if (customTitle) {
     const contextForTitle = buildContext(objective, pillar, professionContext);
     ideaTitle = developContentTitle(customTitle, format as ContentType, platform as Platform, contextForTitle);
+
+    fullScript = generateTopicAlignedScript(customTitle, format, platform, objective, professionContext);
+
+    const verification = verifyTopicCoherence(customTitle, fullScript);
+    coherenceCheck = `
+✅ VÉRIFICATION DE COHÉRENCE (OBLIGATOIRE)
+
+Thème source : "${customTitle}"
+${verification.aligned ? '✅ Alignement : 100% CONFORME' : '❌ Alignement : NON CONFORME'}
+
+${verification.issues.length > 0 ? verification.issues.join('\n') : '✅ Le script reste 100% aligné avec le thème fourni'}
+${verification.aligned ? '✅ Le sujet n\'a PAS dérivé vers des sujets génériques' : ''}
+${verification.aligned ? `✅ Les mots-clés "${extractTopicKeywords(customTitle).join(', ')}" sont présents` : ''}
+
+IMPORTANT : Ce contenu parle UNIQUEMENT de "${customTitle}",
+et ne dérive PAS vers d'autres sujets (annulations, communication, etc.)
+
+---
+
+`;
   } else {
     ideaTitle = generateIdeaTitle(format, objective, professionContext, index, seed);
+    fullScript = generateCompleteScript(format, platform, objective, professionContext, index, seed);
   }
+
+  const hookExample = customTitle
+    ? `${customTitle} ? Ce n'est pas ce que tu crois.`
+    : generatePatternInterruptHook(format, platform, objective, professionContext, index, seed);
+
+  const psychologicalTriggers = getPsychologicalTriggers(objective, format, index, seed);
+  const contentAngle = customTitle
+    ? `Rester 100% aligné avec "${customTitle}" tout en créant l'identification, amplifier la frustration liée à ce sujet précis, puis présenter la solution experte adaptée à ce problème spécifique.`
+    : generateStrategicAngle(format, platform, objective, professionContext, index, seed);
+
+  const retentionStructure = getRetentionStructure(format, platform, index, seed);
+  const conversionVersion = getConversionVersion(format, platform, objective, professionContext, index, seed);
+  const alignment = getAlignmentNote(format, platform, objective, pillar, professionContext);
 
   const developedTitleSection = customTitle && ideaTitle !== customTitle
     ? `📌 SUJET DÉVELOPPÉ À PARTIR DE TON THÈME
@@ -668,12 +817,15 @@ function generateUltraStrategicIdea(
 Thème brut fourni : "${customTitle}"
 ✅ Sujet développé : "${ideaTitle}"
 
+⚠️ RÈGLE ABSOLUE : Le contenu ci-dessous parle UNIQUEMENT de "${customTitle}"
+Le sujet ne dérive PAS vers d'autres thèmes.
+
 ---
 
 `
     : '';
 
-  const description = `${developedTitleSection}📌 HOOK EXEMPLE (Pattern Interrupt)
+  const description = `${developedTitleSection}${coherenceCheck}📌 HOOK EXEMPLE (Pattern Interrupt)
 
 "${hookExample}"
 
@@ -685,7 +837,7 @@ ${psychologicalTriggers}
 
 ${contentAngle}
 
-📚 FORMAT SCRIPT COMPLET
+📚 FORMAT SCRIPT COMPLET${customTitle ? ` (100% aligné avec "${customTitle}")` : ''}
 
 ${fullScript}
 
