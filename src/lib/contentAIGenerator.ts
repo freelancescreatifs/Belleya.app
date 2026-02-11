@@ -9,6 +9,7 @@ interface GenerationParams {
   objective?: 'attirer' | 'éduquer' | 'convertir' | 'fidéliser';
   pillar?: string;
   profession?: string;
+  developTitle?: boolean;
 }
 
 interface GeneratedContent {
@@ -19,7 +20,7 @@ interface GeneratedContent {
 }
 
 export function generateContentAI(params: GenerationParams): GeneratedContent {
-  const { title, contentType, platform, description, objective, pillar, profession } = params;
+  const { title, contentType, platform, description, objective, pillar, profession, developTitle = false } = params;
 
   const context = buildContext(objective, pillar, profession);
   const script = generateDetailedScript(title, contentType, platform, description, objective, pillar, profession);
@@ -27,18 +28,18 @@ export function generateContentAI(params: GenerationParams): GeneratedContent {
   let baseContent: GeneratedContent;
   switch (contentType) {
     case 'carrousel':
-      baseContent = generateCarrousel(title, platform, description, context);
+      baseContent = generateCarrousel(title, platform, description, context, developTitle);
       break;
     case 'reel':
     case 'video':
-      baseContent = generateReel(title, platform, description, context);
+      baseContent = generateReel(title, platform, description, context, developTitle);
       break;
     case 'story':
-      baseContent = generateStory(title, platform, description, context);
+      baseContent = generateStory(title, platform, description, context, developTitle);
       break;
     case 'post':
     default:
-      baseContent = generatePost(title, platform, description, context);
+      baseContent = generatePost(title, platform, description, context, developTitle);
   }
 
   return { ...baseContent, script };
@@ -90,25 +91,24 @@ function generateDetailedScript(
   return `Script généré pour: ${title}`;
 }
 
-function generateCarrousel(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
+function generateCarrousel(title: string, platform: Platform, description?: string, context?: string, developTitle: boolean = false): GeneratedContent {
   const contextHeader = context ? `\n🎯 ${context}\n\n---\n\n` : '';
 
-  const developedTitle = developContentTitle(title, 'carrousel', platform, context);
+  const finalTitle = developTitle ? developContentTitle(title, 'carrousel', platform, context) : title;
+  const showDevelopedSection = developTitle && finalTitle !== title;
 
-  const contentStructure = `${contextHeader}📌 SUJET DÉVELOPPÉ
+  const developedSection = showDevelopedSection
+    ? `📌 SUJET DÉVELOPPÉ\n\n"${finalTitle}"\n\n---\n\n`
+    : '';
 
-"${developedTitle}"
-
----
-
-📍 SLIDE 1 - HOOK
+  const contentStructure = `${contextHeader}${developedSection}📍 SLIDE 1 - HOOK
 → Titre percutant qui arrête le scroll
 
 📍 SLIDES 2-7 - CONTENU
 → Une idée de valeur par slide`;
 
   const caption = generateProfessionalCaption({
-    title: developedTitle,
+    title: finalTitle,
     contentType: 'carrousel',
     platform,
     description,
@@ -120,21 +120,20 @@ function generateCarrousel(title: string, platform: Platform, description?: stri
   return { contentStructure, caption, hashtags };
 }
 
-function generateReel(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
-  const developedTitle = developContentTitle(title, 'reel', platform, context);
+function generateReel(title: string, platform: Platform, description?: string, context?: string, developTitle: boolean = false): GeneratedContent {
+  const finalTitle = developTitle ? developContentTitle(title, 'reel', platform, context) : title;
+  const showDevelopedSection = developTitle && finalTitle !== title;
+
+  const developedSection = showDevelopedSection
+    ? `📌 SUJET DÉVELOPPÉ\n\n"${finalTitle}"\n\n---\n\n`
+    : '';
 
   const contentStructure = `🎬 REEL
 
-📌 SUJET DÉVELOPPÉ
-
-"${developedTitle}"
-
----
-
-Script adapté pour format vidéo court avec hook visuel fort`;
+${developedSection}Script adapté pour format vidéo court avec hook visuel fort`;
 
   const caption = generateProfessionalCaption({
-    title: developedTitle,
+    title: finalTitle,
     contentType: 'reel',
     platform,
     description,
@@ -146,21 +145,20 @@ Script adapté pour format vidéo court avec hook visuel fort`;
   return { contentStructure, caption, hashtags };
 }
 
-function generateStory(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
-  const developedTitle = developContentTitle(title, 'story', platform, context);
+function generateStory(title: string, platform: Platform, description?: string, context?: string, developTitle: boolean = false): GeneratedContent {
+  const finalTitle = developTitle ? developContentTitle(title, 'story', platform, context) : title;
+  const showDevelopedSection = developTitle && finalTitle !== title;
+
+  const developedSection = showDevelopedSection
+    ? `📌 SUJET DÉVELOPPÉ\n\n"${finalTitle}"\n\n---\n\n`
+    : '';
 
   const contentStructure = `📱 STORY
 
-📌 SUJET DÉVELOPPÉ
-
-"${developedTitle}"
-
----
-
-Format story : court, direct, authentique`;
+${developedSection}Format story : court, direct, authentique`;
 
   const caption = generateProfessionalCaption({
-    title: developedTitle,
+    title: finalTitle,
     contentType: 'story',
     platform,
     description,
@@ -172,21 +170,20 @@ Format story : court, direct, authentique`;
   return { contentStructure, caption, hashtags };
 }
 
-function generatePost(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
-  const developedTitle = developContentTitle(title, 'post', platform, context);
+function generatePost(title: string, platform: Platform, description?: string, context?: string, developTitle: boolean = false): GeneratedContent {
+  const finalTitle = developTitle ? developContentTitle(title, 'post', platform, context) : title;
+  const showDevelopedSection = developTitle && finalTitle !== title;
+
+  const developedSection = showDevelopedSection
+    ? `📌 SUJET DÉVELOPPÉ\n\n"${finalTitle}"\n\n---\n\n`
+    : '';
 
   const contentStructure = `📸 POST
 
-📌 SUJET DÉVELOPPÉ
-
-"${developedTitle}"
-
----
-
-Contenu statique avec légende engageante`;
+${developedSection}Contenu statique avec légende engageante`;
 
   const caption = generateProfessionalCaption({
-    title: developedTitle,
+    title: finalTitle,
     contentType: 'post',
     platform,
     description,
@@ -657,9 +654,26 @@ function generateUltraStrategicIdea(
   const conversionVersion = getConversionVersion(format, platform, objective, professionContext, index, seed);
   const alignment = getAlignmentNote(format, platform, objective, pillar, professionContext);
 
-  const ideaTitle = customTitle || generateIdeaTitle(format, objective, professionContext, index, seed);
+  let ideaTitle: string;
+  if (customTitle) {
+    const contextForTitle = buildContext(objective, pillar, professionContext);
+    ideaTitle = developContentTitle(customTitle, format as ContentType, platform as Platform, contextForTitle);
+  } else {
+    ideaTitle = generateIdeaTitle(format, objective, professionContext, index, seed);
+  }
 
-  const description = `📌 HOOK EXEMPLE (Pattern Interrupt)
+  const developedTitleSection = customTitle && ideaTitle !== customTitle
+    ? `📌 SUJET DÉVELOPPÉ À PARTIR DE TON THÈME
+
+Thème brut fourni : "${customTitle}"
+✅ Sujet développé : "${ideaTitle}"
+
+---
+
+`
+    : '';
+
+  const description = `${developedTitleSection}📌 HOOK EXEMPLE (Pattern Interrupt)
 
 "${hookExample}"
 
