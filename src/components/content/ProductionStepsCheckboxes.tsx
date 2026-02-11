@@ -76,9 +76,25 @@ export default function ProductionStepsCheckboxes({
 
     setUpdating(true);
     try {
+      const newValue = !currentValue;
+      const updates: Record<string, boolean> = {};
+
+      const stepOrder = ['script_checked', 'tournage_checked', 'montage_checked', 'planifie_checked'];
+      const currentStepIndex = stepOrder.indexOf(stepKey);
+
+      if (newValue) {
+        for (let i = 0; i <= currentStepIndex; i++) {
+          updates[stepOrder[i]] = true;
+        }
+      } else {
+        for (let i = currentStepIndex; i < stepOrder.length; i++) {
+          updates[stepOrder[i]] = false;
+        }
+      }
+
       const { error, data } = await supabase
         .from('content_calendar')
-        .update({ [stepKey]: !currentValue })
+        .update(updates)
         .eq('id', contentId)
         .select();
 
@@ -94,7 +110,7 @@ export default function ProductionStepsCheckboxes({
 
       setCurrentValues(prev => ({
         ...prev,
-        [stepKey]: !currentValue
+        ...updates
       }));
 
       if (onUpdate) onUpdate();
