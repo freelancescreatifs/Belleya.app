@@ -1,24 +1,24 @@
-import { Check, X } from 'lucide-react';
+import { Check, X, AlertCircle, Sparkles } from 'lucide-react';
 
 export default function ComparisonSection() {
   const features = [
-    { category: "Visibilité & Découverte", name: "Page profil publique partageable", belleya: true, others: false },
+    { category: "Visibilité & Découverte", name: "Page profil publique partageable", belleya: true, others: true },
     { category: "Visibilité & Découverte", name: "Découverte par les clientes potentielles", belleya: true, others: false },
     { category: "Réservation", name: "Prise de rendez-vous en ligne", belleya: true, others: true },
     { category: "Réservation", name: "Gestion des disponibilités", belleya: true, others: true },
-    { category: "Paiement", name: "Paiement intégré (acompte/solde)", belleya: true, others: false },
+    { category: "Paiement", name: "Paiement intégré (acompte/solde)", belleya: true, others: true },
     { category: "Paiement", name: "Gestion des encaissements", belleya: true, others: false },
     { category: "Gestion Cliente", name: "CRM avec historique complet", belleya: true, others: false },
     { category: "Gestion Cliente", name: "Galerie photos avant/après", belleya: true, others: false },
     { category: "Gestion Cliente", name: "Champs métier personnalisables", belleya: true, others: false },
-    { category: "Finances", name: "Suivi CA, charges et bénéfices", belleya: true, others: false },
+    { category: "Finances", name: "Suivi CA, charges et bénéfices", belleya: true, others: true },
     { category: "Finances", name: "Calculs TVA et seuils fiscaux", belleya: true, others: false },
     { category: "Contenu & Marketing", name: "Calendrier éditorial avec IA", belleya: true, others: false },
     { category: "Contenu & Marketing", name: "Planification posts Instagram", belleya: true, others: false },
     { category: "Contenu & Marketing", name: "Relances clients automatiques", belleya: true, others: false },
     { category: "Organisation", name: "Agenda unifié (RDV + tâches)", belleya: true, others: false },
     { category: "Organisation", name: "Gestion des objectifs", belleya: true, others: false },
-    { category: "Organisation", name: "Gestion du stock", belleya: true, others: false }
+    { category: "Organisation", name: "Gestion du stock", belleya: true, others: true }
   ];
 
   return (
@@ -28,21 +28,59 @@ export default function ComparisonSection() {
       <div className="container mx-auto px-4 relative">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-belleya-powder via-belleya-bright to-belleya-deep bg-clip-text text-transparent">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 bg-gradient-to-r from-belleya-powder via-belleya-bright to-belleya-deep bg-clip-text text-transparent">
               Belleya VS les autres outils
             </h2>
 
-            <div className="max-w-4xl mx-auto mb-8">
-              <p className="text-base md:text-lg text-gray-700 leading-relaxed">
-                La plupart des outils du marché excellent dans leur domaine : les solutions de réservation gèrent très bien les prises de RDV,
-                les outils de gestion de tâches optimisent votre organisation, les CRM structurent vos données clientes. Techniquement performants,
-                mais spécialisés. Le problème ? Vous jongler entre 3, 4, voire 5 plateformes différentes. Belleya adopte une approche différente :
-                c'est une plateforme tout-en-un pensée pour les professionnelles de la beauté. Au-delà de la simple réservation ou de la gestion
-                administrative, Belleya intègre une dimension unique : la visibilité. Votre profil public devient votre vitrine, permettant aux
-                clientes de vous découvrir, consulter vos services, voir vos créations, et réserver directement. Là où les autres outils restent
-                des solutions techniques en arrière-plan, Belleya combine gestion interne performante et présence client visible. Vous pilotez
-                votre activité et développez votre clientèle depuis un seul endroit. Simple, cohérent, efficace.
-              </p>
+            <div className="max-w-5xl mx-auto mb-10">
+              <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl p-8 md:p-12 border-2 border-brand-100/50 shadow-xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-pink-50/30 to-brand-50/50 rounded-3xl -z-10"></div>
+
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-4 text-left">
+                    <div className="inline-block px-4 py-2 bg-gradient-to-r from-belleya-powder/20 to-belleya-bright/20 rounded-full border border-belleya-powder/30">
+                      <span className="text-sm font-bold text-belleya-deep">Les autres outils</span>
+                    </div>
+                    <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                      Les solutions du marché excellent dans <span className="font-bold text-belleya-deep">leur domaine spécifique</span> :
+                      les plateformes de réservation gèrent très bien les RDV, les outils de gestion optimisent votre organisation,
+                      les CRM structurent vos données.
+                    </p>
+                    <div className="flex items-center gap-3 p-4 bg-amber-50/50 rounded-xl border border-amber-200/50">
+                      <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                      <p className="text-sm font-medium text-amber-900">
+                        Le problème ? Vous jonglez entre <span className="font-bold">3, 4, voire 5 plateformes</span> différentes.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 text-left">
+                    <div className="inline-block px-4 py-2 bg-gradient-to-r from-belleya-powder to-belleya-bright rounded-full shadow-md">
+                      <span className="text-sm font-bold text-white">Belleya</span>
+                    </div>
+                    <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                      Une <span className="font-bold text-belleya-deep">plateforme tout-en-un</span> pensée pour les professionnelles de la beauté.
+                      Au-delà de la gestion administrative, Belleya intègre une dimension unique : <span className="font-bold text-belleya-bright">la visibilité</span>.
+                    </p>
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50/50 rounded-xl border border-green-200/50">
+                      <Sparkles className="w-6 h-6 text-green-600 flex-shrink-0" />
+                      <p className="text-sm font-medium text-green-900">
+                        Votre profil public devient votre <span className="font-bold">vitrine</span> : visibilité + gestion au même endroit.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-8 border-t-2 border-brand-100/50">
+                  <p className="text-lg md:text-xl font-bold text-center bg-gradient-to-r from-belleya-powder via-belleya-bright to-belleya-deep bg-clip-text text-transparent">
+                    Là où les autres outils restent des solutions techniques en arrière-plan,
+                    Belleya combine gestion interne performante et présence client visible.
+                  </p>
+                  <p className="text-center text-gray-600 mt-4 text-sm md:text-base">
+                    Simple, cohérent, efficace.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 

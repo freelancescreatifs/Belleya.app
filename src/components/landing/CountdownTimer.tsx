@@ -34,44 +34,33 @@ export default function CountdownTimer() {
   const formatNumber = (num: number) => String(num).padStart(2, '0');
 
   return (
-    <div className="relative bg-gradient-to-r from-brand-50 to-brand-100/50 rounded-2xl p-6 border-2 border-brand-100 shadow-lg">
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <Clock className="w-6 h-6 text-belleya-deep animate-pulse" />
-        <h3 className="text-xl font-bold text-gray-900">
-          Offre spéciale qui expire dans
-        </h3>
-      </div>
-
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="flex flex-col items-center bg-white rounded-xl px-4 py-3 min-w-[80px] shadow-md">
-          <span className="text-3xl font-bold text-belleya-deep">
+    <div className="flex items-center justify-center gap-3 md:gap-4 text-sm md:text-base">
+      <Clock className="w-4 h-4 md:w-5 md:h-5 text-belleya-deep animate-pulse flex-shrink-0" />
+      <span className="text-gray-700 font-medium">
+        Offre limitée : <span className="font-bold text-belleya-deep">14 jours gratuits</span>
+      </span>
+      <span className="hidden sm:inline text-gray-400">|</span>
+      <div className="flex items-center gap-1.5 md:gap-2">
+        <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-1 shadow-sm">
+          <span className="text-lg md:text-xl font-bold text-belleya-deep">
             {formatNumber(timeLeft.hours)}
           </span>
-          <span className="text-xs text-gray-600 font-medium">Heures</span>
+          <span className="text-xs text-gray-500">h</span>
         </div>
-        <span className="text-2xl font-bold text-belleya-deep">:</span>
-        <div className="flex flex-col items-center bg-white rounded-xl px-4 py-3 min-w-[80px] shadow-md">
-          <span className="text-3xl font-bold text-belleya-deep">
+        <span className="text-belleya-medium font-bold">:</span>
+        <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-1 shadow-sm">
+          <span className="text-lg md:text-xl font-bold text-belleya-deep">
             {formatNumber(timeLeft.minutes)}
           </span>
-          <span className="text-xs text-gray-600 font-medium">Minutes</span>
+          <span className="text-xs text-gray-500">m</span>
         </div>
-        <span className="text-2xl font-bold text-belleya-deep">:</span>
-        <div className="flex flex-col items-center bg-white rounded-xl px-4 py-3 min-w-[80px] shadow-md">
-          <span className="text-3xl font-bold text-belleya-deep">
+        <span className="text-belleya-medium font-bold">:</span>
+        <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-1 shadow-sm">
+          <span className="text-lg md:text-xl font-bold text-belleya-deep">
             {formatNumber(timeLeft.seconds)}
           </span>
-          <span className="text-xs text-gray-600 font-medium">Secondes</span>
+          <span className="text-xs text-gray-500">s</span>
         </div>
-      </div>
-
-      <div className="text-center">
-        <p className="text-lg font-bold text-belleya-deep">
-          14 jours gratuits sans CB
-        </p>
-        <p className="text-sm text-gray-600 mt-1">
-          Profite de toutes les fonctionnalités premium
-        </p>
       </div>
     </div>
   );
