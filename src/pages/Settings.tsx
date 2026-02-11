@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Building2, FileText, Calculator, LayoutGrid, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import CompanyProfileForm from '../components/settings/CompanyProfileForm';
 import MyDocuments from '../components/settings/MyDocuments';
 import ProfitabilityCalculator from '../components/settings/ProfitabilityCalculator';
@@ -9,13 +10,14 @@ import LanguageSettings from '../components/settings/LanguageSettings';
 
 export default function Settings() {
   const { user, refreshProfile } = useAuth();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language'>('company');
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Paramètres</h1>
-        <p className="text-gray-600">Gérez votre profil et les informations de votre entreprise</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('settings.title')}</h1>
+        <p className="text-gray-600">{t('settings.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -30,7 +32,7 @@ export default function Settings() {
               }`}
             >
               <Building2 className="w-5 h-5" />
-              Profil d'entreprise
+              {t('settings.tabs.company')}
             </button>
             <button
               onClick={() => setActiveTab('documents')}
@@ -41,7 +43,7 @@ export default function Settings() {
               }`}
             >
               <FileText className="w-5 h-5" />
-              Mes documents
+              {t('settings.tabs.documents')}
             </button>
             <button
               onClick={() => setActiveTab('profitability')}
@@ -52,7 +54,7 @@ export default function Settings() {
               }`}
             >
               <Calculator className="w-5 h-5" />
-              Rentabilité
+              {t('settings.tabs.profitability')}
             </button>
             <button
               onClick={() => setActiveTab('tabs')}
@@ -63,7 +65,7 @@ export default function Settings() {
               }`}
             >
               <LayoutGrid className="w-5 h-5" />
-              Onglets
+              {t('settings.tabs.social')}
             </button>
             <button
               onClick={() => setActiveTab('language')}
@@ -74,7 +76,7 @@ export default function Settings() {
               }`}
             >
               <Globe className="w-5 h-5" />
-              Langue
+              {t('settings.tabs.language')}
             </button>
           </div>
         </div>

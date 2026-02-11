@@ -136,10 +136,21 @@
     }
   },
   "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your profile and business information",
+    "tabs": {
+      "company": "Company Profile",
+      "documents": "My Documents",
+      "profitability": "Profitability",
+      "social": "Tabs",
+      "language": "Language"
+    },
     "language": {
       "title": "Language",
       "description": "Choose your preferred language",
-      "success": "Language updated successfully"
+      "success": "Language updated successfully",
+      "autoDetect": "Automatic detection",
+      "autoDetectDesc": "If no language is set, the application will automatically use your browser's language."
     }
   }
 }

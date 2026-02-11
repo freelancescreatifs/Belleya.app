@@ -94,9 +94,9 @@ export default function LanguageSettings({ userId, currentLanguage }: LanguageSe
       <div className="flex items-start gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <Globe className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
         <div className="text-sm text-blue-900">
-          <p className="font-medium mb-1">Détection automatique</p>
+          <p className="font-medium mb-1">{t('settings.language.autoDetect')}</p>
           <p className="text-blue-700">
-            Si aucune langue n'est définie, l'application utilisera automatiquement la langue de votre navigateur.
+            {t('settings.language.autoDetectDesc')}
           </p>
         </div>
       </div>

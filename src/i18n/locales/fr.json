@@ -136,10 +136,21 @@
     }
   },
   "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez votre profil et les informations de votre entreprise",
+    "tabs": {
+      "company": "Profil d'entreprise",
+      "documents": "Mes documents",
+      "profitability": "Rentabilité",
+      "social": "Onglets",
+      "language": "Langue"
+    },
     "language": {
       "title": "Langue",
       "description": "Choisissez votre langue préférée",
-      "success": "Langue mise à jour avec succès"
+      "success": "Langue mise à jour avec succès",
+      "autoDetect": "Détection automatique",
+      "autoDetectDesc": "Si aucune langue n'est définie, l'application utilisera automatiquement la langue de votre navigateur."
     }
   }
 }
