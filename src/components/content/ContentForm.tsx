@@ -41,6 +41,11 @@ interface ContentItem {
   date_scheduling_end_time?: string;
   production_auto_plan?: boolean;
   production_start_date?: string;
+  script_checked?: boolean;
+  tournage_checked?: boolean;
+  montage_checked?: boolean;
+  planifie_checked?: boolean;
+  is_published_status?: string;
 }
 
 interface EditorialPillar {

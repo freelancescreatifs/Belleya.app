@@ -20,14 +20,18 @@ interface ContentItem {
   caption?: string;
   media_urls?: string[];
   date_script?: string;
+  date_script_time?: string;
   date_shooting?: string;
+  date_shooting_time?: string;
   date_editing?: string;
+  date_editing_time?: string;
   date_scheduling?: string;
-  step_script_completed?: boolean;
-  step_shooting_completed?: boolean;
-  step_editing_completed?: boolean;
-  step_scheduling_completed?: boolean;
-  is_published?: boolean;
+  date_scheduling_time?: string;
+  script_checked?: boolean;
+  tournage_checked?: boolean;
+  montage_checked?: boolean;
+  planifie_checked?: boolean;
+  is_published_status?: string;
 }
 
 interface EditorialPillar {
