@@ -161,7 +161,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         title: manualIdea.title.trim(),
         description: '',
         content_type: manualIdea.content_type,
-        platform: manualIdea.platform,
+        platform: [manualIdea.platform],
         publication_date: new Date().toISOString().split('T')[0],
         publication_time: '12:00',
         status: 'idea' as const,
@@ -258,7 +258,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         title: idea.title,
         description: idea.description || '',
         content_type: idea.content_type,
-        platform: idea.platform,
+        platform: Array.isArray(idea.platform) ? idea.platform : [idea.platform],
         publication_date: new Date().toISOString().split('T')[0],
         publication_time: '12:00',
         status: 'idea' as const,
@@ -439,9 +439,11 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-bold text-gray-900 border border-gray-300">
                 {getFormatLabel(idea.content_type)}
               </span>
-              <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-medium text-gray-700 border border-gray-200 capitalize">
-                {idea.platform}
-              </span>
+              {(Array.isArray(idea.platform) ? idea.platform : [idea.platform]).map((plat, idx) => (
+                <span key={idx} className="px-2.5 py-1 bg-white rounded-lg text-xs font-medium text-gray-700 border border-gray-200 capitalize">
+                  {plat}
+                </span>
+              ))}
               {idea.objective && (
                 <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-medium text-blue-700 border border-blue-200 capitalize">
                   {idea.objective}
