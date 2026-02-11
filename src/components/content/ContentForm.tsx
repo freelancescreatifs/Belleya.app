@@ -158,7 +158,6 @@ export default function ContentForm({
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(mode === 'edit');
   const [generatingCaption, setGeneratingCaption] = useState(false);
-  const [generatingScript, setGeneratingScript] = useState(false);
   const [useAI, setUseAI] = useState(false);
   const [showProductionDates, setShowProductionDates] = useState(false);
   const [showAddPillar, setShowAddPillar] = useState(false);
@@ -361,22 +360,22 @@ export default function ContentForm({
     }
   }
 
-  async function handleGenerateCaption() {
+  async function handleGenerateAI() {
     if (!formData.title) {
-      alert('Veuillez remplir le titre pour générer une légende');
+      alert('Veuillez d\'abord saisir un titre');
       return;
     }
 
     setGeneratingCaption(true);
     try {
+      const primaryPlatform = (selectedPlatforms[0] || 'instagram') as 'instagram' | 'tiktok' | 'linkedin' | 'facebook' | 'youtube' | 'twitter';
       const contentType = formData.content_type as 'post' | 'reel' | 'carrousel' | 'story' | 'video' | 'live';
-      const platform = (selectedPlatforms[0] || 'instagram') as 'instagram' | 'tiktok' | 'linkedin' | 'facebook' | 'youtube' | 'twitter';
 
       const generated = generateContentAI({
         title: formData.title,
+        contentType: contentType,
+        platform: primaryPlatform,
         description: formData.description,
-        contentType,
-        platform,
         objective: formData.objective as any,
         pillar: formData.editorial_pillar || undefined,
         profession: professionType || undefined
@@ -390,15 +389,10 @@ export default function ContentForm({
 
       if (formData.objective) {
         const objectiveEmojis: Record<string, string> = {
-          'Attirer': '🎯',
-          'Éduquer': '📚',
-          'Inspirer': '✨',
-          'Engager': '💬',
-          'Convertir': '🎁',
-          'Fidéliser': '❤️',
-          'Vendre': '🛍️',
-          'Informer': '📰',
-          'Divertir': '🎉',
+          'attirer': '🎯',
+          'éduquer': '📚',
+          'convertir': '🎁',
+          'fidéliser': '❤️',
         };
         const emoji = objectiveEmojis[formData.objective] || '';
         if (emoji) {
@@ -406,72 +400,18 @@ export default function ContentForm({
         }
       }
 
-      setFormData({ ...formData, caption: finalCaption });
-    } catch (error) {
-      console.error('Error generating caption:', error);
-      alert('Erreur lors de la génération de la légende');
-    } finally {
-      setGeneratingCaption(false);
-    }
-  }
-
-
-  async function handleGenerateAI() {
-    if (!formData.title) {
-      alert('Veuillez d\'abord saisir un titre');
-      return;
-    }
-
-    setGeneratingCaption(true);
-    try {
-      const generated = generateContentAI({
-        title: formData.title,
-        contentType: formData.content_type as any,
-        platform: (selectedPlatforms[0] || 'instagram') as any,
-        description: formData.description,
-        objective: formData.objective as any,
-        pillar: formData.editorial_pillar || undefined,
-        profession: professionType || undefined
-      });
-
       setFormData({
         ...formData,
-        content_structure: generated.contentStructure,
-        caption: generated.caption,
+        caption: finalCaption,
         description: generated.script || formData.description
       });
+
+      alert('Contenu généré avec succès ! Script et légende sont prêts.');
     } catch (error) {
       console.error('Error generating AI content:', error);
-      alert('Erreur lors de la génération');
+      alert('Erreur lors de la génération du contenu');
     } finally {
       setGeneratingCaption(false);
-    }
-  }
-
-  async function handleGenerateScript() {
-    if (!formData.title) {
-      alert('Veuillez remplir le titre pour générer le script');
-      return;
-    }
-
-    setGeneratingScript(true);
-    try {
-      const generated = generateContentAI({
-        title: formData.title,
-        contentType: formData.content_type as any,
-        platform: (selectedPlatforms[0] || 'instagram') as any,
-        description: formData.description,
-        objective: formData.objective as any,
-        pillar: formData.editorial_pillar || undefined,
-        profession: professionType || undefined
-      });
-
-      setFormData({ ...formData, description: generated.script || '' });
-    } catch (error) {
-      console.error('Error generating script:', error);
-      alert('Erreur lors de la génération du script');
-    } finally {
-      setGeneratingScript(false);
     }
   }
 
@@ -1082,54 +1022,55 @@ export default function ContentForm({
         )}
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <button
-          type="button"
-          onClick={() => setUseAI(false)}
-          className={`flex-1 py-2 px-4 rounded-lg transition-all ${
-            !useAI
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Écrire manuellement
-        </button>
+      <div className="bg-gradient-to-br from-purple-50 via-orange-50 to-pink-50 border-2 border-orange-300 rounded-xl p-6">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 mb-3">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Génération IA Intelligente</h3>
+          <p className="text-sm text-gray-600">
+            L'IA génère automatiquement le script détaillé ET la légende, adaptés à votre contexte
+          </p>
+        </div>
+
+        <div className="bg-white/70 border border-orange-200 rounded-lg p-4 mb-4">
+          <p className="text-sm font-medium text-gray-800 mb-2">Le contenu sera adapté selon :</p>
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-orange-500" />
+              <span>Type de contenu ({formData.content_type})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-orange-500" />
+              <span>Plateformes ({selectedPlatforms.join(', ')})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-orange-500" />
+              <span>Objectif ({formData.objective || 'Non défini'})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-orange-500" />
+              <span>Pilier ({formData.editorial_pillar || 'Aucun'})</span>
+            </div>
+          </div>
+        </div>
+
         <button
           type="button"
           onClick={() => {
             setUseAI(true);
             handleGenerateAI();
           }}
-          disabled={generatingCaption}
-          className={`flex-1 py-2 px-4 rounded-lg transition-all flex items-center justify-center gap-2 ${
-            useAI
-              ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          disabled={generatingCaption || !formData.title}
+          className="w-full py-4 px-6 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 text-white rounded-xl hover:from-orange-600 hover:via-pink-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold text-base flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
         >
-          <Sparkles className="w-4 h-4" />
-          {generatingCaption ? 'Génération...' : 'Générer avec l\'IA'}
+          <Sparkles className="w-5 h-5" />
+          {generatingCaption ? 'Génération en cours...' : 'Générer le contenu'}
         </button>
-      </div>
 
-      <div className="bg-gradient-to-br from-orange-50 to-pink-50 border-2 border-orange-200 rounded-xl p-4">
-        <div className="flex items-start gap-3 mb-3">
-          <FileEdit className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="text-sm font-bold text-orange-900 mb-1">Structure du contenu</h3>
-            <p className="text-xs text-orange-700 font-medium mb-3">
-              {getContentStructureHelper()}
-            </p>
-            <div className="space-y-2">
-              {getProTips().map((tip, idx) => (
-                <div key={idx} className="flex gap-2 items-start">
-                  <span className="text-orange-500 font-bold mt-0.5">→</span>
-                  <span className="text-xs text-orange-800 leading-relaxed">{tip}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {!formData.title && (
+          <p className="text-xs text-center text-red-600 mt-2">Veuillez d'abord saisir un titre</p>
+        )}
       </div>
 
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 space-y-3">
@@ -1141,26 +1082,21 @@ export default function ContentForm({
             </label>
             <p className="text-xs text-blue-700 mt-1">
               {selectedPlatforms.includes('linkedin') || selectedPlatforms.includes('facebook')
-                ? '📝 Framework SLAY recommandé (Story → Lesson → Actionable → You)'
-                : '📝 Framework AIDA recommandé (Attention → Interest → Desire → Action)'}
+                ? 'Ton professionnel adapté à LinkedIn/Facebook'
+                : selectedPlatforms.includes('tiktok')
+                ? 'Script rythmé et punchline pour TikTok'
+                : selectedPlatforms.includes('instagram')
+                ? 'Hook rapide et format engageant pour Instagram'
+                : 'Script optimisé pour la plateforme sélectionnée'}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleGenerateScript}
-            disabled={generatingScript}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all disabled:opacity-50 flex-shrink-0"
-          >
-            <Sparkles className="w-4 h-4" />
-            {generatingScript ? 'Génération...' : 'Générer le script'}
-          </button>
         </div>
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           rows={6}
           className="w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm"
-          placeholder="Le script détaillé sera généré ici selon le framework SLAY ou AIDA en fonction de la plateforme..."
+          placeholder="Cliquez sur 'Générer le contenu' pour créer un script détaillé adapté à votre format et plateforme..."
         />
       </div>
 
@@ -1171,26 +1107,17 @@ export default function ContentForm({
             <div className="relative group">
               <Info className="w-4 h-4 text-gray-400 cursor-help" />
               <div className="absolute left-0 top-6 w-64 bg-gray-900 text-white text-xs rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                Texte affiché en bas de votre post
+                Texte affiché en bas de votre post (généré automatiquement avec le script)
               </div>
             </div>
           </label>
-          <button
-            type="button"
-            onClick={handleGenerateCaption}
-            disabled={generatingCaption}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50"
-          >
-            <Sparkles className="w-4 h-4" />
-            {generatingCaption ? 'Génération...' : 'Générer la légende'}
-          </button>
         </div>
         <textarea
           value={formData.caption}
           onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
           rows={3}
           className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base"
-          placeholder="Texte d'accompagnement du post"
+          placeholder="La légende sera générée automatiquement avec le script..."
         />
       </div>
 

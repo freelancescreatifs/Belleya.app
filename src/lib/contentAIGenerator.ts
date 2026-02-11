@@ -516,24 +516,51 @@ function buildContext(objective?: string, pillar?: string, profession?: string):
 function generateCarrousel(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
   const contextHeader = context ? `\n🎯 ${context}\n\n---\n\n` : '';
 
-  const contentStructure = `${contextHeader}📍 SLIDE 1 - HOOK
-${getHook(title)}
+  const isProfessional = platform === 'linkedin';
+  const hookStyle = isProfessional ? 'professionnel et direct' : 'accrocheur et émotionnel';
 
-📍 SLIDE 2 - POINT CLÉ 1
-${description || 'Exemple : "La préparation c\'est 70% de la réussite - voici pourquoi..."'}
+  const contentStructure = `${contextHeader}📍 SLIDE 1 - HOOK (Couverture)
+${getCarrouselHook(title, platform)}
 
-📍 SLIDE 3 - POINT CLÉ 2
-Exemple : "L'erreur n°1 que je vois chez 90% de mes clientes"
+💡 Design : Titre percutant + visuel fort
+🎯 Objectif : Arrêter le scroll en 0.5 seconde
 
-📍 SLIDE 4 - POINT CLÉ 3
-Exemple : "Ma technique secrète pour un résultat qui dure 3x plus longtemps"
+📍 SLIDE 2 - CONTEXTE / PROBLÈME
+${isProfessional
+  ? `→ Identifie le problème principal de ton audience\n→ Crée l'identification immédiate\n→ Montre que tu comprends leur situation`
+  : `→ "Tu connais ce moment où..."\n→ Crée l'empathie et l'identification\n→ Raconte une situation concrète`}
 
-📍 SLIDE 5 - ERREUR COURANTE
-❌ Exemple : "Ne jamais faire ça - ça ruine tout le travail"
+📍 SLIDE 3 - POINT CLÉ 1
+→ Premier élément de solution
+→ Explique le "pourquoi" avant le "comment"
+→ Une idée = un slide (clarté maximale)
 
-📍 SLIDE FINALE - CTA
-👉 Prête à essayer ? Réserve ton RDV en bio !
-${platform === 'instagram' ? '💬 Sauvegarde ce carrousel pour ne pas l\'oublier' : ''}`;
+📍 SLIDE 4 - POINT CLÉ 2
+→ Deuxième élément de solution
+→ Ajoute de la valeur concrète
+→ Exemple ou donnée pour renforcer
+
+📍 SLIDE 5 - POINT CLÉ 3
+→ Troisième élément de solution
+→ L'astuce ou le secret qui fait la différence
+→ Ce qui va surprendre ton audience
+
+📍 SLIDE 6 - ERREUR À ÉVITER
+❌ Ce qu'il NE faut surtout PAS faire
+→ Pourquoi c'est contre-productif
+→ L'alternative correcte
+
+📍 SLIDE 7 - RÉCAPITULATIF
+✓ Résumé des 3 points clés en format liste
+→ Facile à sauvegarder et à retenir
+→ Renforce l'apprentissage
+
+📍 SLIDE FINALE - CALL TO ACTION
+${isProfessional
+  ? `→ "Prêt(e) à passer à l'action ?"\n→ Invitation à échanger / contacter\n→ Offre de valeur claire`
+  : `→ "Tu veux essayer ? Lien en bio !"\n→ Incitation à sauvegarder le carrousel\n→ Question pour engagement en commentaires`}
+
+${platform === 'instagram' ? '💾 Sauvegarde ce carrousel\n💬 Tag quelqu\'un qui doit voir ça\n❤️ Double tap si c\'est utile' : ''}`;
 
   const caption = generateCarrouselCaption(title, platform);
   const hashtags = generateHashtags(title, 'carrousel', platform);
@@ -541,32 +568,120 @@ ${platform === 'instagram' ? '💬 Sauvegarde ce carrousel pour ne pas l\'oublie
   return { contentStructure, caption, hashtags };
 }
 
+function getCarrouselHook(title: string, platform: Platform): string {
+  const isPro = platform === 'linkedin';
+  const hooks = isPro ? [
+    `"${title}" - Voici ce que personne ne vous dit`,
+    `Les 3 vérités sur ${title.toLowerCase()} que j'aurais aimé connaître plus tôt`,
+    `${title} : Guide complet pour éviter les erreurs courantes`,
+    `Ce que ${title.toLowerCase()} révèle sur votre stratégie`,
+  ] : [
+    `${title} 👀\nTu vas kiffer ce carrousel`,
+    `STOP ❌\nAvant de ${title.toLowerCase()}, lis ça`,
+    `${title}\nLes 7 slides qui changent tout 🔥`,
+    `POV : Tu découvres enfin ${title.toLowerCase()} 💡`,
+  ];
+  return hooks[Math.floor(Math.random() * hooks.length)];
+}
+
 function generateReel(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
   const contextHeader = context ? `\n🎯 ${context}\n\n---\n\n` : '';
+  const isTikTok = platform === 'tiktok';
+  const isInstagram = platform === 'instagram';
 
-  const contentStructure = `${contextHeader}🎬 HOOK (0-3 sec)
-${getHook(title)}
-Exemple : "Arrête tout, regarde ça..." ou "POV : Tu découvres enfin le secret des pros"
+  const contentStructure = isTikTok ? `${contextHeader}🔥 TIKTOK - STRUCTURE RYTHMÉE
 
-📖 DÉVELOPPEMENT (4-12 sec)
-${description || 'Montre la transformation ou le processus étape par étape'}
+⚡ HOOK (0-3 sec) - CRITIQUE !
+${getTikTokHook(title)}
 
-Structure suggérée :
-• PROBLÈME : "Tu as déjà eu ce souci ? Normal, 95% de mes clientes l'ont..."
-• SOLUTION : "Voici exactement ce que je fais pour l'éviter"
-• AVANT/APRÈS : Montrer le résultat visuel spectaculaire
+📌 Pattern Interrupt obligatoire :
+• Mouvement brusque / Changement de plan
+• Son choc / Effet sonore marquant
+• Texte qui apparaît en gros
+• Début en pleine action (pas de intro)
 
-💡 PUNCHLINE (13-17 sec)
-Exemple : "Et voilà pourquoi tu ne referas plus jamais cette erreur !"
-ou "C'est ça le secret que les pros ne disent jamais"
+💥 DÉVELOPPEMENT (3-15 sec)
+${description || 'Montrer l\'action / la transformation'}
+
+Structure TikTok :
+• RYTHME RAPIDE : Changement tous les 2-3 secondes
+• 3-4 POINTS MAX : Pas de long discours
+• VISUEL > ORAL : Ce qu'on voit doit suffire
+• TRENDING SOUND : Utilise un son populaire si possible
+
+💬 PUNCHLINE (15-18 sec)
+→ Phrase choc finale qui résume tout
+→ Moment "AH!" de réalisation
+→ Ce qui va faire commenter
 
 🎯 CTA (18-20 sec)
-${platform === 'instagram' ? '💾 Sauvegarde pour réessayer chez toi !\n📩 Envoie "INFO" en DM pour en savoir plus' : 'Partage à quelqu\'un qui en a besoin !'}`;
+→ "Partage si ça t'aide"
+→ "Commente GO pour la suite"
+→ "Follow pour plus d'astuces"
+
+🎵 AUDIO : Choisis un son trending ou voix off énergique`
+
+: `${contextHeader}🎬 INSTAGRAM REEL - STRUCTURE ENGAGEANTE
+
+💫 HOOK (0-3 sec) - ARRÊTE LE SCROLL
+${getInstagramHook(title)}
+
+Techniques qui marchent :
+• POV (Point of View) + situation relatable
+• "Attends... regarde ça" + reveal
+• Avant/Après immédiat
+• Question directe qui interpelle
+
+🎨 DÉVELOPPEMENT (3-12 sec)
+${description || 'Montrer le processus ou la transformation'}
+
+Structure Instagram :
+• STORYTELLING RAPIDE : Raconte en montrant
+• ESTHÉTIQUE SOIGNÉE : Beau + utile = viral
+• SOUS-TITRES : 80% regardent sans son
+• TRANSITIONS FLUIDES : Garder l'attention
+
+✨ VALEUR AJOUTÉE (12-16 sec)
+→ L'astuce / le secret / le détail qui tue
+→ Ce qui rend ton contenu unique
+→ Le "pourquoi ça marche"
+
+💡 CONCLUSION (16-20 sec)
+→ Récap rapide ou punchline
+→ Incite à l'action sans forcer
+→ Crée l'envie de revoir
+
+🎯 CTA (écrit + audio)
+💾 "Sauvegarde pour plus tard"
+💬 "Tag qui doit voir ça"
+📩 "DM 'INFO' pour en savoir plus"
+
+🎵 AUDIO : Trending ou musique qui colle à l'ambiance`;
 
   const caption = generateReelCaption(title, platform);
   const hashtags = generateHashtags(title, 'reel', platform);
 
   return { contentStructure, caption, hashtags };
+}
+
+function getTikTokHook(title: string): string {
+  const hooks = [
+    `ATTENDS ❌ avant ${title.toLowerCase()}, regarde ça !`,
+    `POV : Tu découvres ${title.toLowerCase()} 😱`,
+    `${title} ? JE VAIS TE CHOQUER 🤯`,
+    `Personne te dit ça sur ${title.toLowerCase()} 👀`,
+  ];
+  return hooks[Math.floor(Math.random() * hooks.length)];
+}
+
+function getInstagramHook(title: string): string {
+  const hooks = [
+    `${title} ✨\nCe que tu vas voir va te surprendre...`,
+    `STOP 🛑\nRegarde comment je fais ${title.toLowerCase()}`,
+    `${title}\nLa méthode que j'aurais aimé connaître avant 💡`,
+    `POV : ${title.toLowerCase()}\nEt le résultat est fou 🔥`,
+  ];
+  return hooks[Math.floor(Math.random() * hooks.length)];
 }
 
 function generateStory(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
@@ -826,6 +941,104 @@ interface ContentIdea {
   objective: string;
   type: 'content' | 'event';
   structure?: string;
+}
+
+function enhanceIdeaWithHook(
+  title: string,
+  format: string,
+  platform: string,
+  objective: string,
+  pillar?: string
+): string {
+  const hooks = generateHooksForIdea(title, format, platform);
+  const selectedHook = hooks[Math.floor(Math.random() * hooks.length)];
+
+  const objectiveGuidance = getObjectiveGuidance(objective);
+  const platformTone = getPlatformToneDescription(platform);
+
+  return `🎯 HOOK PROPOSÉ :
+"${selectedHook}"
+
+✨ ANGLE STRATÉGIQUE :
+${objectiveGuidance}
+
+📱 TON ${platform.toUpperCase()} :
+${platformTone}
+
+${pillar ? `🎨 PILIER ÉDITORIAL : ${pillar}\n\n` : ''}💡 STRUCTURE RECOMMANDÉE :
+${getStructureForFormat(format, platform)}
+
+🔥 POURQUOI ÇA MARCHE :
+→ Hook qui capte l'attention immédiatement
+→ Angle ${objective} clairement identifié
+→ Adapté aux codes de ${platform}
+→ Crée l'engagement naturellement`;
+}
+
+function generateHooksForIdea(title: string, format: string, platform: string): string[] {
+  const isTikTok = platform === 'tiktok';
+  const isLinkedIn = platform === 'linkedin';
+
+  if (isLinkedIn) {
+    return [
+      `${title} : Ce que personne ne vous dit`,
+      `La vérité sur ${title.toLowerCase()} (d'après 5 ans d'expérience)`,
+      `${title} - Mon retour d'expérience franc`,
+      `Les 3 erreurs que je vois sur ${title.toLowerCase()}`,
+    ];
+  }
+
+  if (isTikTok) {
+    return [
+      `POV : Tu découvres ${title.toLowerCase()} 😱`,
+      `ATTENDS ❌ ${title} ? Regarde ça !`,
+      `${title} - JE VAIS TE CHOQUER 🤯`,
+      `Personne te dit ça sur ${title.toLowerCase()} 👀`,
+    ];
+  }
+
+  return [
+    `${title} ✨ Ce que tu vas voir...`,
+    `STOP 🛑 ${title.toLowerCase()} - La vraie méthode`,
+    `${title} : Le guide que j'aurais aimé avoir 💡`,
+    `Tu fais ${title.toLowerCase()} ? Évite ces erreurs 🔥`,
+  ];
+}
+
+function getObjectiveGuidance(objective: string): string {
+  const guidance: Record<string, string> = {
+    'attirer': 'Capturer l\'attention avec un résultat spectaculaire ou une promesse forte. Créer la curiosité et l\'envie de découvrir.',
+    'éduquer': 'Apporter une vraie valeur éducative. Expliquer le pourquoi avant le comment. Rendre l\'apprentissage facile et actionnable.',
+    'convertir': 'Montrer la transformation possible. Créer l\'urgence ou la rareté. CTA clair vers action concrète.',
+    'fidéliser': 'Créer de la proximité et de l\'authenticité. Montrer les coulisses. Remercier et impliquer la communauté.',
+  };
+  return guidance[objective] || 'Créer du contenu de valeur qui résonne avec ton audience.';
+}
+
+function getPlatformToneDescription(platform: string): string {
+  const tones: Record<string, string> = {
+    'instagram': 'Esthétique + Authentique + Storytelling visuel',
+    'tiktok': 'Rythmé + Direct + Trending + Fun',
+    'linkedin': 'Professionnel + Insights + Valeur business',
+    'facebook': 'Conversationnel + Accessible + Communautaire',
+    'youtube': 'Approfondi + Pédagogique + Format long',
+  };
+  return tones[platform] || 'Adapté à ta communauté';
+}
+
+function getStructureForFormat(format: string, platform: string): string {
+  const isTikTok = platform === 'tiktok';
+
+  const structures: Record<string, string> = {
+    'reel': isTikTok
+      ? '0-3s : Hook choc → 3-15s : Action/Transformation → 15-20s : Punchline + CTA'
+      : '0-3s : Hook visuel → 3-12s : Développement → 12-20s : Valeur + CTA',
+    'carrousel': 'Slide 1 : Hook → Slides 2-6 : Contenu valeur → Slide 7 : Récap + CTA',
+    'post': 'Visuel fort → Légende accrocheuse → Storytelling → CTA',
+    'story': 'Story 1 : Hook → Stories 2-3 : Contenu → Story 4 : Interaction',
+    'video': 'Intro (0-30s) → Développement (1-8min) → Conclusion + CTA',
+  };
+  return structures[format] || 'Structure adaptée au format choisi';
 }
 
 const professionIdeasDatabase: Record<ProfessionKey, Record<string, ContentIdea[]>> = {
@@ -1101,7 +1314,7 @@ export function generateContentIdeas(
     const ideasWithPillar = professionSpecificIdeas.map(idea => ({
       ...idea,
       title: customTitle || idea.title,
-      description: customTitle ? `Créer du contenu sur : ${customTitle}` : idea.description,
+      description: customTitle ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar) : idea.description,
       pillarContext: pillar ? `Axé sur le pilier: ${pillar}` : undefined
     }));
     return ideasWithPillar;
@@ -1112,21 +1325,25 @@ export function generateContentIdeas(
   if (format === 'reel') {
     genericIdeas.push(
       {
-        title: 'Coulisses de mon quotidien pro',
-        description: `Montrer une journée typique dans ton métier`,
+        title: customTitle || 'Coulisses de mon quotidien pro',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎬 HOOK : "POV : Une journée dans ma vie de pro"\n\n✨ ANGLE : Immersion authentique derrière les coulisses\n\n🎯 OBJECTIF : Créer connexion et identification\n\n💡 STRUCTURE :\n→ Matin : Préparation + premier RDV\n→ Midi : Gestion entre deux clients\n→ Après-midi : Les moments forts\n→ Soir : Bilan et réflexion`,
         content_type: format,
         platform,
-        angle: 'Immersion authentique dans le quotidien d\'un(e) professionnel(le)',
+        angle: 'Authenticité et connexion humaine',
         objective,
         type: 'content',
-        structure: 'Matin → Midi → Après-midi → Bilan de la journée'
+        structure: 'Hook visuel → Journée en accéléré → Moments clés → Punchline finale'
       },
       {
-        title: 'Mes 3 indispensables',
-        description: 'Les 3 outils/produits sans lesquels tu ne peux pas travailler',
+        title: customTitle || 'Mes 3 indispensables',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎬 HOOK : "Les 3 trucs sans lesquels je ne pourrais PAS travailler 🔥"\n\n✨ ANGLE : Recommandation d'expert + authenticité\n\n🎯 OBJECTIF : Apporter de la valeur + créer autorité\n\n💡 STRUCTURE :\n→ Hook : "Attends... tu vas kiffer"\n→ Indispensable #1 + pourquoi\n→ Indispensable #2 + pourquoi\n→ Indispensable #3 + secret bonus\n→ CTA : "Et toi, c'est quoi tes indispensables ?"`,
         content_type: format,
         platform,
-        angle: 'Ce que j\'utilise tous les jours',
+        angle: 'Partage d\'expertise et recommandations pro',
         objective,
         type: 'content'
       }
@@ -1136,21 +1353,72 @@ export function generateContentIdeas(
   if (format === 'carrousel') {
     genericIdeas.push(
       {
-        title: '5 erreurs de débutant',
-        description: 'Les erreurs classiques que tu vois chez tes clientes/clients',
+        title: customTitle || '5 erreurs de débutant',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎯 HOOK SLIDE 1 :
+"Les 5 erreurs qui ruinent tout ❌"
+(Et comment les éviter)
+
+✨ STRUCTURE CARROUSEL :
+
+📍 SLIDE 1 : Couverture hook
+→ Titre percutant + promesse claire
+
+📍 SLIDES 2-6 : Une erreur par slide
+→ ❌ L'erreur en gros titre
+→ Pourquoi c'est problématique
+→ ✅ La bonne méthode
+
+📍 SLIDE 7 : Récapitulatif
+→ Liste des 5 points
+→ CTA : "Sauvegarde pour ne pas oublier"
+
+💡 TIPS PRO :
+→ Design cohérent sur toutes les slides
+→ Maximum 2-3 lignes de texte par slide
+→ Utilise des icônes et émojis pour la clarté`,
         content_type: format,
         platform,
-        angle: 'Guide pratique pour éviter les pièges',
+        angle: 'Guide expert pour éviter les pièges courants',
         objective,
         type: 'content',
-        structure: 'Slide 1: Titre → Slides 2-6: 1 erreur + solution/slide → Slide 7: Récap'
+        structure: 'Slide 1: Hook → Slides 2-6: Erreur + solution → Slide 7: Récap + CTA'
       },
       {
-        title: 'Avant/Après : mes transformations',
-        description: 'Sélection de tes plus beaux résultats',
+        title: customTitle || 'Avant/Après : mes transformations',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎯 HOOK SLIDE 1 :
+"Ces transformations qui me rendent fière ✨"
+
+✨ STRUCTURE PORTFOLIO :
+
+📍 SLIDE 1 : Couverture
+→ Titre émotionnel
+→ Nombre de transformations
+
+📍 SLIDES 2-7 : Avant/Après
+→ Photo AVANT claire
+→ Photo APRÈS impactante
+→ Contexte en 1 phrase
+→ Technique utilisée
+
+📍 SLIDE 8 : Coulisses
+→ Mon process/ma méthode
+→ Ce qui fait la différence
+
+📍 SLIDE 9 : CTA
+→ "Prête pour ta transformation ?"
+→ Lien de réservation
+
+💡 IMPACT :
+→ Preuve sociale puissante
+→ Inspire confiance
+→ Génère des réservations`,
         content_type: format,
         platform,
-        angle: 'Ces résultats qui me rendent fière',
+        angle: 'Portfolio visuel de résultats concrets',
         objective,
         type: 'content'
       }
@@ -1160,20 +1428,76 @@ export function generateContentIdeas(
   if (format === 'story') {
     genericIdeas.push(
       {
-        title: 'Sondage : Ton avis compte',
-        description: 'Demander l\'avis de ta communauté sur un sujet pro',
+        title: customTitle || 'Sondage : Ton avis compte',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎯 STORY 1 - HOOK :
+"Question pour toi 👇"
+
+✨ STRUCTURE INTERACTIVE :
+
+📱 STORY 1 : Question/Sondage
+→ Pose une vraie question
+→ Utilise sticker sondage IG
+→ Options claires et fun
+
+📱 STORY 2 : Contexte
+→ Pourquoi tu poses cette question
+→ Ton avis personnel
+→ Ce que ça change
+
+📱 STORY 3 : Résultats
+→ Partage les votes/réponses
+→ Commente les tendances
+→ Remercie la participation
+
+📱 STORY 4 : Suite
+→ "Résultat : voilà ce que je vais faire"
+→ CTA ou promesse de suite
+
+💡 ENGAGEMENT :
+→ Taux de réponse élevé
+→ Crée la conversation
+→ Insights précieux sur ton audience`,
         content_type: format,
         platform,
-        angle: 'J\'ai besoin de ton avis !',
+        angle: 'Interaction directe avec la communauté',
         objective,
         type: 'content'
       },
       {
-        title: 'Question du jour',
-        description: 'Répondre aux questions fréquentes de façon spontanée',
+        title: customTitle || 'Question du jour',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎯 STORY 1 - HOOK :
+"On me demande TOUT LE TEMPS 👀"
+
+✨ STRUCTURE Q&A :
+
+📱 STORY 1 : La question
+→ "Vous m'avez posé 47 fois..."
+→ Montre la question (DM ou commentaire)
+
+📱 STORY 2 : Ta réponse partie 1
+→ Commence par le contexte
+→ Explique simplement
+
+📱 STORY 3 : Ta réponse partie 2
+→ L'astuce ou le secret
+→ Exemple concret
+
+📱 STORY 4 : CTA
+→ "D'autres questions ?"
+→ Sticker question IG
+→ Promesse d'y répondre
+
+💡 VALEUR :
+→ Réponds aux vraies attentes
+→ Positionne ton expertise
+→ Crée du contenu evergreen`,
         content_type: format,
         platform,
-        angle: 'Vous m\'avez posé cette question 100 fois',
+        angle: 'Expertise partagée de façon spontanée',
         objective,
         type: 'content'
       }
@@ -1195,34 +1519,147 @@ export function generateContentIdeas(
   if (format === 'post') {
     genericIdeas.push(
       {
-        title: 'Transformation du jour',
-        description: 'Partager un beau résultat client',
+        title: customTitle || 'Transformation du jour',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎯 VISUEL + LÉGENDE :
+
+📸 IMAGE :
+→ Avant/Après côte à côte
+→ Ou focus sur le résultat final
+→ Qualité pro obligatoire
+→ Lumière naturelle si possible
+
+✍️ LÉGENDE STRUCTURE :
+
+[Hook - Ligne 1]
+"Cette transformation... 😍"
+
+[Contexte]
+"Elle est venue avec [problème]
+Je savais exactement quoi faire..."
+
+[Storytelling]
+"Pendant 2h, j'ai [processus]
+Le moment magique ? Quand elle a vu le résultat 💕"
+
+[Résultat]
+"Résultat : [transformation concrète]
+Elle rayonne, et ça, c'est tout ce qui compte"
+
+[CTA]
+"Tag quelqu'un qui a besoin de ça 👇"
+
+💡 ENGAGEMENT :
+→ Émotion + Preuve = Confiance
+→ Storytelling > Description technique`,
         content_type: format,
         platform,
-        angle: 'Ce résultat qui m\'a fait vibrer cette semaine',
+        angle: 'Preuve sociale par le résultat',
         objective,
         type: 'content'
       },
       {
-        title: 'Conseil de la semaine',
-        description: 'Un conseil pratique et actionnable',
+        title: customTitle || 'Conseil de la semaine',
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎯 CONSEIL ACTIONNABLE :
+
+✍️ STRUCTURE LÉGENDE :
+
+[Hook accrocheur]
+"Tu fais cette erreur sans le savoir... 👀"
+
+[Identification du problème]
+"Hier, 4 clientes m'ont dit la même chose :
+[problème récurrent]"
+
+[Explication]
+"Voici pourquoi ça arrive :
+[cause racine simple]"
+
+[Solution concrète]
+"Ma solution en 3 étapes :
+1️⃣ [Action précise]
+2️⃣ [Action précise]
+3️⃣ [Action précise]"
+
+[Bénéfice]
+"Résultat ? [transformation attendue]"
+
+[CTA]
+"💾 Sauvegarde pour t'en souvenir
+💬 Tu le savais ?"
+
+💡 VALEUR :
+→ Conseil applicable immédiatement
+→ Positionne ton expertise
+→ Génère saves + partages`,
         content_type: format,
         platform,
-        angle: 'Le conseil que je donne à toutes mes clientes',
+        angle: 'Expertise partagée de manière actionnable',
         objective,
         type: 'content'
       }
     );
   }
 
+  if (format === 'live') {
+    genericIdeas.push({
+      title: customTitle || 'Session Q&A en direct',
+      description: customTitle
+        ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+        : `🎯 LIVE INTERACTIF :
+
+📱 PRÉPARATION :
+→ Annonce 24-48h avant
+→ Crée l'attente avec stories
+→ Demande questions en amont
+
+🎬 STRUCTURE LIVE :
+→ 0-5min : Intro + accueil
+→ 5-30min : Réponses aux questions
+→ 30-35min : Bonus surprise
+→ 35-40min : Récap + annonce prochain live
+
+💡 TIPS :
+→ Réponds à 5-8 questions max
+→ Montre des exemples visuels
+→ Sois authentique et spontané
+→ Annonce la rediffusion
+
+🎁 APRÈS LE LIVE :
+→ Partage les highlights en stories
+→ Remercie les participants
+→ Crée du contenu des moments forts`,
+      content_type: format,
+      platform,
+      angle: 'Connexion directe et authentique avec la communauté',
+      objective,
+      type: 'event'
+    });
+  }
+
   if (genericIdeas.length === 0) {
     return [
       {
         title: customTitle || 'Contenu personnalisé',
-        description: customTitle ? `Créer du contenu sur : ${customTitle}` : `Créer un contenu adapté à ton audience`,
+        description: customTitle
+          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
+          : `🎯 CONTENU ADAPTÉ À TON AUDIENCE
+
+Ce contenu sera généré en fonction de :
+→ Ton métier et ton expertise
+→ Ton objectif (${objective})
+→ Ta plateforme (${platform})
+→ Ton format (${format})
+${pillar ? `→ Ton pilier éditorial (${pillar})` : ''}
+
+💡 CONSEIL :
+Clique sur "Générer le contenu" dans le formulaire pour obtenir un script détaillé et une légende optimisés pour ton contexte.`,
         content_type: format,
         platform,
-        angle: 'Partage ton expertise unique',
+        angle: 'Expertise adaptée à ton contexte unique',
         objective,
         type: 'content',
         pillarContext: pillar ? `Axé sur le pilier: ${pillar}` : undefined
@@ -1233,7 +1670,7 @@ export function generateContentIdeas(
   const ideasWithCustomTitle = genericIdeas.map(idea => ({
     ...idea,
     title: customTitle || idea.title,
-    description: customTitle ? `Créer du contenu sur : ${customTitle}` : idea.description,
+    description: customTitle ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar) : idea.description,
     pillarContext: pillar ? `Axé sur le pilier: ${pillar}` : undefined
   }));
 
