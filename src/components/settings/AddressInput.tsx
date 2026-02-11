@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Check, AlertCircle, Loader } from 'lucide-react';
-import Map, { Marker, Popup } from 'react-map-gl';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import { geocodeAddress, GeocodeResult } from '../../lib/geocodingHelpers';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
+import 'leaflet/dist/leaflet.css';
 
 interface AddressInputProps {
   value: string;
@@ -14,6 +13,39 @@ interface AddressInputProps {
   profilePhoto: string | null;
   error?: string | null;
   onErrorChange?: (error: string | null) => void;
+}
+
+function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+
+  return null;
+}
+
+function MapSizeHandler() {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+
+  return null;
 }
 
 export default function AddressInput({
@@ -28,40 +60,7 @@ export default function AddressInput({
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingStatus, setGeocodingStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [showMap, setShowMap] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const mapRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (!MAPBOX_TOKEN) {
-      console.error('Token Mapbox manquant dans AddressInput');
-      setMapError('Token Mapbox manquant');
-      return;
-    }
-
-    if (!MAPBOX_TOKEN.startsWith('pk.')) {
-      console.error('Token Mapbox invalide dans AddressInput');
-      setMapError('Token Mapbox invalide');
-      return;
-    }
-
-    const validateToken = async () => {
-      try {
-        const response = await fetch(
-          `https://api.mapbox.com/styles/v1/mapbox/light-v11?access_token=${MAPBOX_TOKEN}`,
-          { method: 'GET' }
-        );
-
-        if (response.status === 401 || response.status === 403) {
-          setMapError('Token Mapbox invalide (erreur 401/403)');
-        }
-      } catch (err) {
-        console.warn('Validation token Mapbox echouee:', err);
-      }
-    };
-
-    validateToken();
-  }, []);
 
   useEffect(() => {
     if (!value || value.length < 3) {
@@ -226,77 +225,54 @@ export default function AddressInput({
 
           {showMap && (
             <div className="rounded-lg overflow-hidden border border-gray-300" style={{ height: '256px' }}>
-              {mapError ? (
-                <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                  <div className="text-center p-4">
-                    <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">{mapError}</p>
-                  </div>
-                </div>
-              ) : (
-                <Map
-                  ref={mapRef}
-                  initialViewState={{
-                    longitude: currentLocation.longitude,
-                    latitude: currentLocation.latitude,
-                    zoom: 15
-                  }}
-                  style={{ width: '100%', height: '100%' }}
-                  mapStyle="mapbox://styles/mapbox/light-v11"
-                  mapboxAccessToken={MAPBOX_TOKEN}
-                  scrollZoom={false}
-                  dragPan={true}
-                  dragRotate={false}
-                  touchZoomRotate={false}
-                  onLoad={() => {
-                    console.log('Carte prévisualisation chargée');
-                    if (mapRef.current) {
-                      setTimeout(() => {
-                        mapRef.current.resize();
-                      }, 100);
-                    }
-                  }}
-                  onError={(e) => {
-                    console.error('Erreur carte prévisualisation:', e);
-                    setMapError('Erreur lors du chargement de la carte');
-                  }}
-                  reuseMaps
-                >
-                <Marker
-                  longitude={currentLocation.longitude}
-                  latitude={currentLocation.latitude}
-                  anchor="bottom"
-                >
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-red-500 border-4 border-white shadow-lg flex items-center justify-center">
-                      <MapPin className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-                </Marker>
+              <MapContainer
+                center={[currentLocation.latitude, currentLocation.longitude]}
+                zoom={15}
+                scrollWheelZoom={false}
+                zoomControl={true}
+                style={{ width: '100%', height: '100%' }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  maxZoom={20}
+                />
+                <MapViewController center={[currentLocation.latitude, currentLocation.longitude]} zoom={15} />
+                <MapSizeHandler />
 
-                <Popup
-                  longitude={currentLocation.longitude}
-                  latitude={currentLocation.latitude}
-                  anchor="top"
-                  offset={15}
-                  closeButton={false}
-                  closeOnClick={false}
-                  className="map-preview-popup"
+                <Marker
+                  position={[currentLocation.latitude, currentLocation.longitude]}
+                  icon={L.divIcon({
+                    html: `
+                      <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 border-4 border-white shadow-lg flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                          </svg>
+                        </div>
+                      </div>
+                    `,
+                    className: 'custom-marker-icon',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40]
+                  })}
                 >
-                  <div className="text-center p-2">
-                    {profilePhoto && (
-                      <img
-                        src={profilePhoto}
-                        alt="Profil"
-                        className="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-belleya-200"
-                      />
-                    )}
-                    <p className="font-semibold text-gray-900 text-sm">Votre emplacement</p>
-                    <p className="text-xs text-gray-600 mt-1">{value}</p>
-                  </div>
-                </Popup>
-                </Map>
-              )}
+                  <Popup closeButton={false}>
+                    <div className="text-center p-2">
+                      {profilePhoto && (
+                        <img
+                          src={profilePhoto}
+                          alt="Profil"
+                          className="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-belleya-200"
+                        />
+                      )}
+                      <p className="font-semibold text-gray-900 text-sm">Votre emplacement</p>
+                      <p className="text-xs text-gray-600 mt-1">{value}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              </MapContainer>
             </div>
           )}
         </div>
