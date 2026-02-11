@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, MapPin, Star, Clock, Bell, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import AppointmentDetailModal from '../../components/client/AppointmentDetailModal';
 
 interface Booking {
   id: string;
@@ -35,6 +36,8 @@ export default function ClientBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
 
   useEffect(() => {
     loadBookings();
@@ -161,6 +164,14 @@ export default function ClientBookings() {
         {labels[status as keyof typeof labels] || status}
       </span>
     );
+  };
+
+  const handleViewDetail = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+  };
+
+  const handleReschedule = (bookingId: string) => {
+    setShowRescheduleModal(true);
   };
 
   return (
@@ -331,7 +342,13 @@ export default function ClientBookings() {
                   </button>
                 )}
                 {activeTab === 'upcoming' && (
-                  <button className="px-5 py-2.5 border-2 border-brand-200 text-brand-600 font-semibold text-sm rounded-xl hover:bg-brand-50 transition-all">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewDetail(booking.id);
+                    }}
+                    className="px-5 py-2.5 border-2 border-brand-200 text-brand-600 font-semibold text-sm rounded-xl hover:bg-brand-50 transition-all"
+                  >
                     Voir le détail
                   </button>
                 )}
@@ -340,6 +357,31 @@ export default function ClientBookings() {
           ))
         )}
       </div>
+
+      {selectedBookingId && (
+        <AppointmentDetailModal
+          bookingId={selectedBookingId}
+          onClose={() => setSelectedBookingId(null)}
+          onReschedule={handleReschedule}
+        />
+      )}
+
+      {showRescheduleModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Modifier le rendez-vous</h3>
+            <p className="text-gray-600 mb-6">
+              La fonctionnalité de modification sera bientôt disponible. Pour le moment, veuillez contacter directement votre prestataire pour modifier votre rendez-vous.
+            </p>
+            <button
+              onClick={() => setShowRescheduleModal(false)}
+              className="w-full px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

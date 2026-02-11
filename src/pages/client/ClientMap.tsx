@@ -1,17 +1,19 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPin, Search, Navigation, Star, Filter, AlertCircle } from 'lucide-react';
+import { MapPin, Search, Navigation, Star, HelpCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { ProviderProfile, getNearbyProviders } from '../../lib/socialHelpers';
 import { getCurrentPosition, geocodeAddress } from '../../lib/geocodingHelpers';
 import ProviderMapMarker from '../../components/client/ProviderMapMarker';
+import CategoryChips from '../../components/client/CategoryChips';
+import ToastContainer from '../../components/shared/ToastContainer';
+import { useToast } from '../../hooks/useToast';
 import 'leaflet/dist/leaflet.css';
 
 const DEFAULT_CENTER: [number, number] = [48.8566, 2.3522];
 const DEFAULT_ZOOM = 11;
 
-// Composant pour contrôler la vue de la carte
 function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
 
@@ -22,17 +24,14 @@ function MapViewController({ center, zoom }: { center: [number, number]; zoom: n
   return null;
 }
 
-// Composant pour gérer l'invalidation de la taille de la carte
 function MapSizeHandler() {
   const map = useMap();
 
   useEffect(() => {
-    // Invalider la taille après le montage
     const timer = setTimeout(() => {
       map.invalidateSize();
     }, 100);
 
-    // Écouter les changements de taille de fenêtre
     const handleResize = () => {
       map.invalidateSize();
     };
@@ -48,7 +47,6 @@ function MapSizeHandler() {
   return null;
 }
 
-// Composant pour gérer les events de clic sur la carte
 function MapEventHandler({ onMapClick }: { onMapClick: () => void }) {
   useMapEvents({
     click: () => {
@@ -68,10 +66,9 @@ export default function ClientMap() {
   const [searchAddress, setSearchAddress] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [showGeolocationPrompt, setShowGeolocationPrompt] = useState(true);
-  const [selectedProfession, setSelectedProfession] = useState<string>('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { toasts, dismissToast, success, error } = useToast();
 
-  // Créer des icônes personnalisées pour Leaflet
   const userIcon = useMemo(() => L.divIcon({
     html: `
       <div class="relative flex items-center justify-center">
@@ -120,14 +117,14 @@ export default function ClientMap() {
   const requestGeolocation = async () => {
     try {
       if (!navigator.geolocation) {
-        alert('Votre navigateur ne supporte pas la géolocalisation');
+        error('Votre navigateur ne supporte pas la géolocalisation');
         return;
       }
 
       const permission = await navigator.permissions.query({ name: 'geolocation' });
 
       if (permission.state === 'denied') {
-        alert('La géolocalisation est bloquée. Veuillez activer la géolocalisation dans les paramètres de votre navigateur.');
+        error('La géolocalisation est bloquée');
         return;
       }
 
@@ -137,15 +134,16 @@ export default function ClientMap() {
       setMapCenter([position.latitude, position.longitude]);
       setMapZoom(13);
       setShowGeolocationPrompt(false);
-    } catch (error: any) {
-      console.error('Geolocation error:', error);
+      success('Position activée');
+    } catch (err: any) {
+      console.error('Geolocation error:', err);
 
-      if (error.code === 1) {
-        alert('Permission de géolocalisation refusée. Veuillez autoriser l\'accès à votre position dans les paramètres de votre navigateur.');
-      } else if (error.code === 2) {
-        alert('Impossible d\'obtenir votre position. Vérifiez que les services de localisation sont activés.');
-      } else if (error.code === 3) {
-        alert('La demande de géolocalisation a expiré. Veuillez réessayer.');
+      if (err.code === 1) {
+        error('Permission de géolocalisation refusée');
+      } else if (err.code === 2) {
+        error('Impossible d\'obtenir votre position');
+      } else if (err.code === 3) {
+        error('La demande de géolocalisation a expiré');
       }
 
       setShowGeolocationPrompt(true);
@@ -178,7 +176,7 @@ export default function ClientMap() {
   const loadProvidersWithoutLocation = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('public_provider_profiles')
         .select('*')
         .not('profile_photo', 'is', null)
@@ -186,11 +184,11 @@ export default function ClientMap() {
         .not('latitude', 'is', null)
         .not('longitude', 'is', null);
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
 
       setProviders(data || []);
-    } catch (error) {
-      console.error('Error loading providers:', error);
+    } catch (err) {
+      console.error('Error loading providers:', err);
     } finally {
       setLoading(false);
     }
@@ -209,12 +207,13 @@ export default function ClientMap() {
         setMapCenter([result.latitude, result.longitude]);
         setMapZoom(13);
         setShowGeolocationPrompt(false);
+        success('Adresse trouvée');
       } else {
-        alert('Adresse introuvable. Veuillez réessayer avec une autre adresse.');
+        error('Adresse introuvable');
       }
-    } catch (error) {
-      console.error('Search error:', error);
-      alert('Erreur lors de la recherche. Veuillez réessayer.');
+    } catch (err) {
+      console.error('Search error:', err);
+      error('Erreur lors de la recherche');
     } finally {
       setSearchLoading(false);
     }
@@ -228,30 +227,43 @@ export default function ClientMap() {
   };
 
   const filteredProviders = useMemo(() => {
-    if (selectedProfession === 'all') {
+    if (selectedCategory === 'all') {
       return providers;
     }
-    return providers.filter((p) => p.activity_type === selectedProfession);
-  }, [providers, selectedProfession]);
+    return providers.filter((p) => p.activity_type === selectedCategory);
+  }, [providers, selectedCategory]);
 
-  const professions = useMemo(() => {
+  const categories = useMemo(() => {
     const unique = Array.from(new Set(providers.map((p) => p.activity_type).filter(Boolean)));
     return unique.sort();
   }, [providers]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50/30 to-white">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
       <div className="bg-gradient-to-r from-brand-50 to-brand-100/50 border-b-2 border-brand-100 sticky top-0 z-[1000] shadow-md">
         <div className="px-4 pt-6 pb-4">
-          <div className="flex items-center gap-3 mb-4">
-            <img
-              src="/logo.png"
-              alt="Belleya"
-              className="h-10 w-auto"
-            />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-belleya-powder to-belleya-deep bg-clip-text text-transparent">
-              Carte des pros
-            </h1>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt="Belleya"
+                className="h-10 w-auto"
+              />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-belleya-powder to-belleya-deep bg-clip-text text-transparent">
+                Carte des pros
+              </h1>
+            </div>
+
+            <button
+              onClick={() => window.open('https://support.belleya.com', '_blank')}
+              className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all border-2 border-brand-100"
+              aria-label="Aide et support"
+            >
+              <HelpCircle className="w-5 h-5 text-belleya-medium" />
+              <span className="text-sm font-medium text-gray-700 hidden sm:inline">Aide</span>
+            </button>
           </div>
 
           {showGeolocationPrompt && (
@@ -288,13 +300,13 @@ export default function ClientMap() {
           )}
 
           <form onSubmit={handleSearchAddress} className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-belleya-medium" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-belleya-medium" />
             <input
               type="text"
               value={searchAddress}
               onChange={(e) => setSearchAddress(e.target.value)}
               placeholder="Entrer une ville ou adresse..."
-              className="w-full pl-10 pr-4 py-3 bg-white border-2 border-brand-100 rounded-xl focus:ring-2 focus:ring-belleya-bright focus:border-belleya-bright shadow-sm"
+              className="w-full pl-12 pr-24 py-3 bg-white border-2 border-brand-100 rounded-xl focus:ring-2 focus:ring-belleya-bright focus:border-belleya-bright shadow-sm text-sm sm:text-base"
             />
             <button
               type="submit"
@@ -305,42 +317,13 @@ export default function ClientMap() {
             </button>
           </form>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
-                showFilters
-                  ? 'bg-gradient-to-r from-belleya-powder to-belleya-bright text-white'
-                  : 'bg-white text-gray-700 hover:shadow-md border-2 border-brand-100'
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              Filtres
-            </button>
-            <span className="text-sm font-medium text-belleya-deep">
-              {filteredProviders.length} {filteredProviders.length === 1 ? 'pro' : 'pros'}
-            </span>
-          </div>
-
-          {showFilters && (
-            <div className="mt-4 p-4 bg-white rounded-xl border-2 border-brand-100 shadow-md">
-              <label className="block text-sm font-medium text-belleya-deep mb-2">
-                Métier
-              </label>
-              <select
-                value={selectedProfession}
-                onChange={(e) => setSelectedProfession(e.target.value)}
-                className="w-full px-3 py-2 bg-white border-2 border-brand-100 rounded-lg focus:ring-2 focus:ring-belleya-bright focus:border-belleya-bright"
-              >
-                <option value="all">Tous les métiers</option>
-                {professions.map((profession) => (
-                  <option key={profession} value={profession}>
-                    {profession}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <CategoryChips
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            totalCount={providers.length}
+            filteredCount={filteredProviders.length}
+          />
         </div>
       </div>
 
