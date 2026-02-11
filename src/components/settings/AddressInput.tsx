@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Check, AlertCircle, Loader } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
 import { geocodeAddress, GeocodeResult } from '../../lib/geocodingHelpers';
-import 'leaflet/dist/leaflet.css';
 
 interface AddressInputProps {
   value: string;
@@ -13,39 +10,6 @@ interface AddressInputProps {
   profilePhoto: string | null;
   error?: string | null;
   onErrorChange?: (error: string | null) => void;
-}
-
-function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
-  const map = useMap();
-
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-
-  return null;
-}
-
-function MapSizeHandler() {
-  const map = useMap();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
-
-    const handleResize = () => {
-      map.invalidateSize();
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [map]);
-
-  return null;
 }
 
 export default function AddressInput({
@@ -59,7 +23,6 @@ export default function AddressInput({
 }: AddressInputProps) {
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingStatus, setGeocodingStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [showMap, setShowMap] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -96,7 +59,6 @@ export default function AddressInput({
       if (result) {
         setGeocodingStatus('success');
         onGeocode(result);
-        setShowMap(true);
       } else {
         setGeocodingStatus('error');
         if (onErrorChange) {
@@ -121,7 +83,6 @@ export default function AddressInput({
     if (onErrorChange) onErrorChange(null);
     if (newValue.length < 3) {
       setGeocodingStatus('idle');
-      setShowMap(false);
     }
   };
 
@@ -205,76 +166,6 @@ export default function AddressInput({
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
           <p className="text-sm text-red-700">{error}</p>
-        </div>
-      )}
-
-      {showMap && currentLocation && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">
-              Prévisualisation sur la carte
-            </label>
-            <button
-              type="button"
-              onClick={() => setShowMap(!showMap)}
-              className="text-xs text-gray-500 hover:text-gray-700"
-            >
-              {showMap ? 'Masquer' : 'Afficher'}
-            </button>
-          </div>
-
-          {showMap && (
-            <div className="rounded-lg overflow-hidden border border-gray-300" style={{ height: '256px' }}>
-              <MapContainer
-                center={[currentLocation.latitude, currentLocation.longitude]}
-                zoom={15}
-                scrollWheelZoom={false}
-                zoomControl={true}
-                style={{ width: '100%', height: '100%' }}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                  maxZoom={20}
-                />
-                <MapViewController center={[currentLocation.latitude, currentLocation.longitude]} zoom={15} />
-                <MapSizeHandler />
-
-                <Marker
-                  position={[currentLocation.latitude, currentLocation.longitude]}
-                  icon={L.divIcon({
-                    html: `
-                      <div class="relative">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 border-4 border-white shadow-lg flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                          </svg>
-                        </div>
-                      </div>
-                    `,
-                    className: 'custom-marker-icon',
-                    iconSize: [40, 40],
-                    iconAnchor: [20, 40]
-                  })}
-                >
-                  <Popup closeButton={false}>
-                    <div className="text-center p-2">
-                      {profilePhoto && (
-                        <img
-                          src={profilePhoto}
-                          alt="Profil"
-                          className="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-belleya-200"
-                        />
-                      )}
-                      <p className="font-semibold text-gray-900 text-sm">Votre emplacement</p>
-                      <p className="text-xs text-gray-600 mt-1">{value}</p>
-                    </div>
-                  </Popup>
-                </Marker>
-              </MapContainer>
-            </div>
-          )}
         </div>
       )}
     </div>
