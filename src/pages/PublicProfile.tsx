@@ -8,6 +8,9 @@ import { SERVICE_CATEGORIES } from '../lib/categoryHelpers';
 import AddressInput from '../components/settings/AddressInput';
 import CompactWeeklySchedule from '../components/settings/CompactWeeklySchedule';
 import BookingSettings from '../components/settings/BookingSettings';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface PublicProfileData {
   profile_photo: string | null;
@@ -64,6 +67,39 @@ interface Review {
   is_validated: boolean;
   photo_url: string | null;
   service_category: string | null;
+}
+
+function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+
+  return null;
+}
+
+function MapSizeHandler() {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+
+  return null;
 }
 
 export default function PublicProfile() {
@@ -1200,6 +1236,52 @@ export default function PublicProfile() {
                     </div>
                   </div>
                 </div>
+
+                {/* Map Preview */}
+                {profileData.latitude && profileData.longitude && (
+                  <div className="p-4 bg-white border-b border-gray-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPin className="w-4 h-4 text-belleya-primary" />
+                      <h4 className="font-bold text-gray-900 text-sm">Localisation</h4>
+                    </div>
+                    <div className="rounded-xl overflow-hidden border-2 border-gray-200 shadow-md" style={{ height: '250px' }}>
+                      <MapContainer
+                        center={[profileData.latitude, profileData.longitude]}
+                        zoom={15}
+                        scrollWheelZoom={false}
+                        zoomControl={true}
+                        style={{ height: '100%', width: '100%' }}
+                      >
+                        <TileLayer
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                          maxZoom={20}
+                        />
+                        <MapViewController center={[profileData.latitude, profileData.longitude]} zoom={15} />
+                        <MapSizeHandler />
+                        <Marker
+                          position={[profileData.latitude, profileData.longitude]}
+                          icon={L.divIcon({
+                            html: `
+                              <div class="relative transform transition-transform hover:scale-110">
+                                <div class="w-12 h-12 rounded-full border-3 border-white shadow-lg overflow-hidden ring-2 ring-belleya-primary bg-white">
+                                  ${profileData.profile_photo
+                                    ? `<img src="${profileData.profile_photo}" alt="${companyName}" class="w-full h-full object-cover" />`
+                                    : `<div class="w-full h-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white font-bold text-lg">${companyName.charAt(0)}</div>`
+                                  }
+                                </div>
+                                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-belleya-primary border-2 border-white rounded-full"></div>
+                              </div>
+                            `,
+                            className: 'custom-provider-marker',
+                            iconSize: [48, 56],
+                            iconAnchor: [24, 56]
+                          })}
+                        />
+                      </MapContainer>
+                    </div>
+                  </div>
+                )}
 
                 {/* Tabs */}
                 <div className="bg-white border-b border-gray-200">
