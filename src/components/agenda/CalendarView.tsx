@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CalendarView as ViewType, CalendarItem } from '../../types/agenda';
 import { getMonthDays, getWeekDays, isSameDay, getItemsForDay, formatTime, getEventColor, calculateOverlappingPositions } from '../../lib/calendarHelpers';
 import { getStepEmoji } from '../../lib/productionStepsHelpers';
+import { ExternalLink } from 'lucide-react';
 
 interface CalendarViewProps {
   view: ViewType;
@@ -893,16 +894,30 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                               style={{ background: 'rgba(255,255,255,0.3)' }}
                             />
                           )}
-                          <div className={`px-2 py-1 font-medium line-clamp-2 text-xs leading-snug ${isCancelled ? 'line-through' : ''}`}>
-                            {(() => {
-                              const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
-                              return (
-                                <>
-                                  {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
-                                  {item.title}
-                                </>
-                              );
-                            })()}
+                          <div className="flex items-start justify-between gap-1">
+                            <div className={`px-2 py-1 font-medium line-clamp-2 text-xs leading-snug flex-1 ${isCancelled ? 'line-through' : ''}`}>
+                              {(() => {
+                                const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
+                                return (
+                                  <>
+                                    {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
+                                    {item.title}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                            {item.data && (item.data as any).link && (
+                              <a
+                                href={(item.data as any).link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-1 py-1 hover:bg-white/20 rounded transition-colors"
+                                title="Ouvrir le lien"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
                           </div>
                           <div className={`px-2 text-xs opacity-90 truncate ${isCancelled ? 'line-through' : ''}`}>
                             {formatTime(start)} - {formatTime(end)}
@@ -1390,16 +1405,30 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                           style={{ background: 'rgba(255,255,255,0.3)' }}
                         />
                       )}
-                      <div className={`px-3 md:px-4 pt-2 font-semibold text-base line-clamp-2 ${isCancelled ? 'line-through' : ''}`}>
-                        {(() => {
-                          const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
-                          return (
-                            <>
-                              {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
-                              {item.title}
-                            </>
-                          );
-                        })()}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className={`px-3 md:px-4 pt-2 font-semibold text-base line-clamp-2 flex-1 ${isCancelled ? 'line-through' : ''}`}>
+                          {(() => {
+                            const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
+                            return (
+                              <>
+                                {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
+                                {item.title}
+                              </>
+                            );
+                          })()}
+                        </div>
+                        {item.data && (item.data as any).link && (
+                          <a
+                            href={(item.data as any).link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="px-2 py-2 hover:bg-white/20 rounded transition-colors"
+                            title="Ouvrir le lien"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
                       </div>
                       <div className={`px-3 md:px-4 pb-2 text-sm opacity-90 mt-1 truncate ${isCancelled ? 'line-through' : ''}`}>
                         {formatTime(start)} - {formatTime(end)}
