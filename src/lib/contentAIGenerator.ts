@@ -88,7 +88,344 @@ function generateDetailedScript(
   pillar?: string,
   profession?: string
 ): string {
-  return `Script généré pour: ${title}`;
+  const professionContext = getProfessionContext(profession || 'multi_metiers');
+  const seed = title.length + (profession?.length || 0);
+
+  const hook = generateStrategicHook(title, contentType, platform, seed);
+  const identification = generateIdentification(title, professionContext, seed);
+  const mechanism = generateMechanism(title, professionContext, seed);
+  const commonError = generateCommonError(title, professionContext, seed);
+  const concreteSolution = generateConcreteSolution(title, professionContext, seed);
+  const emotionalProjection = generateEmotionalProjection(title, professionContext, seed);
+  const strategicCTA = generateStrategicCTAForScript(objective || 'éduquer', title, seed);
+
+  const longCaption = generateLongCaption(title, professionContext, seed);
+  const shortCaption = generateShortCaption(title, professionContext, seed);
+  const scriptHashtags = generateProfessionHashtags(professionContext, contentType, platform);
+
+  if (contentType === 'carrousel') {
+    return `📋 SCRIPT COMPLET - CARROUSEL
+
+🎯 Thème : ${title}
+🎨 Métier : ${professionContext}
+📱 Format : Carrousel Instagram
+🎯 Objectif : ${objective || 'Éducation'} + conversion
+
+⸻
+
+📌 SLIDE 1 — HOOK (Pattern Interrupt Puissant)
+
+${hook}
+
+⸻
+
+📌 SLIDE 2 — IDENTIFICATION
+
+${identification}
+
+⸻
+
+📌 SLIDE 3 — MÉCANISME / CAUSE RÉELLE
+
+${mechanism}
+
+⸻
+
+📌 SLIDE 4 — ERREUR COURANTE
+
+${commonError}
+
+⸻
+
+📌 SLIDE 5 — SOLUTION CONCRÈTE
+
+${concreteSolution}
+
+⸻
+
+📌 SLIDE 6 — PROJECTION ÉMOTIONNELLE
+
+${emotionalProjection}
+
+⸻
+
+📌 SLIDE 7 — CTA STRATÉGIQUE
+
+${strategicCTA}
+
+⸻
+
+📝 LÉGENDE LONGUE (Humaine, fluide, persuasive)
+
+${longCaption}
+
+⸻
+
+✂️ VERSION COURTE (Optimisée conversion)
+
+${shortCaption}
+
+⸻
+
+🏷️ HASHTAGS (Cohérents avec le métier)
+
+${scriptHashtags}`;
+  }
+
+  if (contentType === 'reel' || contentType === 'video') {
+    return `🎬 SCRIPT COMPLET - REEL
+
+🎯 Thème : ${title}
+🎨 Métier : ${professionContext}
+📱 Format : Reel / Vidéo courte
+🎯 Objectif : ${objective || 'Éducation'} + conversion
+
+⸻
+
+⏱️ 0-3s — HOOK (Arrêt brutal)
+
+${hook}
+
+⸻
+
+⏱️ 3-8s — IDENTIFICATION
+
+${identification}
+
+⸻
+
+⏱️ 8-12s — MÉCANISME
+
+${mechanism}
+
+⸻
+
+⏱️ 12-15s — SOLUTION
+
+${concreteSolution}
+
+⸻
+
+⏱️ 15-18s — PROJECTION
+
+${emotionalProjection}
+
+⸻
+
+⏱️ 18-20s — CTA
+
+${strategicCTA}
+
+⸻
+
+📝 LÉGENDE LONGUE
+
+${longCaption}
+
+⸻
+
+✂️ VERSION COURTE
+
+${shortCaption}
+
+⸻
+
+🏷️ HASHTAGS
+
+${scriptHashtags}`;
+  }
+
+  return `📋 SCRIPT COMPLET - ${contentType.toUpperCase()}
+
+🎯 Thème : ${title}
+🎨 Métier : ${professionContext}
+🎯 Objectif : ${objective || 'Éducation'}
+
+⸻
+
+1️⃣ HOOK
+
+${hook}
+
+⸻
+
+2️⃣ IDENTIFICATION
+
+${identification}
+
+⸻
+
+3️⃣ MÉCANISME / CAUSE RÉELLE
+
+${mechanism}
+
+⸻
+
+4️⃣ ERREUR COURANTE
+
+${commonError}
+
+⸻
+
+5️⃣ SOLUTION CONCRÈTE
+
+${concreteSolution}
+
+⸻
+
+6️⃣ PROJECTION ÉMOTIONNELLE
+
+${emotionalProjection}
+
+⸻
+
+7️⃣ CTA STRATÉGIQUE
+
+${strategicCTA}
+
+⸻
+
+📝 LÉGENDE LONGUE
+
+${longCaption}
+
+⸻
+
+✂️ VERSION COURTE
+
+${shortCaption}
+
+⸻
+
+🏷️ HASHTAGS
+
+${scriptHashtags}`;
+}
+
+function generateStrategicHook(title: string, contentType: ContentType, platform: Platform, seed: number): string {
+  const hooks = [
+    `"Si ${title.toLowerCase()}… ce n'est pas un manque de volonté."\n\nC'est un mécanisme.`,
+    `"${title}"\n\n[Arrêt brutal]\n\nCe n'est pas ce que tu crois.`,
+    `"Tu te demandes pourquoi ${title.toLowerCase()} ?"\n\nLa vérité va te surprendre.`,
+    `"${title}. Ce que personne ne te dit."`,
+    `"Si tu vis ${title.toLowerCase()}, sache une chose :\n\nCe n'est pas une fatalité."`
+  ];
+
+  return hooks[seed % hooks.length];
+}
+
+function generateIdentification(title: string, profession: string, seed: number): string {
+  const identifications = [
+    `Tu t'es déjà dit :\n\n"C'est la dernière fois."\n"Demain j'arrête."\n\nMais au moindre stress…\nTout recommence.\n\nSans même que tu t'en rendes compte.`,
+    `Tu te reconnais ?\n\nTu essaies.\nTu fais de ton mieux.\nMais rien ne change.\n\nEt tu commences à croire que c'est toi le problème.`,
+    `La plupart des clientes me disent :\n\n"J'ai tout essayé"\n"Ça ne marche jamais pour moi"\n"Je pense que c'est normal"\n\nNon. Ce n'est pas normal.`,
+    `Ce moment où tu te dis :\n\n"Pourquoi ça ne fonctionne jamais ?"\n"Qu'est-ce qui ne va pas chez moi ?"\n\nCe n'est pas toi.\nC'est juste qu'on ne t'a pas donné les bonnes clés.`
+  ];
+
+  return identifications[seed % identifications.length];
+}
+
+function generateMechanism(title: string, profession: string, seed: number): string {
+  const mechanisms = [
+    `${title} n'est pas une habitude "bête".\n\nC'est souvent :\n• Un réflexe d'anxiété\n• Une décharge émotionnelle\n• Un besoin de contrôle\n\nLe problème n'est pas visible.\nC'est le déclencheur.`,
+    `Voici ce que la plupart des gens ne comprennent pas :\n\nCe n'est pas une question de technique parfaite.\nCe n'est pas une question de produit magique.\n\nC'est une question de méthode adaptée à TOI.`,
+    `La vraie cause de ${title.toLowerCase()} :\n\nCe n'est pas le manque de volonté.\nCe n'est pas une fatalité génétique.\n\nC'est un mécanisme qu'on peut comprendre et traiter.`,
+    `Ce que personne ne te dit sur ${title.toLowerCase()} :\n\nPlus tu essaies de "réparer" seule, plus tu risques d'aggraver.\nPlus c'est mal fait, plus c'est difficile à rattraper.\nEt plus tu attends, plus tu perds confiance.`
+  ];
+
+  return mechanisms[seed % mechanisms.length];
+}
+
+function generateCommonError(title: string, profession: string, seed: number): string {
+  const errors = [
+    `Ce qui aggrave le problème :\n\nPlus tu culpabilises → plus tu stresses.\nPlus tu stresses → plus le problème revient.\n\nC'est un cercle invisible.\n\nEt c'est pour ça que "juste arrêter" ne marche pas.`,
+    `L'erreur que tout le monde fait :\n\nEssayer de forcer une solution générique.\n\nMais ton corps, ta situation, tes besoins…\nsont UNIQUES.\n\nCe qui marche pour les autres ne marchera pas forcément pour toi.`,
+    `Ce que la majorité fait mal :\n\nAttendre que ça passe tout seul.\nEssayer des solutions trouvées sur Internet.\nCacher le problème au lieu de le traiter.\n\nRésultat : ça empire.`,
+    `Pourquoi les solutions classiques échouent :\n\nElles ne traitent que le symptôme.\nPas la cause.\n\nC'est comme mettre un pansement\nsur une plaie infectée.`
+  ];
+
+  return errors[seed % errors.length];
+}
+
+function generateConcreteSolution(title: string, profession: string, seed: number): string {
+  const solutions = [
+    `En ${profession}, on agit sur 2 niveaux :\n\n1️⃣ Renforcer (technique adaptée)\n2️⃣ Créer une barrière qui casse le réflexe automatique\n\nQuand c'est traité correctement…\nLe résultat est visible.\nEt durable.`,
+    `La solution que j'applique :\n\n✔️ Comprendre TON besoin réel (pas celui des autres)\n✔️ Adapter la méthode à TA situation\n✔️ Créer un résultat qui tient dans le temps\n\nPas de recette magique.\nJuste une approche personnalisée.`,
+    `Voici comment je traite ${title.toLowerCase()} :\n\n1. On identifie la vraie cause\n2. On adapte la technique à ton cas précis\n3. On crée un environnement favorable\n4. On suit l'évolution\n\nRésultat : durable et confortable.`,
+    `La méthode qui fonctionne :\n\n❌ Pas de solution générique\n❌ Pas de promesse miracle\n✔️ Une vraie écoute de ton besoin\n✔️ Une technique adaptée\n✔️ Un suivi personnalisé\n\nC'est ça qui fait la différence.`
+  ];
+
+  return solutions[seed % solutions.length];
+}
+
+function generateEmotionalProjection(title: string, profession: string, seed: number): string {
+  const projections = [
+    `Imagine :\n\nRegarder tes mains sans honte.\nArrêter de les cacher.\nTe sentir soignée.\n\nC'est souvent là que le déclic se fait.`,
+    `Le résultat ?\n\nPlus besoin de stresser.\nPlus besoin de tout surveiller.\nJuste profiter.\n\nEt retrouver cette confiance que tu avais perdue.`,
+    `Avant : tu évitais.\nTu cachais.\nTu espérais que personne ne remarque.\n\nAprès : tu montres.\nTu assumes.\nTu es fière du résultat.\n\nC'est ça que mes clientes me disent.`,
+    `Le changement n'est pas que physique.\n\nC'est dans le regard.\nDans la posture.\nDans la confiance retrouvée.\n\nEt ça… ça change tout.`
+  ];
+
+  return projections[seed % projections.length];
+}
+
+function generateStrategicCTAForScript(objective: string, title: string, seed: number): string {
+  const ctas: Record<string, string[]> = {
+    éduquer: [
+      `Si tu veux en savoir plus :\n\n📌 Sauvegarde ce post\n💬 Pose tes questions en commentaire\n📩 Ou DM-moi pour en discuter`,
+      `Des questions sur ${title.toLowerCase()} ?\n\n💬 Écris-les en commentaire\n📩 Ou envoie-moi un DM\nJe te réponds avec plaisir`,
+    ],
+    convertir: [
+      `Si ${title.toLowerCase()} te concerne :\n\n📍 Prends RDV maintenant (lien en bio)\n💬 Ou DM-moi "RDV"`,
+      `Tu veux résoudre ${title.toLowerCase()} ?\n\n📲 Réserve ton créneau (lien en bio)\n💬 Ou commente "GO"`,
+    ],
+    attirer: [
+      `Ce post résonne pour toi ?\n\n💬 Commente "OUI"\n📌 Sauvegarde-le\n📤 Partage-le à quelqu'un qui en a besoin`,
+      `Tu te reconnais dans ce post ?\n\n💾 Sauvegarde-le\n📩 Partage-le en story\n💬 Dis-moi en commentaire`,
+    ],
+    fidéliser: [
+      `Tu fais déjà partie de mes clientes ?\n\n💬 Raconte-moi ton expérience en commentaire\n📍 Et pense à réserver ton prochain RDV`,
+      `Mes clientes régulières :\n\n💬 Partagez votre transformation\n📩 Et n'oubliez pas de réserver (lien en bio)`,
+    ],
+  };
+
+  const objectiveCTAs = ctas[objective] || ctas['éduquer'];
+  return objectiveCTAs[seed % objectiveCTAs.length];
+}
+
+function generateLongCaption(title: string, profession: string, seed: number): string {
+  const captions = [
+    `${title}. Ce n'est pas ce que tu crois.\n\nLa plupart des clientes pensent que ${title.toLowerCase()}, c'est compliqué ou hors de portée.\nEn réalité, ce n'est ni une question de chance… ni une question de budget.\n\nCe n'est pas une fatalité.\nC'est un mécanisme qu'on peut comprendre et traiter.\n\nQuand c'est fait correctement :\n✔️ Le résultat tient dans le temps\n✔️ Tu te sens en confiance\n✔️ Tu n'as plus besoin de cacher\n\nEt surtout… tu retrouves ce sentiment de bien-être que tu cherchais.\n\nJ'ai accompagné des dizaines de clientes dans cette transformation.\nEt chaque fois, c'est la même chose : ce n'est pas juste le résultat qui change.\nC'est la confiance qui revient.`,
+
+    `Parlons de ${title.toLowerCase()} (sans filtre).\n\nBeaucoup me disent qu'elles ont essayé, que ça n'a pas marché, qu'elles ont abandonné.\nMais voici ce qu'on ne leur a jamais expliqué.\n\nCe n'est pas une question de technique parfaite.\nCe n'est pas une question de produit magique.\nC'est une question de méthode adaptée à TOI.\n\nPlus tu essaies de "réparer" seule, plus tu risques d'aggraver.\nPlus c'est mal fait, plus c'est difficile à rattraper.\nEt plus tu attends, plus tu perds confiance.\n\nAvec la bonne approche :\n✔️ On comprend d'abord ton besoin réel\n✔️ On adapte la solution à ta situation\n✔️ On obtient un résultat durable et naturel\n\nLa différence ne se voit pas que dans le résultat.\nElle se voit dans la posture, dans le regard, dans la confiance retrouvée.`
+  ];
+
+  return captions[seed % captions.length];
+}
+
+function generateShortCaption(title: string, profession: string, seed: number): string {
+  const shortCaptions = [
+    `${title} ? Ce n'est pas une fatalité.\n\nAvec la bonne méthode, tout change.\n\n✔️ Résultat durable\n✔️ Confiance retrouvée\n✔️ Bien-être garanti\n\n📍 Réserve maintenant (lien en bio)`,
+
+    `${title}. La vérité.\n\nCe n'est pas toi le problème.\nC'est la méthode.\n\nAvec la bonne approche :\n✔️ Ça tient\n✔️ C'est confortable\n✔️ Tu retrouves confiance\n\n📩 DM-moi "RDV" pour réserver`
+  ];
+
+  return shortCaptions[seed % shortCaptions.length];
+}
+
+function generateProfessionHashtags(profession: string, contentType: ContentType, platform: Platform): string {
+  const baseHashtags: Record<string, string[]> = {
+    'onglerie': ['#onglerie', '#ongles', '#nailart', '#beautedesongles', '#prothesisteongulaire'],
+    'esthétique': ['#esthetique', '#beaute', '#soinsvisage', '#skincare', '#estheticienne'],
+    'coiffure': ['#coiffure', '#cheveux', '#coiffeuseproductrice', '#hair', '#hairstyle'],
+    'extensions de cils': ['#cils', '#extensionsdecils', '#lashartist', '#beauty', '#regard'],
+    'sourcils': ['#sourcils', '#browartist', '#microblading', '#beauteduregard', '#brows'],
+    'soins du visage': ['#soinsvisage', '#facialiste', '#skincare', '#beautebienetre', '#peauparfaite'],
+    'beauté': ['#beaute', '#beauty', '#bienetre', '#selfcare', '#beautypro']
+  };
+
+  const professionTags = baseHashtags[profession] || baseHashtags['beauté'];
+  return professionTags.join(' ');
 }
 
 function generateCarrousel(title: string, platform: Platform, description?: string, context?: string, developTitle: boolean = false): GeneratedContent {
