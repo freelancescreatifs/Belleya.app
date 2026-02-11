@@ -616,6 +616,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
                       </h4>
                       <ProductionStepsCheckboxes
                         contentId={content.id}
+                        contentType={content.content_type}
                         scriptChecked={content.script_checked || false}
                         tournageChecked={content.tournage_checked || false}
                         montageChecked={content.montage_checked || false}

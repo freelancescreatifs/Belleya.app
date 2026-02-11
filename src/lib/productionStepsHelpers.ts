@@ -14,6 +14,10 @@ export interface ContentItem {
   date_editing?: string;
   date_scheduling?: string;
   publication_date: string;
+  script_checked?: boolean;
+  tournage_checked?: boolean;
+  montage_checked?: boolean;
+  planifie_checked?: boolean;
 }
 
 export interface ProductionStep {
@@ -30,8 +34,23 @@ export interface ProductionStep {
   isCompleted: boolean;
 }
 
-function getCompletedStepsForStatus(status: ContentStatus, contentType: string): StepKey[] {
-  return [];
+function getCompletedStepsForContent(content: ContentItem): StepKey[] {
+  const completed: StepKey[] = [];
+
+  if (content.script_checked) {
+    completed.push('date_script');
+  }
+  if (content.tournage_checked) {
+    completed.push('date_shooting');
+  }
+  if (content.montage_checked) {
+    completed.push('date_editing');
+  }
+  if (content.planifie_checked) {
+    completed.push('date_scheduling');
+  }
+
+  return completed;
 }
 
 export function getRelevantStepsForContentType(contentType: string): string[] {
@@ -71,7 +90,7 @@ export function getProductionSteps(content: ContentItem): ProductionStep[] {
   ];
 
   const relevantStepKeys = getRelevantStepsForContentType(content.content_type);
-  const completedStepKeys = getCompletedStepsForStatus(content.status, content.content_type);
+  const completedStepKeys = getCompletedStepsForContent(content);
   const stepsConfig = allStepsConfig.filter(step => relevantStepKeys.includes(step.key));
 
   for (const step of stepsConfig) {
@@ -302,4 +321,46 @@ export function getStepFromDateColumn(column: string): ProductionStepValue | nul
     default:
       return null;
   }
+}
+
+/**
+ * Calculate production status based on checkboxes
+ * Returns the next unchecked step in order, or 'scheduled' if all are checked
+ */
+export function calculateProductionStatus(content: ContentItem): ContentStatus {
+  const relevantSteps = getRelevantStepsForContentType(content.content_type);
+
+  const stepOrder: { key: StepKey; status: ContentStatus }[] = [
+    { key: 'date_script', status: 'to_produce' },
+    { key: 'date_shooting', status: 'to_shoot' },
+    { key: 'date_editing', status: 'to_edit' },
+    { key: 'date_scheduling', status: 'scheduled' }
+  ];
+
+  const relevantStepOrder = stepOrder.filter(s => relevantSteps.includes(s.key));
+
+  for (const step of relevantStepOrder) {
+    let isChecked = false;
+
+    switch (step.key) {
+      case 'date_script':
+        isChecked = content.script_checked || false;
+        break;
+      case 'date_shooting':
+        isChecked = content.tournage_checked || false;
+        break;
+      case 'date_editing':
+        isChecked = content.montage_checked || false;
+        break;
+      case 'date_scheduling':
+        isChecked = content.planifie_checked || false;
+        break;
+    }
+
+    if (!isChecked) {
+      return step.status;
+    }
+  }
+
+  return 'scheduled';
 }

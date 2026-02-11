@@ -1,6 +1,7 @@
 import { FileText, Video, Scissors, Calendar, CheckCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useState, useEffect } from 'react';
+import { calculateProductionStatus, ContentItem } from '../../lib/productionStepsHelpers';
 
 interface ProductionStep {
   key: 'script_checked' | 'tournage_checked' | 'montage_checked' | 'planifie_checked';
@@ -12,6 +13,7 @@ interface ProductionStep {
 
 interface ProductionStepsCheckboxesProps {
   contentId: string;
+  contentType?: string;
   scriptChecked: boolean;
   tournageChecked: boolean;
   montageChecked: boolean;
@@ -38,6 +40,7 @@ const PRODUCTION_STEPS: ProductionStep[] = [
 
 export default function ProductionStepsCheckboxes({
   contentId,
+  contentType = 'post',
   scriptChecked,
   tournageChecked,
   montageChecked,
@@ -77,7 +80,7 @@ export default function ProductionStepsCheckboxes({
     setUpdating(true);
     try {
       const newValue = !currentValue;
-      const updates: Record<string, boolean> = {};
+      const updates: Record<string, boolean | string> = {};
 
       const stepOrder = ['script_checked', 'tournage_checked', 'montage_checked', 'planifie_checked'];
       const currentStepIndex = stepOrder.indexOf(stepKey);
@@ -91,6 +94,20 @@ export default function ProductionStepsCheckboxes({
           updates[stepOrder[i]] = false;
         }
       }
+
+      const mockContent: ContentItem = {
+        id: contentId,
+        content_type: contentType,
+        status: 'idea' as any,
+        publication_date: new Date().toISOString(),
+        script_checked: updates.script_checked !== undefined ? updates.script_checked as boolean : scriptChecked,
+        tournage_checked: updates.tournage_checked !== undefined ? updates.tournage_checked as boolean : tournageChecked,
+        montage_checked: updates.montage_checked !== undefined ? updates.montage_checked as boolean : montageChecked,
+        planifie_checked: updates.planifie_checked !== undefined ? updates.planifie_checked as boolean : planifieChecked,
+      };
+
+      const newStatus = calculateProductionStatus(mockContent);
+      updates.status = newStatus;
 
       const { error, data } = await supabase
         .from('content_calendar')
@@ -110,7 +127,10 @@ export default function ProductionStepsCheckboxes({
 
       setCurrentValues(prev => ({
         ...prev,
-        ...updates
+        script_checked: mockContent.script_checked!,
+        tournage_checked: mockContent.tournage_checked!,
+        montage_checked: mockContent.montage_checked!,
+        planifie_checked: mockContent.planifie_checked!,
       }));
 
       if (onUpdate) onUpdate();
@@ -172,10 +192,28 @@ export default function ProductionStepsCheckboxes({
     return null;
   }
 
+  const getRelevantSteps = (type: string): ProductionStep[] => {
+    switch (type) {
+      case 'post':
+      case 'story':
+      case 'live':
+        return PRODUCTION_STEPS.filter(s => s.key === 'script_checked' || s.key === 'planifie_checked');
+      case 'carrousel':
+        return PRODUCTION_STEPS.filter(s => s.key !== 'tournage_checked');
+      case 'reel':
+      case 'video':
+        return PRODUCTION_STEPS;
+      default:
+        return PRODUCTION_STEPS;
+    }
+  };
+
+  const relevantSteps = getRelevantSteps(contentType);
+
   if (compact) {
     return (
       <div className="flex items-center gap-2 flex-wrap">
-        {PRODUCTION_STEPS.map((step) => {
+        {relevantSteps.map((step) => {
           const Icon = step.icon;
           const isChecked = currentValues[step.key];
           const stepDate = getStepDate(step);
@@ -218,7 +256,7 @@ export default function ProductionStepsCheckboxes({
 
   return (
     <div className="space-y-2">
-      {PRODUCTION_STEPS.map((step) => {
+      {relevantSteps.map((step) => {
         const Icon = step.icon;
         const isChecked = currentValues[step.key];
         const stepDate = getStepDate(step);
