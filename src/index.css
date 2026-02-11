@@ -349,6 +349,57 @@ button, a, [role="button"] {
   }
 }
 
+/* Client Map Wrapper - Fixed dimensions for stable rendering */
+.map-wrapper-client {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 50vh !important;
+  min-height: 260px !important;
+  position: relative;
+  overflow: hidden;
+  background: #e8e8e8;
+}
+
+@media (min-width: 768px) {
+  .map-wrapper-client {
+    height: 420px !important;
+    min-height: 420px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-wrapper-client {
+    height: 45vh !important;
+    min-height: 260px !important;
+  }
+}
+
+/* Client Leaflet Container - Force full size */
+.leaflet-map-client {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.leaflet-map-client .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  background: #e8e8e8;
+}
+
+/* Apply grayscale to client map */
+.leaflet-map-client .leaflet-tile-pane {
+  filter: grayscale(100%) contrast(1.1);
+  -webkit-filter: grayscale(100%) contrast(1.1);
+}
+
 /* Leaflet Map Styles - Grayscale Theme */
 .leaflet-container {
   width: 100% !important;

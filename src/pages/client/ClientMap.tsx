@@ -22,6 +22,32 @@ function MapViewController({ center, zoom }: { center: [number, number]; zoom: n
   return null;
 }
 
+// Composant pour gérer l'invalidation de la taille de la carte
+function MapSizeHandler() {
+  const map = useMap();
+
+  useEffect(() => {
+    // Invalider la taille après le montage
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+
+    // Écouter les changements de taille de fenêtre
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+
+  return null;
+}
+
 // Composant pour gérer les events de clic sur la carte
 function MapEventHandler({ onMapClick }: { onMapClick: () => void }) {
   useMapEvents({
@@ -309,13 +335,11 @@ export default function ClientMap() {
         </div>
       </div>
 
-      <div
-        className="relative z-0 w-full map-container-responsive"
-      >
+      <div className="relative z-0 w-full map-wrapper-client">
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
-          className="w-full h-full grayscale-map"
+          className="leaflet-map-client"
           scrollWheelZoom={true}
           zoomControl={true}
         >
@@ -326,6 +350,7 @@ export default function ClientMap() {
           />
 
           <MapViewController center={mapCenter} zoom={mapZoom} />
+          <MapSizeHandler />
           <MapEventHandler onMapClick={() => setSelectedProvider(null)} />
 
           {userLocation && (
