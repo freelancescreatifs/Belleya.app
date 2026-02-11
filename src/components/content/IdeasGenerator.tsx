@@ -125,7 +125,9 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         .from('content_calendar')
         .select('*')
         .eq('user_id', user.id)
-        .eq('status', 'idea')
+        .eq('status', 'script')
+        .in('source', ['manual', 'ai'])
+        .is('date_script', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -164,7 +166,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         platform: [manualIdea.platform],
         publication_date: new Date().toISOString().split('T')[0],
         publication_time: '12:00',
-        status: 'idea' as const,
+        status: 'script' as const,
         source: 'manual' as const,
         objective: manualIdea.objective,
         editorial_pillar: manualIdea.editorial_pillar || null,
@@ -261,7 +263,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         platform: Array.isArray(idea.platform) ? idea.platform : [idea.platform],
         publication_date: new Date().toISOString().split('T')[0],
         publication_time: '12:00',
-        status: 'idea' as const,
+        status: 'script' as const,
         source: 'ai' as const,
         objective: idea.objective,
         editorial_pillar: aiIdea.editorial_pillar || null,
