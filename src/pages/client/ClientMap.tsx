@@ -27,21 +27,30 @@ function MapSizeHandler() {
   const map = useMap();
 
   useEffect(() => {
-    // Invalider la taille après le montage
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
+    // Multiples invalidations pour garantir le rendu sur mobile
+    const timers = [
+      setTimeout(() => map.invalidateSize(), 100),
+      setTimeout(() => map.invalidateSize(), 300),
+      setTimeout(() => map.invalidateSize(), 900)
+    ];
 
-    // Écouter les changements de taille de fenêtre
+    // Écouter les changements de taille de fenêtre et orientation
     const handleResize = () => {
       map.invalidateSize();
     };
 
+    const handleOrientationChange = () => {
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
+    };
+
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
 
     return () => {
-      clearTimeout(timer);
+      timers.forEach(timer => clearTimeout(timer));
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
     };
   }, [map]);
 
@@ -335,7 +344,7 @@ export default function ClientMap() {
         </div>
       </div>
 
-      <div className="relative z-0 w-full map-wrapper-client">
+      <div className="relative z-0 w-full map-wrapper-client h-[40vh] min-h-[260px] md:h-[420px] overflow-hidden">
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
