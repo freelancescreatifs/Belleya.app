@@ -1,0 +1,145 @@
+import { Check, X } from 'lucide-react';
+
+export default function ComparisonSection() {
+  const features = [
+    { category: "Visibilité & Découverte", name: "Page profil publique partageable", belleya: true, others: false },
+    { category: "Visibilité & Découverte", name: "Découverte par les clientes potentielles", belleya: true, others: false },
+    { category: "Réservation", name: "Prise de rendez-vous en ligne", belleya: true, others: true },
+    { category: "Réservation", name: "Gestion des disponibilités", belleya: true, others: true },
+    { category: "Paiement", name: "Paiement intégré (acompte/solde)", belleya: true, others: false },
+    { category: "Paiement", name: "Gestion des encaissements", belleya: true, others: false },
+    { category: "Gestion Cliente", name: "CRM avec historique complet", belleya: true, others: false },
+    { category: "Gestion Cliente", name: "Galerie photos avant/après", belleya: true, others: false },
+    { category: "Gestion Cliente", name: "Champs métier personnalisables", belleya: true, others: false },
+    { category: "Finances", name: "Suivi CA, charges et bénéfices", belleya: true, others: false },
+    { category: "Finances", name: "Calculs TVA et seuils fiscaux", belleya: true, others: false },
+    { category: "Contenu & Marketing", name: "Calendrier éditorial avec IA", belleya: true, others: false },
+    { category: "Contenu & Marketing", name: "Planification posts Instagram", belleya: true, others: false },
+    { category: "Contenu & Marketing", name: "Relances clients automatiques", belleya: true, others: false },
+    { category: "Organisation", name: "Agenda unifié (RDV + tâches)", belleya: true, others: false },
+    { category: "Organisation", name: "Gestion des objectifs", belleya: true, others: false },
+    { category: "Organisation", name: "Gestion du stock", belleya: true, others: false }
+  ];
+
+  return (
+    <section className="relative py-20 md:py-32 bg-gradient-to-b from-rose-50/30 to-white overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(239,170,154,0.08),rgba(255,255,255,0))]"></div>
+
+      <div className="container mx-auto px-4 relative">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-belleya-powder via-belleya-bright to-belleya-deep bg-clip-text text-transparent">
+              Belleya VS les autres outils
+            </h2>
+
+            <div className="max-w-4xl mx-auto mb-8">
+              <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                La plupart des outils du marché excellent dans leur domaine : les solutions de réservation gèrent très bien les prises de RDV,
+                les outils de gestion de tâches optimisent votre organisation, les CRM structurent vos données clientes. Techniquement performants,
+                mais spécialisés. Le problème ? Vous jongler entre 3, 4, voire 5 plateformes différentes. Belleya adopte une approche différente :
+                c'est une plateforme tout-en-un pensée pour les professionnelles de la beauté. Au-delà de la simple réservation ou de la gestion
+                administrative, Belleya intègre une dimension unique : la visibilité. Votre profil public devient votre vitrine, permettant aux
+                clientes de vous découvrir, consulter vos services, voir vos créations, et réserver directement. Là où les autres outils restent
+                des solutions techniques en arrière-plan, Belleya combine gestion interne performante et présence client visible. Vous pilotez
+                votre activité et développez votre clientèle depuis un seul endroit. Simple, cohérent, efficace.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl border border-brand-100/50 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-brand-50 to-brand-100/50 border-b-2 border-brand-100">
+                    <th className="text-left p-6 font-bold text-gray-900 text-lg">
+                      Fonctionnalité
+                    </th>
+                    <th className="text-center p-6 font-bold text-belleya-deep text-lg border-l-2 border-brand-100 bg-white/50">
+                      Belleya
+                      <div className="text-xs font-normal text-gray-600 mt-1">
+                        Tout-en-un
+                      </div>
+                    </th>
+                    <th className="text-center p-6 font-bold text-gray-600 text-lg">
+                      Les autres outils
+                      <div className="text-xs font-normal text-gray-500 mt-1">
+                        Spécialisés
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {features.map((feature, index) => (
+                    <tr
+                      key={index}
+                      className={`border-b border-gray-100 hover:bg-rose-50/20 transition-colors ${
+                        index === 0 || features[index - 1]?.category !== feature.category
+                          ? 'border-t-2 border-brand-100/30'
+                          : ''
+                      }`}
+                    >
+                      <td className="p-5 text-gray-800">
+                        {index === 0 || features[index - 1]?.category !== feature.category ? (
+                          <div className="font-bold text-belleya-deep text-sm mb-2">
+                            {feature.category}
+                          </div>
+                        ) : null}
+                        <div className="pl-4">{feature.name}</div>
+                      </td>
+                      <td className="text-center p-5 border-l-2 border-brand-100/30 bg-gradient-to-r from-white to-rose-50/10">
+                        {feature.belleya ? (
+                          <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-belleya-powder to-belleya-bright shadow-md">
+                            <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-200">
+                            <X className="w-5 h-5 text-gray-400" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="text-center p-5">
+                        {feature.others ? (
+                          <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-300">
+                            <Check className="w-5 h-5 text-gray-600" />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100">
+                            <X className="w-5 h-5 text-gray-300" />
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="bg-gradient-to-r from-brand-50 to-brand-100/50 p-6 text-center border-t-2 border-brand-100">
+              <p className="text-gray-700 font-medium mb-4">
+                Les autres outils excellent dans leur spécialité, mais vous obligent à multiplier les abonnements.
+              </p>
+              <p className="text-lg font-bold text-belleya-deep">
+                Belleya réunit tout ce dont vous avez besoin au même endroit.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-12 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-brand-100/50 text-center">
+              <div className="text-3xl font-bold text-belleya-deep mb-2">1 seul outil</div>
+              <p className="text-gray-600">Au lieu de 4 ou 5 plateformes différentes</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-brand-100/50 text-center">
+              <div className="text-3xl font-bold text-belleya-deep mb-2">1 seul prix</div>
+              <p className="text-gray-600">Au lieu de cumuler plusieurs abonnements</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-brand-100/50 text-center">
+              <div className="text-3xl font-bold text-belleya-deep mb-2">1 seule connexion</div>
+              <p className="text-gray-600">Tout centralisé, rien à synchroniser</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

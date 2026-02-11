@@ -240,20 +240,29 @@ export default function ClientMap() {
   }, [providers]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-[1000]">
+    <div className="min-h-screen bg-gradient-to-b from-brand-50/30 to-white">
+      <div className="bg-gradient-to-r from-brand-50 to-brand-100/50 border-b-2 border-brand-100 sticky top-0 z-[1000] shadow-md">
         <div className="px-4 pt-6 pb-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Carte des pros</h1>
+          <div className="flex items-center gap-3 mb-4">
+            <img
+              src="/logo.png"
+              alt="Belleya"
+              className="h-10 w-auto"
+            />
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-belleya-powder to-belleya-deep bg-clip-text text-transparent">
+              Carte des pros
+            </h1>
+          </div>
 
           {showGeolocationPrompt && (
-            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-              <p className="text-sm text-blue-800 mb-3">
+            <div className="mb-4 p-4 bg-white border-2 border-brand-100 rounded-xl shadow-md">
+              <p className="text-sm text-gray-700 mb-3 font-medium">
                 Activez la géolocalisation pour trouver les pros près de chez vous
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={requestGeolocation}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors active:bg-blue-800"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-belleya-powder to-belleya-bright text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all hover:scale-105"
                 >
                   <Navigation className="w-4 h-4" />
                   Activer ma position
@@ -263,14 +272,14 @@ export default function ClientMap() {
           )}
 
           {!showGeolocationPrompt && userLocation && (
-            <div className="mb-4 flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
-              <p className="text-sm text-green-800 flex items-center gap-2">
+            <div className="mb-4 flex items-center justify-between p-3 bg-white border-2 border-belleya-powder rounded-xl shadow-md">
+              <p className="text-sm text-belleya-deep flex items-center gap-2 font-medium">
                 <MapPin className="w-4 h-4" />
                 Position activée
               </p>
               <button
                 onClick={requestGeolocation}
-                className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors active:bg-green-800"
+                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-belleya-powder to-belleya-bright text-white rounded-lg text-xs font-medium hover:shadow-lg transition-all"
               >
                 <Navigation className="w-3 h-3" />
                 Actualiser
@@ -279,18 +288,18 @@ export default function ClientMap() {
           )}
 
           <form onSubmit={handleSearchAddress} className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-belleya-medium" />
             <input
               type="text"
               value={searchAddress}
               onChange={(e) => setSearchAddress(e.target.value)}
               placeholder="Entrer une ville ou adresse..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 bg-white border-2 border-brand-100 rounded-xl focus:ring-2 focus:ring-belleya-bright focus:border-belleya-bright shadow-sm"
             />
             <button
               type="submit"
               disabled={searchLoading}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors disabled:opacity-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-gradient-to-r from-belleya-powder to-belleya-bright text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all disabled:opacity-50"
             >
               {searchLoading ? 'Recherche...' : 'OK'}
             </button>
@@ -299,29 +308,29 @@ export default function ClientMap() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
                 showFilters
-                  ? 'bg-brand-100 text-brand-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-belleya-powder to-belleya-bright text-white'
+                  : 'bg-white text-gray-700 hover:shadow-md border-2 border-brand-100'
               }`}
             >
               <Filter className="w-4 h-4" />
               Filtres
             </button>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm font-medium text-belleya-deep">
               {filteredProviders.length} {filteredProviders.length === 1 ? 'pro' : 'pros'}
             </span>
           </div>
 
           {showFilters && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mt-4 p-4 bg-white rounded-xl border-2 border-brand-100 shadow-md">
+              <label className="block text-sm font-medium text-belleya-deep mb-2">
                 Métier
               </label>
               <select
                 value={selectedProfession}
                 onChange={(e) => setSelectedProfession(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white border-2 border-brand-100 rounded-lg focus:ring-2 focus:ring-belleya-bright focus:border-belleya-bright"
               >
                 <option value="all">Tous les métiers</option>
                 {professions.map((profession) => (
@@ -394,13 +403,13 @@ export default function ClientMap() {
       </div>
 
       <div className="p-4">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">
+        <h2 className="text-lg font-bold bg-gradient-to-r from-belleya-powder to-belleya-deep bg-clip-text text-transparent mb-4">
           Pros à proximité
         </h2>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belleya-bright mx-auto mb-4"></div>
             <p className="text-gray-600">Chargement...</p>
           </div>
         ) : filteredProviders.length === 0 ? (
@@ -419,7 +428,7 @@ export default function ClientMap() {
               <div
                 key={provider.user_id}
                 onClick={() => handleViewProfile(provider.user_id)}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer hover:border-gray-300"
+                className="bg-white rounded-xl shadow-md border-2 border-brand-100 p-4 hover:shadow-lg transition-all cursor-pointer hover:border-belleya-powder hover:-translate-y-1"
               >
                 <div className="flex gap-4">
                   <div className="flex-shrink-0">

@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import AnimatedKeywords from '../components/landing/AnimatedKeywords';
 import BeforeAfterSection from '../components/landing/BeforeAfterSection';
+import CountdownTimer from '../components/landing/CountdownTimer';
+import TestimonialsSlider from '../components/landing/TestimonialsSlider';
+import ComparisonSection from '../components/landing/ComparisonSection';
 
 interface LandingProps {
   onSelectRole: (role: 'client' | 'pro') => void;
@@ -23,6 +26,10 @@ export default function Landing({ onSelectRole }: LandingProps) {
       </header>
 
       <AnimatedKeywords />
+
+      <div className="container mx-auto px-4 py-8">
+        <CountdownTimer />
+      </div>
 
       <div className="relative overflow-hidden min-h-[80vh] flex items-center" style={{ background: '#FFFDF8' }}>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZGUyZTQiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRjMC0yLjIxIDEuNzktNCAzLjk5OC00SDQwYzIuMjEgMCA0IDEuNzkgNCAzLjk5OFY0MGMwIDIuMjEtMS43OSA0LTMuOTk4IDRINDBjLTIuMjEgMC00LTEuNzktNC0zLjk5OFYzNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40"></div>
@@ -349,6 +356,10 @@ export default function Landing({ onSelectRole }: LandingProps) {
       </section>
 
       <BeforeAfterSection />
+
+      <TestimonialsSlider />
+
+      <ComparisonSection />
 
       <section className="relative py-20 md:py-32 bg-gradient-to-b from-white via-rose-50/20 to-white overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(239,170,154,0.08),rgba(255,255,255,0))]"></div>
