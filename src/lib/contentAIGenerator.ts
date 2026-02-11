@@ -93,14 +93,22 @@ function generateDetailedScript(
 function generateCarrousel(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
   const contextHeader = context ? `\n🎯 ${context}\n\n---\n\n` : '';
 
-  const contentStructure = `${contextHeader}📍 SLIDE 1 - HOOK
+  const developedTitle = developContentTitle(title, 'carrousel', platform, context);
+
+  const contentStructure = `${contextHeader}📌 SUJET DÉVELOPPÉ
+
+"${developedTitle}"
+
+---
+
+📍 SLIDE 1 - HOOK
 → Titre percutant qui arrête le scroll
 
 📍 SLIDES 2-7 - CONTENU
 → Une idée de valeur par slide`;
 
   const caption = generateProfessionalCaption({
-    title,
+    title: developedTitle,
     contentType: 'carrousel',
     platform,
     description,
@@ -113,10 +121,20 @@ function generateCarrousel(title: string, platform: Platform, description?: stri
 }
 
 function generateReel(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
-  const contentStructure = `🎬 REEL - ${title}`;
+  const developedTitle = developContentTitle(title, 'reel', platform, context);
+
+  const contentStructure = `🎬 REEL
+
+📌 SUJET DÉVELOPPÉ
+
+"${developedTitle}"
+
+---
+
+Script adapté pour format vidéo court avec hook visuel fort`;
 
   const caption = generateProfessionalCaption({
-    title,
+    title: developedTitle,
     contentType: 'reel',
     platform,
     description,
@@ -129,10 +147,20 @@ function generateReel(title: string, platform: Platform, description?: string, c
 }
 
 function generateStory(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
-  const contentStructure = `📱 STORY - ${title}`;
+  const developedTitle = developContentTitle(title, 'story', platform, context);
+
+  const contentStructure = `📱 STORY
+
+📌 SUJET DÉVELOPPÉ
+
+"${developedTitle}"
+
+---
+
+Format story : court, direct, authentique`;
 
   const caption = generateProfessionalCaption({
-    title,
+    title: developedTitle,
     contentType: 'story',
     platform,
     description,
@@ -145,10 +173,20 @@ function generateStory(title: string, platform: Platform, description?: string, 
 }
 
 function generatePost(title: string, platform: Platform, description?: string, context?: string): GeneratedContent {
-  const contentStructure = `📸 POST - ${title}`;
+  const developedTitle = developContentTitle(title, 'post', platform, context);
+
+  const contentStructure = `📸 POST
+
+📌 SUJET DÉVELOPPÉ
+
+"${developedTitle}"
+
+---
+
+Contenu statique avec légende engageante`;
 
   const caption = generateProfessionalCaption({
-    title,
+    title: developedTitle,
     contentType: 'post',
     platform,
     description,
@@ -166,6 +204,58 @@ interface CaptionParams {
   platform: Platform;
   description?: string;
   context?: string;
+}
+
+function developContentTitle(rawTitle: string, contentType: ContentType, platform: Platform, context?: string): string {
+  const objective = extractObjective(context);
+  const profession = extractProfession(context);
+
+  const titlePatterns = {
+    attirer: [
+      `Pourquoi ${rawTitle.toLowerCase()} (et ce que tu dois savoir)`,
+      `${rawTitle} : ce que personne ne te dit`,
+      `La vérité sur ${rawTitle.toLowerCase()}`,
+      `${rawTitle} : arrête de faire ces erreurs`,
+      `Ce que tu ignores sur ${rawTitle.toLowerCase()}`,
+      `${rawTitle} : le guide que j'aurais aimé avoir`,
+      `Tout ce qu'on ne t'a jamais dit sur ${rawTitle.toLowerCase()}`,
+      `${rawTitle} : les 3 erreurs les plus courantes`,
+    ],
+    éduquer: [
+      `Comment ${rawTitle.toLowerCase()} (la bonne méthode)`,
+      `${rawTitle} : le guide complet`,
+      `Comprendre ${rawTitle.toLowerCase()} en 5 points`,
+      `${rawTitle} : explications et solutions`,
+      `Pourquoi ${rawTitle.toLowerCase()} et comment y remédier`,
+      `${rawTitle} : ce que tu dois absolument savoir`,
+      `Les bases de ${rawTitle.toLowerCase()} expliquées simplement`,
+      `${rawTitle} : décryptage et conseils pratiques`,
+    ],
+    convertir: [
+      `${rawTitle} : la solution que tu cherchais`,
+      `Arrête de ${rawTitle.toLowerCase()} (j'ai la solution)`,
+      `${rawTitle} : comment je peux t'aider`,
+      `Tu veux ${rawTitle.toLowerCase()} ? Voici comment`,
+      `${rawTitle} : réserve maintenant pour un résultat garanti`,
+      `${rawTitle} : la transformation que mes clientes adorent`,
+      `${rawTitle} : pourquoi mes clientes ne vont plus ailleurs`,
+      `La méthode ${rawTitle.toLowerCase()} qui change tout`,
+    ],
+    fidéliser: [
+      `${rawTitle} : pourquoi mes clientes reviennent toujours`,
+      `${rawTitle} : l'expérience que tu mérites`,
+      `${rawTitle} : ce qui fait la différence chez moi`,
+      `Mes clientes adorent ${rawTitle.toLowerCase()} (voici pourquoi)`,
+      `${rawTitle} : le secret de mes clientes fidèles`,
+      `${rawTitle} : ton moment rien qu'à toi`,
+      `${rawTitle} : l'attention que je porte à chaque détail`,
+      `${rawTitle} : ce que tu vis vraiment pendant ta séance`,
+    ],
+  };
+
+  const patterns = titlePatterns[objective as keyof typeof titlePatterns] || titlePatterns['éduquer'];
+  const seed = rawTitle.length + contentType.length + profession.length;
+  return patterns[seed % patterns.length];
 }
 
 function generateProfessionalCaption(params: CaptionParams): string {
@@ -245,15 +335,29 @@ function extractProfession(context?: string): string {
 }
 
 function generateCaptionHook(title: string, platform: Platform, contentType: ContentType): string {
+  const extractCoreTheme = (developedTitle: string): string => {
+    const lower = developedTitle.toLowerCase();
+    if (lower.includes('pourquoi')) {
+      const match = lower.match(/pourquoi (.+?) (?:\(|et|:)/);
+      return match ? match[1].trim() : developedTitle.substring(0, 50);
+    }
+    if (lower.includes(':')) {
+      return developedTitle.split(':')[0].trim();
+    }
+    return developedTitle.substring(0, 60);
+  };
+
+  const coreTheme = extractCoreTheme(title);
+
   const hooks = [
-    `${title} ? Ce n'est pas ce que tu crois.`,
-    `Parlons de ${title.toLowerCase()} (sans filtre).`,
-    `${title}. Voilà ce que personne ne dit.`,
-    `La vérité sur ${title.toLowerCase()}.`,
-    `${title} : arrêtons les fausses croyances.`,
-    `Tu te demandes comment ${title.toLowerCase()} ? Voici la réalité.`,
-    `${title}. Et si on en parlait vraiment ?`,
-    `Tout ce qu'on ne t'a jamais dit sur ${title.toLowerCase()}.`,
+    `${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)} ? Ce n'est pas ce que tu crois.`,
+    `Parlons de ${coreTheme} (sans filtre).`,
+    `${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)}. Voilà ce que personne ne dit.`,
+    `La vérité sur ${coreTheme}.`,
+    `${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)} : arrêtons les fausses croyances.`,
+    `Tu te demandes ${coreTheme} ? Voici la réalité.`,
+    `${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)}. Et si on en parlait vraiment ?`,
+    `Tout ce qu'on ne t'a jamais dit sur ${coreTheme}.`,
   ];
 
   const seed = title.length + (platform === 'instagram' ? 0 : platform === 'linkedin' ? 10 : 20);
