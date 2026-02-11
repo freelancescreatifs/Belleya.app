@@ -196,3 +196,110 @@ export const stepEmojiMap: Record<string, string> = {
 export function getStepEmoji(step: string): string {
   return stepEmojiMap[step] || '📝';
 }
+
+/**
+ * Normalise un nom d'étape de production vers le format DB (anglais)
+ *
+ * IMPORTANT: Les valeurs de production_step dans la DB sont EN ANGLAIS
+ * pour respecter la contrainte CHECK de la table tasks.
+ *
+ * Valeurs autorisées (SOURCE OF TRUTH):
+ * - 'script'
+ * - 'shooting'
+ * - 'editing'
+ * - 'subtitles'
+ * - 'validation'
+ * - 'scheduling'
+ *
+ * Cette fonction convertit les variantes françaises vers l'anglais.
+ */
+export type ProductionStepValue = 'script' | 'shooting' | 'editing' | 'subtitles' | 'validation' | 'scheduling';
+
+export function normalizeProductionStep(step: string | null | undefined): ProductionStepValue | null {
+  if (!step) return null;
+
+  const normalized = step.toLowerCase().trim();
+
+  switch (normalized) {
+    case 'script':
+    case 'écriture':
+      return 'script';
+
+    case 'shooting':
+    case 'tournage':
+      return 'shooting';
+
+    case 'editing':
+    case 'montage':
+      return 'editing';
+
+    case 'subtitles':
+    case 'sous-titres':
+    case 'soustitres':
+      return 'subtitles';
+
+    case 'validation':
+      return 'validation';
+
+    case 'scheduling':
+    case 'planification':
+    case 'planifie':
+    case 'planifié':
+      return 'scheduling';
+
+    default:
+      console.error(`Invalid production step: ${step}`);
+      return null;
+  }
+}
+
+/**
+ * Vérifie si une valeur est une étape de production valide
+ */
+export function isValidProductionStep(step: string | null | undefined): step is ProductionStepValue {
+  if (!step) return false;
+  return ['script', 'shooting', 'editing', 'subtitles', 'validation', 'scheduling'].includes(step);
+}
+
+/**
+ * Obtient toutes les étapes de production disponibles
+ */
+export function getAllProductionSteps(): ProductionStepValue[] {
+  return ['script', 'shooting', 'editing', 'subtitles', 'validation', 'scheduling'];
+}
+
+/**
+ * Mapping des étapes de production vers les colonnes de date dans content_calendar
+ */
+export function getDateColumnForStep(step: ProductionStepValue): string | null {
+  switch (step) {
+    case 'script':
+      return 'date_script';
+    case 'shooting':
+      return 'date_shooting';
+    case 'editing':
+      return 'date_editing';
+    case 'scheduling':
+      return 'date_scheduling';
+    default:
+      return null;
+  }
+}
+
+/**
+ * Mapping inverse: colonne de date → étape de production
+ */
+export function getStepFromDateColumn(column: string): ProductionStepValue | null {
+  switch (column) {
+    case 'date_script':
+      return 'script';
+    case 'date_shooting':
+      return 'shooting';
+    case 'date_editing':
+      return 'editing';
+    case 'date_scheduling':
+      return 'scheduling';
+    default:
+      return null;
+  }
+}
