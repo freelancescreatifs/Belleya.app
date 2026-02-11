@@ -164,60 +164,75 @@ export default function ClientBookings() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="px-4 pt-6 pb-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Mes rendez-vous</h1>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('upcoming')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                activeTab === 'upcoming'
-                  ? 'bg-brand-500 text-white'
-                  : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              A venir
-            </button>
-            <button
-              onClick={() => setActiveTab('past')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                activeTab === 'past'
-                  ? 'bg-brand-500 text-white'
-                  : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              Passes
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
+      <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 pt-12 pb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <img src="/belleyaa.png" alt="BelleYa" className="h-24 w-auto" />
+        </div>
+        <h1 className="text-2xl font-bold text-white mb-4">Mes rendez-vous</h1>
+        <div className="flex gap-2 bg-white/20 rounded-xl p-1">
+          <button
+            onClick={() => setActiveTab('upcoming')}
+            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+              activeTab === 'upcoming'
+                ? 'bg-white text-brand-600 shadow-lg'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            À venir
+          </button>
+          <button
+            onClick={() => setActiveTab('past')}
+            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+              activeTab === 'past'
+                ? 'bg-white text-brand-600 shadow-lg'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            Passés
+          </button>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="px-4 -mt-6 space-y-4">
         {notifications.length > 0 && (
           <div className="space-y-3">
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`bg-white rounded-xl shadow-sm p-4 border-l-4 ${
+                className={`bg-white rounded-2xl shadow-lg p-5 border-l-4 ${
                   notification.type === 'booking_confirmed'
                     ? 'border-green-500'
                     : notification.type === 'booking_cancelled'
                     ? 'border-red-500'
-                    : 'border-blue-500'
+                    : 'border-brand-500'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                    <Bell className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{notification.title}</h3>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      notification.type === 'booking_confirmed'
+                        ? 'bg-green-100'
+                        : notification.type === 'booking_cancelled'
+                        ? 'bg-red-100'
+                        : 'bg-brand-100'
+                    }`}>
+                      <Bell className={`w-5 h-5 ${
+                        notification.type === 'booking_confirmed'
+                          ? 'text-green-600'
+                          : notification.type === 'booking_cancelled'
+                          ? 'text-red-600'
+                          : 'text-brand-600'
+                      }`} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900">{notification.title}</h3>
                       <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => dismissNotification(notification.id)}
-                    className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                   >
                     <X className="w-4 h-4 text-gray-400" />
                   </button>
@@ -238,79 +253,85 @@ export default function ClientBookings() {
             ))}
           </div>
         ) : bookings.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="font-medium text-gray-900 mb-2">
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-brand-600 to-brand-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-10 h-10 text-white" />
+            </div>
+            <h3 className="font-bold text-gray-900 text-xl mb-2">
               Aucun rendez-vous
             </h3>
             <p className="text-sm text-gray-500">
               {activeTab === 'upcoming'
-                ? 'Vous n\'avez aucun rendez-vous a venir'
+                ? 'Vous n\'avez aucun rendez-vous à venir'
                 : 'Aucun historique de rendez-vous'}
             </p>
           </div>
         ) : (
           bookings.map((booking) => (
-            <div key={booking.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-              <div className="p-4">
-                <div className="flex items-start gap-3 mb-3">
+            <div key={booking.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+              <div className="p-5">
+                <div className="flex items-start gap-4 mb-4">
                   {booking.pro.photo ? (
                     <img
                       src={booking.pro.photo}
                       alt={booking.pro.business_name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-600 to-brand-100 flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-50 flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-xl">
                         {booking.pro.business_name.charAt(0)}
                       </span>
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 mb-0.5">
-                          {booking.service.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {booking.pro.business_name}
-                        </p>
-                      </div>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-bold text-gray-900 text-lg">
+                        {booking.service.name}
+                      </h3>
                       {getStatusBadge(booking.status)}
                     </div>
+                    <p className="text-sm text-gray-600 font-medium">
+                      {booking.pro.business_name}
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-sm text-gray-600 mb-3">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span>{formatDate(booking.appointment_date)} à {formatTime(booking.appointment_date)}</span>
+                <div className="space-y-2.5 text-sm text-gray-600">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-brand-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-4 h-4 text-brand-600" />
+                    </div>
+                    <span className="font-medium">{formatDate(booking.appointment_date)} à {formatTime(booking.appointment_date)}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <span>{booking.duration} min</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-brand-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-4 h-4 text-brand-600" />
+                    </div>
+                    <span className="font-medium">{booking.duration} min</span>
                   </div>
                   {booking.pro.address && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="truncate">{booking.pro.address}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-brand-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-4 h-4 text-brand-600" />
+                      </div>
+                      <span className="font-medium truncate">{booking.pro.address}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                <span className="font-bold text-gray-900 text-lg">
+              <div className="px-5 py-4 bg-gradient-to-r from-brand-50 to-brand-100/50 border-t border-brand-100 flex items-center justify-between">
+                <span className="font-bold text-brand-600 text-xl">
                   {booking.price.toFixed(2)} €
                 </span>
                 {activeTab === 'past' && booking.status === 'completed' && (
-                  <button className="px-4 py-2 text-brand-600 font-medium text-sm hover:bg-brand-50 rounded-lg transition-colors">
+                  <button className="px-5 py-2.5 bg-gradient-to-r from-brand-600 to-brand-50 text-white font-semibold text-sm rounded-xl hover:opacity-90 transition-all">
                     Laisser un avis
                   </button>
                 )}
                 {activeTab === 'upcoming' && (
-                  <button className="px-4 py-2 text-gray-600 font-medium text-sm hover:bg-gray-100 rounded-lg transition-colors">
+                  <button className="px-5 py-2.5 border-2 border-brand-200 text-brand-600 font-semibold text-sm rounded-xl hover:bg-brand-50 transition-all">
                     Voir le détail
                   </button>
                 )}

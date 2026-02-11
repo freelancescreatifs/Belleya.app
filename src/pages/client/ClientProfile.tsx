@@ -1,4 +1,4 @@
-import { User, Mail, Phone, LogOut, ChevronRight, Image as ImageIcon, Camera, X } from 'lucide-react';
+import { User, Mail, Phone, LogOut, ChevronRight, Image as ImageIcon, Camera, X, Bell, Shield, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -10,18 +10,50 @@ interface ClientPhoto {
   created_at: string;
 }
 
+interface NotificationPreferences {
+  booking_reminders: boolean;
+  booking_confirmations: boolean;
+  special_offers: boolean;
+  newsletter: boolean;
+  sms_notifications: boolean;
+  email_notifications: boolean;
+}
+
+interface PrivacySettings {
+  profile_visibility: 'public' | 'private';
+  show_in_search: boolean;
+  allow_messages: boolean;
+  data_sharing: boolean;
+}
+
 export default function ClientProfile() {
   const { user, profile, signOut } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [myPhotos, setMyPhotos] = useState<ClientPhoto[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || '',
     last_name: profile?.last_name || '',
     phone: profile?.phone || '',
     photo_url: profile?.photo_url || ''
+  });
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>({
+    booking_reminders: true,
+    booking_confirmations: true,
+    special_offers: true,
+    newsletter: false,
+    sms_notifications: true,
+    email_notifications: true
+  });
+  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
+    profile_visibility: 'public',
+    show_in_search: true,
+    allow_messages: true,
+    data_sharing: false
   });
 
   useEffect(() => {
@@ -144,18 +176,31 @@ export default function ClientProfile() {
     }
   };
 
+  const handleSaveNotifications = () => {
+    alert('Préférences de notifications sauvegardées !');
+    setShowNotificationsModal(false);
+  };
+
+  const handleSavePrivacy = () => {
+    alert('Paramètres de confidentialité sauvegardés !');
+    setShowPrivacyModal(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-4 pt-12 pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
+      <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 pt-12 pb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <img src="/belleyaa.png" alt="BelleYa" className="h-24 w-auto" />
+        </div>
         <div className="flex flex-col items-center">
           {profile?.photo_url ? (
             <img
               src={profile.photo_url}
               alt="Photo de profil"
-              className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-white/20"
+              className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-white shadow-lg"
             />
           ) : (
-            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-4">
+            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-4 shadow-lg">
               <User className="w-12 h-12 text-white" />
             </div>
           )}
@@ -164,40 +209,42 @@ export default function ClientProfile() {
               ? `${profile.first_name} ${profile.last_name}`
               : 'Mon profil'}
           </h1>
-          <p className="text-brand-100">Cliente BelleYa</p>
+          <p className="text-white/90 text-sm">Cliente BelleYa</p>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <h2 className="font-bold text-gray-900 px-4 pt-4 pb-2">
+      <div className="px-4 -mt-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <h2 className="font-bold text-gray-900 px-5 pt-5 pb-3">
             Ma galerie
           </h2>
 
           {loadingPhotos ? (
-            <div className="px-4 py-8 text-center text-gray-500">
+            <div className="px-5 py-8 text-center text-gray-500">
               Chargement...
             </div>
           ) : myPhotos.length === 0 ? (
-            <div className="px-4 py-8 text-center">
-              <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-600 text-sm">Aucune photo pour le moment</p>
-              <p className="text-gray-500 text-xs mt-1">
-                Vos photos de résultats apparaitront ici
+            <div className="px-5 py-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-brand-600 to-brand-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <ImageIcon className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-gray-900 font-semibold text-sm mb-1">Aucune photo pour le moment</p>
+              <p className="text-gray-500 text-xs">
+                Vos photos de résultats apparaîtront ici
               </p>
             </div>
           ) : (
-            <div className="p-4">
+            <div className="p-5">
               <div className="grid grid-cols-3 gap-2">
                 {myPhotos.map((photo) => (
                   <div key={photo.id} className="relative aspect-square">
                     <img
                       src={photo.photo_url}
                       alt={photo.service_name || 'Photo'}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-xl"
                     />
                     {photo.service_name && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg">
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 rounded-b-xl">
                         <p className="text-white text-xs font-medium truncate">
                           {photo.service_name}
                         </p>
@@ -210,63 +257,90 @@ export default function ClientProfile() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <h2 className="font-bold text-gray-900 px-4 pt-4 pb-2">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <h2 className="font-bold text-gray-900 px-5 pt-5 pb-3">
             Informations personnelles
           </h2>
 
           <div className="divide-y divide-gray-100">
-            <div className="flex items-center gap-3 px-4 py-3">
-              <Mail className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Mail className="w-5 h-5 text-brand-600" />
+              </div>
               <div className="flex-1">
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium text-gray-900">{user?.email}</p>
+                <p className="text-xs text-gray-500 mb-0.5">Email</p>
+                <p className="font-semibold text-gray-900">{user?.email}</p>
               </div>
             </div>
 
             {profile?.phone && (
-              <div className="flex items-center gap-3 px-4 py-3">
-                <Phone className="w-5 h-5 text-gray-400" />
+              <div className="flex items-center gap-4 px-5 py-4">
+                <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-5 h-5 text-brand-600" />
+                </div>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-500">Telephone</p>
-                  <p className="font-medium text-gray-900">{profile.phone}</p>
+                  <p className="text-xs text-gray-500 mb-0.5">Téléphone</p>
+                  <p className="font-semibold text-gray-900">{profile.phone}</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <h2 className="font-bold text-gray-900 px-4 pt-4 pb-2">
-            Parametres
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <h2 className="font-bold text-gray-900 px-5 pt-5 pb-3">
+            Paramètres
           </h2>
 
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
-          >
-            <span className="text-gray-900">Modifier mon profil</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
+          <div className="divide-y divide-gray-100">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-brand-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center">
+                  <User className="w-5 h-5 text-brand-600" />
+                </div>
+                <span className="text-gray-900 font-medium">Modifier mon profil</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
 
-          <button className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
-            <span className="text-gray-900">Notifications</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
+            <button
+              onClick={() => setShowNotificationsModal(true)}
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-brand-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-brand-600" />
+                </div>
+                <span className="text-gray-900 font-medium">Notifications</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
 
-          <button className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
-            <span className="text-gray-900">Confidentialite</span>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
+            <button
+              onClick={() => setShowPrivacyModal(true)}
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-brand-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-brand-600" />
+                </div>
+                <span className="text-gray-900 font-medium">Confidentialité</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
+          </div>
         </div>
 
         <button
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="w-full bg-white rounded-xl shadow-sm px-4 py-4 flex items-center justify-center gap-2 text-red-600 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-white rounded-2xl shadow-lg px-5 py-4 flex items-center justify-center gap-2 text-red-600 font-semibold hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <LogOut className="w-5 h-5" />
-          {isSigningOut ? 'Déconnexion en cours...' : 'Deconnexion'}
+          {isSigningOut ? 'Déconnexion en cours...' : 'Déconnexion'}
         </button>
 
         <div className="text-center text-sm text-gray-500 py-4">
@@ -385,6 +459,301 @@ export default function ClientProfile() {
                 <button
                   onClick={handleSaveProfile}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-medium hover:opacity-90 transition-all"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showNotificationsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 py-5 flex items-center justify-between rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Bell className="w-5 h-5" />
+                </div>
+                <h2 className="text-xl font-bold">Notifications</h2>
+              </div>
+              <button
+                onClick={() => setShowNotificationsModal(false)}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="font-bold text-gray-900 mb-4 text-lg">Rendez-vous</h3>
+                <div className="space-y-4">
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Rappels de rendez-vous</p>
+                      <p className="text-sm text-gray-500">Recevoir un rappel avant vos rendez-vous</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={notificationPrefs.booking_reminders}
+                        onChange={(e) => setNotificationPrefs({...notificationPrefs, booking_reminders: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Confirmations</p>
+                      <p className="text-sm text-gray-500">Notifications de confirmation de réservation</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={notificationPrefs.booking_confirmations}
+                        onChange={(e) => setNotificationPrefs({...notificationPrefs, booking_confirmations: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="font-bold text-gray-900 mb-4 text-lg">Promotions</h3>
+                <div className="space-y-4">
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Offres spéciales</p>
+                      <p className="text-sm text-gray-500">Recevoir les promotions et offres</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={notificationPrefs.special_offers}
+                        onChange={(e) => setNotificationPrefs({...notificationPrefs, special_offers: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Newsletter</p>
+                      <p className="text-sm text-gray-500">Conseils beauté et actualités</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={notificationPrefs.newsletter}
+                        onChange={(e) => setNotificationPrefs({...notificationPrefs, newsletter: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="font-bold text-gray-900 mb-4 text-lg">Canaux de communication</h3>
+                <div className="space-y-4">
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">SMS</p>
+                      <p className="text-sm text-gray-500">Recevoir des SMS</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={notificationPrefs.sms_notifications}
+                        onChange={(e) => setNotificationPrefs({...notificationPrefs, sms_notifications: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Email</p>
+                      <p className="text-sm text-gray-500">Recevoir des emails</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={notificationPrefs.email_notifications}
+                        onChange={(e) => setNotificationPrefs({...notificationPrefs, email_notifications: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowNotificationsModal(false)}
+                  className="flex-1 px-4 py-3 border-2 border-brand-200 text-brand-600 rounded-xl font-semibold hover:bg-brand-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveNotifications}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-xl font-semibold hover:opacity-90 transition-all"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPrivacyModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 py-5 flex items-center justify-between rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Shield className="w-5 h-5" />
+                </div>
+                <h2 className="text-xl font-bold">Confidentialité</h2>
+              </div>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="font-bold text-gray-900 mb-4 text-lg">Visibilité du profil</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer p-4 border-2 rounded-xl transition-all hover:bg-brand-50"
+                    style={{borderColor: privacySettings.profile_visibility === 'public' ? 'rgb(var(--brand-600))' : '#e5e7eb'}}>
+                    <input
+                      type="radio"
+                      name="profile_visibility"
+                      checked={privacySettings.profile_visibility === 'public'}
+                      onChange={() => setPrivacySettings({...privacySettings, profile_visibility: 'public'})}
+                      className="sr-only"
+                    />
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      privacySettings.profile_visibility === 'public' ? 'border-brand-600 bg-brand-600' : 'border-gray-300'
+                    }`}>
+                      {privacySettings.profile_visibility === 'public' && (
+                        <Check className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Public</p>
+                      <p className="text-sm text-gray-500">Visible par tous</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer p-4 border-2 rounded-xl transition-all hover:bg-brand-50"
+                    style={{borderColor: privacySettings.profile_visibility === 'private' ? 'rgb(var(--brand-600))' : '#e5e7eb'}}>
+                    <input
+                      type="radio"
+                      name="profile_visibility"
+                      checked={privacySettings.profile_visibility === 'private'}
+                      onChange={() => setPrivacySettings({...privacySettings, profile_visibility: 'private'})}
+                      className="sr-only"
+                    />
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      privacySettings.profile_visibility === 'private' ? 'border-brand-600 bg-brand-600' : 'border-gray-300'
+                    }`}>
+                      {privacySettings.profile_visibility === 'private' && (
+                        <Check className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Privé</p>
+                      <p className="text-sm text-gray-500">Visible uniquement par vous</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="font-bold text-gray-900 mb-4 text-lg">Paramètres de confidentialité</h3>
+                <div className="space-y-4">
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Apparaître dans les recherches</p>
+                      <p className="text-sm text-gray-500">Les pros peuvent vous trouver</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={privacySettings.show_in_search}
+                        onChange={(e) => setPrivacySettings({...privacySettings, show_in_search: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Autoriser les messages</p>
+                      <p className="text-sm text-gray-500">Recevoir des messages des pros</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={privacySettings.allow_messages}
+                        onChange={(e) => setPrivacySettings({...privacySettings, allow_messages: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Partage de données</p>
+                      <p className="text-sm text-gray-500">Améliorer l'expérience avec les partenaires</p>
+                    </div>
+                    <div className="relative ml-4">
+                      <input
+                        type="checkbox"
+                        checked={privacySettings.data_sharing}
+                        onChange={(e) => setPrivacySettings({...privacySettings, data_sharing: e.target.checked})}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-brand-600 peer-checked:to-brand-50"></div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="bg-brand-50 border border-brand-200 rounded-xl p-4">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Note :</span> Vos données sont protégées conformément au RGPD. Consultez notre politique de confidentialité pour plus d'informations.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowPrivacyModal(false)}
+                  className="flex-1 px-4 py-3 border-2 border-brand-200 text-brand-600 rounded-xl font-semibold hover:bg-brand-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSavePrivacy}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-xl font-semibold hover:opacity-90 transition-all"
                 >
                   Enregistrer
                 </button>

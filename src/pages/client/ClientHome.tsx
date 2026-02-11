@@ -433,50 +433,6 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
       </div>
 
       <div className="px-4 -mt-4">
-        {loading ? (
-          <div className="bg-white rounded-2xl shadow-lg p-6 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-            <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-          </div>
-        ) : nextBooking ? (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Prochain rendez-vous</p>
-                <h2 className="text-xl font-bold text-gray-900">
-                  {nextBooking.service.name}
-                </h2>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-brand-600 to-brand-50 rounded-xl flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm">{formatDate(nextBooking.appointment_date)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Star className="w-4 h-4" />
-                <span className="text-sm">
-                  {nextBooking.pro.business_name} - {nextBooking.pro.profession}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">{nextBooking.pro.city}</span>
-              </div>
-            </div>
-
-            <button className="w-full mt-6 bg-gradient-to-r from-brand-600 to-brand-50 text-white py-3 rounded-xl font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2">
-              Voir les details
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        ) : null}
-
         <SpecialOffersSlider userLocation={userLocation} onNavigateToMap={onNavigateToMap} />
 
         <div className="mb-6">
