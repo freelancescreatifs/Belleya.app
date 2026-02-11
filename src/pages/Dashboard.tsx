@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, Users, Euro, Package, Calendar, Calculator, Receipt, FileText, Building, AlertCircle, ChevronLeft, ChevronRight, Filter, Lightbulb } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -65,6 +66,7 @@ interface DashboardProps {
 
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats>({
     totalClients: 0,
     revenue: 0,
@@ -542,7 +544,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Chargement...</div>
+        <div className="text-gray-500">{t('dashboard.loading')}</div>
       </div>
     );
   }
@@ -580,8 +582,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     <div className="p-3 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
       <div className="mb-6 sm:mb-8">
         <div className="mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Tableau de bord</h1>
-          <p className="text-sm sm:text-base text-gray-600">Vue d'ensemble de votre activité</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t('dashboard.title')}</h1>
+          <p className="text-sm sm:text-base text-gray-600">{t('dashboard.subtitle')}</p>
         </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full max-w-full">
@@ -594,7 +596,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Jour
+                {t('dashboard.day')}
               </button>
               <button
                 onClick={() => setPeriodFilter('month')}
@@ -604,7 +606,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Mois
+                {t('dashboard.month')}
               </button>
               <button
                 onClick={() => setPeriodFilter('year')}
@@ -614,7 +616,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Année
+                {t('dashboard.year')}
               </button>
             </div>
 

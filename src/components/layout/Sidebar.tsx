@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { prefetchClients } from '../../lib/clientsCache';
@@ -34,25 +35,9 @@ interface SidebarProps {
   onMobileToggle?: () => void;
 }
 
-const menuItems = [
-  { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-  { id: 'agenda', label: 'Agenda', icon: Calendar },
-  { id: 'clients', label: 'Clientes', icon: Users },
-  { id: 'training', label: 'Élèves', icon: GraduationCap },
-  { id: 'services', label: 'Services', icon: Scissors },
-  { id: 'finances', label: 'Transactions', icon: Euro },
-  { id: 'stock', label: 'Stock', icon: Package },
-  { id: 'tasks', label: 'Tâches', icon: CheckSquare },
-  { id: 'goals', label: 'Objectifs', icon: Target },
-  { id: 'content', label: 'Contenu', icon: Video },
-  { id: 'public-profile', label: 'Profil public', icon: Eye },
-  { id: 'inspiration', label: 'Inspiration', icon: Lightbulb },
-  { id: 'marketing', label: 'Marketing', icon: Mail },
-  { id: 'partnerships', label: 'Partenariats', icon: Handshake },
-];
-
 export default function Sidebar({ currentPage, onPageChange, isMobileOpen = false, onMobileToggle }: SidebarProps) {
   const { signOut, user } = useAuth();
+  const { t } = useTranslation();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [internalMobileOpen, setInternalMobileOpen] = useState(false);
@@ -62,6 +47,23 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
 
   const mobileOpen = onMobileToggle !== undefined ? isMobileOpen : internalMobileOpen;
   const setMobileOpen = onMobileToggle !== undefined ? onMobileToggle : setInternalMobileOpen;
+
+  const menuItems = [
+    { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { id: 'agenda', label: t('nav.agenda'), icon: Calendar },
+    { id: 'clients', label: t('nav.clients'), icon: Users },
+    { id: 'training', label: t('training.title'), icon: GraduationCap },
+    { id: 'services', label: t('nav.services'), icon: Scissors },
+    { id: 'finances', label: t('nav.finances'), icon: Euro },
+    { id: 'stock', label: t('nav.stock'), icon: Package },
+    { id: 'tasks', label: t('nav.tasks'), icon: CheckSquare },
+    { id: 'goals', label: t('nav.goals'), icon: Target },
+    { id: 'content', label: t('nav.content'), icon: Video },
+    { id: 'public-profile', label: 'Profil public', icon: Eye },
+    { id: 'inspiration', label: t('nav.inspiration'), icon: Lightbulb },
+    { id: 'marketing', label: t('nav.marketing'), icon: Mail },
+    { id: 'partnerships', label: t('nav.partnerships'), icon: Handshake },
+  ];
 
   useEffect(() => {
     checkAdminStatus();
@@ -132,7 +134,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
             <div className="flex items-center gap-3">
               <div>
                 <img src="/logo-1.png" alt="BelleYa" className="h-8 w-auto" />
-                <p className="text-xs text-gray-500 mt-1">Contrôle ton business, pas l'inverse</p>
+                <p className="text-xs text-gray-500 mt-1">{t('nav.tagline')}</p>
               </div>
             </div>
             <NotificationCenter compact={true} />
@@ -178,7 +180,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
             }`}
           >
             <Shield className="w-5 h-5" />
-            <span className="text-sm">Administration</span>
+            <span className="text-sm">{t('nav.admin')}</span>
           </button>
         )}
         <button
@@ -190,7 +192,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
           }`}
         >
           <SettingsIcon className="w-5 h-5" />
-          <span className="text-sm">Paramètres</span>
+          <span className="text-sm">{t('nav.settings')}</span>
         </button>
         <button
           onClick={handleSignOut}
@@ -199,7 +201,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
         >
           <LogOut className="w-5 h-5" />
           <span className="text-sm">
-            {isSigningOut ? 'Déconnexion...' : 'Déconnexion'}
+            {isSigningOut ? t('nav.loggingOut') : t('nav.logout')}
           </span>
         </button>
       </div>
