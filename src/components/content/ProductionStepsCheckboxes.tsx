@@ -76,12 +76,21 @@ export default function ProductionStepsCheckboxes({
 
     setUpdating(true);
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('content_calendar')
         .update({ [stepKey]: !currentValue })
-        .eq('id', contentId);
+        .eq('id', contentId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating checkbox - Full error:', error);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        throw error;
+      }
+
+      console.log('Update successful:', data);
 
       setCurrentValues(prev => ({
         ...prev,
@@ -89,9 +98,9 @@ export default function ProductionStepsCheckboxes({
       }));
 
       if (onUpdate) onUpdate();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating checkbox:', error);
-      alert('Erreur lors de la mise à jour');
+      alert(`Erreur lors de la mise à jour: ${error.message || 'Unknown error'}`);
     } finally {
       setUpdating(false);
     }
