@@ -60,7 +60,7 @@ export default function ComparisonSection() {
                     </div>
                     <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                       Une <span className="font-bold text-belleya-deep">plateforme tout-en-un</span> pensée pour les professionnelles de la beauté.
-                      Au-delà de la gestion administrative, Belleya intègre une dimension unique : <span className="font-bold text-belleya-bright">la visibilité</span>.
+                      Au-delà de la gestion administrative, Belleya intègre une dimension unique : <span className="font-bold text-belleya-bright">la visibilité, vos objectifs, vos tâches et tout ce que vous avez besoin dans votre business</span>.
                     </p>
                     <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50/50 rounded-xl border border-green-200/50">
                       <Sparkles className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -73,11 +73,8 @@ export default function ComparisonSection() {
 
                 <div className="mt-8 pt-8 border-t-2 border-brand-100/50">
                   <p className="text-lg md:text-xl font-bold text-center bg-gradient-to-r from-belleya-powder via-belleya-bright to-belleya-deep bg-clip-text text-transparent">
-                    Là où les autres outils restent des solutions techniques en arrière-plan,
-                    Belleya combine gestion interne performante et présence client visible.
-                  </p>
-                  <p className="text-center text-gray-600 mt-4 text-sm md:text-base">
-                    Simple, cohérent, efficace.
+                    Là où les autres outils restent des solutions spécifiques,
+                    Belleya combine TOUTE la gestion de votre business.
                   </p>
                 </div>
               </div>

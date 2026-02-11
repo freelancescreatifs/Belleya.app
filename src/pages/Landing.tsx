@@ -302,66 +302,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
         `}</style>
       </section>
 
-      <section className="relative py-20 md:py-32 bg-gradient-to-b from-white to-rose-50/30 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(239,170,154,0.08),rgba(255,255,255,0))]"></div>
-
-        <div className="container mx-auto px-4 relative">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-rose-100/30 via-pink-100/30 to-rose-100/30 rounded-3xl blur-3xl"></div>
-
-              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 border border-belleya-200/50 shadow-[0_8px_40px_rgba(239,170,154,0.12)] text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-[#efaa9a] to-[#d9629b] mb-6 md:mb-8 shadow-lg animate-pulse">
-                  <Heart className="w-6 h-6 md:w-8 md:h-8 text-white" />
-                </div>
-
-                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-6 md:mb-8 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
-                  Ton cocon pro, enfin
-                </h2>
-
-                <p className="text-base md:text-xl lg:text-2xl text-gray-700 leading-relaxed mb-6 md:mb-8 max-w-3xl mx-auto px-4">
-                  Belleya prend en charge l'invisible.<br />
-                  Pour que tu puisses rayonner dans ton art.
-                </p>
-
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-3xl mx-auto">
-                  {[
-                    { text: 'Clarté', icon: Sparkles },
-                    { text: 'Sérénité', icon: Heart },
-                    { text: 'Contrôle', icon: Target },
-                    { text: 'Sans effort', icon: Zap }
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      className="group relative bg-gradient-to-br from-rose-50/50 to-pink-50/50 backdrop-blur-sm rounded-2xl p-6 border border-belleya-100/50 hover:border-belleya-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                      style={{
-                        animation: `fadeInUp 0.6s ease-out ${i * 0.1 + 0.3}s both`
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#efaa9a]/10 to-[#d9629b]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                      <div className="relative">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#efaa9a] to-[#d9629b] flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                          <item.icon className="w-5 h-5 text-white" />
-                        </div>
-                        <p className="text-lg font-bold bg-gradient-to-r from-[#efaa9a] to-[#d9629b] bg-clip-text text-transparent">
-                          {item.text}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <BeforeAfterSection />
-
-      <TestimonialsSlider />
-
-      <ComparisonSection />
 
       <section className="relative py-20 md:py-32 bg-gradient-to-b from-white via-rose-50/20 to-white overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(239,170,154,0.08),rgba(255,255,255,0))]"></div>
@@ -472,6 +413,8 @@ export default function Landing({ onSelectRole }: LandingProps) {
           </div>
         </div>
       </section>
+
+      <ComparisonSection />
 
       <section className="py-20 md:py-32 bg-[#efaa9a]/10">
         <div className="container mx-auto px-4">
@@ -677,6 +620,8 @@ export default function Landing({ onSelectRole }: LandingProps) {
           </p>
         </div>
       </section>
+
+      <TestimonialsSlider />
 
       <section className="py-20 md:py-32 bg-[#efaa9a]/10">
         <div className="container mx-auto px-4">
