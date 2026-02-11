@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import i18n from '../i18n';
 
 export interface UserProfile {
   id: string;
@@ -11,6 +12,7 @@ export interface UserProfile {
   phone: string | null;
   photo_url: string | null;
   company_id: string | null;
+  preferred_language: string | null;
 }
 
 interface AuthContextType {
@@ -62,6 +64,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[LoadProfile] Role:', data.role);
         console.log('[LoadProfile] Name:', data.first_name, data.last_name);
         console.log('[LoadProfile] Company ID:', data.company_id);
+
+        if (data.preferred_language && data.preferred_language !== i18n.language) {
+          console.log('[LoadProfile] 🌐 Changing language to:', data.preferred_language);
+          await i18n.changeLanguage(data.preferred_language);
+        }
+
         setProfile(data);
       } else {
         console.warn('[LoadProfile] ⚠️ No profile found for user:', userId);

@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Building2, FileText, Calculator, LayoutGrid } from 'lucide-react';
+import { Building2, FileText, Calculator, LayoutGrid, Globe } from 'lucide-react';
 import CompanyProfileForm from '../components/settings/CompanyProfileForm';
 import MyDocuments from '../components/settings/MyDocuments';
 import ProfitabilityCalculator from '../components/settings/ProfitabilityCalculator';
 import SocialMediaSettings from '../components/settings/SocialMediaSettings';
+import LanguageSettings from '../components/settings/LanguageSettings';
 
 export default function Settings() {
   const { user, refreshProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language'>('company');
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
@@ -64,6 +65,17 @@ export default function Settings() {
               <LayoutGrid className="w-5 h-5" />
               Onglets
             </button>
+            <button
+              onClick={() => setActiveTab('language')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+                activeTab === 'language'
+                  ? 'text-[#C43586] border-b-2 border-[#C43586]'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Globe className="w-5 h-5" />
+              Langue
+            </button>
           </div>
         </div>
 
@@ -85,6 +97,10 @@ export default function Settings() {
 
           {activeTab === 'tabs' && user && (
             <SocialMediaSettings userId={user.id} />
+          )}
+
+          {activeTab === 'language' && user && (
+            <LanguageSettings userId={user.id} />
           )}
         </div>
       </div>

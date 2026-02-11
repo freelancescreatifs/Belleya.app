@@ -1,0 +1,145 @@
+{
+  "landing": {
+    "header": {
+      "altText": "Belleya - Beauty is my priority"
+    },
+    "roles": {
+      "client": {
+        "title": "Je suis cliente",
+        "subtitle": "Trouve ta pro idéale et réserve en quelques clics",
+        "benefits": {
+          "booking": "Réservation en ligne 24/7",
+          "appointments": "Tous tes RDV au même endroit",
+          "favorites": "Tes pros préférées en favoris"
+        },
+        "cta": "Accéder à mon espace"
+      },
+      "pro": {
+        "title": "Je suis pro",
+        "subtitle": "Ton business beauté au même endroit. Simple, clair, serein.",
+        "badge": "14 jours gratuits",
+        "benefits": {
+          "agenda": "Ton agenda + réservations 24/7",
+          "clients": "Tes clientes + historique complet",
+          "finances": "Tes finances + objectifs enfin clairs"
+        },
+        "cta": "Démarrer gratuitement"
+      },
+      "terms": "En utilisant Belleya, vous acceptez nos conditions d'utilisation"
+    },
+    "reality": {
+      "title": "Ta réalité aujourd'hui",
+      "subtitle": "Tu adores ton métier... mais la gestion te bouffe la tête.",
+      "problems": {
+        "messages": {
+          "title": "Messages éparpillés",
+          "desc": "WhatsApp, Insta, SMS... Tu cherches qui a réservé quoi pendant 10 minutes."
+        },
+        "brain": {
+          "title": "Tête surchargée",
+          "desc": "Tout est dans ta tête. Et ta tête déborde."
+        },
+        "goals": {
+          "title": "Objectifs flous",
+          "desc": "Tu bosses beaucoup. Mais tu sais pas vraiment où t'en es."
+        },
+        "finances": {
+          "title": "Finances floues",
+          "desc": "Combien tu gagnes vraiment ? Tes charges ? Tu préfères pas regarder."
+        },
+        "content": {
+          "title": "Contenu chaotique",
+          "desc": "Des idées plein la tête, mais zéro organisation pour poster."
+        },
+        "inspiration": {
+          "title": "Inspirations perdues",
+          "desc": "Cette photo super inspirante... elle était où déjà ?"
+        }
+      },
+      "realProblem": {
+        "title": "Le vrai problème ?",
+        "subtitle": "Tu subis ton activité au lieu de la piloter.",
+        "conclusion": "Ce n'est pas normal de travailler comme ça."
+      }
+    },
+    "solution": {
+      "youAre": "Tu es une",
+      "realPro": "vraie pro",
+      "youDeserve": "Tu mérites un",
+      "realSystem": "vrai système",
+      "values": {
+        "clarity": "Clarté",
+        "control": "Contrôle",
+        "visibility": "Visibilité",
+        "serenity": "Sérénité"
+      },
+      "conclusion": "Tu mérites Belleya.",
+      "cta": "Découvrir Belleya"
+    },
+    "features": {
+      "title": "Tout ton business au même endroit",
+      "subtitle": "Adapté à ton métier. Grandit avec toi.",
+      "list": {
+        "dashboard": {
+          "title": "Vois où t'en es, vraiment",
+          "subtitle": "Dashboard intelligent",
+          "desc": "CA du jour, RDV de la semaine, tâches prioritaires. Tout d'un coup d'œil."
+        },
+        "finances": {
+          "title": "Comprends tes finances",
+          "subtitle": "Pilotage financier",
+          "desc": "CA, charges, bénéfice réel. Seuils fiscaux adaptés à ton statut. Enfin clair."
+        },
+        "clients": {
+          "title": "Connais vraiment tes clientes",
+          "subtitle": "Fiches clientes complètes",
+          "desc": "Historique, préférences, photos, notes. Champs adaptés à ton métier."
+        },
+        "agenda": {
+          "title": "Ton temps organisé",
+          "subtitle": "Agenda unifié",
+          "desc": "RDV, tâches, contenu social : tout au même endroit. Synchro Google & Planity."
+        },
+        "goals": {
+          "title": "Garde le cap",
+          "subtitle": "Objectifs & suivi",
+          "desc": "Fixe tes objectifs mensuels et suis ta progression en temps réel."
+        },
+        "gallery": {
+          "title": "Garde tes inspirations",
+          "subtitle": "Galerie organisée",
+          "desc": "Collecte les inspirations clientes. Photos avant/après liées automatiquement."
+        },
+        "booking": {
+          "title": "Réserve en ligne 24/7",
+          "subtitle": "Ta page Belleya unique",
+          "desc": "Tes clientes réservent H24. Tu valides quand tu veux."
+        },
+        "stock": {
+          "title": "Jamais à court",
+          "subtitle": "Gestion de stock",
+          "desc": "Suis tes fournitures, reçois des alertes. Toujours prête."
+        },
+        "content": {
+          "title": "Publie sans réfléchir",
+          "subtitle": "Calendrier éditorial IA",
+          "desc": "Planifie tes posts Insta, génère des idées. Zéro panne d'inspiration."
+        }
+      }
+    }
+  },
+  "language": {
+    "selector": {
+      "label": "Langue",
+      "french": "Français",
+      "english": "English"
+    }
+  },
+  "settings": {
+    "language": {
+      "title": "Langue",
+      "description": "Choisissez votre langue préférée",
+      "success": "Langue mise à jour avec succès"
+    }
+  }
+}

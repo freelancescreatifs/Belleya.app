@@ -4,17 +4,20 @@ import {
   Clock, Lock, MessageCircle, ArrowRight, MessageSquare, Brain, DollarSign,
   BarChart3, AlertCircle, Search, Flame, Eye
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AnimatedKeywords from '../components/landing/AnimatedKeywords';
 import BeforeAfterSection from '../components/landing/BeforeAfterSection';
 import CountdownTimer from '../components/landing/CountdownTimer';
 import TestimonialsSlider from '../components/landing/TestimonialsSlider';
 import ComparisonSection from '../components/landing/ComparisonSection';
+import LanguageSwitcher from '../components/shared/LanguageSwitcher';
 
 interface LandingProps {
   onSelectRole: (role: 'client' | 'pro') => void;
 }
 
 export default function Landing({ onSelectRole }: LandingProps) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-white">
       <div className="w-full bg-gradient-to-r from-brand-50 to-brand-100/50 border-b border-brand-100">
@@ -23,12 +26,15 @@ export default function Landing({ onSelectRole }: LandingProps) {
         </div>
       </div>
 
-      <header className="w-full">
+      <header className="w-full relative">
         <img
           src="/installation_du_widget_(5)_copie.png"
-          alt="Belleya - Beauty is my priority"
+          alt={t('landing.header.altText')}
           className="w-full h-auto object-cover"
         />
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageSwitcher variant="landing" />
+        </div>
       </header>
 
       <AnimatedKeywords />
@@ -55,30 +61,30 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   </div>
 
                   <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-3" style={{ color: 'rgb(113, 19, 65)' }}>
-                    Je suis cliente
+                    {t('landing.roles.client.title')}
                   </h2>
 
                   <p className="text-sm md:text-lg text-gray-600 mb-4 md:mb-6 leading-relaxed">
-                    Trouve ta pro idéale et réserve en quelques clics
+                    {t('landing.roles.client.subtitle')}
                   </p>
 
                   <ul className="space-y-2 text-left max-w-sm mx-auto mb-4 md:mb-6">
                     <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
-                      <span>Réservation en ligne 24/7</span>
+                      <span>{t('landing.roles.client.benefits.booking')}</span>
                     </li>
                     <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
-                      <span>Tous tes RDV au même endroit</span>
+                      <span>{t('landing.roles.client.benefits.appointments')}</span>
                     </li>
                     <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
-                      <span>Tes pros préférées en favoris</span>
+                      <span>{t('landing.roles.client.benefits.favorites')}</span>
                     </li>
                   </ul>
 
                   <div className="inline-flex items-center gap-2 text-[rgb(113,19,65)] font-semibold text-base md:text-lg group-hover:gap-3 transition-all">
-                    Accéder à mon espace
+                    {t('landing.roles.client.cta')}
                     <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -91,7 +97,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#efaa9a]/20 to-[#d9629b]/20 opacity-50 group-hover:opacity-70 transition-opacity"></div>
 
                 <div className="absolute -top-2 md:-top-3 -right-2 md:-right-3 bg-gradient-to-r from-[#efaa9a] to-[#d9629b] text-white px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-bold shadow-lg">
-                  14 jours gratuits
+                  {t('landing.roles.pro.badge')}
                 </div>
 
                 <div className="relative">
@@ -104,30 +110,30 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   </div>
 
                   <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-3" style={{ color: 'rgb(113, 19, 65)' }}>
-                    Je suis pro
+                    {t('landing.roles.pro.title')}
                   </h2>
 
                   <p className="text-sm md:text-lg text-gray-600 mb-4 md:mb-6 leading-relaxed">
-                    Ton business beauté au même endroit. Simple, clair, serein.
+                    {t('landing.roles.pro.subtitle')}
                   </p>
 
                   <ul className="space-y-2 text-left max-w-sm mx-auto mb-4 md:mb-6">
                     <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
-                      <span>Ton agenda + réservations 24/7</span>
+                      <span>{t('landing.roles.pro.benefits.agenda')}</span>
                     </li>
                     <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
-                      <span>Tes clientes + historique complet</span>
+                      <span>{t('landing.roles.pro.benefits.clients')}</span>
                     </li>
                     <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
-                      <span>Tes finances + objectifs enfin clairs</span>
+                      <span>{t('landing.roles.pro.benefits.finances')}</span>
                     </li>
                   </ul>
 
                   <div className="inline-flex items-center gap-2 text-[rgb(113,19,65)] font-semibold text-base md:text-lg group-hover:gap-3 transition-all">
-                    Démarrer gratuitement
+                    {t('landing.roles.pro.cta')}
                     <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -135,7 +141,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             </div>
 
             <p className="text-gray-500 text-xs md:text-sm mt-8 md:mt-12">
-              En utilisant Belleya, vous acceptez nos conditions d'utilisation
+              {t('landing.roles.terms')}
             </p>
           </div>
         </div>
@@ -149,22 +155,22 @@ export default function Landing({ onSelectRole }: LandingProps) {
             <div className="text-center mb-16 md:mb-20">
               <div className="inline-block mb-4 md:mb-6">
                 <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
-                  Ta réalité aujourd'hui
+                  {t('landing.reality.title')}
                 </h2>
               </div>
               <p className="text-base md:text-xl text-gray-500 max-w-2xl mx-auto px-4">
-                Tu adores ton métier... mais la gestion te bouffe la tête.
+                {t('landing.reality.subtitle')}
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-16 md:mb-20">
               {[
-                { icon: MessageSquare, title: "Messages éparpillés", desc: "WhatsApp, Insta, SMS... Tu cherches qui a réservé quoi pendant 10 minutes." },
-                { icon: Brain, title: "Tête surchargée", desc: "Tout est dans ta tête. Et ta tête déborde." },
-                { icon: Target, title: "Objectifs flous", desc: "Tu bosses beaucoup. Mais tu sais pas vraiment où t'en es." },
-                { icon: DollarSign, title: "Finances floues", desc: "Combien tu gagnes vraiment ? Tes charges ? Tu préfères pas regarder." },
-                { icon: BarChart3, title: "Contenu chaotique", desc: "Des idées plein la tête, mais zéro organisation pour poster." },
-                { icon: Search, title: "Inspirations perdues", desc: "Cette photo super inspirante... elle était où déjà ?" }
+                { icon: MessageSquare, titleKey: "messages", descKey: "messages" },
+                { icon: Brain, titleKey: "brain", descKey: "brain" },
+                { icon: Target, titleKey: "goals", descKey: "goals" },
+                { icon: DollarSign, titleKey: "finances", descKey: "finances" },
+                { icon: BarChart3, titleKey: "content", descKey: "content" },
+                { icon: Search, titleKey: "inspiration", descKey: "inspiration" }
               ].map((item, i) => (
                 <div
                   key={i}
@@ -180,10 +186,10 @@ export default function Landing({ onSelectRole }: LandingProps) {
                       <item.icon className="w-5 h-5 md:w-6 md:h-6 text-[#d9629b]" />
                     </div>
                     <h3 className="text-base md:text-lg font-bold text-gray-900 mb-1.5 md:mb-2">
-                      {item.title}
+                      {t(`landing.reality.problems.${item.titleKey}.title`)}
                     </h3>
                     <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
-                      {item.desc}
+                      {t(`landing.reality.problems.${item.descKey}.desc`)}
                     </p>
                   </div>
                 </div>
@@ -199,16 +205,16 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   </div>
 
                   <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6">
-                    Le vrai problème ?
+                    {t('landing.reality.realProblem.title')}
                   </h3>
 
                   <p className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#711341] bg-clip-text text-transparent mb-6 md:mb-8">
-                    Tu subis ton activité au lieu de la piloter.
+                    {t('landing.reality.realProblem.subtitle')}
                   </p>
 
                   <div className="inline-block px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full border border-belleya-200/50">
                     <p className="text-base md:text-lg font-bold text-gray-900">
-                      Ce n'est pas normal de travailler comme ça.
+                      {t('landing.reality.realProblem.conclusion')}
                     </p>
                   </div>
                 </div>
@@ -229,23 +235,23 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 <div className="max-w-4xl mx-auto">
                   <div className="bg-white/80 backdrop-blur-sm rounded-xl md:rounded-2xl p-6 md:p-8 mb-8 md:mb-10 shadow-lg border border-belleya-100/50">
                     <p className="text-xl md:text-2xl lg:text-3xl font-bold text-center mb-6 md:mb-8 text-gray-900">
-                      Tu es une <span className="bg-gradient-to-r from-[#efaa9a] to-[#d9629b] bg-clip-text text-transparent">vraie pro</span>.
+                      {t('landing.solution.youAre')} <span className="bg-gradient-to-r from-[#efaa9a] to-[#d9629b] bg-clip-text text-transparent">{t('landing.solution.realPro')}</span>.
                       <br />
-                      Tu mérites un <span className="bg-gradient-to-r from-[#efaa9a] to-[#d9629b] bg-clip-text text-transparent">vrai système</span>.
+                      {t('landing.solution.youDeserve')} <span className="bg-gradient-to-r from-[#efaa9a] to-[#d9629b] bg-clip-text text-transparent">{t('landing.solution.realSystem')}</span>.
                     </p>
 
                     <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
                       {[
-                        { icon: Sparkles, text: 'Clarté' },
-                        { icon: Target, text: 'Contrôle' },
-                        { icon: Eye, text: 'Visibilité' },
-                        { icon: Heart, text: 'Sérénité' }
+                        { icon: Sparkles, textKey: 'clarity' },
+                        { icon: Target, textKey: 'control' },
+                        { icon: Eye, textKey: 'visibility' },
+                        { icon: Heart, textKey: 'serenity' }
                       ].map((item, i) => (
                         <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-belleya-50/50 transition-colors">
                           <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-[#efaa9a] to-[#d9629b] rounded-full flex items-center justify-center shadow-md flex-shrink-0">
                             <item.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                           </div>
-                          <span className="text-base md:text-lg font-medium text-gray-800">{item.text}</span>
+                          <span className="text-base md:text-lg font-medium text-gray-800">{t(`landing.solution.values.${item.textKey}`)}</span>
                         </div>
                       ))}
                     </div>
@@ -253,13 +259,13 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
                   <div className="text-center">
                     <p className="text-2xl md:text-4xl lg:text-5xl font-bold mb-6 md:mb-8 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#711341] bg-clip-text text-transparent">
-                      Tu mérites Belleya.
+                      {t('landing.solution.conclusion')}
                     </p>
                     <button
                       onClick={() => onSelectRole('pro')}
                       className="group relative inline-flex items-center gap-2 md:gap-3 px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-[length:200%_auto] text-white font-bold text-base md:text-lg rounded-full shadow-[0_10px_40px_rgba(217,98,155,0.3)] hover:shadow-[0_15px_50px_rgba(217,98,155,0.4)] transition-all hover:scale-105 animate-[shimmer_3s_linear_infinite]"
                     >
-                      <span className="relative z-10">Découvrir Belleya</span>
+                      <span className="relative z-10">{t('landing.solution.cta')}</span>
                       <ArrowRight className="w-4 h-4 md:w-5 md:h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                       <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 rounded-full transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                     </button>
@@ -311,70 +317,25 @@ export default function Landing({ onSelectRole }: LandingProps) {
           <div className="text-center mb-16 md:mb-20">
             <div className="inline-block mb-4 md:mb-6">
               <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite] px-4">
-                Tout ton business au même endroit
+                {t('landing.features.title')}
               </h2>
             </div>
             <p className="text-base md:text-xl text-gray-500 px-4">
-              Adapté à ton métier. Grandit avec toi.
+              {t('landing.features.subtitle')}
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
             {[
-              {
-                icon: BarChart,
-                title: "Vois où t'en es, vraiment",
-                subtitle: "Dashboard intelligent",
-                description: "CA du jour, RDV de la semaine, tâches prioritaires. Tout d'un coup d'œil."
-              },
-              {
-                icon: TrendingUp,
-                title: "Comprends tes finances",
-                subtitle: "Pilotage financier",
-                description: "CA, charges, bénéfice réel. Seuils fiscaux adaptés à ton statut. Enfin clair."
-              },
-              {
-                icon: Users,
-                title: "Connais vraiment tes clientes",
-                subtitle: "Fiches clientes complètes",
-                description: "Historique, préférences, photos, notes. Champs adaptés à ton métier."
-              },
-              {
-                icon: Calendar,
-                title: "Ton temps organisé",
-                subtitle: "Agenda unifié",
-                description: "RDV, tâches, contenu social : tout au même endroit. Synchro Google & Planity."
-              },
-              {
-                icon: Target,
-                title: "Garde le cap",
-                subtitle: "Objectifs & suivi",
-                description: "Fixe tes objectifs mensuels et suis ta progression en temps réel."
-              },
-              {
-                icon: Image,
-                title: "Garde tes inspirations",
-                subtitle: "Galerie organisée",
-                description: "Collecte les inspirations clientes. Photos avant/après liées automatiquement."
-              },
-              {
-                icon: Globe,
-                title: "Réserve en ligne 24/7",
-                subtitle: "Ta page Belleya unique",
-                description: "Tes clientes réservent H24. Tu valides quand tu veux."
-              },
-              {
-                icon: Package,
-                title: "Jamais à court",
-                subtitle: "Gestion de stock",
-                description: "Suis tes fournitures, reçois des alertes. Toujours prête."
-              },
-              {
-                icon: Sparkles,
-                title: "Publie sans réfléchir",
-                subtitle: "Calendrier éditorial IA",
-                description: "Planifie tes posts Insta, génère des idées. Zéro panne d'inspiration."
-              }
+              { icon: BarChart, key: 'dashboard' },
+              { icon: TrendingUp, key: 'finances' },
+              { icon: Users, key: 'clients' },
+              { icon: Calendar, key: 'agenda' },
+              { icon: Target, key: 'goals' },
+              { icon: Image, key: 'gallery' },
+              { icon: Globe, key: 'booking' },
+              { icon: Package, key: 'stock' },
+              { icon: Sparkles, key: 'content' }
             ].map((feature, i) => (
               <div
                 key={i}
@@ -395,15 +356,15 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
                   <div className="mb-3 md:mb-4">
                     <h3 className="text-base md:text-xl font-bold text-gray-900 mb-1 leading-tight">
-                      {feature.title}
+                      {t(`landing.features.list.${feature.key}.title`)}
                     </h3>
                     <p className="text-xs md:text-sm font-semibold bg-gradient-to-r from-[#efaa9a] to-[#d9629b] bg-clip-text text-transparent">
-                      {feature.subtitle}
+                      {t(`landing.features.list.${feature.key}.subtitle`)}
                     </p>
                   </div>
 
                   <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
-                    {feature.description}
+                    {t(`landing.features.list.${feature.key}.desc`)}
                   </p>
 
                   <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-[length:200%_auto] rounded-b-xl md:rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-[shimmer_3s_linear_infinite]"></div>
