@@ -228,12 +228,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       return;
     }
 
-    if (!aiIdea.title.trim()) {
-      setErrorMessage('Le titre du post est obligatoire');
-      alert('Le titre du post est obligatoire');
-      return;
-    }
-
     setGenerating(true);
     setErrorMessage('');
 
@@ -250,7 +244,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         aiIdea.platform,
         aiIdea.objective,
         aiIdea.editorial_pillar,
-        aiIdea.title
+        aiIdea.title.trim() || undefined
       );
 
       if (ideas.length === 0) {
@@ -434,37 +428,43 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   }
 
   function renderIdeaCard(idea: SavedIdea, cardColor: string) {
+    const isAIGenerated = idea.source === 'ai';
+
     return (
       <div key={idea.id} className={`p-4 ${cardColor} rounded-xl border`}>
-        <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-gray-900 mb-1">{idea.title}</h4>
-            {idea.description && (
-              <p className="text-sm text-gray-700 mb-2 line-clamp-2">{idea.description}</p>
-            )}
+            <h4 className="font-semibold text-gray-900 mb-2">{idea.title}</h4>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-bold text-gray-900 border border-gray-300">
+                {getFormatLabel(idea.content_type)}
+              </span>
+              <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-medium text-gray-700 border border-gray-200 capitalize">
+                {idea.platform}
+              </span>
+              {idea.objective && (
+                <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-medium text-blue-700 border border-blue-200 capitalize">
+                  {idea.objective}
+                </span>
+              )}
+              {idea.editorial_pillar && (
+                <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${getPillarColor(idea.editorial_pillar)}`}>
+                  {idea.editorial_pillar}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-bold text-gray-900 border border-gray-300">
-            {getFormatLabel(idea.content_type)}
-          </span>
-          <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-medium text-gray-700 border border-gray-200 capitalize">
-            {idea.platform}
-          </span>
-          {idea.objective && (
-            <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-medium text-blue-700 border border-blue-200 capitalize">
-              {idea.objective}
-            </span>
-          )}
-          {idea.editorial_pillar && (
-            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${getPillarColor(idea.editorial_pillar)}`}>
-              {idea.editorial_pillar}
-            </span>
-          )}
-        </div>
+        {idea.description && (
+          <div className="mb-3 p-3 bg-white/70 rounded-lg max-h-64 overflow-y-auto">
+            <div className="text-xs text-gray-700 whitespace-pre-line">
+              {idea.description}
+            </div>
+          </div>
+        )}
 
-        {idea.notes && (
+        {idea.notes && idea.source !== 'ai' && (
           <div className="mb-3 p-2 bg-white/50 rounded-lg">
             <p className="text-xs text-gray-700 line-clamp-2">{idea.notes}</p>
           </div>
@@ -697,18 +697,19 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
           {activeTab === 'ai' && (
             <div className="space-y-4">
               <div className="p-5 bg-white border-2 border-orange-300 rounded-xl shadow-lg">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Générer des idées avec l'IA</h3>
-                <p className="text-sm text-gray-600 mb-4">L'IA va générer plusieurs idées basées sur tes critères</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Générateur d'idées stratégiques</h3>
+                <p className="text-sm text-gray-600 mb-4">L'IA va créer 5 idées stratégiques avec hooks, angles et justifications</p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Titre du post *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Thème ou sujet (optionnel)</label>
                     <input
                       type="text"
                       value={aiIdea.title}
                       onChange={(e) => setAiIdea({ ...aiIdea, title: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="Ex: Tutoriel French Manucure, Avant-Après Client..."
+                      placeholder="Ex: Transformation client, Erreurs courantes, Technique signature..."
                     />
+                    <p className="text-xs text-gray-500 mt-1">Laisse vide pour des idées génériques adaptées à tes critères</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -778,18 +779,18 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
                   <button
                     onClick={handleGenerateAI}
-                    disabled={generating || !aiIdea.title.trim()}
+                    disabled={generating}
                     className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50 font-medium flex items-center justify-center gap-2"
                   >
                     {generating ? (
                       <>
                         <Loader className="w-5 h-5 animate-spin" />
-                        Génération en cours...
+                        Génération de 5 idées stratégiques...
                       </>
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5" />
-                        Générer des idées
+                        Générer 5 idées stratégiques
                       </>
                     )}
                   </button>

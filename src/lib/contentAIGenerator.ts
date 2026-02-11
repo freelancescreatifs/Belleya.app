@@ -1041,264 +1041,6 @@ function getStructureForFormat(format: string, platform: string): string {
   return structures[format] || 'Structure adaptée au format choisi';
 }
 
-const professionIdeasDatabase: Record<ProfessionKey, Record<string, ContentIdea[]>> = {
-  nail_artist: {
-    'reel-attirer': [
-      {
-        title: 'Transformation avant/après',
-        description: 'Montrer un avant/après spectaculaire de ongles abîmés transformés en œuvre d\'art',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'POV : Tu regardes la magie opérer en 60 secondes',
-        objective: 'attirer',
-        type: 'content',
-        structure: '0-2s : Ongles abîmés → 3-15s : Processus accéléré → 16-20s : Résultat final + CTA'
-      },
-      {
-        title: 'L\'erreur que toutes les clientes font',
-        description: 'Révéler une erreur courante qui abîme les ongles',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Arrête de faire ça avec tes ongles !',
-        objective: 'attirer',
-        type: 'content',
-        structure: '0-3s : Hook choc → 4-12s : Explication problème → 13-18s : Solution simple'
-      },
-      {
-        title: 'Coulisses d\'une pose technique',
-        description: 'Montrer les coulisses d\'une pose complexe étape par étape',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Regarde comment je crée des ongles parfaits',
-        objective: 'attirer',
-        type: 'content',
-        structure: 'Immersion complète : préparation → pose → finition'
-      }
-    ],
-    'carrousel-éduquer': [
-      {
-        title: '5 signes que tes ongles ont besoin d\'aide',
-        description: 'Carrousel éducatif sur les signaux d\'alerte pour la santé des ongles',
-        content_type: 'carrousel',
-        platform: 'instagram',
-        angle: 'Guide expert : reconnaître les problèmes avant qu\'il soit trop tard',
-        objective: 'éduquer',
-        type: 'content',
-        structure: 'Slide 1: Titre accrocheur → Slides 2-6: 1 signe + explication/slide → Slide 7: Solutions'
-      },
-      {
-        title: 'Gel vs Résine vs Semi-permanent',
-        description: 'Comparaison complète des différentes techniques de pose',
-        content_type: 'carrousel',
-        platform: 'instagram',
-        angle: 'Quelle technique choisir pour TES ongles ?',
-        objective: 'éduquer',
-        type: 'content',
-        structure: 'Slide 1: Question → Slides 2-4: 1 technique détaillée/slide → Slide 5: Tableau comparatif'
-      },
-      {
-        title: 'Comment faire durer tes ongles 4 semaines',
-        description: 'Les secrets pour une tenue longue durée',
-        content_type: 'carrousel',
-        platform: 'instagram',
-        angle: 'Mes astuces de pro pour des ongles impeccables',
-        objective: 'éduquer',
-        type: 'content'
-      }
-    ],
-    'story-fideliser': [
-      {
-        title: 'Sondage : Ta couleur préférée du moment',
-        description: 'Story interactive avec sondage sur les tendances couleurs',
-        content_type: 'story',
-        platform: 'instagram',
-        angle: 'Aide-moi à choisir mes prochains vernis !',
-        objective: 'fideliser',
-        type: 'content'
-      },
-      {
-        title: 'Mini-tour de mon salon',
-        description: 'Visite rapide et authentique de ton espace de travail',
-        content_type: 'story',
-        platform: 'instagram',
-        angle: 'Viens découvrir mon petit cocon nail',
-        objective: 'fideliser',
-        type: 'content'
-      }
-    ],
-    'reel-convertir': [
-      {
-        title: 'Nouvelle promo du mois',
-        description: 'Annoncer une offre spéciale de façon créative',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Cette semaine seulement : offre spéciale',
-        objective: 'convertir',
-        type: 'content',
-        structure: '0-3s : Accroche promo → 4-10s : Détails offre → 11-15s : CTA fort'
-      }
-    ]
-  },
-  estheticienne: {
-    'reel-attirer': [
-      {
-        title: 'Transformation peau avant/après soin',
-        description: 'Résultat impressionnant d\'un soin visage signature',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'L\'effet glow immédiat après mon soin visage',
-        objective: 'attirer',
-        type: 'content',
-        structure: 'Avant : peau fatiguée → Pendant : extraits du soin → Après : peau éclatante'
-      },
-      {
-        title: '3 erreurs qui ruinent ta peau',
-        description: 'Les erreurs les plus courantes en routine beauté',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Arrête de faire ça si tu veux une belle peau',
-        objective: 'attirer',
-        type: 'content',
-        structure: '0-3s : Hook → 4-15s : 3 erreurs courantes → 16-20s : Ce qu\'il faut faire'
-      }
-    ],
-    'carrousel-éduquer': [
-      {
-        title: 'Ta routine selon ton type de peau',
-        description: 'Guide personnalisé pour chaque type de peau',
-        content_type: 'carrousel',
-        platform: 'instagram',
-        angle: 'La routine parfaite adaptée à TON type de peau',
-        objective: 'éduquer',
-        type: 'content',
-        structure: 'Slide 1: Les 4 types → Slides 2-5: 1 routine complète/type → Slide 6: Erreurs à éviter'
-      },
-      {
-        title: 'Décoder les ingrédients cosmétiques',
-        description: 'Comprendre ce qu\'il y a vraiment dans tes produits',
-        content_type: 'carrousel',
-        platform: 'instagram',
-        angle: 'Guide des ingrédients à chercher (et à éviter)',
-        objective: 'éduquer',
-        type: 'content'
-      }
-    ]
-  },
-  coiffeuse: {
-    'reel-attirer': [
-      {
-        title: 'Transformation coloration spectaculaire',
-        description: 'Avant/après d\'une transformation capillaire impressionnante',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'De brune à blonde platine en une séance',
-        objective: 'attirer',
-        type: 'content',
-        structure: 'Avant → Processus (décoloration, soin, coloration) → Résultat final'
-      },
-      {
-        title: 'La coupe tendance du moment',
-        description: 'Démonstration de LA coupe que tout le monde demande',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'LA coupe que toutes mes clientes veulent',
-        objective: 'attirer',
-        type: 'content'
-      }
-    ],
-    'carrousel-éduquer': [
-      {
-        title: 'Comment choisir sa couleur selon son teint',
-        description: 'Guide complet pour trouver la couleur qui te va',
-        content_type: 'carrousel',
-        platform: 'instagram',
-        angle: 'Quelle couleur pour sublimer TON teint ?',
-        objective: 'éduquer',
-        type: 'content',
-        structure: 'Slide 1: Intro colorimétrie → Slides 2-5: Conseils par teint → Slide 6: Nuancier'
-      }
-    ]
-  },
-  lash_artist: {
-    'reel-attirer': [
-      {
-        title: 'Transformation regard avec extensions',
-        description: 'Avant/après extensions de cils spectaculaire',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Ce regard de rêve... sans mascara !',
-        objective: 'attirer',
-        type: 'content',
-        structure: 'Avant : cils naturels → Pose en accéléré → Résultat final close-up'
-      }
-    ],
-    'carrousel-éduquer': [
-      {
-        title: 'Les différents styles d\'extensions',
-        description: 'Comparaison des styles : naturel, volume, mega volume',
-        content_type: 'carrousel',
-        platform: 'instagram',
-        angle: 'Quel style d\'extensions correspond à ta personnalité ?',
-        objective: 'éduquer',
-        type: 'content',
-        structure: 'Slide 1: Intro → Slides 2-4: 1 style détaillé + photo → Slide 5: Comparatif'
-      }
-    ]
-  },
-  brow_artist: {
-    'reel-attirer': [
-      {
-        title: 'Transformation sourcils',
-        description: 'Avant/après restructuration complète des sourcils',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Des sourcils parfaits qui changent tout le visage',
-        objective: 'attirer',
-        type: 'content'
-      }
-    ]
-  },
-  facialiste: {
-    'reel-attirer': [
-      {
-        title: 'Routine soin visage apaisante',
-        description: 'Démonstration d\'un soin signature relaxant',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: '30 minutes de pur bonheur pour ta peau',
-        objective: 'attirer',
-        type: 'content'
-      }
-    ]
-  },
-  prothesiste_ongulaire: {
-    'reel-attirer': [
-      {
-        title: 'Pose technique ultra-précise',
-        description: 'Démonstration d\'une technique de pose avancée',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Regarde-moi créer ces ongles parfaits au millimètre',
-        objective: 'attirer',
-        type: 'content'
-      }
-    ]
-  },
-  multi_metiers: {
-    'reel-attirer': [
-      {
-        title: 'Ma journée multi-casquettes',
-        description: 'Une journée type avec différentes prestations',
-        content_type: 'reel',
-        platform: 'instagram',
-        angle: 'Une journée dans ma vie de pro multi-talents',
-        objective: 'attirer',
-        type: 'content'
-      }
-    ]
-  }
-};
-
 export function generateContentIdeas(
   profession: ProfessionKey | null,
   format: string,
@@ -1307,372 +1049,366 @@ export function generateContentIdeas(
   pillar?: string,
   customTitle?: string
 ): ContentIdea[] {
-  const key = `${format}-${objective}`;
-  const professionSpecificIdeas = profession ? (professionIdeasDatabase[profession]?.[key] || []) : [];
+  return generateStrategicIdeas(profession, format, platform, objective, pillar, customTitle);
+}
 
-  if (professionSpecificIdeas.length > 0) {
-    const ideasWithPillar = professionSpecificIdeas.map(idea => ({
-      ...idea,
-      title: customTitle || idea.title,
-      description: customTitle ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar) : idea.description,
-      pillarContext: pillar ? `Axé sur le pilier: ${pillar}` : undefined
-    }));
-    return ideasWithPillar;
-  }
+function generateStrategicIdeas(
+  profession: ProfessionKey | null,
+  format: string,
+  platform: string,
+  objective: string,
+  pillar?: string,
+  customTitle?: string
+): ContentIdea[] {
+  const ideas: ContentIdea[] = [];
+  const professionContext = getProfessionContext(profession || 'multi_metiers');
+  const seed = Math.random() * 1000;
 
-  const genericIdeas: ContentIdea[] = [];
-
-  if (format === 'reel') {
-    genericIdeas.push(
-      {
-        title: customTitle || 'Coulisses de mon quotidien pro',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎬 HOOK : "POV : Une journée dans ma vie de pro"\n\n✨ ANGLE : Immersion authentique derrière les coulisses\n\n🎯 OBJECTIF : Créer connexion et identification\n\n💡 STRUCTURE :\n→ Matin : Préparation + premier RDV\n→ Midi : Gestion entre deux clients\n→ Après-midi : Les moments forts\n→ Soir : Bilan et réflexion`,
-        content_type: format,
-        platform,
-        angle: 'Authenticité et connexion humaine',
-        objective,
-        type: 'content',
-        structure: 'Hook visuel → Journée en accéléré → Moments clés → Punchline finale'
-      },
-      {
-        title: customTitle || 'Mes 3 indispensables',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎬 HOOK : "Les 3 trucs sans lesquels je ne pourrais PAS travailler 🔥"\n\n✨ ANGLE : Recommandation d'expert + authenticité\n\n🎯 OBJECTIF : Apporter de la valeur + créer autorité\n\n💡 STRUCTURE :\n→ Hook : "Attends... tu vas kiffer"\n→ Indispensable #1 + pourquoi\n→ Indispensable #2 + pourquoi\n→ Indispensable #3 + secret bonus\n→ CTA : "Et toi, c'est quoi tes indispensables ?"`,
-        content_type: format,
-        platform,
-        angle: 'Partage d\'expertise et recommandations pro',
-        objective,
-        type: 'content'
-      }
-    );
-  }
-
-  if (format === 'carrousel') {
-    genericIdeas.push(
-      {
-        title: customTitle || '5 erreurs de débutant',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎯 HOOK SLIDE 1 :
-"Les 5 erreurs qui ruinent tout ❌"
-(Et comment les éviter)
-
-✨ STRUCTURE CARROUSEL :
-
-📍 SLIDE 1 : Couverture hook
-→ Titre percutant + promesse claire
-
-📍 SLIDES 2-6 : Une erreur par slide
-→ ❌ L'erreur en gros titre
-→ Pourquoi c'est problématique
-→ ✅ La bonne méthode
-
-📍 SLIDE 7 : Récapitulatif
-→ Liste des 5 points
-→ CTA : "Sauvegarde pour ne pas oublier"
-
-💡 TIPS PRO :
-→ Design cohérent sur toutes les slides
-→ Maximum 2-3 lignes de texte par slide
-→ Utilise des icônes et émojis pour la clarté`,
-        content_type: format,
-        platform,
-        angle: 'Guide expert pour éviter les pièges courants',
-        objective,
-        type: 'content',
-        structure: 'Slide 1: Hook → Slides 2-6: Erreur + solution → Slide 7: Récap + CTA'
-      },
-      {
-        title: customTitle || 'Avant/Après : mes transformations',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎯 HOOK SLIDE 1 :
-"Ces transformations qui me rendent fière ✨"
-
-✨ STRUCTURE PORTFOLIO :
-
-📍 SLIDE 1 : Couverture
-→ Titre émotionnel
-→ Nombre de transformations
-
-📍 SLIDES 2-7 : Avant/Après
-→ Photo AVANT claire
-→ Photo APRÈS impactante
-→ Contexte en 1 phrase
-→ Technique utilisée
-
-📍 SLIDE 8 : Coulisses
-→ Mon process/ma méthode
-→ Ce qui fait la différence
-
-📍 SLIDE 9 : CTA
-→ "Prête pour ta transformation ?"
-→ Lien de réservation
-
-💡 IMPACT :
-→ Preuve sociale puissante
-→ Inspire confiance
-→ Génère des réservations`,
-        content_type: format,
-        platform,
-        angle: 'Portfolio visuel de résultats concrets',
-        objective,
-        type: 'content'
-      }
-    );
-  }
-
-  if (format === 'story') {
-    genericIdeas.push(
-      {
-        title: customTitle || 'Sondage : Ton avis compte',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎯 STORY 1 - HOOK :
-"Question pour toi 👇"
-
-✨ STRUCTURE INTERACTIVE :
-
-📱 STORY 1 : Question/Sondage
-→ Pose une vraie question
-→ Utilise sticker sondage IG
-→ Options claires et fun
-
-📱 STORY 2 : Contexte
-→ Pourquoi tu poses cette question
-→ Ton avis personnel
-→ Ce que ça change
-
-📱 STORY 3 : Résultats
-→ Partage les votes/réponses
-→ Commente les tendances
-→ Remercie la participation
-
-📱 STORY 4 : Suite
-→ "Résultat : voilà ce que je vais faire"
-→ CTA ou promesse de suite
-
-💡 ENGAGEMENT :
-→ Taux de réponse élevé
-→ Crée la conversation
-→ Insights précieux sur ton audience`,
-        content_type: format,
-        platform,
-        angle: 'Interaction directe avec la communauté',
-        objective,
-        type: 'content'
-      },
-      {
-        title: customTitle || 'Question du jour',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎯 STORY 1 - HOOK :
-"On me demande TOUT LE TEMPS 👀"
-
-✨ STRUCTURE Q&A :
-
-📱 STORY 1 : La question
-→ "Vous m'avez posé 47 fois..."
-→ Montre la question (DM ou commentaire)
-
-📱 STORY 2 : Ta réponse partie 1
-→ Commence par le contexte
-→ Explique simplement
-
-📱 STORY 3 : Ta réponse partie 2
-→ L'astuce ou le secret
-→ Exemple concret
-
-📱 STORY 4 : CTA
-→ "D'autres questions ?"
-→ Sticker question IG
-→ Promesse d'y répondre
-
-💡 VALEUR :
-→ Réponds aux vraies attentes
-→ Positionne ton expertise
-→ Crée du contenu evergreen`,
-        content_type: format,
-        platform,
-        angle: 'Expertise partagée de façon spontanée',
-        objective,
-        type: 'content'
-      }
-    );
-  }
-
-  if (format === 'live') {
-    genericIdeas.push({
-      title: 'Session Q&A en direct',
-      description: 'Répondre aux questions de ta communauté en live',
-      content_type: format,
+  for (let i = 0; i < 5; i++) {
+    const ideaSeed = seed + i * 17;
+    const idea = generateSingleStrategicIdea(
+      professionContext,
+      format,
       platform,
-      angle: 'Pose-moi toutes tes questions !',
       objective,
-      type: 'event'
-    });
+      pillar,
+      customTitle,
+      i,
+      ideaSeed
+    );
+    ideas.push(idea);
+  }
+
+  return ideas;
+}
+
+function generateSingleStrategicIdea(
+  professionContext: string,
+  format: string,
+  platform: string,
+  objective: string,
+  pillar: string | undefined,
+  customTitle: string | undefined,
+  index: number,
+  seed: number
+): ContentIdea {
+  const hookExamples = generateStrategicHooks(format, platform, objective, professionContext, seed);
+  const selectedHook = hookExamples[index % hookExamples.length];
+
+  const angle = generateContentAngle(format, platform, objective, professionContext, index, seed);
+  const whyItWorks = explainWhyItWorks(format, platform, objective, index, seed);
+
+  const formatGuidance = getFormatSpecificGuidance(format, platform);
+  const objectiveStrategy = getObjectiveStrategy(objective);
+
+  const ideaTitle = customTitle || generateIdeaTitle(format, objective, professionContext, index, seed);
+
+  const description = `📌 HOOK EXEMPLE
+
+"${selectedHook}"
+
+🎯 ANGLE DU CONTENU
+
+${angle}
+
+✨ POURQUOI ÇA MARCHE
+
+${whyItWorks}
+
+${formatGuidance}
+
+${objectiveStrategy}
+
+${pillar ? `🎨 PILIER ÉDITORIAL : ${pillar}\n\n` : ''}💡 CONSEIL PRO
+
+${getProTip(format, platform, objective, seed + index)}`;
+
+  return {
+    title: ideaTitle,
+    description,
+    content_type: format,
+    platform,
+    angle,
+    objective,
+    type: 'content'
+  };
+}
+
+function generateStrategicHooks(
+  format: string,
+  platform: string,
+  objective: string,
+  professionContext: string,
+  seed: number
+): string[] {
+  const hooks: string[] = [];
+
+  if (platform === 'tiktok') {
+    hooks.push(
+      `ATTENDS ❌ Avant de faire ça... regarde !`,
+      `POV : Tu découvres enfin le secret des pros 😱`,
+      `Je vais te CHOQUER avec cette technique 🤯`,
+      `Personne ne te dit ça en ${professionContext} 👀`,
+      `Cette erreur... presque TOUT LE MONDE la fait ⚠️`
+    );
+  } else if (platform === 'linkedin') {
+    hooks.push(
+      `Après 5 ans en ${professionContext}, voici ce que j'ai appris`,
+      `La dure réalité du métier de ${professionContext} (et personne n'en parle)`,
+      `3 leçons que ${professionContext} m'a apprises sur l'entrepreneuriat`,
+      `Comment j'ai transformé ma pratique de ${professionContext} en 6 mois`,
+      `Ce que mes clients m'ont appris sur ${professionContext}`
+    );
+  } else if (platform === 'instagram') {
+    if (objective === 'attirer' || objective === 'visibilité') {
+      hooks.push(
+        `Cette transformation... 😍 Tu ne vas pas y croire`,
+        `STOP 🛑 Regarde ce qui se passe quand tu fais ça correctement`,
+        `Le secret que tous les pros de ${professionContext} gardent 🤫`,
+        `Avant VS Après... Le résultat est DINGUE 🔥`,
+        `Tu vois cette différence ? C'est la bonne technique ✨`
+      );
+    } else if (objective === 'vente' || objective === 'convertir') {
+      hooks.push(
+        `Elle pensait que c'était impossible... Regarde maintenant 💕`,
+        `Ce moment où tu réalises que tu méritais mieux ✨`,
+        `3 signes que tu as besoin de ça (et tu ne le sais pas encore)`,
+        `Voilà ce qui change VRAIMENT la donne 🎯`,
+        `Le problème que 8 personnes sur 10 ont (sans le savoir)`
+      );
+    } else if (objective === 'engagement' || objective === 'fidéliser') {
+      hooks.push(
+        `Question pour toi : tu es plutôt A ou B ? 👇`,
+        `On en parle ? Ce truc que PERSONNE n'ose dire sur ${professionContext}`,
+        `Tag quelqu'un qui a besoin de voir ça immédiatement 💬`,
+        `Qui est d'accord avec moi ? 🙋‍♀️`,
+        `Raconte-moi en commentaire : tu as déjà vécu ça ?`
+      );
+    } else {
+      hooks.push(
+        `Ce que j'aurais aimé savoir AVANT de commencer 💡`,
+        `Les 3 erreurs qui ruinent tout (et comment les éviter)`,
+        `Le guide complet que tu n'as jamais eu en ${professionContext}`,
+        `Pourquoi ça ne marche pas ? Voici la vraie raison`,
+        `La méthode que j'utilise avec TOUTES mes clientes`
+      );
+    }
+  } else {
+    hooks.push(
+      `Le secret bien gardé des professionnels`,
+      `Voici ce qui fait VRAIMENT la différence`,
+      `La transformation qui va te surprendre`,
+      `Ce que personne ne te dit sur ${professionContext}`,
+      `Ma méthode signature pour des résultats incroyables`
+    );
+  }
+
+  return hooks;
+}
+
+function generateContentAngle(
+  format: string,
+  platform: string,
+  objective: string,
+  professionContext: string,
+  index: number,
+  seed: number
+): string {
+  const angles = [
+    `Transformation spectaculaire qui capte l'attention immédiatement et crée l'envie de découvrir le processus.`,
+    `Démystification d'une croyance limitante commune en ${professionContext}, positionnant ton expertise unique.`,
+    `Storytelling authentique basé sur une expérience réelle de cliente, créant identification et émotion.`,
+    `Révélation d'une erreur courante avec solution actionnable, apportant de la valeur éducative immédiate.`,
+    `Coulisses et authenticité montrant l'humain derrière le professionnel, renforçant la connexion.`
+  ];
+
+  return angles[index % angles.length];
+}
+
+function explainWhyItWorks(
+  format: string,
+  platform: string,
+  objective: string,
+  index: number,
+  seed: number
+): string {
+  const explanations: Record<string, string[]> = {
+    'attirer': [
+      `→ Capte l'attention dans les 3 premières secondes grâce au pattern interrupt visuel\n→ Crée la curiosité avec une promesse de transformation claire\n→ Format optimisé pour le scroll rapide et la viralité`,
+      `→ Joue sur l'identification immédiate de ton audience cible\n→ Promet une solution à un problème qu'ils rencontrent tous\n→ Le format génère naturellement des partages et des saves`,
+      `→ Utilise la preuve sociale et le résultat visuel pour convaincre\n→ Crée l'envie de vivre la même expérience\n→ Optimisé pour maximiser la portée organique`,
+      `→ S'appuie sur l'effet surprise et la révélation pour capter l'attention\n→ Positionne ton expertise de façon naturelle et crédible\n→ Génère des interactions grâce à la valeur apportée`,
+      `→ L'authenticité crée une connexion émotionnelle forte\n→ Se démarque dans un feed saturé de contenu parfait\n→ Favorise l'engagement naturel et les commentaires`
+    ],
+    'vente': [
+      `→ Identifie un problème spécifique que ton audience ressent\n→ Montre la transformation possible de façon tangible\n→ Crée le désir d'obtenir le même résultat`,
+      `→ Utilise la preuve sociale pour rassurer et convaincre\n→ Positionne ton offre comme la solution évidente\n→ CTA naturel qui découle logiquement du contenu`,
+      `→ Crée l'urgence émotionnelle sans être agressif\n→ Montre la valeur avant de présenter le prix\n→ Réduit les objections en anticipant les questions`,
+      `→ S'appuie sur le storytelling pour vendre sans "vendre"\n→ Démontre l'expertise à travers des résultats concrets\n→ Crée un pont naturel vers la prise de rendez-vous`,
+      `→ Utilise la scarcité perçue pour déclencher l'action\n→ Présente une opportunité claire et limitée dans le temps\n→ Facilite le passage à l'action avec un CTA direct`
+    ],
+    'engagement': [
+      `→ Pose une question qui invite naturellement à la réponse\n→ Crée le débat positif dans les commentaires\n→ Augmente drastiquement le taux d'interaction`,
+      `→ Utilise un format interactif qui demande la participation\n→ Crée un sentiment de communauté et d'appartenance\n→ Les interactions boostent la visibilité algorithmique`,
+      `→ S'appuie sur l'opinion et l'identification personnelle\n→ Encourage le partage et le tag entre amis\n→ Génère des conversations authentiques`,
+      `→ Crée de la controverse positive qui fait réagir\n→ Invite à partager son expérience personnelle\n→ Favorise les échanges dans les commentaires`,
+      `→ Utilise l'interactivité native de la plateforme\n→ Crée du contenu qui demande une réponse immédiate\n→ Augmente le temps passé sur le contenu`
+    ],
+    'éduquer': [
+      `→ Apporte une valeur concrète et actionnable immédiatement\n→ Explique le pourquoi avant le comment pour créer la compréhension\n→ Format digestible qui facilite l'apprentissage`,
+      `→ Démonte les idées reçues avec preuves et clarté\n→ Positionne ton expertise de façon pédagogique\n→ Contenu sauvegardable qui génère des retours`,
+      `→ Structure claire et progressive qui facilite la mémorisation\n→ Exemples concrets qui rendent l'apprentissage pratique\n→ Crée de l'autorité et de la crédibilité`,
+      `→ Simplifie un sujet complexe sans le dénaturer\n→ Donne des étapes actionnables que l'audience peut appliquer\n→ Format optimisé pour la rétention d'information`,
+      `→ S'appuie sur des cas réels et des situations concrètes\n→ Anticipe et répond aux questions avant qu'elles soient posées\n→ Crée une ressource de référence partageable`
+    ],
+    'fidéliser': [
+      `→ Montre les coulisses et l'authenticité pour créer proximité\n→ Fait sentir ta communauté privilégiée et importante\n→ Renforce le lien émotionnel avec ton audience`,
+      `→ Crée un sentiment d'exclusivité pour ta communauté\n→ Récompense la fidélité par du contenu de valeur\n→ Encourage l'appartenance et la loyauté`,
+      `→ Implique directement ton audience dans tes décisions\n→ Montre que leur avis compte vraiment\n→ Crée de la co-création et de l'engagement profond`,
+      `→ Partage des moments personnels qui humanisent ta marque\n→ Crée des inside jokes et références communautaires\n→ Favorise le sentiment d'appartenance au groupe`,
+      `→ Célèbre ta communauté et ses membres\n→ Crée des rituels et habitudes de consommation\n→ Transforme les followers en véritables fans`
+    ]
+  };
+
+  const objectiveKey = objective === 'attirer' ? 'attirer'
+    : objective === 'convertir' ? 'vente'
+    : objective === 'éduquer' ? 'éduquer'
+    : objective === 'fidéliser' ? 'fidéliser'
+    : 'engagement';
+
+  const relevantExplanations = explanations[objectiveKey];
+  return relevantExplanations[index % relevantExplanations.length];
+}
+
+function getFormatSpecificGuidance(format: string, platform: string): string {
+  if (format === 'carrousel') {
+    return `📚 FORMAT CARROUSEL
+
+→ SLIDE 1 : Hook visuel fort avec promesse claire
+→ SLIDES 2-6 : Une idée de valeur par slide (max 2-3 lignes)
+→ SLIDE 7 : Récapitulatif + CTA fort
+→ Design cohérent et lisible en 2 secondes par slide
+→ CTA suggéré : "Sauvegarde pour ne pas oublier 💾"`;
+  }
+
+  if (format === 'reel' || format === 'video') {
+    if (platform === 'tiktok') {
+      return `🎬 FORMAT TIKTOK
+
+→ 0-3 SEC : Pattern interrupt CHOC (mouvement brusque, son marquant)
+→ 3-15 SEC : Action rapide avec changements toutes les 2-3 secondes
+→ 15-18 SEC : Punchline mémorable
+→ 18-20 SEC : CTA direct ("Partage", "Follow", "Commente GO")
+→ Utilise un son trending pour maximiser la portée`;
+    } else {
+      return `🎬 FORMAT REEL INSTAGRAM
+
+→ 0-3 SEC : Hook visuel + texte qui arrête le scroll
+→ 3-12 SEC : Développement avec storytelling ou démonstration
+→ 12-18 SEC : Valeur ajoutée (l'astuce, le secret)
+→ 18-20 SEC : Conclusion + CTA doux
+→ Sous-titres obligatoires (80% regardent sans son)
+→ Esthétique soignée et transitions fluides`;
+    }
   }
 
   if (format === 'post') {
-    genericIdeas.push(
-      {
-        title: customTitle || 'Transformation du jour',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎯 VISUEL + LÉGENDE :
+    return `📸 FORMAT POST
 
-📸 IMAGE :
-→ Avant/Après côte à côte
-→ Ou focus sur le résultat final
-→ Qualité pro obligatoire
-→ Lumière naturelle si possible
-
-✍️ LÉGENDE STRUCTURE :
-
-[Hook - Ligne 1]
-"Cette transformation... 😍"
-
-[Contexte]
-"Elle est venue avec [problème]
-Je savais exactement quoi faire..."
-
-[Storytelling]
-"Pendant 2h, j'ai [processus]
-Le moment magique ? Quand elle a vu le résultat 💕"
-
-[Résultat]
-"Résultat : [transformation concrète]
-Elle rayonne, et ça, c'est tout ce qui compte"
-
-[CTA]
-"Tag quelqu'un qui a besoin de ça 👇"
-
-💡 ENGAGEMENT :
-→ Émotion + Preuve = Confiance
-→ Storytelling > Description technique`,
-        content_type: format,
-        platform,
-        angle: 'Preuve sociale par le résultat',
-        objective,
-        type: 'content'
-      },
-      {
-        title: customTitle || 'Conseil de la semaine',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎯 CONSEIL ACTIONNABLE :
-
-✍️ STRUCTURE LÉGENDE :
-
-[Hook accrocheur]
-"Tu fais cette erreur sans le savoir... 👀"
-
-[Identification du problème]
-"Hier, 4 clientes m'ont dit la même chose :
-[problème récurrent]"
-
-[Explication]
-"Voici pourquoi ça arrive :
-[cause racine simple]"
-
-[Solution concrète]
-"Ma solution en 3 étapes :
-1️⃣ [Action précise]
-2️⃣ [Action précise]
-3️⃣ [Action précise]"
-
-[Bénéfice]
-"Résultat ? [transformation attendue]"
-
-[CTA]
-"💾 Sauvegarde pour t'en souvenir
-💬 Tu le savais ?"
-
-💡 VALEUR :
-→ Conseil applicable immédiatement
-→ Positionne ton expertise
-→ Génère saves + partages`,
-        content_type: format,
-        platform,
-        angle: 'Expertise partagée de manière actionnable',
-        objective,
-        type: 'content'
-      }
-    );
+→ VISUEL : Photo impactante qui fonctionne seule
+→ LÉGENDE : Hook première ligne (125 caractères visibles)
+→ STRUCTURE : Problème → Storytelling → Solution → CTA
+→ LONGUEUR : 150-300 mots idéalement
+→ CTA suggéré : Tag, Sauvegarde, ou Question`;
   }
 
-  if (format === 'live') {
-    genericIdeas.push({
-      title: customTitle || 'Session Q&A en direct',
-      description: customTitle
-        ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-        : `🎯 LIVE INTERACTIF :
+  if (format === 'story') {
+    return `📱 FORMAT STORY
 
-📱 PRÉPARATION :
-→ Annonce 24-48h avant
-→ Crée l'attente avec stories
-→ Demande questions en amont
-
-🎬 STRUCTURE LIVE :
-→ 0-5min : Intro + accueil
-→ 5-30min : Réponses aux questions
-→ 30-35min : Bonus surprise
-→ 35-40min : Récap + annonce prochain live
-
-💡 TIPS :
-→ Réponds à 5-8 questions max
-→ Montre des exemples visuels
-→ Sois authentique et spontané
-→ Annonce la rediffusion
-
-🎁 APRÈS LE LIVE :
-→ Partage les highlights en stories
-→ Remercie les participants
-→ Crée du contenu des moments forts`,
-      content_type: format,
-      platform,
-      angle: 'Connexion directe et authentique avec la communauté',
-      objective,
-      type: 'event'
-    });
+→ STORY 1 : Hook ou question directe
+→ STORIES 2-3 : Contenu de valeur segmenté
+→ STORY 4 : Interaction (sondage, question, quiz)
+→ Durée : 15 secondes max par story
+→ Utilise stickers interactifs natifs de la plateforme`;
   }
 
-  if (genericIdeas.length === 0) {
-    return [
-      {
-        title: customTitle || 'Contenu personnalisé',
-        description: customTitle
-          ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar)
-          : `🎯 CONTENU ADAPTÉ À TON AUDIENCE
+  return `💡 Adapte le format à ton style et aux codes de ${platform}`;
+}
 
-Ce contenu sera généré en fonction de :
-→ Ton métier et ton expertise
-→ Ton objectif (${objective})
-→ Ta plateforme (${platform})
-→ Ton format (${format})
-${pillar ? `→ Ton pilier éditorial (${pillar})` : ''}
+function getObjectiveStrategy(objective: string): string {
+  const strategies: Record<string, string> = {
+    'attirer': `🎯 STRATÉGIE VISIBILITÉ
 
-💡 CONSEIL :
-Clique sur "Générer le contenu" dans le formulaire pour obtenir un script détaillé et une légende optimisés pour ton contexte.`,
-        content_type: format,
-        platform,
-        angle: 'Expertise adaptée à ton contexte unique',
-        objective,
-        type: 'content',
-        pillarContext: pillar ? `Axé sur le pilier: ${pillar}` : undefined
-      }
-    ];
-  }
+→ Focus sur le résultat spectaculaire et la transformation
+→ Optimise pour la shareability (contenu facilement partageable)
+→ Crée de la relatabilité (ton audience doit se reconnaître)
+→ Utilise des éléments visuels forts et impactants`,
 
-  const ideasWithCustomTitle = genericIdeas.map(idea => ({
-    ...idea,
-    title: customTitle || idea.title,
-    description: customTitle ? enhanceIdeaWithHook(customTitle, format, platform, objective, pillar) : idea.description,
-    pillarContext: pillar ? `Axé sur le pilier: ${pillar}` : undefined
-  }));
+    'vente': `🎯 STRATÉGIE VENTE/CONVERSION
 
-  return ideasWithCustomTitle;
+→ Identifie le problème spécifique de ton client idéal
+→ Montre la transformation de manière tangible et désirable
+→ Crée l'urgence émotionnelle sans agressivité
+→ CTA clair vers une action concrète (réserver, DM, lien bio)`,
+
+    'convertir': `🎯 STRATÉGIE VENTE/CONVERSION
+
+→ Identifie le problème spécifique de ton client idéal
+→ Montre la transformation de manière tangible et désirable
+→ Crée l'urgence émotionnelle sans agressivité
+→ CTA clair vers une action concrète (réserver, DM, lien bio)`,
+
+    'engagement': `🎯 STRATÉGIE ENGAGEMENT
+
+→ Pose des questions ouvertes qui invitent à la réponse
+→ Crée des sondages et interactions natives
+→ Utilise les formats participatifs (tag, partage, avis)
+→ Lance des débats positifs qui font réagir`,
+
+    'éduquer': `🎯 STRATÉGIE ÉDUCATION
+
+→ Apporte de la valeur actionnable immédiatement
+→ Explique simplement sans jargon technique
+→ Donne des étapes claires et applicables
+→ Crée du contenu de référence sauvegardable`,
+
+    'fidéliser': `🎯 STRATÉGIE FIDÉLISATION
+
+→ Montre les coulisses et ton authenticité
+→ Crée des rituels et moments récurrents
+→ Implique ta communauté dans tes décisions
+→ Célèbre tes membres et crée un sentiment d'appartenance`
+  };
+
+  return strategies[objective] || strategies['attirer'];
+}
+
+function getProTip(format: string, platform: string, objective: string, seed: number): string {
+  const tips = [
+    `Les 3 premières secondes décident de TOUT. Si tu ne captes pas l'attention immédiatement, le reste ne sera jamais vu. Teste toujours plusieurs hooks.`,
+    `L'algorithme favorise les contenus qui génèrent des interactions rapides. Pose une question ou crée l'émotion dès le début pour maximiser l'engagement.`,
+    `La cohérence bat la perfection. Mieux vaut publier régulièrement du contenu authentique que d'attendre le post "parfait" qui ne vient jamais.`,
+    `Analyse ce qui marche déjà dans ta niche, mais adapte-le à TA personnalité. La copie ne fonctionne jamais aussi bien que l'inspiration personnalisée.`,
+    `Les sauvegardes (saves) sont LE signal le plus fort pour l'algorithme. Crée du contenu de référence que ton audience voudra retrouver.`
+  ];
+
+  return tips[Math.floor(seed) % tips.length];
+}
+
+function generateIdeaTitle(
+  format: string,
+  objective: string,
+  professionContext: string,
+  index: number,
+  seed: number
+): string {
+  const titles = [
+    `Transformation ${professionContext} spectaculaire`,
+    `L'erreur à éviter en ${professionContext}`,
+    `Ma méthode signature révélée`,
+    `Coulisses d'une journée pro`,
+    `Le secret des résultats durables`
+  ];
+
+  return titles[index % titles.length];
 }
