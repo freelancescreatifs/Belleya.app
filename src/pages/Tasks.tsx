@@ -91,7 +91,7 @@ export default function Tasks() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
-  const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'year'>('day');
+  const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'year'>('year');
   const [timeFilterReferenceDate, setTimeFilterReferenceDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showAddTaskForColumn, setShowAddTaskForColumn] = useState<string | null>(null);
