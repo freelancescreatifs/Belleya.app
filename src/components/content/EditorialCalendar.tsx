@@ -434,6 +434,18 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
 
   function getProductionStepsWithRealStatus(content: ContentItem) {
+    // Si aucune date de production n'est définie, ne pas afficher d'étapes
+    const hasProductionDates = !!(
+      content.date_script ||
+      content.date_shooting ||
+      content.date_editing ||
+      content.date_scheduling
+    );
+
+    if (!hasProductionDates) {
+      return [];
+    }
+
     const allSteps = getProductionSteps(content);
 
     // Une étape est complétée si sa date existe dans content_calendar
