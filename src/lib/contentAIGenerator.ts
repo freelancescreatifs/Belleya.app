@@ -303,12 +303,29 @@ ${scriptHashtags}`;
 }
 
 function generateStrategicHook(title: string, contentType: ContentType, platform: Platform, seed: number): string {
+  const extractCoreTheme = (fullTitle: string): string => {
+    const lower = fullTitle.toLowerCase();
+    if (lower.includes(':')) {
+      const parts = fullTitle.split(':');
+      if (parts[0].length > 8) return parts[0].trim();
+    }
+    if (lower.includes('pourquoi')) {
+      const match = lower.match(/pourquoi (.+?)(?:\s+et\s+|:|$)/);
+      if (match) return match[1].trim();
+    }
+    return fullTitle.length > 50 ? fullTitle.substring(0, 45) + '...' : fullTitle;
+  };
+
+  const coreTheme = extractCoreTheme(title);
+
   const hooks = [
-    `"Si ${title.toLowerCase()}… ce n'est pas un manque de volonté."\n\nC'est un mécanisme.`,
-    `"${title}"\n\n[Arrêt brutal]\n\nCe n'est pas ce que tu crois.`,
-    `"Tu te demandes pourquoi ${title.toLowerCase()} ?"\n\nLa vérité va te surprendre.`,
-    `"${title}. Ce que personne ne te dit."`,
-    `"Si tu vis ${title.toLowerCase()}, sache une chose :\n\nCe n'est pas une fatalité."`
+    `"Si ${coreTheme.toLowerCase()}… ce n'est pas un manque de volonté."\n\nC'est un mécanisme.`,
+    `"${coreTheme}"\n\n[Arrêt brutal]\n\nCe n'est pas ce que tu crois.`,
+    `"Tu te demandes pourquoi ${coreTheme.toLowerCase()} ?"\n\nLa vérité va te surprendre.`,
+    `"${coreTheme}. Ce que personne ne te dit."`,
+    `"Si tu vis ${coreTheme.toLowerCase()}, sache une chose :\n\nCe n'est pas une fatalité."`,
+    `"${coreTheme.charAt(0).toUpperCase() + coreTheme.slice(1)}…"\n\nCe n'est pas ce que tu crois.`,
+    `"La vérité sur ${coreTheme.toLowerCase()}."\n\nCe que personne n'ose dire.`
   ];
 
   return hooks[seed % hooks.length];
@@ -319,18 +336,33 @@ function generateIdentification(title: string, profession: string, seed: number)
     `Tu t'es déjà dit :\n\n"C'est la dernière fois."\n"Demain j'arrête."\n\nMais au moindre stress…\nTout recommence.\n\nSans même que tu t'en rendes compte.`,
     `Tu te reconnais ?\n\nTu essaies.\nTu fais de ton mieux.\nMais rien ne change.\n\nEt tu commences à croire que c'est toi le problème.`,
     `La plupart des clientes me disent :\n\n"J'ai tout essayé"\n"Ça ne marche jamais pour moi"\n"Je pense que c'est normal"\n\nNon. Ce n'est pas normal.`,
-    `Ce moment où tu te dis :\n\n"Pourquoi ça ne fonctionne jamais ?"\n"Qu'est-ce qui ne va pas chez moi ?"\n\nCe n'est pas toi.\nC'est juste qu'on ne t'a pas donné les bonnes clés.`
+    `Ce moment où tu te dis :\n\n"Pourquoi ça ne fonctionne jamais ?"\n"Qu'est-ce qui ne va pas chez moi ?"\n\nCe n'est pas toi.\nC'est juste qu'on ne t'a pas donné les bonnes clés.`,
+    `Tu sais ce que mes clientes me disent souvent ?\n\n"J'ai essayé…\nmais ça n'a rien changé."\n\nEt à chaque fois, je comprends.\nParce que le problème n'était pas elles.\n\nC'était la méthode.`,
+    `Imagine :\n\nTu t'es déjà posé la question.\nTu as déjà cherché des solutions.\nMais rien n'a vraiment fonctionné.\n\nCe n'est pas que tu n'essaies pas assez.\nC'est qu'on ne t'a jamais expliqué pourquoi.`
   ];
 
   return identifications[seed % identifications.length];
 }
 
 function generateMechanism(title: string, profession: string, seed: number): string {
+  const extractCoreTheme = (fullTitle: string): string => {
+    const lower = fullTitle.toLowerCase();
+    if (lower.includes(':')) {
+      const parts = fullTitle.split(':');
+      if (parts[0].length > 8) return parts[0].trim();
+    }
+    return fullTitle.length > 40 ? 'ce problème' : fullTitle;
+  };
+
+  const theme = extractCoreTheme(title);
+
   const mechanisms = [
-    `${title} n'est pas une habitude "bête".\n\nC'est souvent :\n• Un réflexe d'anxiété\n• Une décharge émotionnelle\n• Un besoin de contrôle\n\nLe problème n'est pas visible.\nC'est le déclencheur.`,
+    `Ce n'est pas une habitude "bête".\n\nC'est souvent :\n• Un réflexe d'anxiété\n• Une décharge émotionnelle\n• Un besoin de contrôle\n\nLe problème n'est pas l'action elle-même.\nC'est le déclencheur invisible.`,
     `Voici ce que la plupart des gens ne comprennent pas :\n\nCe n'est pas une question de technique parfaite.\nCe n'est pas une question de produit magique.\n\nC'est une question de méthode adaptée à TOI.`,
-    `La vraie cause de ${title.toLowerCase()} :\n\nCe n'est pas le manque de volonté.\nCe n'est pas une fatalité génétique.\n\nC'est un mécanisme qu'on peut comprendre et traiter.`,
-    `Ce que personne ne te dit sur ${title.toLowerCase()} :\n\nPlus tu essaies de "réparer" seule, plus tu risques d'aggraver.\nPlus c'est mal fait, plus c'est difficile à rattraper.\nEt plus tu attends, plus tu perds confiance.`
+    `La vraie cause ?\n\nCe n'est pas le manque de volonté.\nCe n'est pas une fatalité génétique.\n\nC'est un mécanisme qu'on peut comprendre.\nEt surtout… traiter correctement.`,
+    `Ce que personne ne te dit :\n\nPlus tu essaies de "réparer" seule, plus tu risques d'aggraver.\nPlus c'est mal fait, plus c'est difficile à rattraper.\nEt plus tu attends, plus tu perds confiance.`,
+    `Le vrai problème n'est pas là où tu crois.\n\nCe n'est pas TOI.\nCe n'est pas un défaut.\nCe n'est pas une faiblesse.\n\nC'est juste un mécanisme mal compris.\nEt quand on comprend… on peut agir.`,
+    `La différence entre celles qui réussissent et les autres ?\n\nElles ne forcent rien.\nElles ne culpabilisent pas.\n\nElles comprennent d'abord.\nPuis elles agissent intelligemment.`
   ];
 
   return mechanisms[seed % mechanisms.length];
@@ -348,11 +380,25 @@ function generateCommonError(title: string, profession: string, seed: number): s
 }
 
 function generateConcreteSolution(title: string, profession: string, seed: number): string {
+  const professionActions: Record<string, string> = {
+    'onglerie': 'En institut, on agit sur 2 niveaux :\n\n1️⃣ Renforcer l\'ongle (gainage / semi renforcé)\n2️⃣ Créer une barrière physique qui casse le réflexe',
+    'esthétique': 'En cabinet, on agit sur 2 axes :\n\n1️⃣ Traiter la cause (protocole adapté)\n2️⃣ Créer un environnement favorable',
+    'coiffure': 'Au salon, on travaille sur 2 aspects :\n\n1️⃣ Réparer en profondeur\n2️⃣ Protéger pour maintenir le résultat',
+    'extensions de cils': 'En studio, on agit sur 2 niveaux :\n\n1️⃣ Adapter la pose à ton type de cil\n2️⃣ Créer un résultat qui respecte ta santé oculaire',
+    'sourcils': 'En institut, on travaille sur 2 points :\n\n1️⃣ Restructurer la forme naturelle\n2️⃣ Créer un tracé qui tient durablement',
+    'soins du visage': 'En cabinets, on agit sur 2 niveaux :\n\n1️⃣ Traiter la cause profonde\n2️⃣ Renforcer la barrière protectrice',
+    'beauté': 'En institut, on agit sur 2 niveaux :\n\n1️⃣ Comprendre TON besoin spécifique\n2️⃣ Adapter la technique à TA situation'
+  };
+
+  const professionSolution = professionActions[profession] || professionActions['beauté'];
+
   const solutions = [
-    `En ${profession}, on agit sur 2 niveaux :\n\n1️⃣ Renforcer (technique adaptée)\n2️⃣ Créer une barrière qui casse le réflexe automatique\n\nQuand c'est traité correctement…\nLe résultat est visible.\nEt durable.`,
+    `${professionSolution}\n\nQuand c'est fait correctement…\nLe résultat est visible.\nEt surtout : durable.`,
     `La solution que j'applique :\n\n✔️ Comprendre TON besoin réel (pas celui des autres)\n✔️ Adapter la méthode à TA situation\n✔️ Créer un résultat qui tient dans le temps\n\nPas de recette magique.\nJuste une approche personnalisée.`,
-    `Voici comment je traite ${title.toLowerCase()} :\n\n1. On identifie la vraie cause\n2. On adapte la technique à ton cas précis\n3. On crée un environnement favorable\n4. On suit l'évolution\n\nRésultat : durable et confortable.`,
-    `La méthode qui fonctionne :\n\n❌ Pas de solution générique\n❌ Pas de promesse miracle\n✔️ Une vraie écoute de ton besoin\n✔️ Une technique adaptée\n✔️ Un suivi personnalisé\n\nC'est ça qui fait la différence.`
+    `Voici comment je procède :\n\n1. On identifie la vraie cause\n2. On adapte la technique à ton cas précis\n3. On crée un environnement favorable\n4. On suit l'évolution\n\nRésultat : durable et confortable.`,
+    `La méthode qui fonctionne :\n\n❌ Pas de solution générique\n❌ Pas de promesse miracle\n✔️ Une vraie écoute de ton besoin\n✔️ Une technique adaptée\n✔️ Un suivi personnalisé\n\nC'est ça qui fait la différence.`,
+    `${professionSolution}\n\nLe résultat ?\n\nPlus besoin de stresser.\nPlus besoin de tout surveiller.\nJuste profiter.`,
+    `Ce qui change tout :\n\n1️⃣ Pas de forcing\n2️⃣ Pas de jugement\n3️⃣ Juste une vraie écoute de tes besoins\n\nOn travaille AVEC toi.\nPas contre toi.`
   ];
 
   return solutions[seed % solutions.length];
