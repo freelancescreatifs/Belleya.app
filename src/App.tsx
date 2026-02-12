@@ -26,6 +26,7 @@ import Inspiration from './pages/Inspiration';
 import PublicProfile from './pages/PublicProfile';
 import Notifications from './pages/Notifications';
 import ProviderPublicProfile from './pages/ProviderPublicProfile';
+import Pricing from './pages/Pricing';
 import ClientLayout from './components/client/ClientLayout';
 import ClientHome from './pages/client/ClientHome';
 import ClientBookings from './pages/client/ClientBookings';
@@ -34,6 +35,7 @@ import ClientFavorites from './pages/client/ClientFavorites';
 import ClientProfile from './pages/client/ClientProfile';
 import ProviderProfile from './pages/client/ProviderProfile';
 import ChatBot from './components/shared/ChatBot';
+import TrialBanner from './components/shared/TrialBanner';
 import {
   Handshake,
   Video,
@@ -106,6 +108,7 @@ function AppContent() {
   const isProviderProfilePage = pathname.startsWith('/provider/');
   const isPublicProfilePage = pathname.startsWith('/profile/');
   const isStudentDetailPage = pathname.startsWith('/training/students/');
+  const isPricingPage = pathname === '/pricing';
 
   if (isBookingPage) {
     const slug = pathname.replace('/book/', '');
@@ -132,6 +135,15 @@ function AppContent() {
     return (
       <>
         <ProviderPublicProfile />
+        <ChatBot />
+      </>
+    );
+  }
+
+  if (isPricingPage) {
+    return (
+      <>
+        <Pricing />
         <ChatBot />
       </>
     );
@@ -274,6 +286,8 @@ function AppContent() {
         return <Admin />;
       case 'notifications':
         return <Notifications />;
+      case 'pricing':
+        return <Pricing />;
       default:
         return <Dashboard />;
     }
@@ -286,10 +300,15 @@ function AppContent() {
         <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
       </div>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto w-full lg:w-auto pb-20 lg:pb-0">
-        {renderPage()}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Trial Banner */}
+        <TrialBanner />
+
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto w-full lg:w-auto pb-20 lg:pb-0">
+          {renderPage()}
+        </main>
+      </div>
 
       {/* Bottom Navigation mobile only */}
       <BottomNavigation currentPage={currentPage} onPageChange={setCurrentPage} />
