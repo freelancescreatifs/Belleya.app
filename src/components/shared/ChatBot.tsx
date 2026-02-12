@@ -321,24 +321,24 @@ export default function ChatBot() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-4">
+    <div className="fixed bottom-6 right-6 z-40">
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-2xl p-4 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
+          className="bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
           aria-label="Ouvrir le support bot"
           style={{ touchAction: 'manipulation' }}
         >
           <MessageCircle className="w-6 h-6" />
-          <span className="text-base font-medium">
-            Besoin d'aide ? Ouvrir le support
+          <span className="absolute right-full mr-3 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            Besoin d'aide ?
           </span>
         </button>
       )}
 
       {isOpen && (
         <div
-          className="w-full bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200"
+          className="w-96 bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200"
           style={{
             maxHeight: '600px'
           }}
