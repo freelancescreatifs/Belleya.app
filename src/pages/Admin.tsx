@@ -82,8 +82,6 @@ export default function Admin() {
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([]);
-  const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all');
-  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -271,9 +269,15 @@ export default function Admin() {
       }
 
       // Calculer les revenus d'acomptes pour la période sélectionnée
-      // Pour l'instant à 0 car pas de système de commission sur les acomptes
       const { start, end } = getDateRange();
-      const depositRevenue = 0;
+      const { data: depositData } = await supabase
+        .from('revenues')
+        .select('amount, deposit_amount')
+        .gte('date', start.split('T')[0])
+        .lte('date', end.split('T')[0])
+        .not('deposit_amount', 'is', null);
+
+      const depositRevenue = depositData?.reduce((sum, r) => sum + (r.deposit_amount || 0), 0) || 0;
 
       if (partnershipsResult.data) {
         const { data: salesData } = await supabase
@@ -289,8 +293,8 @@ export default function Admin() {
           .reduce((sum, s) => sum + s.commission_earned, 0);
 
         const partnershipRevenues = partnershipsResult.data.map(p => {
-          const partnershipPeriodSales = periodSales.filter(s => s.partnership_id === p.id);
-          const revenue = partnershipPeriodSales.reduce((sum, s) => sum + s.commission_earned, 0);
+          const partnershipMonthlySales = monthlySales.filter(s => s.partnership_id === p.id);
+          const revenue = partnershipMonthlySales.reduce((sum, s) => sum + s.commission_earned, 0);
           return { ...p, revenue };
         });
 
@@ -361,19 +365,14 @@ export default function Admin() {
           .gte('created_at', startDate.toISOString())
           .lte('created_at', endDate.toISOString());
 
-        // Revenus de Belleya = commissions partenariats + abonnements
-        // 1. Commissions sur les partenariats
-        const { data: partnershipRevenue } = await supabase
-          .from('partnership_sales')
-          .select('commission_earned')
-          .gte('sale_date', startDate.toISOString().split('T')[0])
-          .lte('sale_date', endDate.toISOString().split('T')[0]);
+        // Revenus totaux
+        const { data: revenuesData } = await supabase
+          .from('revenues')
+          .select('amount')
+          .gte('date', startDate.toISOString().split('T')[0])
+          .lte('date', endDate.toISOString().split('T')[0]);
 
-        const partnershipTotal = partnershipRevenue?.reduce((sum, r) => sum + r.commission_earned, 0) || 0;
-
-        // 2. Revenus des abonnements (à implémenter selon votre système de paiement)
-        // Pour l'instant on compte juste les partenariats
-        const totalRevenue = partnershipTotal;
+        const totalRevenue = revenuesData?.reduce((sum, r) => sum + r.amount, 0) || 0;
 
         stats.push({
           month: startDate.toLocaleDateString('fr-FR', { month: 'short' }),
@@ -385,29 +384,6 @@ export default function Admin() {
       setMonthlyStats(stats);
     } catch (error) {
       console.error('Error loading monthly stats:', error);
-    }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
-      return;
-    }
-
-    setDeletingUserId(userId);
-
-    try {
-      // Supprimer l'utilisateur via l'API admin
-      const { error } = await supabase.auth.admin.deleteUser(userId);
-
-      if (error) throw error;
-
-      addToast('Utilisateur supprimé avec succès', 'success');
-      loadData();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      addToast('Erreur lors de la suppression de l\'utilisateur', 'error');
-    } finally {
-      setDeletingUserId(null);
     }
   };
 
@@ -536,14 +512,10 @@ export default function Admin() {
     );
   }
 
-  const filteredUsers = users.filter(u => {
-    const matchesSearch = u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.id.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesSubscription = subscriptionFilter === 'all' || u.plan_type === subscriptionFilter;
-
-    return matchesSearch && matchesSubscription;
-  });
+  const filteredUsers = users.filter(u =>
+    u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const filteredPartnerships = partnerships.filter(p =>
     p.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -906,17 +878,6 @@ export default function Admin() {
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               />
             </div>
-            <select
-              value={subscriptionFilter}
-              onChange={(e) => setSubscriptionFilter(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white text-gray-700"
-            >
-              <option value="all">Tous les abonnements</option>
-              <option value="start">Start</option>
-              <option value="studio">Studio</option>
-              <option value="empire">Empire</option>
-              <option value="vip">VIP</option>
-            </select>
             <button
               onClick={() => exportToCSV(users, 'users')}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -1031,24 +992,12 @@ export default function Admin() {
                           {user.plan_type && (
                             <button
                               onClick={() => handleDeleteSubscription(user.id)}
-                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="Supprimer l'abonnement"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
                           )}
-                          <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            disabled={deletingUserId === user.id}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Supprimer l'utilisateur"
-                          >
-                            {deletingUserId === user.id ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                            ) : (
-                              <X className="w-4 h-4" />
-                            )}
-                          </button>
                         </div>
                       </td>
                     </tr>
