@@ -4,17 +4,25 @@ import { supabase } from '../../lib/supabase';
 import { calculateLineTotal, calculateInvoiceTotals, InvoiceItem } from '../../lib/invoiceHelpers';
 import { useToast } from '../../hooks/useToast';
 
+interface Supplement {
+  id: string;
+  name: string;
+  price: number;
+  duration_minutes: number;
+}
+
 interface Service {
   id: string;
   name: string;
   price: number;
   duration: number;
+  supplements?: Supplement[];
 }
 
 interface InvoiceFormProps {
   clientId: string;
   appointmentId?: string;
-  providerId: string;
+  providerId?: string;
   onSuccess?: (invoiceId: string) => void;
   onCancel?: () => void;
   prefilledServices?: Array<{
@@ -39,29 +47,61 @@ export default function InvoiceForm({
   const [discountTotal, setDiscountTotal] = useState(0);
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { showToast } = useToast();
 
   useEffect(() => {
-    loadServices();
-    initializeForm();
+    getCurrentUser();
   }, []);
 
+  useEffect(() => {
+    if (currentUserId) {
+      loadServices();
+      initializeForm();
+    }
+  }, [currentUserId]);
+
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setCurrentUserId(user.id);
+    }
+  };
+
   const loadServices = async () => {
+    if (!currentUserId) return;
+
     const { data } = await supabase
       .from('services')
-      .select('id, name, price, duration')
-      .eq('user_id', providerId)
+      .select(`
+        id,
+        name,
+        price,
+        duration,
+        service_supplements (
+          id,
+          name,
+          price,
+          duration_minutes
+        )
+      `)
+      .eq('user_id', currentUserId)
+      .eq('status', 'active')
       .order('name');
 
     if (data) {
-      setServices(data);
+      const servicesWithSupplements = data.map(service => ({
+        ...service,
+        supplements: service.service_supplements || []
+      }));
+      setServices(servicesWithSupplements);
     }
   };
 
   const initializeForm = () => {
     if (appointmentId) {
       const date = new Date().toLocaleDateString('fr-FR');
-      setTitle(`Récap RDV du ${date}`);
+      setTitle(`Reçu RDV du ${date}`);
     } else {
       setTitle('Prestation');
     }
@@ -143,6 +183,11 @@ export default function InvoiceForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!currentUserId) {
+      showToast('Erreur: utilisateur non connecté', 'error');
+      return;
+    }
+
     if (!title.trim()) {
       showToast('Veuillez entrer un titre', 'error');
       return;
@@ -165,7 +210,7 @@ export default function InvoiceForm({
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
-          provider_id: providerId,
+          provider_id: currentUserId,
           client_id: clientId,
           appointment_id: appointmentId || null,
           title: title.trim(),
@@ -200,12 +245,12 @@ export default function InvoiceForm({
         throw new Error(itemsError.message || 'Erreur lors de l\'ajout des services');
       }
 
-      showToast('Récap créé avec succès', 'success');
+      showToast('Reçu créé avec succès', 'success');
       onSuccess?.(invoice.id);
     } catch (error) {
       console.error('Error creating invoice:', error);
       showToast(
-        error instanceof Error ? error.message : 'Erreur lors de la création du récap',
+        error instanceof Error ? error.message : 'Erreur lors de la création du reçu',
         'error'
       );
     } finally {
@@ -217,14 +262,14 @@ export default function InvoiceForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Titre du récap *
+          Titre du reçu *
         </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-          placeholder="Ex: Récap RDV du 12/02"
+          placeholder="Ex: Reçu RDV du 12/02"
           required
         />
       </div>
@@ -269,6 +314,44 @@ export default function InvoiceForm({
                       ))}
                     </select>
                   </div>
+
+                  {item.service_id && (() => {
+                    const selectedService = services.find(s => s.id === item.service_id);
+                    return selectedService?.supplements && selectedService.supplements.length > 0 ? (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-xs font-medium text-blue-900 mb-2">
+                          Suppléments disponibles :
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedService.supplements.map(supplement => (
+                            <button
+                              key={supplement.id}
+                              type="button"
+                              onClick={() => {
+                                setItems(prev => {
+                                  const newItems = [...prev];
+                                  newItems.splice(index + 1, 0, {
+                                    service_id: null,
+                                    label: supplement.name,
+                                    price: supplement.price,
+                                    quantity: 1,
+                                    duration_minutes: supplement.duration_minutes,
+                                    discount: 0,
+                                    line_total: supplement.price,
+                                  });
+                                  return newItems;
+                                });
+                              }}
+                              className="text-xs px-3 py-1.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-1"
+                            >
+                              <Plus className="w-3 h-3" />
+                              {supplement.name} (+{supplement.price.toFixed(2)}€)
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
 
                   {!item.service_id && (
                     <div>
@@ -420,7 +503,7 @@ export default function InvoiceForm({
           className="flex-1 px-6 py-3 bg-brand-500 text-white rounded-xl hover:bg-brand-600 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <Save className="w-5 h-5" />
-          {loading ? 'Enregistrement...' : 'Créer le récap'}
+          {loading ? 'Enregistrement...' : 'Créer le reçu'}
         </button>
       </div>
     </form>

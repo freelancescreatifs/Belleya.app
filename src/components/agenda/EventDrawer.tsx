@@ -259,7 +259,7 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
                         >
                           <Plus className="w-4 h-4" />
-                          Créer un récap
+                          +Créer un reçu
                         </button>
                       )}
                     </div>
@@ -372,7 +372,7 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Créer un récap</h2>
+              <h2 className="text-xl font-bold text-gray-900">Créer un reçu</h2>
               <button
                 onClick={() => setShowInvoiceForm(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
