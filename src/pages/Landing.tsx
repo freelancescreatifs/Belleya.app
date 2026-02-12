@@ -456,7 +456,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
       <section className="py-20 md:py-32 bg-gradient-to-b from-white to-[#efaa9a]/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4 md:mb-6">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 text-orange-800 px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4 md:mb-6">
               <Clock className="w-4 h-4" />
               Augmentation dans 30 jours
             </div>
@@ -525,6 +525,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 price: "59",
                 futurePrice: "79",
                 popular: false,
+                isEmpire: true,
                 description: "Pour celles qui veulent automatiser et générer des revenus récurrents.",
                 icon: Crown,
                 color: "belleya-deep",
@@ -547,7 +548,9 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 <div
                   key={i}
                   className={`relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col ${
-                    plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105' : 'border border-gray-200'
+                    plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105' :
+                    plan.isEmpire ? 'border-2 border-belleya-deep' :
+                    'border border-gray-200'
                   }`}
                 >
                   {plan.popular && (
@@ -556,12 +559,19 @@ export default function Landing({ onSelectRole }: LandingProps) {
                       Le plus choisi
                     </div>
                   )}
+                  {plan.isEmpire && (
+                    <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg">
+                      <Crown className="w-3 h-3 md:w-4 md:h-4" />
+                      Premium
+                    </div>
+                  )}
 
                   <div>
                     <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
                       <Icon className={`w-6 h-6 md:w-8 md:h-8 ${
                         plan.color === 'belleya-powder' ? 'text-belleya-powder' :
                         plan.color === 'amber' ? 'text-amber-600' :
+                        plan.isEmpire ? 'text-purple-600' :
                         'text-belleya-deep'
                       }`} />
                       <h3 className="text-lg md:text-2xl font-bold text-gray-900">{plan.name}</h3>
@@ -570,10 +580,8 @@ export default function Landing({ onSelectRole }: LandingProps) {
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl md:text-5xl font-bold text-gray-900">{plan.price}</span>
                         <span className="text-sm md:text-base text-gray-600">€/mois</span>
+                        <span className="text-lg md:text-2xl font-semibold text-gray-400 line-through ml-1">{plan.futurePrice}€</span>
                       </div>
-                      <p className="text-xs md:text-sm text-gray-500 mt-1">
-                        Bientôt {plan.futurePrice}€ - Prix bloqué à vie
-                      </p>
                     </div>
                     <p className="text-xs md:text-sm text-gray-600 mb-4 md:mb-6 leading-relaxed">
                       {plan.description}
@@ -594,6 +602,8 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     className={`w-full py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all ${
                       plan.popular
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:scale-105'
+                        : plan.isEmpire
+                        ? 'bg-gradient-to-r from-belleya-deep to-purple-600 text-white hover:shadow-lg hover:scale-105'
                         : 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
                     }`}
                   >
