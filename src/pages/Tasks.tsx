@@ -2773,7 +2773,7 @@ export default function Tasks() {
 
       {completedProjectNotification.show && (
         <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
-          <div className="bg-gradient-to-r from-belleya-bright to-belleya-deep text-white px-8 py-6 rounded-2xl shadow-2xl flex items-center gap-4 border-4 border-white">
+          <div className="bg-gradient-to-r from-green-400 to-green-600 text-white px-8 py-6 rounded-2xl shadow-2xl flex items-center gap-4 border-4 border-white">
             <div className="text-5xl">🎉</div>
             <div>
               <div className="font-bold text-xl mb-1">Bravo ! Projet terminé</div>

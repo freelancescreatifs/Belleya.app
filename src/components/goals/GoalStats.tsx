@@ -41,7 +41,7 @@ export default function GoalStats({ goals }: GoalStatsProps) {
       label: 'Atteints cette année',
       value: achievedThisYear,
       icon: CheckCircle2,
-      color: 'from-belleya-bright to-belleya-deep',
+      color: 'from-green-400 to-green-600',
       bgColor: 'bg-green-50',
       textColor: 'text-green-700',
     },
