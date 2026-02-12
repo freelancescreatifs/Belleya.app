@@ -390,9 +390,9 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
             {[
-              { profession: "Prothésistes ongulaires", image: "/nail_artist.jpg" },
+              { profession: "Masseuse", image: "/massage.jpg" },
               { profession: "Nail artists", image: "/nail_artist.jpg" },
-              { profession: "Esthéticiennes", image: "/maquilleuse.jpeg" },
+              { profession: "Esthéticiennes", image: "/esthéticienne.jpg" },
               { profession: "Techs cils & sourcils", image: "/tech_cils.jpg" },
               { profession: "Maquilleuses professionnelles", image: "/maquilleuse.jpeg" },
               { profession: "Coiffeuse", image: "/coiffure.png" }
@@ -401,7 +401,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 key={i}
                 className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-lg transition-all flex items-center gap-3 md:gap-4"
               >
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 shadow-md">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 shadow-md">
                   <img
                     src={item.image}
                     alt={item.profession}
