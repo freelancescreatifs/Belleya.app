@@ -178,17 +178,7 @@ export default function Admin() {
   const loadData = async () => {
     try {
       const [usersResult, partnershipsResult] = await Promise.all([
-        supabase
-          .from('user_profiles')
-          .select(`
-            id,
-            user_id,
-            first_name,
-            last_name,
-            created_at,
-            company_id
-          `)
-          .order('created_at', { ascending: false }),
+        supabase.rpc('get_all_users_admin'),
         supabase
           .from('partnerships')
           .select('id, company_name, partnership_type, commission_rate, status, user_id, is_default')
@@ -200,17 +190,11 @@ export default function Admin() {
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
         const totalUsers = usersResult.data.length;
-        const newUsers30d = usersResult.data.filter(u => new Date(u.created_at) >= thirtyDaysAgo).length;
+        const newUsers30d = usersResult.data.filter((u: any) => new Date(u.created_at) >= thirtyDaysAgo).length;
 
         const usersWithDetails = await Promise.all(
-          usersResult.data.map(async (u) => {
-            const [profileData, authData, companyData, subscriptionData] = await Promise.all([
-              supabase
-                .from('user_profiles')
-                .select('role')
-                .eq('user_id', u.user_id)
-                .maybeSingle(),
-              supabase.auth.admin.getUserById(u.user_id).catch(() => ({ data: { user: null } })),
+          usersResult.data.map(async (u: any) => {
+            const [companyData, subscriptionData] = await Promise.all([
               u.company_id
                 ? supabase
                     .from('company_profiles')
@@ -241,10 +225,10 @@ export default function Admin() {
               id: u.id,
               user_id: u.user_id,
               company_id: u.company_id,
-              email: authData.data.user?.email || 'N/A',
-              created_at: authData.data.user?.created_at || u.created_at,
-              last_sign_in_at: authData.data.user?.last_sign_in_at || null,
-              role: profileData?.data?.role || 'pro',
+              email: u.email || 'N/A',
+              created_at: u.auth_created_at || u.created_at,
+              last_sign_in_at: u.last_sign_in_at || null,
+              role: u.role || 'pro',
               first_name: u.first_name || null,
               last_name: u.last_name || null,
               profession: companyData.data?.primary_profession || null,
@@ -406,8 +390,10 @@ export default function Admin() {
     setDeletingUserId(user.id);
 
     try {
-      // Supprimer l'utilisateur via l'API admin en utilisant le user_id (auth.users)
-      const { error } = await supabase.auth.admin.deleteUser(user.user_id);
+      // Supprimer l'utilisateur via la fonction RPC sécurisée
+      const { data, error } = await supabase.rpc('admin_delete_user', {
+        target_user_id: user.user_id
+      });
 
       if (error) throw error;
 
