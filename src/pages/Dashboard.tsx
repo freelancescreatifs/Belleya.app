@@ -811,7 +811,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                               </span>
                             )}
                             <div
-                              className="bg-belleya-bright rounded-t-lg transition-all group-hover:opacity-90 w-full cursor-pointer"
+                              className="bg-green-500 rounded-t-lg transition-all group-hover:bg-green-600 w-full cursor-pointer"
                               style={{
                                 height: `${revenueHeight}%`,
                                 minHeight: data.revenue > 0 ? '4px' : '0'
@@ -843,7 +843,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
             <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-belleya-bright rounded"></div>
+                <div className="w-4 h-4 bg-green-500 rounded"></div>
                 <span className="text-sm text-gray-700">Revenus</span>
               </div>
               <div className="flex items-center gap-2">
