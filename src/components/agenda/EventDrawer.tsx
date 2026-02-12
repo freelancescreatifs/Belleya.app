@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { X, Edit2, Trash2, Clock, User, FileText, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Edit2, Trash2, Clock, User, FileText, Calendar, Receipt, Plus } from 'lucide-react';
 import { Event } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import EventForm from './EventForm';
 import { formatDate, formatTime } from '../../lib/calendarHelpers';
+import { getInvoiceByAppointment } from '../../lib/invoiceHelpers';
+import InvoiceDetailDrawer from '../client/InvoiceDetailDrawer';
+import InvoiceForm from '../client/InvoiceForm';
 
 interface EventDrawerProps {
   event: Event;
@@ -21,6 +24,22 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
     startDate: event.start_at.split('T')[0],
     endDate: event.end_at.split('T')[0],
   });
+  const [invoiceId, setInvoiceId] = useState<string | null>(null);
+  const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
+  const [showInvoiceForm, setShowInvoiceForm] = useState(false);
+
+  useEffect(() => {
+    if (event.type === 'pro' && event.client_id) {
+      checkInvoice();
+    }
+  }, [event.id]);
+
+  const checkInvoice = async () => {
+    const { data } = await getInvoiceByAppointment(event.id);
+    if (data) {
+      setInvoiceId(data.id);
+    }
+  };
 
   const handleDelete = async () => {
     if (!confirm('Voulez-vous vraiment supprimer ce rendez-vous ?')) return;
@@ -147,9 +166,15 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
               <div className="space-y-6">
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">{event.title}</h3>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {getTypeBadge(event.type)}
                     {getStatusBadge(event.status)}
+                    {invoiceId && (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 flex items-center gap-1">
+                        <Receipt className="w-3 h-3" />
+                        Récap disponible
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -215,6 +240,28 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="text-sm text-gray-600 mb-2">Notes</div>
                       <div className="text-gray-900 whitespace-pre-wrap">{event.notes}</div>
+                    </div>
+                  )}
+
+                  {event.type === 'pro' && event.client_id && (
+                    <div className="bg-brand-50 rounded-lg p-4 border border-brand-200">
+                      {invoiceId ? (
+                        <button
+                          onClick={() => setShowInvoiceDetail(true)}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
+                        >
+                          <Receipt className="w-4 h-4" />
+                          Voir le récap
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setShowInvoiceForm(true)}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Créer un récap
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -307,6 +354,53 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
           </div>
         </div>
       </div>
+
+      {showInvoiceDetail && invoiceId && (
+        <InvoiceDetailDrawer
+          invoiceId={invoiceId}
+          isOpen={showInvoiceDetail}
+          onClose={() => setShowInvoiceDetail(false)}
+          onDeleted={() => {
+            setInvoiceId(null);
+            setShowInvoiceDetail(false);
+          }}
+          isProvider={true}
+        />
+      )}
+
+      {showInvoiceForm && event.client_id && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Créer un récap</h2>
+              <button
+                onClick={() => setShowInvoiceForm(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <InvoiceForm
+                clientId={event.client_id}
+                appointmentId={event.id}
+                providerId={event.user_id}
+                prefilledServices={event.service ? [{
+                  service_id: event.service.id,
+                  service_name: event.service.name,
+                  price: event.service.price || 0,
+                  duration: event.service.duration || 0,
+                }] : []}
+                onSuccess={(newInvoiceId) => {
+                  setInvoiceId(newInvoiceId);
+                  setShowInvoiceForm(false);
+                }}
+                onCancel={() => setShowInvoiceForm(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
