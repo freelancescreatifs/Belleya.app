@@ -544,9 +544,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       label: 'CA du mois',
       value: `${stats.currentMonthRevenue.toFixed(2)} €`,
       icon: TrendingUp,
-      color: 'from-green-400 to-belleya-deep',
-      bgColor: 'bg-green-50',
-      textColor: 'text-belleya-bright',
+      color: 'from-pink-400 to-belleya-deep',
+      bgColor: 'bg-pink-50',
+      textColor: 'text-green-600',
       tooltip: `Moyenne mensuelle: ${stats.avgMonthlyRevenue.toFixed(2)} €`,
       link: 'finances',
     },
@@ -554,9 +554,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       label: `Revenus ${getPeriodLabel()}`,
       value: `${stats.revenue.toFixed(2)} €`,
       icon: TrendingUp,
-      color: 'from-emerald-400 to-belleya-deep',
-      bgColor: 'bg-emerald-50',
-      textColor: 'text-belleya-bright',
+      color: 'from-pink-400 to-belleya-deep',
+      bgColor: 'bg-pink-50',
+      textColor: 'text-green-600',
       link: 'finances',
     },
     {
@@ -811,7 +811,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                               </span>
                             )}
                             <div
-                              className="bg-gradient-to-t from-green-400 to-green-500 rounded-t-lg transition-all group-hover:from-green-500 group-hover:to-green-600 w-full cursor-pointer"
+                              className="bg-belleya-bright rounded-t-lg transition-all group-hover:opacity-90 w-full cursor-pointer"
                               style={{
                                 height: `${revenueHeight}%`,
                                 minHeight: data.revenue > 0 ? '4px' : '0'

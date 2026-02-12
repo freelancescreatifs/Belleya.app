@@ -64,7 +64,7 @@ export default function GoalCard({
       content: 'from-purple-400 to-brand-100',
       business: 'from-blue-400 to-cyan-600',
       loyalty: 'from-amber-400 to-orange-600',
-      financial: 'from-green-400 to-belleya-deep',
+      financial: 'from-pink-400 to-belleya-deep',
       clients: 'from-blue-400 to-cyan-600',
       personal: 'from-orange-400 to-red-600',
     };
@@ -185,7 +185,7 @@ export default function GoalCard({
             onClick={handleToggleSuspend}
             className={`p-2 rounded-lg transition-colors ${
               goal.status === 'on_hold'
-                ? 'text-belleya-bright hover:text-green-700 hover:bg-green-50'
+                ? 'text-belleya-bright hover:text-belleya-deep hover:bg-pink-50'
                 : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
             }`}
             title={goal.status === 'on_hold' ? 'Reprendre' : 'Mettre en suspend'}
@@ -236,8 +236,8 @@ export default function GoalCard({
       </div>
 
       {isCompleted && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-belleya-200 rounded-lg animate-bounce-subtle">
-          <div className="flex items-center gap-2 text-green-700">
+        <div className="mb-4 p-3 bg-gradient-to-r from-pink-50 to-rose-50 border border-belleya-200 rounded-lg animate-bounce-subtle">
+          <div className="flex items-center gap-2 text-belleya-bright">
             <Sparkles className="w-5 h-5 animate-pulse" />
             <span className="font-semibold">Bravo ! Objectif atteint</span>
             <Sparkles className="w-5 h-5 animate-pulse" />
