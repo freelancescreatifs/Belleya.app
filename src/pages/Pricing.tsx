@@ -45,6 +45,7 @@ const plans: PricingPlan[] = [
       'Adaptation selon ton statut',
       'Estimation automatique TVA / CFE',
       'Export & import complet des données',
+      'Partenariat officiel Belleya',
       'Support WhatsApp 48h',
       '🎯 Idéal pour se structurer dès le départ'
     ]
@@ -70,7 +71,7 @@ const plans: PricingPlan[] = [
       '📈 Croissance & Marketing',
       'Marketing automatique par email',
       'Emails anniversaires & relances',
-      'Partenariats Belleya',
+      'Partenariat officiel Belleya',
       'Visibilité sur la plateforme sociale Belleya',
       'Outils d\'optimisation conversion',
       '💰 Finance avancée',
@@ -98,7 +99,7 @@ const plans: PricingPlan[] = [
       'Rappels intelligents (anniversaires, relances)',
       '🤝 Revenus complémentaires',
       'Partenariat officiel Belleya',
-      'Revenus récurrents via affiliation',
+      'Gestion des Revenus d\'affiliation de vos partenaires',
       'Mise en avant premium sur la plateforme',
       'Visibilité renforcée côté client',
       '⚡ Support prioritaire express',
@@ -222,25 +223,25 @@ export default function Pricing() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-8 mb-12 mt-8">
           {plans.map((plan) => {
             const isEmpire = plan.id === 'empire';
             return (
             <div
               key={plan.id}
-              className={`relative bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl flex flex-col ${
-                plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105' :
-                isEmpire ? 'border-2 border-belleya-deep' : 'border border-gray-200'
+              className={`relative bg-white rounded-3xl shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col ${
+                plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105 mt-6' :
+                isEmpire ? 'border-2 border-belleya-deep mt-6' : 'border border-gray-200'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                   <Star className="w-4 h-4" />
                   Le plus choisi
                 </div>
               )}
               {isEmpire && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                   <Crown className="w-4 h-4" />
                   Premium
                 </div>
@@ -393,12 +394,12 @@ export default function Pricing() {
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Partenariat officiel Belleya</td>
-                  <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-4 text-sm text-slate-600">Revenus d'affiliation</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">Gestion des Revenus d'affiliation de vos partenaires</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
@@ -423,7 +424,7 @@ export default function Pricing() {
             </div>
             <div>
               <div className="text-3xl font-bold text-white mb-2">Prix bloqué</div>
-              <p className="text-white/90">À vie pour les premières inscrites</p>
+              <p className="text-white/90">Le prix auquel vous avez souscris restera le même, vous n'aurez pas d'augmentation future dessus</p>
             </div>
             <div>
               <div className="text-3xl font-bold text-white mb-2">Support 24/48h</div>

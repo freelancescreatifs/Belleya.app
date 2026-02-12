@@ -472,7 +472,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-8">
             {[
               {
                 name: "BELLEYA START",
@@ -494,6 +494,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   "Boîte à idées IA",
                   "Suivi des paiements",
                   "Calculateur de rentabilité",
+                  "Partenariat officiel Belleya",
                   "Support WhatsApp 48h"
                 ]
               },
@@ -514,6 +515,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   "Gestion des stocks",
                   "Marketing automatique",
                   "Emails anniversaires & relances",
+                  "Partenariat officiel Belleya",
                   "Visibilité plateforme Belleya",
                   "Calcul charges & cotisations",
                   "Exports comptables",
@@ -536,7 +538,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   "Optimisation conversion",
                   "Rappels intelligents",
                   "Partenariat officiel Belleya",
-                  "Revenus d'affiliation",
+                  "Gestion des Revenus d'affiliation de vos partenaires",
                   "Mise en avant premium",
                   "Visibilité renforcée client",
                   "Support prioritaire express"
@@ -548,19 +550,19 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 <div
                   key={i}
                   className={`relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col ${
-                    plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105' :
-                    plan.isEmpire ? 'border-2 border-belleya-deep' :
+                    plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105 mt-6' :
+                    plan.isEmpire ? 'border-2 border-belleya-deep mt-6' :
                     'border border-gray-200'
                   }`}
                 >
                   {plan.popular && (
-                    <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                       <Star className="w-3 h-3 md:w-4 md:h-4" />
                       Le plus choisi
                     </div>
                   )}
                   {plan.isEmpire && (
-                    <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                       <Crown className="w-3 h-3 md:w-4 md:h-4" />
                       Premium
                     </div>
