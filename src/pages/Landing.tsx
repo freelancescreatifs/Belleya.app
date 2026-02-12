@@ -456,129 +456,158 @@ export default function Landing({ onSelectRole }: LandingProps) {
       <section className="py-20 md:py-32 bg-gradient-to-b from-white to-[#efaa9a]/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
+            <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4 md:mb-6">
+              <Clock className="w-4 h-4" />
+              Augmentation dans 30 jours
+            </div>
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 px-4">
-              Des tarifs clairs et adaptés
+              Les Offres Belleya
             </h2>
+            <p className="text-base md:text-xl text-gray-600 mb-4 md:mb-6">
+              Choisis l'offre qui correspond à ton ambition
+            </p>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium shadow-lg text-xs md:text-base">
+              <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+              14 jours gratuits - accès complet - sans engagement
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
               {
-                name: "Starter",
-                price: "19",
+                name: "BELLEYA START",
+                price: "29",
+                futurePrice: "39",
                 popular: false,
+                description: "Pour les indépendantes qui veulent structurer leur activité et arrêter de tout gérer à la main.",
+                icon: Sparkles,
+                color: "emerald",
                 features: [
-                  "Agenda + tâches",
-                  "Jusqu'à 50 clientes",
+                  "Gestion des objectifs",
+                  "Gestion des tâches",
+                  "Agenda intelligent synchronisé",
                   "Réservation en ligne",
-                  "Gestion RDV basique",
-                  "Notifs automatiques",
-                  "Dashboard simple",
-                  "Support email 48h"
+                  "Jusqu'à 50 clientes",
+                  "Notifications automatiques",
+                  "Gestion des réseaux sociaux",
+                  "Calendrier éditorial",
+                  "Boîte à idées IA",
+                  "Suivi des paiements",
+                  "Calculateur de rentabilité",
+                  "Support WhatsApp 48h"
                 ]
               },
               {
-                name: "Pro",
+                name: "BELLEYA STUDIO",
                 price: "39",
+                futurePrice: "49",
                 popular: true,
+                description: "Pour les professionnelles qui veulent scaler intelligemment.",
+                icon: Zap,
+                color: "amber",
                 features: [
-                  "Tout Starter inclus",
+                  "Tout Start inclus +",
                   "Clientes illimitées",
-                  "Finances + TVA",
-                  "Objectifs & suivi",
-                  "Galerie photos",
-                  "Historique détaillé",
-                  "Champs métier perso",
-                  "Gestion stock",
-                  "Calendrier éditorial IA",
-                  "Marketing auto",
-                  "Exports Excel/PDF",
-                  "Support 24h"
+                  "Gestion des acomptes",
+                  "Gestion élèves / formations",
+                  "Système de fidélisation",
+                  "Gestion des stocks",
+                  "Marketing automatique",
+                  "Emails anniversaires & relances",
+                  "Visibilité plateforme Belleya",
+                  "Calcul charges & cotisations",
+                  "Exports comptables",
+                  "Support WhatsApp 24h"
                 ]
               },
               {
-                name: "Premium",
-                price: "69",
+                name: "BELLEYA EMPIRE",
+                price: "59",
+                futurePrice: "79",
                 popular: false,
+                description: "Pour celles qui veulent automatiser et générer des revenus récurrents.",
+                icon: Crown,
+                color: "purple",
                 features: [
-                  "Tout Pro inclus",
-                  "Analytics avancées",
-                  "Synchro Google",
-                  "Synchro Planity",
-                  "Multi-calendriers",
-                  "Export comptable",
-                  "Rappels SMS auto",
-                  "API & intégrations",
-                  "Formation perso 1h",
-                  "Conseils business",
-                  "Support dédié 12h"
-                ]
-              },
-              {
-                name: "Salon",
-                price: "99",
-                popular: false,
-                features: [
-                  "Tout Premium inclus",
-                  "Multi-users illimités",
-                  "Gestion équipe",
-                  "Planning collaboratif",
-                  "Dashboard salon",
-                  "Commissions & salaires",
-                  "Stats par praticien",
-                  "Formation équipe",
-                  "Account manager",
-                  "Support 4h"
+                  "Tout Studio inclus +",
+                  "Marketing automatisé avancé",
+                  "Campagnes SMS + Email",
+                  "Optimisation conversion",
+                  "Rappels intelligents",
+                  "Partenariat officiel Belleya",
+                  "Revenus d'affiliation",
+                  "Mise en avant premium",
+                  "Visibilité renforcée client",
+                  "Support prioritaire express"
                 ]
               }
-            ].map((plan, i) => (
-              <div
-                key={i}
-                className={`relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col ${
-                  plan.popular ? 'border-2 border-[#d9629b] md:transform md:scale-105' : 'border border-[#efaa9a]/20'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#efaa9a] to-[#d9629b] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg">
-                    <Star className="w-3 h-3 md:w-4 md:h-4" />
-                    Le + populaire
-                  </div>
-                )}
-
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1.5 md:mb-2">{plan.name}</h3>
-                  <div className="mb-4 md:mb-6">
-                    <span className="text-3xl md:text-5xl font-bold text-gray-900">{plan.price}</span>
-                    <span className="text-sm md:text-base text-gray-600 ml-1 md:ml-2">€/mois</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8 flex-1">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-start gap-2 text-gray-700 text-xs md:text-sm">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => onSelectRole('pro')}
-                  className={`w-full py-2.5 md:py-3 rounded-full font-medium text-sm md:text-base transition-all ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-[#efaa9a] to-[#d9629b] text-white hover:shadow-lg hover:scale-105'
-                      : 'bg-[#efaa9a]/10 text-[rgb(113,19,65)] hover:bg-[#efaa9a]/20'
+            ].map((plan, i) => {
+              const Icon = plan.icon;
+              return (
+                <div
+                  key={i}
+                  className={`relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col ${
+                    plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105' : 'border border-gray-200'
                   }`}
                 >
-                  Essayer gratuit
-                </button>
-              </div>
-            ))}
+                  {plan.popular && (
+                    <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg">
+                      <Star className="w-3 h-3 md:w-4 md:h-4" />
+                      Le plus choisi
+                    </div>
+                  )}
+
+                  <div>
+                    <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                      <Icon className={`w-6 h-6 md:w-8 md:h-8 text-${plan.color}-600`} />
+                      <h3 className="text-lg md:text-2xl font-bold text-gray-900">{plan.name}</h3>
+                    </div>
+                    <div className="mb-3 md:mb-4">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl md:text-5xl font-bold text-gray-900">{plan.price}</span>
+                        <span className="text-sm md:text-base text-gray-600">€/mois</span>
+                      </div>
+                      <p className="text-xs md:text-sm text-gray-500 mt-1">
+                        Bientôt {plan.futurePrice}€ - Prix bloqué à vie
+                      </p>
+                    </div>
+                    <p className="text-xs md:text-sm text-gray-600 mb-4 md:mb-6 leading-relaxed">
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <ul className="space-y-2 mb-6 md:mb-8 flex-1">
+                    {plan.features.map((feature, j) => (
+                      <li key={j} className="flex items-start gap-2 text-gray-700 text-xs md:text-sm">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    onClick={() => onSelectRole('pro')}
+                    className={`w-full py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all ${
+                      plan.popular
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:scale-105'
+                        : 'bg-gray-900 text-white hover:bg-gray-800'
+                    }`}
+                  >
+                    Commencer gratuitement
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
-          <p className="text-center text-gray-600 mt-8 md:mt-12 text-sm md:text-lg px-4">
-            14 jours gratuits, sans CB
-          </p>
+          <div className="text-center mt-8 md:mt-12 px-4">
+            <p className="text-gray-600 text-sm md:text-lg mb-2">
+              14 jours d'essai gratuit - Toutes les fonctionnalités
+            </p>
+            <p className="text-xs md:text-sm text-gray-500">
+              Aucune carte bancaire requise pendant l'essai
+            </p>
+          </div>
         </div>
       </section>
 
