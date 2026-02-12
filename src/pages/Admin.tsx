@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, Edit2, Trash2, Crown, X, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
+import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, Edit2, Trash2, Crown, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
-
-type PeriodFilter = 'day' | 'month' | 'year';
 
 interface KPIStats {
   totalUsers: number;
@@ -18,13 +16,6 @@ interface KPIStats {
   studioUsers: number;
   empireUsers: number;
   vipUsers: number;
-  depositRevenue: number;
-}
-
-interface MonthlyStats {
-  month: string;
-  newUsers: number;
-  revenue: number;
 }
 
 interface UserData {
@@ -70,8 +61,7 @@ export default function Admin() {
     startUsers: 0,
     studioUsers: 0,
     empireUsers: 0,
-    vipUsers: 0,
-    depositRevenue: 0
+    vipUsers: 0
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
@@ -79,9 +69,6 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('month');
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([]);
 
   useEffect(() => {
     checkAdminStatus();
@@ -90,56 +77,8 @@ export default function Admin() {
   useEffect(() => {
     if (isAdmin) {
       loadData();
-      loadMonthlyStats();
     }
-  }, [isAdmin, periodFilter, selectedDate]);
-
-  const getDateRange = () => {
-    const start = new Date(selectedDate);
-    const end = new Date(selectedDate);
-
-    if (periodFilter === 'day') {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-    } else if (periodFilter === 'month') {
-      start.setDate(1);
-      start.setHours(0, 0, 0, 0);
-      end.setMonth(end.getMonth() + 1);
-      end.setDate(0);
-      end.setHours(23, 59, 59, 999);
-    } else if (periodFilter === 'year') {
-      start.setMonth(0, 1);
-      start.setHours(0, 0, 0, 0);
-      end.setMonth(11, 31);
-      end.setHours(23, 59, 59, 999);
-    }
-
-    return {
-      start: start.toISOString(),
-      end: end.toISOString(),
-    };
-  };
-
-  const getDisplayDate = () => {
-    if (periodFilter === 'day') {
-      return selectedDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    } else if (periodFilter === 'month') {
-      return selectedDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-    }
-    return selectedDate.getFullYear().toString();
-  };
-
-  const handleDateChange = (direction: 'prev' | 'next') => {
-    const newDate = new Date(selectedDate);
-    if (periodFilter === 'day') {
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
-    } else if (periodFilter === 'month') {
-      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-    } else {
-      newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
-    }
-    setSelectedDate(newDate);
-  };
+  }, [isAdmin]);
 
   const checkAdminStatus = async () => {
     if (!user) {
@@ -268,27 +207,17 @@ export default function Admin() {
         }));
       }
 
-      // Calculer les revenus d'acomptes pour la période sélectionnée
-      const { start, end } = getDateRange();
-      const { data: depositData } = await supabase
-        .from('revenues')
-        .select('amount, deposit_amount')
-        .gte('date', start.split('T')[0])
-        .lte('date', end.split('T')[0])
-        .not('deposit_amount', 'is', null);
-
-      const depositRevenue = depositData?.reduce((sum, r) => sum + (r.deposit_amount || 0), 0) || 0;
-
       if (partnershipsResult.data) {
         const { data: salesData } = await supabase
           .from('partnership_sales')
-          .select('partnership_id, commission_earned, payment_status, sale_date')
-          .gte('sale_date', start.split('T')[0])
-          .lte('sale_date', end.split('T')[0]);
+          .select('partnership_id, commission_earned, payment_status, sale_date');
 
-        const periodSales = salesData || [];
-        const monthlyRevenue = periodSales.reduce((sum, s) => sum + s.commission_earned, 0);
-        const pendingRevenue = periodSales
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const monthlySales = salesData?.filter(s => new Date(s.sale_date) >= firstDayOfMonth) || [];
+        const monthlyRevenue = monthlySales.reduce((sum, s) => sum + s.commission_earned, 0);
+        const pendingRevenue = monthlySales
           .filter(s => s.payment_status === 'pending')
           .reduce((sum, s) => sum + s.commission_earned, 0);
 
@@ -308,8 +237,7 @@ export default function Admin() {
           monthlyRevenue,
           avgCommission,
           topPartnership: topPartnership?.company_name || null,
-          pendingRevenue,
-          depositRevenue
+          pendingRevenue
         }));
 
         const partnershipsWithUserData = await Promise.all(
@@ -330,8 +258,8 @@ export default function Admin() {
               ? `${userData.first_name} ${userData.last_name}`
               : userData?.first_name || userData?.last_name || 'N/A';
 
-            const partnershipPeriodSales = periodSales.filter(s => s.partnership_id === p.id);
-            const monthlyRevenue = partnershipPeriodSales.reduce((sum, s) => sum + s.commission_earned, 0);
+            const partnershipMonthlySales = monthlySales.filter(s => s.partnership_id === p.id);
+            const monthlyRevenue = partnershipMonthlySales.reduce((sum, s) => sum + s.commission_earned, 0);
 
             return {
               ...p,
@@ -346,44 +274,6 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error loading admin data:', error);
-    }
-  };
-
-  const loadMonthlyStats = async () => {
-    try {
-      const currentYear = selectedDate.getFullYear();
-      const stats: MonthlyStats[] = [];
-
-      for (let month = 0; month < 12; month++) {
-        const startDate = new Date(currentYear, month, 1);
-        const endDate = new Date(currentYear, month + 1, 0);
-
-        // Nouveaux utilisateurs
-        const { data: newUsersData } = await supabase
-          .from('user_profiles')
-          .select('id')
-          .gte('created_at', startDate.toISOString())
-          .lte('created_at', endDate.toISOString());
-
-        // Revenus totaux
-        const { data: revenuesData } = await supabase
-          .from('revenues')
-          .select('amount')
-          .gte('date', startDate.toISOString().split('T')[0])
-          .lte('date', endDate.toISOString().split('T')[0]);
-
-        const totalRevenue = revenuesData?.reduce((sum, r) => sum + r.amount, 0) || 0;
-
-        stats.push({
-          month: startDate.toLocaleDateString('fr-FR', { month: 'short' }),
-          newUsers: newUsersData?.length || 0,
-          revenue: totalRevenue
-        });
-      }
-
-      setMonthlyStats(stats);
-    } catch (error) {
-      console.error('Error loading monthly stats:', error);
     }
   };
 
@@ -571,60 +461,6 @@ export default function Admin() {
 
       {activeTab === 'dashboard' && (
         <div className="space-y-8">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
-            <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-1">
-              <button
-                onClick={() => setPeriodFilter('day')}
-                className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  periodFilter === 'day'
-                    ? 'bg-[#E51E8F] text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Jour
-              </button>
-              <button
-                onClick={() => setPeriodFilter('month')}
-                className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  periodFilter === 'month'
-                    ? 'bg-[#E51E8F] text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Mois
-              </button>
-              <button
-                onClick={() => setPeriodFilter('year')}
-                className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  periodFilter === 'year'
-                    ? 'bg-[#E51E8F] text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Année
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2">
-              <button
-                onClick={() => handleDateChange('prev')}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
-              >
-                <ChevronLeft className="w-4 sm:w-5 h-4 sm:h-5 text-gray-600" />
-              </button>
-              <span className="text-xs sm:text-sm font-medium text-gray-900 min-w-[120px] sm:min-w-[150px] text-center">
-                {getDisplayDate()}
-              </span>
-              <button
-                onClick={() => handleDateChange('next')}
-                disabled={selectedDate >= new Date()}
-                className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="w-4 sm:w-5 h-4 sm:h-5 text-gray-600" />
-              </button>
-            </div>
-          </div>
-
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Abonnements</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -707,7 +543,7 @@ export default function Admin() {
 
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Revenus & Abonnements</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belleya-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
@@ -739,17 +575,6 @@ export default function Admin() {
                 </div>
                 <p className="text-3xl font-bold text-gray-900">{arpa.toFixed(2)} €</p>
                 <p className="text-xs text-gray-600 mt-1">Revenu moyen / utilisateur</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <CreditCard className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">Acomptes</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{stats.depositRevenue.toFixed(2)} €</p>
-                <p className="text-xs text-gray-600 mt-1">Revenus des acomptes</p>
               </div>
 
               <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
@@ -806,59 +631,6 @@ export default function Admin() {
                   <span className="text-sm font-medium text-gray-700">À encaisser</span>
                 </div>
                 <p className="text-3xl font-bold text-gray-900">{stats.pendingRevenue.toFixed(2)} €</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Graphiques */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Graphique des nouveaux utilisateurs */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Nouveaux abonnés par mois</h3>
-              <div className="space-y-3">
-                {monthlyStats.map((stat, index) => {
-                  const maxUsers = Math.max(...monthlyStats.map(s => s.newUsers), 1);
-                  const widthPercentage = (stat.newUsers / maxUsers) * 100;
-
-                  return (
-                    <div key={index} className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
-                      <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-end pr-2"
-                          style={{ width: `${Math.max(widthPercentage, 5)}%` }}
-                        >
-                          <span className="text-xs font-semibold text-white">{stat.newUsers}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Graphique des revenus */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Revenus par mois</h3>
-              <div className="space-y-3">
-                {monthlyStats.map((stat, index) => {
-                  const maxRevenue = Math.max(...monthlyStats.map(s => s.revenue), 1);
-                  const widthPercentage = (stat.revenue / maxRevenue) * 100;
-
-                  return (
-                    <div key={index} className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
-                      <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-end pr-2"
-                          style={{ width: `${Math.max(widthPercentage, 5)}%` }}
-                        >
-                          <span className="text-xs font-semibold text-white">{stat.revenue.toFixed(0)}€</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           </div>
