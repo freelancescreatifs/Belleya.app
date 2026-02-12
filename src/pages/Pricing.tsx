@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Zap, Crown, Sparkles, Clock } from 'lucide-react';
+import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface PricingPlan {
@@ -112,33 +112,8 @@ export default function Pricing() {
   const [loading, setLoading] = useState(false);
   const [daysUntilIncrease] = useState(30);
 
-  useEffect(() => {
-    checkExistingSubscription();
-  }, []);
-
-  async function checkExistingSubscription() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('company_id')
-      .eq('user_id', user.id)
-      .single();
-
-    if (profile?.company_id) {
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('company_id', profile.company_id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (subscription && (subscription.subscription_status === 'trial' || subscription.subscription_status === 'active')) {
-        window.location.href = '/';
-      }
-    }
+  async function handleLogout() {
+    await supabase.auth.signOut();
   }
 
   async function handleSelectPlan(planId: string) {
@@ -214,10 +189,21 @@ export default function Pricing() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Bouton déconnexion */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-belleya-deep transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Se déconnecter
+          </button>
+        </div>
+
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Clock className="w-4 h-4" />
             Augmentation dans {daysUntilIncrease} jours
           </div>
@@ -230,23 +216,33 @@ export default function Pricing() {
             Choisis l'offre qui correspond à ton ambition
           </p>
 
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-belleya-bright to-teal-500 text-white px-6 py-3 rounded-full font-medium shadow-lg">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-belleya-bright to-belleya-vivid text-white px-6 py-3 rounded-full font-medium shadow-lg">
             <Sparkles className="w-5 h-5" />
             14 jours gratuits - accès complet - sans engagement
           </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
-          {plans.map((plan) => (
+          {plans.map((plan) => {
+            const isEmpire = plan.id === 'empire';
+            return (
             <div
               key={plan.id}
-              className={`relative bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 ${
-                plan.popular ? 'ring-4 ring-amber-400' : ''
+              className={`relative bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl flex flex-col ${
+                plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105' :
+                isEmpire ? 'border-2 border-belleya-deep' : 'border border-gray-200'
               }`}
             >
               {plan.popular && (
-                <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 rounded-bl-2xl font-medium text-sm">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg">
+                  <Star className="w-4 h-4" />
                   Le plus choisi
+                </div>
+              )}
+              {isEmpire && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg">
+                  <Crown className="w-4 h-4" />
+                  Premium
                 </div>
               )}
 
@@ -258,12 +254,10 @@ export default function Pricing() {
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-5xl font-bold text-slate-900">{plan.currentPrice}€</span>
-                    <span className="text-slate-600">/mois</span>
+                    <span className="text-5xl font-bold text-slate-900">{plan.currentPrice}</span>
+                    <span className="text-slate-600">€/mois</span>
+                    <span className="text-2xl font-semibold text-gray-400 line-through ml-1">{plan.futurePrice}€</span>
                   </div>
-                  <p className="text-sm text-slate-500">
-                    Bientôt {plan.futurePrice}€ - Prix bloqué à vie pour les premières inscrites
-                  </p>
                 </div>
 
                 <p className="text-slate-600 mb-6 min-h-[60px]">
@@ -276,7 +270,9 @@ export default function Pricing() {
                   className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 ${
                     plan.popular
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-xl hover:scale-105'
-                      : 'bg-slate-900 text-white hover:bg-slate-800'
+                      : isEmpire
+                      ? 'bg-gradient-to-r from-belleya-deep to-purple-600 text-white hover:shadow-xl hover:scale-105'
+                      : 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-xl hover:scale-105'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {loading && selectedPlan === plan.id ? (
@@ -316,11 +312,11 @@ export default function Pricing() {
                 </div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-12">
-          <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white">
+          <div className="bg-gradient-to-r from-belleya-deep to-belleya-bright p-6 text-white">
             <h3 className="text-2xl font-bold text-center">Tableau comparatif</h3>
           </div>
 
@@ -418,20 +414,20 @@ export default function Pricing() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-center text-white">
+        <div className="bg-gradient-to-r from-belleya-deep to-belleya-bright rounded-2xl p-8 text-center text-white">
           <h3 className="text-2xl font-bold mb-4">Pourquoi Belleya ?</h3>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div>
-              <div className="text-3xl font-bold text-emerald-400 mb-2">14 jours</div>
-              <p className="text-slate-300">D'essai gratuit sans engagement</p>
+              <div className="text-3xl font-bold text-white mb-2">14 jours</div>
+              <p className="text-white/90">D'essai gratuit sans engagement</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-amber-400 mb-2">Prix bloqué</div>
-              <p className="text-slate-300">À vie pour les premières inscrites</p>
+              <div className="text-3xl font-bold text-white mb-2">Prix bloqué</div>
+              <p className="text-white/90">À vie pour les premières inscrites</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-purple-400 mb-2">Support 24/48h</div>
-              <p className="text-slate-300">Équipe réactive sur WhatsApp</p>
+              <div className="text-3xl font-bold text-white mb-2">Support 24/48h</div>
+              <p className="text-white/90">Équipe réactive sur WhatsApp</p>
             </div>
           </div>
         </div>
