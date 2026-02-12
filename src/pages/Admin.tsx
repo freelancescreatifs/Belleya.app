@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle } from 'lucide-react';
+import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, Edit2, Trash2, Crown, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../hooks/useToast';
 
 interface KPIStats {
   totalUsers: number;
@@ -11,6 +12,10 @@ interface KPIStats {
   avgCommission: number;
   topPartnership: string | null;
   pendingRevenue: number;
+  startUsers: number;
+  studioUsers: number;
+  empireUsers: number;
+  vipUsers: number;
 }
 
 interface UserData {
@@ -42,6 +47,7 @@ interface PartnershipData {
 
 export default function Admin() {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<KPIStats>({
@@ -51,12 +57,18 @@ export default function Admin() {
     monthlyRevenue: 0,
     avgCommission: 0,
     topPartnership: null,
-    pendingRevenue: 0
+    pendingRevenue: 0,
+    startUsers: 0,
+    studioUsers: 0,
+    empireUsers: 0,
+    vipUsers: 0
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'partnerships'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingUser, setEditingUser] = useState<UserData | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     checkAdminStatus();
@@ -123,13 +135,6 @@ export default function Admin() {
         const totalUsers = usersResult.data.length;
         const newUsers30d = usersResult.data.filter(u => new Date(u.created_at) >= thirtyDaysAgo).length;
 
-        setStats(prev => ({
-          ...prev,
-          totalUsers,
-          newUsers30d,
-          activeUsers30d: totalUsers
-        }));
-
         const usersWithDetails = await Promise.all(
           usersResult.data.map(async (u) => {
             const [roleData, authData, companyData, subscriptionData] = await Promise.all([
@@ -183,6 +188,23 @@ export default function Admin() {
         );
 
         setUsers(usersWithDetails);
+
+        // Calculer les statistiques par plan
+        const startUsers = usersWithDetails.filter(u => u.plan_type === 'start').length;
+        const studioUsers = usersWithDetails.filter(u => u.plan_type === 'studio').length;
+        const empireUsers = usersWithDetails.filter(u => u.plan_type === 'empire').length;
+        const vipUsers = usersWithDetails.filter(u => u.plan_type === 'vip').length;
+
+        setStats(prev => ({
+          ...prev,
+          totalUsers,
+          newUsers30d,
+          activeUsers30d: totalUsers,
+          startUsers,
+          studioUsers,
+          empireUsers,
+          vipUsers
+        }));
       }
 
       if (partnershipsResult.data) {
@@ -252,6 +274,81 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error loading admin data:', error);
+    }
+  };
+
+  const handleEditSubscription = async (newPlanType: string) => {
+    if (!editingUser || !user) return;
+
+    try {
+      // Trouver le company_id de l'utilisateur
+      const { data: profileData } = await supabase
+        .from('user_profiles')
+        .select('company_id')
+        .eq('user_id', editingUser.id)
+        .single();
+
+      if (!profileData?.company_id) {
+        addToast('Erreur : utilisateur sans company_id', 'error');
+        return;
+      }
+
+      // Mettre à jour ou créer l'abonnement
+      const { error: subError } = await supabase
+        .from('subscriptions')
+        .upsert({
+          company_id: profileData.company_id,
+          plan_type: newPlanType,
+          subscription_status: 'active',
+          trial_end_date: newPlanType === 'vip' ? null : undefined,
+          payment_provider: newPlanType === 'vip' ? 'admin' : undefined,
+          payment_provider_subscription_id: newPlanType === 'vip' ? 'admin_vip' : undefined,
+          monthly_price: newPlanType === 'vip' ? 0 : undefined,
+          modified_by_admin_id: user.id,
+          admin_note: `Plan modifié par admin : ${newPlanType}`,
+          updated_at: new Date().toISOString()
+        });
+
+      if (subError) throw subError;
+
+      addToast('Abonnement modifié avec succès', 'success');
+      setShowEditModal(false);
+      setEditingUser(null);
+      loadData();
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      addToast('Erreur lors de la modification', 'error');
+    }
+  };
+
+  const handleDeleteSubscription = async (userId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) return;
+
+    try {
+      // Trouver le company_id
+      const { data: profileData } = await supabase
+        .from('user_profiles')
+        .select('company_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (!profileData?.company_id) {
+        addToast('Erreur : utilisateur sans company_id', 'error');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .delete()
+        .eq('company_id', profileData.company_id);
+
+      if (error) throw error;
+
+      addToast('Abonnement supprimé avec succès', 'success');
+      loadData();
+    } catch (error) {
+      console.error('Error deleting subscription:', error);
+      addToast('Erreur lors de la suppression', 'error');
     }
   };
 
@@ -364,6 +461,51 @@ export default function Admin() {
 
       {activeTab === 'dashboard' && (
         <div className="space-y-8">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Abonnements</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <Star className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Start</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{stats.startUsers}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-brand-100 rounded-xl p-6 border border-purple-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <Star className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Studio</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{stats.studioUsers}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <Crown className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Empire</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{stats.empireUsers}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-rose-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <Crown className="w-6 h-6 text-rose-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">VIP</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{stats.vipUsers}</p>
+              </div>
+            </div>
+          </div>
+
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Utilisateurs</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -531,6 +673,7 @@ export default function Admin() {
                     <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Rôle</th>
                     <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date inscription</th>
                     <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Dernier login</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -605,6 +748,29 @@ export default function Admin() {
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
                         {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('fr-FR') : '—'}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingUser(user);
+                              setShowEditModal(true);
+                            }}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Modifier l'abonnement"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          {user.plan_type && (
+                            <button
+                              onClick={() => handleDeleteSubscription(user.id)}
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Supprimer l'abonnement"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -699,6 +865,103 @@ export default function Admin() {
                 <p className="text-gray-600">Aucun partenariat trouvé</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de modification d'abonnement */}
+      {showEditModal && editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Modifier l'abonnement</h3>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingUser(null);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-sm text-gray-600 mb-1">Utilisateur</p>
+              <p className="font-medium text-gray-900">{editingUser.email}</p>
+              <p className="text-sm text-gray-600">
+                {editingUser.first_name || editingUser.last_name
+                  ? `${editingUser.first_name || ''} ${editingUser.last_name || ''}`.trim()
+                  : ''}
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-3">Sélectionner un plan</p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleEditSubscription('start')}
+                  className="w-full p-4 border-2 border-blue-200 hover:border-blue-400 rounded-xl transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Star className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="font-semibold text-gray-900">Start</p>
+                      <p className="text-sm text-gray-600">Plan de démarrage</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleEditSubscription('studio')}
+                  className="w-full p-4 border-2 border-purple-200 hover:border-purple-400 rounded-xl transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Star className="w-5 h-5 text-purple-600" />
+                    <div>
+                      <p className="font-semibold text-gray-900">Studio</p>
+                      <p className="text-sm text-gray-600">Plan intermédiaire</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleEditSubscription('empire')}
+                  className="w-full p-4 border-2 border-amber-200 hover:border-amber-400 rounded-xl transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Crown className="w-5 h-5 text-amber-600" />
+                    <div>
+                      <p className="font-semibold text-gray-900">Empire</p>
+                      <p className="text-sm text-gray-600">Plan premium</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleEditSubscription('vip')}
+                  className="w-full p-4 border-2 border-rose-200 hover:border-rose-400 rounded-xl transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Crown className="w-5 h-5 text-rose-600" />
+                    <div>
+                      <p className="font-semibold text-gray-900">VIP</p>
+                      <p className="text-sm text-gray-600">Accès gratuit illimité</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingUser(null);
+              }}
+              className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Annuler
+            </button>
           </div>
         </div>
       )}

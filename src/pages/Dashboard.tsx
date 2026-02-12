@@ -8,6 +8,7 @@ import EducationalCard from '../components/shared/EducationalCard';
 import TaxCalculator from '../components/dashboard/TaxCalculator';
 import InfoTooltip from '../components/shared/InfoTooltip';
 import BookingNotifications from '../components/dashboard/BookingNotifications';
+import SubscriptionBadge from '../components/shared/SubscriptionBadge';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -88,11 +89,13 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [revenueTypeData, setRevenueTypeData] = useState<RevenueTypeData[]>([]);
   const [periodTotal, setPeriodTotal] = useState(0);
+  const [userPlan, setUserPlan] = useState<'start' | 'studio' | 'empire' | 'vip' | null>(null);
 
   useEffect(() => {
     loadStats();
     loadCompanyProfile();
     loadRevenuesByType();
+    loadUserPlan();
   }, [user, periodFilter, selectedDate]);
 
   useEffect(() => {
@@ -123,6 +126,32 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       start: start.toISOString().split('T')[0],
       end: end.toISOString().split('T')[0],
     };
+  };
+
+  const loadUserPlan = async () => {
+    if (!user) return;
+
+    try {
+      const { data: profileData } = await supabase
+        .from('user_profiles')
+        .select('company_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileData?.company_id) {
+        const { data: subscriptionData } = await supabase
+          .from('subscriptions')
+          .select('plan_type')
+          .eq('company_id', profileData.company_id)
+          .maybeSingle();
+
+        if (subscriptionData?.plan_type) {
+          setUserPlan(subscriptionData.plan_type as 'start' | 'studio' | 'empire' | 'vip');
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user plan:', error);
+    }
   };
 
   const loadStats = async () => {
@@ -582,7 +611,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     <div className="p-3 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
       <div className="mb-6 sm:mb-8">
         <div className="mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t('dashboard.title')}</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+            <SubscriptionBadge planType={userPlan} />
+          </div>
           <p className="text-sm sm:text-base text-gray-600">{t('dashboard.subtitle')}</p>
         </div>
 
