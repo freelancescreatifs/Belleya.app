@@ -392,7 +392,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             {[
               { profession: "Masseuse", image: "/massage.jpg" },
               { profession: "Nail artists", image: "/nail_artist.jpg" },
-              { profession: "Esthéticiennes", image: "/esthéticienne.png" },
+              { profession: "Esthéticiennes", image: "/esthéticienne.jpg" },
               { profession: "Techs cils & sourcils", image: "/tech_cils.jpg" },
               { profession: "Maquilleuses professionnelles", image: "/maquilleuse.jpeg" },
               { profession: "Coiffeuse", image: "/coiffure.png" }
