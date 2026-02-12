@@ -6,7 +6,7 @@ import i18n from '../i18n';
 export interface UserProfile {
   id: string;
   user_id: string;
-  role: 'client' | 'pro';
+  role: 'client' | 'pro' | 'admin';
   first_name: string | null;
   last_name: string | null;
   phone: string | null;
@@ -224,11 +224,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (profileError) {
-        console.error('Error loading profile:', profileError);
-        throw profileError;
+        console.error('[SignIn] Error loading profile:', profileError);
+        console.error('[SignIn] Profile error details:', profileError.message);
+        // Ne pas bloquer la connexion si le profil n'est pas accessible
+        // Le loadProfile dans useEffect s'occupera de le charger
+        return null;
       }
 
-      return profileData;
+      if (profileData) {
+        console.log('[SignIn] Profile loaded successfully:', profileData.role);
+        return profileData;
+      } else {
+        console.warn('[SignIn] No profile found for user:', data.user.id);
+        return null;
+      }
     }
 
     return null;
