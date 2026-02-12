@@ -2,7 +2,7 @@ import {
   Sparkles, Calendar, Globe, Users, Image, Scissors, TrendingUp,
   Target, Package, BarChart, CheckCircle, Heart, Star, Zap, Shield,
   Clock, Lock, MessageCircle, ArrowRight, MessageSquare, Brain, DollarSign,
-  BarChart3, AlertCircle, Search, Flame, Eye
+  BarChart3, AlertCircle, Search, Flame, Eye, Crown
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AnimatedKeywords from '../components/landing/AnimatedKeywords';
@@ -559,7 +559,11 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
                   <div>
                     <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
-                      <Icon className={`w-6 h-6 md:w-8 md:h-8 text-${plan.color}-600`} />
+                      <Icon className={`w-6 h-6 md:w-8 md:h-8 ${
+                        plan.color === 'emerald' ? 'text-emerald-600' :
+                        plan.color === 'amber' ? 'text-amber-600' :
+                        'text-purple-600'
+                      }`} />
                       <h3 className="text-lg md:text-2xl font-bold text-gray-900">{plan.name}</h3>
                     </div>
                     <div className="mb-3 md:mb-4">
