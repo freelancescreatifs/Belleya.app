@@ -158,14 +158,17 @@ export default function Admin() {
     }
 
     try {
-      // Utilisation de la fonction RPC sécurisée côté backend
-      const { data, error } = await supabase.rpc('is_admin');
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
       } else {
-        setIsAdmin(data === true);
+        setIsAdmin(data?.role === 'admin');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -204,9 +207,9 @@ export default function Admin() {
 
         const usersWithDetails = await Promise.all(
           usersResult.data.map(async (u) => {
-            const [profileData, authData, companyData, subscriptionData] = await Promise.all([
+            const [roleData, authData, companyData, subscriptionData] = await Promise.all([
               supabase
-                .from('user_profiles')
+                .from('user_roles')
                 .select('role')
                 .eq('user_id', u.user_id)
                 .maybeSingle(),
@@ -244,7 +247,7 @@ export default function Admin() {
               email: authData.data.user?.email || 'N/A',
               created_at: authData.data.user?.created_at || u.created_at,
               last_sign_in_at: authData.data.user?.last_sign_in_at || null,
-              role: profileData?.data?.role || 'pro',
+              role: roleData?.data?.role || 'user',
               first_name: u.first_name || null,
               last_name: u.last_name || null,
               profession: companyData.data?.primary_profession || null,
