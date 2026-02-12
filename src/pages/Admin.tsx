@@ -19,6 +19,7 @@ interface KPIStats {
   empireUsers: number;
   vipUsers: number;
   depositRevenue: number;
+  trialUsers: number;
 }
 
 interface MonthlyStats {
@@ -73,7 +74,8 @@ export default function Admin() {
     studioUsers: 0,
     empireUsers: 0,
     vipUsers: 0,
-    depositRevenue: 0
+    depositRevenue: 0,
+    trialUsers: 0
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
@@ -261,6 +263,7 @@ export default function Admin() {
         const studioUsers = usersWithDetails.filter(u => u.plan_type === 'studio').length;
         const empireUsers = usersWithDetails.filter(u => u.plan_type === 'empire').length;
         const vipUsers = usersWithDetails.filter(u => u.plan_type === 'vip').length;
+        const trialUsers = usersWithDetails.filter(u => u.subscription_status === 'trial').length;
 
         setStats(prev => ({
           ...prev,
@@ -270,7 +273,8 @@ export default function Admin() {
           startUsers,
           studioUsers,
           empireUsers,
-          vipUsers
+          vipUsers,
+          trialUsers
         }));
       }
 
@@ -530,7 +534,9 @@ export default function Admin() {
     const matchesSearch = u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesSubscription = subscriptionFilter === 'all' || u.plan_type === subscriptionFilter;
+    const matchesSubscription =
+      subscriptionFilter === 'all' ||
+      (subscriptionFilter === 'trial' ? u.subscription_status === 'trial' : u.plan_type === subscriptionFilter);
 
     return matchesSearch && matchesSubscription;
   });
@@ -645,7 +651,7 @@ export default function Admin() {
 
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Abonnements</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
@@ -684,6 +690,17 @@ export default function Admin() {
                   <span className="text-sm font-medium text-gray-700">VIP</span>
                 </div>
                 <p className="text-3xl font-bold text-gray-900">{stats.vipUsers}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-6 border border-teal-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <Clock className="w-6 h-6 text-teal-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">En essai</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{stats.trialUsers}</p>
+                <p className="text-xs text-gray-600 mt-1">Période d'essai</p>
               </div>
             </div>
           </div>
@@ -902,6 +919,7 @@ export default function Admin() {
               className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white text-gray-700"
             >
               <option value="all">Tous les abonnements</option>
+              <option value="trial">En période d'essai</option>
               <option value="start">Start</option>
               <option value="studio">Studio</option>
               <option value="empire">Empire</option>
@@ -979,14 +997,16 @@ export default function Admin() {
                         ) : '—'}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600">
-                        {user.days_remaining !== null ? (
-                          <span className={`font-semibold ${
-                            user.days_remaining <= 3 ? 'text-red-600' :
-                            user.days_remaining <= 7 ? 'text-amber-600' :
-                            'text-green-600'
-                          }`}>
-                            {user.days_remaining} jours
-                          </span>
+                        {user.days_remaining !== null && user.subscription_status === 'trial' ? (
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                              user.days_remaining <= 3 ? 'bg-red-100 text-red-700' :
+                              user.days_remaining <= 7 ? 'bg-amber-100 text-amber-700' :
+                              'bg-green-100 text-green-700'
+                            }`}>
+                              {user.days_remaining} {user.days_remaining === 1 ? 'jour' : 'jours'}
+                            </span>
+                          </div>
                         ) : '—'}
                       </td>
                       <td className="px-4 py-4">
