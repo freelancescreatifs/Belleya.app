@@ -53,6 +53,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('[LoadProfile] Error code:', error.code);
         console.error('[LoadProfile] Full error:', JSON.stringify(error, null, 2));
 
+        // Erreur 42P17 = Infinite recursion in RLS policy - fixed, needs page refresh
+        if (error.code === '42P17') {
+          console.error('[LoadProfile] 🔄 INFINITE RECURSION ERROR DETECTED!');
+          console.error('[LoadProfile] Database policies have been fixed. Please refresh your browser.');
+          alert('Erreur de configuration détectée. La base de données a été corrigée.\n\nVeuillez rafraîchir votre navigateur (F5 ou Ctrl+R) pour continuer.');
+          // Force logout to clear any cached state
+          await supabase.auth.signOut();
+          return;
+        }
+
         // Ne PAS bloquer : si le profil n'existe pas, on continue sans profil
         // L'app peut gérer le cas "profil manquant" avec un onboarding
         setProfile(null);
