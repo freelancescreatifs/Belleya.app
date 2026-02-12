@@ -85,10 +85,6 @@ function AppContent() {
       }, 1000);
 
       return () => clearTimeout(timer);
-    } else if (user && !profile && !loading && profileRetryCount >= 10) {
-      // Après 10 tentatives, on reset et on réessaie une dernière fois
-      console.log('[App] ⚠️ Max retries reached. Resetting and trying one last time...');
-      setProfileRetryCount(0);
     }
   }, [user, profile, loading, profileRetryCount, refreshProfile]);
 
