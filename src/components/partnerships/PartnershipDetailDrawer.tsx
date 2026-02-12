@@ -267,7 +267,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                     onClick={handleToggleClientSupport}
                     disabled={isUpdating}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      partnership.is_client_support_involved ? 'bg-green-500' : 'bg-gray-300'
+                      partnership.is_client_support_involved ? 'bg-belleya-vivid' : 'bg-gray-300'
                     } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <span
@@ -323,9 +323,9 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6 shadow-sm">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-belleya-200 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
+              <TrendingUp className="w-5 h-5 text-belleya-bright" />
               Performance
             </h3>
 
@@ -342,7 +342,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
 
               <div>
                 <p className="text-sm text-gray-700 mb-1">Commission gagnée</p>
-                <p className="text-2xl font-bold text-green-600">{totalRevenue.toFixed(2)} €</p>
+                <p className="text-2xl font-bold text-belleya-bright">{totalRevenue.toFixed(2)} €</p>
               </div>
 
               <div>
@@ -513,7 +513,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                       </div>
                       <div className="flex items-center gap-4 text-xs text-gray-600">
                         <span>Vente: {sale.sale_amount.toFixed(2)} €</span>
-                        <span className="font-semibold text-green-600">
+                        <span className="font-semibold text-belleya-bright">
                           Commission: {sale.commission_earned.toFixed(2)} €
                         </span>
                       </div>

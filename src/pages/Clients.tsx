@@ -808,7 +808,7 @@ export default function Clients() {
 
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <UserPlus className="w-6 h-6 text-green-500" />
+            <UserPlus className="w-6 h-6 text-belleya-vivid" />
             <InfoTooltip content="Nouvelles clientes inscrites dans les 30 derniers jours" />
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{globalStats.newClients}</p>
@@ -850,7 +850,7 @@ export default function Clients() {
             onClick={() => setClientFilter('new')}
             className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
               clientFilter === 'new'
-                ? 'bg-green-500 text-white'
+                ? 'bg-belleya-vivid text-white'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -945,7 +945,7 @@ export default function Clients() {
                     setClientToArchive(client);
                     setShowArchiveModal(true);
                   }}
-                  className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-belleya-bright hover:bg-green-50 rounded-lg transition-colors"
                   title="Désarchiver"
                 >
                   <ArchiveRestore className="w-4 h-4" />
@@ -1137,7 +1137,7 @@ export default function Clients() {
                 clientToArchive.is_archived ? 'bg-green-100' : 'bg-orange-100'
               }`}>
                 {clientToArchive.is_archived ? (
-                  <ArchiveRestore className="w-6 h-6 text-green-600" />
+                  <ArchiveRestore className="w-6 h-6 text-belleya-bright" />
                 ) : (
                   <Archive className="w-6 h-6 text-orange-600" />
                 )}
@@ -1172,7 +1172,7 @@ export default function Clients() {
                 onClick={handleArchiveClient}
                 className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors ${
                   clientToArchive.is_archived
-                    ? 'bg-green-500 hover:bg-green-600'
+                    ? 'bg-belleya-vivid hover:bg-belleya-bright'
                     : 'bg-orange-500 hover:bg-orange-600'
                 }`}
               >

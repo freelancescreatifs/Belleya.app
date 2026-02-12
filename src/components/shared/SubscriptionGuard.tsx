@@ -44,7 +44,7 @@ export default function SubscriptionGuard({ children }: SubscriptionGuardProps) 
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-belleya-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-600">Vérification de votre abonnement...</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function SubscriptionGuard({ children }: SubscriptionGuardProps) 
 
           <button
             onClick={() => window.location.href = '/pricing'}
-            className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-belleya-bright to-teal-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
           >
             <Sparkles className="w-5 h-5" />
             Voir les offres

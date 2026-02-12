@@ -133,7 +133,7 @@ export default function CompactWeeklySchedule({ availability, onChange }: Compac
             <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
               <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-500 rounded"></div>
+                  <div className="w-4 h-4 bg-belleya-vivid rounded"></div>
                   <span className="text-gray-600">Disponible</span>
                 </div>
                 <div className="flex items-center gap-2">

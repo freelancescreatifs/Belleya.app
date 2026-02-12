@@ -44,8 +44,8 @@ export default function SubGoalItem({ subgoal, onToggle, onEdit, onDelete }: Sub
         onClick={() => onToggle(subgoal.id, !subgoal.checked)}
         className={`flex-shrink-0 w-5 h-5 border-2 rounded transition-all ${
           subgoal.checked
-            ? 'bg-green-500 border-green-500'
-            : 'border-gray-300 hover:border-green-400'
+            ? 'bg-belleya-vivid border-belleya-500'
+            : 'border-gray-300 hover:border-belleya-400'
         } flex items-center justify-center`}
       >
         {subgoal.checked && <Check className="w-3.5 h-3.5 text-white" />}

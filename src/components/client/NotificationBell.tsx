@@ -139,7 +139,7 @@ export default function NotificationBell({ userId, onNavigate }: NotificationBel
       case 'new_content':
         return <Sparkles className="w-5 h-5 text-purple-600" />;
       case 'new_availability':
-        return <Calendar className="w-5 h-5 text-green-600" />;
+        return <Calendar className="w-5 h-5 text-belleya-bright" />;
       default:
         return <Bell className="w-5 h-5 text-gray-600" />;
     }

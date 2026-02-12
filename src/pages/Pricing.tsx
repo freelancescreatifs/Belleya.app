@@ -19,7 +19,7 @@ const plans: PricingPlan[] = [
     name: 'BELLEYA START',
     currentPrice: 29,
     futurePrice: 39,
-    icon: <Sparkles className="w-8 h-8 text-emerald-600" />,
+    icon: <Sparkles className="w-8 h-8 text-belleya-bright" />,
     popular: false,
     description: 'Pour les indépendantes qui veulent structurer leur activité et arrêter de tout gérer à la main.',
     features: [
@@ -230,7 +230,7 @@ export default function Pricing() {
             Choisis l'offre qui correspond à ton ambition
           </p>
 
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-full font-medium shadow-lg">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-belleya-bright to-teal-500 text-white px-6 py-3 rounded-full font-medium shadow-lg">
             <Sparkles className="w-5 h-5" />
             14 jours gratuits - accès complet - sans engagement
           </div>
@@ -305,7 +305,7 @@ export default function Pricing() {
                         }`}
                       >
                         {!isSectionTitle && (
-                          <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          <Check className="w-5 h-5 text-belleya-vivid flex-shrink-0 mt-0.5" />
                         )}
                         <span className={`text-sm ${isSectionTitle ? 'text-slate-900' : 'text-slate-600'}`}>
                           {feature}
@@ -329,7 +329,7 @@ export default function Pricing() {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Fonctionnalités</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-emerald-600">START</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-belleya-bright">START</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-amber-600">STUDIO</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-purple-600">EMPIRE</th>
                 </tr>
@@ -343,69 +343,69 @@ export default function Pricing() {
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Agenda intelligent</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Réservation en ligne</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Réseaux sociaux & calendrier éditorial</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Boîte à idées IA</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Gestion des acomptes</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Gestion élèves / formations</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Marketing automatique</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Système de fidélisation</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Campagnes SMS + Email</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Partenariat officiel Belleya</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Revenus d'affiliation</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
-                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Support</td>

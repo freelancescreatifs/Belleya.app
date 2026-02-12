@@ -301,7 +301,7 @@ export default function Stock() {
         >
           <div className="flex items-start justify-between mb-4">
             <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-              <Boxes className="w-6 h-6 text-green-600" />
+              <Boxes className="w-6 h-6 text-belleya-bright" />
             </div>
           </div>
           <p className="text-sm text-gray-600 mb-1">Unités en stock</p>

@@ -57,7 +57,7 @@ export default function SubscriptionStatus() {
         <p className="text-slate-600 mb-4">Aucun abonnement actif</p>
         <button
           onClick={() => window.location.href = '/pricing'}
-          className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition-colors"
+          className="bg-belleya-vivid text-white px-4 py-2 rounded-lg hover:bg-belleya-bright transition-colors"
         >
           Choisir une offre
         </button>
@@ -68,7 +68,7 @@ export default function SubscriptionStatus() {
   const getPlanIcon = () => {
     switch (status.planType) {
       case 'start':
-        return <Sparkles className="w-6 h-6 text-emerald-600" />;
+        return <Sparkles className="w-6 h-6 text-belleya-bright" />;
       case 'studio':
         return <Zap className="w-6 h-6 text-amber-600" />;
       case 'empire':
@@ -81,7 +81,7 @@ export default function SubscriptionStatus() {
   const getPlanColor = () => {
     switch (status.planType) {
       case 'start':
-        return 'from-emerald-500 to-teal-500';
+        return 'from-belleya-bright to-teal-500';
       case 'studio':
         return 'from-amber-500 to-orange-500';
       case 'empire':
@@ -131,8 +131,8 @@ export default function SubscriptionStatus() {
             <div className="flex items-center gap-2">
               {status.isActive ? (
                 <>
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                  <span className="font-medium text-emerald-600">
+                  <CheckCircle2 className="w-5 h-5 text-belleya-vivid" />
+                  <span className="font-medium text-belleya-bright">
                     {status.isTrial ? 'Essai gratuit actif' : 'Actif'}
                   </span>
                 </>
@@ -169,7 +169,7 @@ export default function SubscriptionStatus() {
         </div>
 
         {status.isTrial && (
-          <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+          <div className="mt-6 bg-emerald-50 border border-belleya-200 rounded-lg p-4">
             <p className="text-sm text-emerald-800 mb-3">
               Votre essai gratuit expire le {new Date(subscriptionData.trial_end_date).toLocaleDateString('fr-FR')}.
               Profitez de toutes les fonctionnalités sans engagement.

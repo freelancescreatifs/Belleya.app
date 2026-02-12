@@ -383,7 +383,7 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
           {step === 'complete' && (
             <div className="space-y-6">
               <div className="text-center py-8">
-                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <CheckCircle className="w-16 h-16 text-belleya-vivid mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Import terminé !</h3>
               </div>
 

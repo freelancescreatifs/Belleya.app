@@ -631,7 +631,7 @@ export default function PersonalProfileForm() {
                 <p className="font-medium text-gray-900">Stripe</p>
                 <p className="text-sm text-gray-500">
                   {profile.stripe_connected ? (
-                    <span className="text-green-600 flex items-center gap-1">
+                    <span className="text-belleya-bright flex items-center gap-1">
                       <Check className="w-4 h-4" />
                       Connecté
                     </span>
@@ -662,7 +662,7 @@ export default function PersonalProfileForm() {
                 <p className="font-medium text-gray-900">PayPal</p>
                 <p className="text-sm text-gray-500">
                   {profile.paypal_connected ? (
-                    <span className="text-green-600 flex items-center gap-1">
+                    <span className="text-belleya-bright flex items-center gap-1">
                       <Check className="w-4 h-4" />
                       Connecté: {profile.paypal_email}
                     </span>

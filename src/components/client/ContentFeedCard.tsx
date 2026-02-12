@@ -243,7 +243,7 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
             <span className="text-sm font-medium">{commentsCount}</span>
           </button>
 
-          <button className="flex items-center gap-2 text-gray-700 hover:text-green-600 transition-colors ml-auto">
+          <button className="flex items-center gap-2 text-gray-700 hover:text-belleya-bright transition-colors ml-auto">
             <Share2 className="w-6 h-6" />
           </button>
         </div>

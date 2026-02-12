@@ -466,7 +466,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             <p className="text-base md:text-xl text-gray-600 mb-4 md:mb-6">
               Choisis l'offre qui correspond à ton ambition
             </p>
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium shadow-lg text-xs md:text-base">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-belleya-bright to-belleya-vivid text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium shadow-lg text-xs md:text-base">
               <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
               14 jours gratuits - accès complet - sans engagement
             </div>
@@ -481,7 +481,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 popular: false,
                 description: "Pour les indépendantes qui veulent structurer leur activité et arrêter de tout gérer à la main.",
                 icon: Sparkles,
-                color: "emerald",
+                color: "belleya-powder",
                 features: [
                   "Gestion des objectifs",
                   "Gestion des tâches",
@@ -527,7 +527,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 popular: false,
                 description: "Pour celles qui veulent automatiser et générer des revenus récurrents.",
                 icon: Crown,
-                color: "purple",
+                color: "belleya-deep",
                 features: [
                   "Tout Studio inclus +",
                   "Marketing automatisé avancé",
@@ -560,9 +560,9 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   <div>
                     <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
                       <Icon className={`w-6 h-6 md:w-8 md:h-8 ${
-                        plan.color === 'emerald' ? 'text-emerald-600' :
+                        plan.color === 'belleya-powder' ? 'text-belleya-powder' :
                         plan.color === 'amber' ? 'text-amber-600' :
-                        'text-purple-600'
+                        'text-belleya-deep'
                       }`} />
                       <h3 className="text-lg md:text-2xl font-bold text-gray-900">{plan.name}</h3>
                     </div>
@@ -583,7 +583,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   <ul className="space-y-2 mb-6 md:mb-8 flex-1">
                     {plan.features.map((feature, j) => (
                       <li key={j} className="flex items-start gap-2 text-gray-700 text-xs md:text-sm">
-                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-belleya-vivid flex-shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -594,7 +594,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     className={`w-full py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all ${
                       plan.popular
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:scale-105'
-                        : 'bg-gray-900 text-white hover:bg-gray-800'
+                        : 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
                     }`}
                   >
                     Commencer gratuitement

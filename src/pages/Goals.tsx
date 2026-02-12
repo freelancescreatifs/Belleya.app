@@ -427,7 +427,7 @@ export default function Goals() {
     { id: 'not_started' as TabStatus, label: 'Pas commencé', icon: Clock, color: 'text-gray-600' },
     { id: 'in_progress' as TabStatus, label: 'En cours', icon: PlayCircle, color: 'text-blue-600' },
     { id: 'on_hold' as TabStatus, label: 'Suspendu', icon: PauseCircle, color: 'text-orange-600' },
-    { id: 'achieved' as TabStatus, label: 'Atteint', icon: CheckCircle2, color: 'text-green-600' },
+    { id: 'achieved' as TabStatus, label: 'Atteint', icon: CheckCircle2, color: 'text-belleya-bright' },
   ];
 
   if (loading) {

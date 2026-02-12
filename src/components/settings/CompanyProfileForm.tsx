@@ -350,7 +350,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                   title="Copier le lien"
                 >
                   {copiedBookingUrl ? (
-                    <Check className="w-5 h-5 text-green-600" />
+                    <Check className="w-5 h-5 text-belleya-bright" />
                   ) : (
                     <Copy className="w-5 h-5 text-belleya-primary" />
                   )}

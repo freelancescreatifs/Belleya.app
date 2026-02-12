@@ -486,12 +486,12 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
           </div>
 
           <div className={`rounded-xl border-2 p-6 shadow-lg ${
-            results.status === 'profitable' ? 'bg-green-50 border-green-300' :
+            results.status === 'profitable' ? 'bg-green-50 border-belleya-300' :
             results.status === 'limit' ? 'bg-amber-50 border-amber-300' :
             'bg-red-50 border-red-300'
           }`}>
             <div className="flex items-center gap-3 mb-4">
-              {results.status === 'profitable' && <CheckCircle className="w-6 h-6 text-green-600" />}
+              {results.status === 'profitable' && <CheckCircle className="w-6 h-6 text-belleya-bright" />}
               {results.status === 'limit' && <AlertTriangle className="w-6 h-6 text-amber-600" />}
               {results.status === 'unprofitable' && <AlertCircle className="w-6 h-6 text-red-600" />}
               <h3 className={`text-lg font-bold ${
@@ -528,7 +528,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                   <InfoTooltip content="Prix actuel - Coût total (ce qu'il vous reste réellement)" />
                 </div>
                 <p className={`text-2xl font-bold ${
-                  results.margin >= 0 ? 'text-green-600' : 'text-red-600'
+                  results.margin >= 0 ? 'text-belleya-bright' : 'text-red-600'
                 }`}>
                   {results.margin.toFixed(2)} €
                 </p>
@@ -540,7 +540,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                   <InfoTooltip content="Marge divisée par le temps de travail (votre rémunération nette par heure)" />
                 </div>
                 <p className={`text-2xl font-bold ${
-                  results.actualHourlyRate >= desiredHourlyRate ? 'text-green-600' : 'text-red-600'
+                  results.actualHourlyRate >= desiredHourlyRate ? 'text-belleya-bright' : 'text-red-600'
                 }`}>
                   {results.actualHourlyRate.toFixed(2)} €/h
                 </p>

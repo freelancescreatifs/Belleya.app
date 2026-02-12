@@ -515,9 +515,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       label: 'CA du mois',
       value: `${stats.currentMonthRevenue.toFixed(2)} €`,
       icon: TrendingUp,
-      color: 'from-green-400 to-green-600',
+      color: 'from-green-400 to-belleya-deep',
       bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
+      textColor: 'text-belleya-bright',
       tooltip: `Moyenne mensuelle: ${stats.avgMonthlyRevenue.toFixed(2)} €`,
       link: 'finances',
     },
@@ -525,9 +525,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       label: `Revenus ${getPeriodLabel()}`,
       value: `${stats.revenue.toFixed(2)} €`,
       icon: TrendingUp,
-      color: 'from-emerald-400 to-emerald-600',
+      color: 'from-emerald-400 to-belleya-deep',
       bgColor: 'bg-emerald-50',
-      textColor: 'text-emerald-600',
+      textColor: 'text-belleya-bright',
       link: 'finances',
     },
     {
@@ -779,7 +779,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                               </span>
                             )}
                             <div
-                              className="bg-gradient-to-t from-green-400 to-green-500 rounded-t-lg transition-all group-hover:from-green-500 group-hover:to-green-600 w-full cursor-pointer"
+                              className="bg-gradient-to-t from-green-400 to-belleya-bright rounded-t-lg transition-all group-hover:from-belleya-bright group-hover:to-belleya-deep w-full cursor-pointer"
                               style={{
                                 height: `${revenueHeight}%`,
                                 minHeight: data.revenue > 0 ? '4px' : '0'
@@ -811,7 +811,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
             <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-gradient-to-t from-green-400 to-green-500 rounded"></div>
+                <div className="w-4 h-4 bg-gradient-to-t from-green-400 to-belleya-bright rounded"></div>
                 <span className="text-sm text-gray-700">Revenus</span>
               </div>
               <div className="flex items-center gap-2">

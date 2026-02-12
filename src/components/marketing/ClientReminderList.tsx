@@ -244,7 +244,7 @@ export default function ClientReminderList({
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
                     {client.phone && (
-                      <MessageSquare className="w-4 h-4 text-green-600" />
+                      <MessageSquare className="w-4 h-4 text-belleya-bright" />
                     )}
                     {client.email && (
                       <Mail className="w-4 h-4 text-blue-600" />

@@ -523,7 +523,7 @@ export default function ProviderPublicProfile() {
             {bookingStep === 'success' && (
               <div className="bg-white rounded-xl max-w-md w-full p-8 text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Check className="w-8 h-8 text-green-600" />
+                  <Check className="w-8 h-8 text-belleya-bright" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
                   Réservation envoyée !

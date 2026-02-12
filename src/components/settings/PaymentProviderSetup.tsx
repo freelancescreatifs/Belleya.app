@@ -277,7 +277,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
             </div>
 
             {stripeAccount?.status === 'active' && (
-              <CheckCircle className="w-6 h-6 text-green-500" />
+              <CheckCircle className="w-6 h-6 text-belleya-vivid" />
             )}
           </div>
 
@@ -386,7 +386,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
             </div>
 
             {paypalAccount?.status === 'active' && (
-              <CheckCircle className="w-6 h-6 text-green-500" />
+              <CheckCircle className="w-6 h-6 text-belleya-vivid" />
             )}
           </div>
 

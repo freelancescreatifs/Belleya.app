@@ -213,7 +213,7 @@ export default function ClientBookings() {
                 key={notification.id}
                 className={`bg-white rounded-2xl shadow-lg p-5 border-l-4 ${
                   notification.type === 'booking_confirmed'
-                    ? 'border-green-500'
+                    ? 'border-belleya-500'
                     : notification.type === 'booking_cancelled'
                     ? 'border-red-500'
                     : 'border-brand-500'
@@ -230,7 +230,7 @@ export default function ClientBookings() {
                     }`}>
                       <Bell className={`w-5 h-5 ${
                         notification.type === 'booking_confirmed'
-                          ? 'text-green-600'
+                          ? 'text-belleya-bright'
                           : notification.type === 'booking_cancelled'
                           ? 'text-red-600'
                           : 'text-brand-600'

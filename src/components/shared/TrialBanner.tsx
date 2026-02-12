@@ -34,7 +34,7 @@ export default function TrialBanner() {
 
   if (status.isTrial && status.daysRemaining > 0) {
     return (
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-3 shadow-lg">
+      <div className="bg-gradient-to-r from-belleya-bright to-belleya-vivid text-white px-4 py-3 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1">
             <Clock className="w-5 h-5 flex-shrink-0" />
@@ -42,7 +42,7 @@ export default function TrialBanner() {
               <p className="font-semibold">
                 Essai gratuit - {status.daysRemaining} jour{status.daysRemaining > 1 ? 's' : ''} restant{status.daysRemaining > 1 ? 's' : ''}
               </p>
-              <p className="text-sm text-emerald-100">
+              <p className="text-sm text-belleya-100">
                 Profite de toutes les fonctionnalités sans engagement
               </p>
             </div>
@@ -50,7 +50,7 @@ export default function TrialBanner() {
 
           <button
             onClick={() => window.location.href = '/pricing'}
-            className="bg-white text-emerald-600 px-4 py-2 rounded-lg font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="bg-white text-belleya-bright px-4 py-2 rounded-lg font-medium hover:bg-belleya-50 transition-colors flex items-center gap-2 whitespace-nowrap"
           >
             <Sparkles className="w-4 h-4" />
             Choisir mon offre

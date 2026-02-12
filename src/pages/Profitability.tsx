@@ -246,13 +246,13 @@ export default function Profitability() {
               <div
                 className={`p-4 rounded-xl border-2 ${
                   result.isProfitable
-                    ? 'bg-green-50 border-green-200'
+                    ? 'bg-green-50 border-belleya-200'
                     : 'bg-red-50 border-red-200'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   {result.isProfitable ? (
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-belleya-vivid rounded-full flex items-center justify-center">
                       <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                   ) : (

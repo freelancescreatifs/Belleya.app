@@ -561,7 +561,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
 
                   <td className="px-4 py-3">
                     {content.is_published ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-300">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-belleya-300">
                         Publié
                       </span>
                     ) : (

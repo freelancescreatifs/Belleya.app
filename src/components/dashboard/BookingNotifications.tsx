@@ -315,7 +315,7 @@ export default function BookingNotifications() {
                 <button
                   onClick={() => notification.booking_id && handleAcceptBooking(notification.id, notification.booking_id)}
                   disabled={processing === notification.booking_id}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-belleya-vivid text-white rounded-lg hover:bg-belleya-bright transition-colors disabled:opacity-50"
                 >
                   <Check className="w-4 h-4" />
                   {processing === notification.booking_id ? 'En cours...' : 'Accepter'}

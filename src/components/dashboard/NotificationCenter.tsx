@@ -261,7 +261,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
   const renderNotificationActions = (notification: Notification) => {
     if (notification.is_acted) {
       return (
-        <div className="flex items-center gap-1 text-xs text-green-600 mt-2">
+        <div className="flex items-center gap-1 text-xs text-belleya-bright mt-2">
           <CheckCircle className="w-3 h-3" />
           Traitée
         </div>
@@ -279,7 +279,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                 e.stopPropagation();
                 handleAcceptAppointment(notification.id, notification.entity_id!);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-belleya-vivid text-white rounded-lg text-xs font-medium hover:bg-belleya-bright transition-colors"
             >
               <Check className="w-3 h-3" />
               Accepter
@@ -317,7 +317,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                 e.stopPropagation();
                 handleValidateReview(notification.id, notification.entity_id!);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-belleya-vivid text-white rounded-lg text-xs font-medium hover:bg-belleya-bright transition-colors"
             >
               <Check className="w-3 h-3" />
               Approuver
@@ -344,7 +344,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                 e.stopPropagation();
                 handleApproveComment(notification.id, notification.entity_id!);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-belleya-vivid text-white rounded-lg text-xs font-medium hover:bg-belleya-bright transition-colors"
             >
               <Check className="w-3 h-3" />
               Approuver

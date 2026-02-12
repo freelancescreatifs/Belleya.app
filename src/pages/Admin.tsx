@@ -317,10 +317,10 @@ export default function Admin() {
                 <p className="text-3xl font-bold text-gray-900">{stats.totalUsers}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belleya-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <UserPlus className="w-6 h-6 text-green-600" />
+                    <UserPlus className="w-6 h-6 text-belleya-bright" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Nouveaux (30j)</span>
                 </div>
@@ -342,10 +342,10 @@ export default function Admin() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Revenus & Abonnements</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belleya-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Euro className="w-6 h-6 text-green-600" />
+                    <Euro className="w-6 h-6 text-belleya-bright" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">MRR</span>
                 </div>
@@ -391,10 +391,10 @@ export default function Admin() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Partenariats</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belleya-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Handshake className="w-6 h-6 text-green-600" />
+                    <Handshake className="w-6 h-6 text-belleya-bright" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Revenus du mois</span>
                 </div>
@@ -564,7 +564,7 @@ export default function Admin() {
                           {partnership.status === 'active' ? 'Actif' : partnership.status === 'pending' ? 'En attente' : 'Terminé'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-green-600">
+                      <td className="px-6 py-4 text-sm font-semibold text-belleya-bright">
                         {partnership.monthly_revenue.toFixed(2)} €
                       </td>
                     </tr>

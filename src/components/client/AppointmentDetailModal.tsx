@@ -130,7 +130,7 @@ export default function AppointmentDetailModal({
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-      confirmed: 'bg-green-100 text-green-700 border-green-300',
+      confirmed: 'bg-green-100 text-green-700 border-belleya-300',
       completed: 'bg-blue-100 text-blue-700 border-blue-300',
       cancelled: 'bg-red-100 text-red-700 border-red-300',
     };

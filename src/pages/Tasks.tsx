@@ -1221,7 +1221,7 @@ export default function Tasks() {
       todo: { label: 'À faire', color: 'bg-slate-100 text-slate-700 border border-slate-300' },
       in_progress: { label: 'En cours', color: 'bg-blue-100 text-blue-700 border border-blue-300' },
       on_hold: { label: 'Suspendu', color: 'bg-amber-100 text-amber-700 border border-amber-300' },
-      completed: { label: 'Terminé', color: 'bg-emerald-100 text-emerald-700 border border-emerald-300' },
+      completed: { label: 'Terminé', color: 'bg-emerald-100 text-emerald-700 border border-belleya-300' },
     };
     return badges[status] || badges.todo;
   };
@@ -1944,7 +1944,7 @@ export default function Tasks() {
                 onClick={() => setProjectStatusFilter('completed')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   projectStatusFilter === 'completed'
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-belleya-vivid text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -2773,13 +2773,13 @@ export default function Tasks() {
 
       {completedProjectNotification.show && (
         <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-6 rounded-2xl shadow-2xl flex items-center gap-4 border-4 border-white">
+          <div className="bg-gradient-to-r from-belleya-bright to-belleya-deep text-white px-8 py-6 rounded-2xl shadow-2xl flex items-center gap-4 border-4 border-white">
             <div className="text-5xl">🎉</div>
             <div>
               <div className="font-bold text-xl mb-1">Bravo ! Projet terminé</div>
               <div className="text-green-100 text-sm">{completedProjectNotification.name}</div>
             </div>
-            <div className="bg-white text-green-600 px-4 py-2 rounded-full font-bold text-sm">
+            <div className="bg-white text-belleya-bright px-4 py-2 rounded-full font-bold text-sm">
               Terminé
             </div>
           </div>
@@ -2978,7 +2978,7 @@ function TaskCard({
             </button>
             <button
               onClick={() => onStatusChange(task.id, 'completed')}
-              className={`flex-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all ${
+              className={`flex-1 bg-belleya-vivid text-white rounded-lg hover:bg-belleya-bright transition-all ${
                 compactMode ? 'text-[10px] px-2 py-1.5' : 'text-xs px-3 py-2'
               }`}
             >

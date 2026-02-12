@@ -98,7 +98,7 @@ export default function AddressInput({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Adresse
           {geocodingStatus === 'success' && (
-            <span className="ml-2 inline-flex items-center gap-1 text-green-600 text-xs">
+            <span className="ml-2 inline-flex items-center gap-1 text-belleya-bright text-xs">
               <MapPin className="w-3 h-3" />
               Géolocalisée
             </span>
@@ -120,7 +120,7 @@ export default function AddressInput({
               error
                 ? 'border-red-300'
                 : geocodingStatus === 'success'
-                ? 'border-green-300'
+                ? 'border-belleya-300'
                 : 'border-gray-300'
             }`}
           />
@@ -133,7 +133,7 @@ export default function AddressInput({
               </div>
             )}
             {geocodingStatus === 'success' && !geocoding && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded text-xs text-green-700">
+              <div className="flex items-center gap-1 px-2 py-1 bg-green-50 border border-belleya-200 rounded text-xs text-green-700">
                 <Check className="w-3 h-3" />
                 OK
               </div>

@@ -231,7 +231,7 @@ export default function Training({ onPageChange }: TrainingProps) {
               <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total_students_trained}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <CheckCircle className="w-6 h-6 text-belleya-bright" />
             </div>
           </div>
         </div>

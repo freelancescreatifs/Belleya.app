@@ -247,7 +247,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   function getStatusColor(status: string) {
     switch (status) {
       case 'published':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-100 text-green-800 border-belleya-200';
       case 'scheduled':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'script':
@@ -1099,7 +1099,7 @@ function DraggableWeekContent({
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border ${
               content.is_published
-                ? 'bg-green-50 text-green-700 border-green-300'
+                ? 'bg-green-50 text-green-700 border-belleya-300'
                 : 'bg-gray-50 text-gray-700 border-gray-300'
             }`}>
               {content.is_published ? <CheckCircle className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}

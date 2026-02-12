@@ -1118,9 +1118,9 @@ export default function Services() {
                         value="active"
                         checked={formData.status === 'active'}
                         onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                        className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                        className="w-4 h-4 text-belleya-bright border-gray-300 focus:ring-green-500"
                       />
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <CheckCircle className="w-5 h-5 text-belleya-bright" />
                       <div className="flex-1">
                         <span className="text-sm font-medium text-gray-900">Actif</span>
                         <p className="text-xs text-gray-500">Service visible partout</p>

@@ -258,7 +258,7 @@ export default function ChatBot() {
                     style={{ touchAction: 'manipulation' }}
                   >
                     {copiedIndex === `${topic.id}-path-${idx}` ? (
-                      <Check className="w-3 h-3 text-green-600" />
+                      <Check className="w-3 h-3 text-belleya-bright" />
                     ) : (
                       <Copy className="w-3 h-3 text-purple-600" />
                     )}
@@ -406,7 +406,7 @@ export default function ChatBot() {
                       href={WHATSAPP_LINK}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-3 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl font-semibold text-sm transition-colors shadow-lg hover:shadow-xl"
+                      className="mt-3 flex items-center justify-center gap-2 bg-belleya-vivid hover:bg-belleya-bright text-white px-4 py-3 rounded-xl font-semibold text-sm transition-colors shadow-lg hover:shadow-xl"
                       style={{ touchAction: 'manipulation' }}
                     >
                       <ExternalLink className="w-4 h-4" />

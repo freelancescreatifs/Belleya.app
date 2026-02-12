@@ -193,10 +193,10 @@ export default function Partnerships() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200 shadow-sm">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belleya-200 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-              <TrendingUp className="w-5 h-5 text-green-600" />
+              <TrendingUp className="w-5 h-5 text-belleya-bright" />
             </div>
             <span className="text-sm font-medium text-gray-700">Revenus générés</span>
           </div>

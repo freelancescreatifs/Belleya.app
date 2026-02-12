@@ -45,7 +45,7 @@ export default function MarketingStats({
       label: 'Taux de retour',
       value: `${returnRate}%`,
       icon: TrendingUp,
-      color: 'text-green-600',
+      color: 'text-belleya-bright',
       bgColor: 'bg-green-50',
       tooltip: 'Estimation basée sur le ratio de clientes actives vs inactives. Une cliente est considérée active si elle n\'est pas en retard de plus de 90 jours.'
     },

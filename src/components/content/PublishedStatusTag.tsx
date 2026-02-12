@@ -62,8 +62,8 @@ export default function PublishedStatusTag({
       className={`
         inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
         ${isPublished
-          ? 'bg-green-100 text-green-700 border border-green-300'
-          : 'bg-gray-100 text-gray-700 border border-gray-300'
+          ? 'bg-belleya-100 text-belleya-700 border border-belleya-300'
+          : 'bg-brand-50 text-brand-700 border border-brand-200'
         }
         ${className}
       `}

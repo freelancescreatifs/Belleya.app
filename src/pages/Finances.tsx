@@ -613,7 +613,7 @@ export default function Finances() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-green-600" />
+              <TrendingUp className="w-5 h-5 text-belleya-bright" />
             </div>
             <p className="text-sm text-gray-600">
               {paymentFilter === 'all' && serviceTypeFilter === 'all' ? 'Total Recettes' : 'Recettes filtrées'}
@@ -853,7 +853,7 @@ export default function Finances() {
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <p className="text-lg font-semibold text-green-600">
+                        <p className="text-lg font-semibold text-belleya-bright">
                           +{revenue.amount} €
                         </p>
                         <button

@@ -62,8 +62,8 @@ export default function ComparisonSection() {
                       Une <span className="font-bold text-belleya-deep">plateforme tout-en-un</span> pensée pour les professionnelles de la beauté.
                       Au-delà de la gestion administrative, Belleya intègre une dimension unique : <span className="font-bold text-belleya-bright">la visibilité, vos objectifs, vos tâches et tout ce que vous avez besoin dans votre business</span>.
                     </p>
-                    <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50/50 rounded-xl border border-green-200/50">
-                      <Sparkles className="w-6 h-6 text-green-600 flex-shrink-0" />
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50/50 rounded-xl border border-belleya-200/50">
+                      <Sparkles className="w-6 h-6 text-belleya-bright flex-shrink-0" />
                       <p className="text-sm font-medium text-green-900">
                         Votre profil public devient votre <span className="font-bold">vitrine</span> : visibilité + gestion au même endroit.
                       </p>

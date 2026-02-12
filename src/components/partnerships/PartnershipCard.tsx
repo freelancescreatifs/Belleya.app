@@ -41,7 +41,7 @@ const compensationModeLabels = {
 };
 
 const statusConfig = {
-  active: { label: 'Actif', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle },
+  active: { label: 'Actif', color: 'bg-green-100 text-green-700 border-belleya-200', icon: CheckCircle },
   pending: { label: 'En attente', color: 'bg-amber-100 text-amber-700 border-amber-200', icon: Clock },
   completed: { label: 'Terminé', color: 'bg-gray-100 text-gray-700 border-gray-200', icon: AlertCircle }
 };
@@ -61,7 +61,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
     : partnership.commission_rate;
 
   const getRentabilityStatus = () => {
-    if (totalRevenue >= 1000) return { label: 'Rentable', color: 'text-green-600', icon: '🟢' };
+    if (totalRevenue >= 1000) return { label: 'Rentable', color: 'text-belleya-bright', icon: '🟢' };
     if (totalRevenue >= 300) return { label: 'Moyen', color: 'text-amber-600', icon: '🟡' };
     return { label: 'Peu rentable', color: 'text-red-600', icon: '🔴' };
   };
@@ -142,9 +142,9 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200 mb-3">
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-belleya-200 mb-3">
         <div className="flex items-center gap-2 mb-1">
-          <TrendingUp className="w-4 h-4 text-green-600" />
+          <TrendingUp className="w-4 h-4 text-belleya-bright" />
           <span className="text-xs font-medium text-gray-700">Revenus générés</span>
         </div>
         <p className="text-xl font-bold text-gray-900">{totalRevenue.toFixed(2)} €</p>

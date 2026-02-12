@@ -218,7 +218,7 @@ export default function InstagramPreviewModal({
               <div className="flex items-center gap-4">
                 <Heart className="w-6 h-6 text-gray-700 hover:text-red-500 cursor-pointer transition-colors" />
                 <MessageCircle className="w-6 h-6 text-gray-700 hover:text-blue-500 cursor-pointer transition-colors" />
-                <Send className="w-6 h-6 text-gray-700 hover:text-green-500 cursor-pointer transition-colors" />
+                <Send className="w-6 h-6 text-gray-700 hover:text-belleya-vivid cursor-pointer transition-colors" />
               </div>
               <Bookmark className="w-6 h-6 text-gray-700 hover:text-orange-500 cursor-pointer transition-colors" />
             </div>
