@@ -321,35 +321,28 @@ export default function ChatBot() {
   };
 
   return (
-    <>
+    <div className="w-full max-w-md mx-auto p-4">
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-[900] bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-full p-4 shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-300 flex items-center gap-2 group animate-bounce"
+          className="w-full bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-2xl p-4 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
           aria-label="Ouvrir le support bot"
           style={{ touchAction: 'manipulation' }}
         >
           <MessageCircle className="w-6 h-6" />
-          <span className="hidden md:block text-sm font-medium pr-1 max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap">
-            Besoin d'aide ?
+          <span className="text-base font-medium">
+            Besoin d'aide ? Ouvrir le support
           </span>
         </button>
       )}
 
       {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-[800]"
-            onClick={() => setIsOpen(false)}
-            style={{ pointerEvents: 'auto' }}
-          />
-          <div
-            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-[900] w-[calc(100vw-2rem)] md:w-[420px] max-w-full bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200"
-            style={{
-              pointerEvents: 'auto',
-              maxHeight: '85vh'
-            }}
-          >
+        <div
+          className="w-full bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200"
+          style={{
+            maxHeight: '600px'
+          }}
+        >
             <div className="bg-gradient-to-r from-brand-500 to-brand-600 text-white p-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center relative">
@@ -380,7 +373,7 @@ export default function ChatBot() {
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehavior: 'contain',
                 minHeight: '300px',
-                maxHeight: 'calc(85vh - 180px)'
+                maxHeight: '400px'
               }}
             >
             {messages.map((message) => (
@@ -491,9 +484,8 @@ export default function ChatBot() {
               </span>
             </div>
           </div>
-          </div>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }
