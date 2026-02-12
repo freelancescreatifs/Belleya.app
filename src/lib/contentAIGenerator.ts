@@ -79,6 +79,95 @@ function buildContext(objective?: string, pillar?: string, profession?: string):
   return parts.join(' • ');
 }
 
+function generate3HookProposals(title: string, contentType: ContentType, platform: Platform, seed: number): string {
+  const titleLower = title.toLowerCase();
+  const proposals = [
+    [
+      `"Tu ${titleLower}… mais ce n'est pas contre ça que tu luttes vraiment."`,
+      `"Si tu n'arrives pas à arrêter ${titleLower}, ce n'est PAS un manque de volonté."`,
+      `"${title}. Ce n'est pas le vrai problème."`
+    ],
+    [
+      `"${title} ? Ce que personne ne t'a jamais dit."`,
+      `"Tu crois que ${titleLower}, c'est ta faute. Mais si ce n'était pas toi le problème ?"`,
+      `"${title}. Arrête de culpabiliser."`
+    ],
+    [
+      `"${title}… ce n'est pas une mauvaise habitude. C'est une réponse."`,
+      `"Si ${titleLower} te concerne : ce n'est pas une fatalité."`,
+      `"En 2026, ${titleLower} n'est plus un tabou. C'est un signal."`
+    ]
+  ];
+
+  const selected = proposals[seed % proposals.length];
+
+  return `1️⃣ Hook émotionnel (identification forte)
+
+${selected[0]}
+
+⸻
+
+2️⃣ Hook confrontation douce
+
+${selected[1]}
+
+⸻
+
+3️⃣ Hook choc silencieux
+
+${selected[2]}`;
+}
+
+function generateRetentionStructure(title: string, seed: number): string {
+  return `1. Micro-choc émotionnel dès la première phrase
+2. Identification immédiate
+3. Déconstruction d'une croyance
+4. Explication claire et concrète
+5. Opposition "ce qui ne marche pas / ce qui marche"
+6. Projection émotionnelle
+7. CTA simple et naturel`;
+}
+
+function generatePsychologicalTriggers(title: string, seed: number): string {
+  return `✓ Identification personnelle
+✓ Déculpabilisation
+✓ Révélation d'une cause cachée
+✓ Projection positive
+✓ Solution concrète`;
+}
+
+function generateContentAngle(title: string, profession: string, objective: string, seed: number): string {
+  const angles = [
+    `Angle éducatif + émotionnel.\n\nOn ne juge pas.\nOn explique.\nOn rassure.\nOn propose une méthode réelle.\n\nObjectif : créer confiance + crédibilité + envie de passer à l'action.`,
+    `Angle transformation.\n\nPartir de la frustration réelle.\nDéconstruire les croyances limitantes.\nProposer une solution experte et personnalisée.\n\nObjectif : positionner l'expertise et créer la prise de rendez-vous.`,
+    `Angle expertise bienveillante.\n\nMontrer qu'on comprend le vécu.\nApporter une explication claire et rassurante.\nProposer une solution concrète et accessible.\n\nObjectif : créer la confiance et déclencher l'action.`
+  ];
+  return angles[seed % angles.length];
+}
+
+function generateConversionVersion(title: string, profession: string, objective: string, seed: number): string {
+  return `→ Problème identifié : "Tu n'arrives pas à ${title.toLowerCase()} malgré tes promesses."
+→ Solution proposée : "Un accompagnement + renforcement professionnel."
+→ Bénéfice tangible : "Des résultats solides en quelques semaines."
+→ Transformation visible : "Des résultats que tu n'as plus besoin de cacher."
+→ CTA : "Réserve ton diagnostic personnalisé."`;
+}
+
+function generateProTip(title: string, contentType: ContentType, seed: number): string {
+  const tips = [
+    `Les 3 premières secondes doivent créer une rupture :\n\n❌ "Aujourd'hui on parle de ${title.toLowerCase()}"\n✅ "Ce n'est pas un problème de volonté."\n\nLa différence ?\nLe cerveau veut comprendre la contradiction.`,
+    `La structure qui retient :\n\n1. Accroche qui casse une croyance\n2. Identification émotionnelle forte\n3. Explication concrète\n4. Solution crédible\n5. Projection du résultat\n\nChaque étape doit créer l'envie de lire la suivante.`,
+    `Le secret d'un carrousel qui convertit :\n\nNe pas vendre dans les slides.\nApporter de la valeur pure.\nLaisser le CTA final faire le travail.\n\nPlus tu éduques, plus tu convertis.`
+  ];
+  return tips[seed % tips.length];
+}
+
+function generate3SimilarTopics(title: string, profession: string, seed: number): string {
+  return `1️⃣ "Pourquoi tu recommences toujours ${title.toLowerCase()} (même après avoir arrêté)"
+2️⃣ "${title} : combien de temps pour vraiment voir un résultat ?"
+3️⃣ "${title} : les 4 erreurs qui empêchent le progrès"`;
+}
+
 function generateDetailedScript(
   title: string,
   contentType: ContentType,
@@ -91,6 +180,9 @@ function generateDetailedScript(
   const professionContext = getProfessionContext(profession || 'multi_metiers');
   const seed = title.length + (profession?.length || 0);
 
+  const developedTitle = `${title}: ce que tu dois absolument comprendre`;
+  const hooks = generate3HookProposals(title, contentType, platform, seed);
+
   const hook = generateStrategicHook(title, contentType, platform, seed);
   const identification = generateIdentification(title, professionContext, seed);
   const mechanism = generateMechanism(title, professionContext, seed);
@@ -99,132 +191,123 @@ function generateDetailedScript(
   const emotionalProjection = generateEmotionalProjection(title, professionContext, seed);
   const strategicCTA = generateStrategicCTAForScript(objective || 'éduquer', title, seed);
 
+  const retentionStructure = generateRetentionStructure(title, seed);
+  const psychologicalTriggers = generatePsychologicalTriggers(title, seed);
+  const contentAngle = generateContentAngle(title, professionContext, objective || 'éduquer', seed);
+  const conversionVersion = generateConversionVersion(title, professionContext, objective || 'éduquer', seed);
+  const proTip = generateProTip(title, contentType, seed);
+  const similarTopics = generate3SimilarTopics(title, professionContext, seed);
+
   const longCaption = generateLongCaption(title, professionContext, seed);
   const shortCaption = generateShortCaption(title, professionContext, seed);
   const scriptHashtags = generateProfessionHashtags(professionContext, contentType, platform);
 
   if (contentType === 'carrousel') {
-    return `📋 SCRIPT COMPLET - CARROUSEL
+    return `📌 SUJET DÉVELOPPÉ À PARTIR DU THÈME
 
-🎯 Thème : ${title}
-🎨 Métier : ${professionContext}
-📱 Format : Carrousel Instagram
-🎯 Objectif : ${objective || 'Éducation'} + conversion
+Thème brut fourni : "${title}"
+✅ Sujet développé : "${developedTitle}"
 
 ⸻
 
-📌 SLIDE 1 — HOOK (Pattern Interrupt Puissant)
+🔥 3 PROPOSITIONS DE HOOK
+
+${hooks}
+
+⸻
+
+🔥 SCRIPT DÉVELOPPÉ — prêt à publier
+
+🎯 Thème : ${title}
+📱 Format : Carrousel ${platform === 'instagram' ? 'Instagram' : platform.charAt(0).toUpperCase() + platform.slice(1)}
+
+⸻
+
+SLIDE 1
 
 ${hook}
 
 ⸻
 
-📌 SLIDE 2 — IDENTIFICATION
+SLIDE 2
 
 ${identification}
 
 ⸻
 
-📌 SLIDE 3 — MÉCANISME / CAUSE RÉELLE
+SLIDE 3
 
 ${mechanism}
 
 ⸻
 
-📌 SLIDE 4 — ERREUR COURANTE
+SLIDE 4
 
 ${commonError}
 
 ⸻
 
-📌 SLIDE 5 — SOLUTION CONCRÈTE
+SLIDE 5
 
 ${concreteSolution}
 
 ⸻
 
-📌 SLIDE 6 — PROJECTION ÉMOTIONNELLE
+SLIDE 6
 
 ${emotionalProjection}
 
 ⸻
 
-📌 SLIDE 7 — CTA STRATÉGIQUE
+SLIDE 7
 
 ${strategicCTA}
 
 ⸻
 
-📝 LÉGENDE LONGUE (Humaine, fluide, persuasive)
+📈 STRUCTURE RÉTENTION 3 SECONDES
+
+${retentionStructure}
+
+⸻
+
+🧠 DÉCLENCHEURS PSYCHOLOGIQUES UTILISÉS
+
+${psychologicalTriggers}
+
+⸻
+
+🎯 ANGLE DU CONTENU
+
+${contentAngle}
+
+⸻
+
+💰 VERSION ORIENTÉE CONVERSION (ADAPTÉE AU SUJET)
+
+${conversionVersion}
+
+⸻
+
+💡 CONSEIL PRO STRATÉGIQUE
+
+${proTip}
+
+⸻
+
+💡 3 SUJETS SIMILAIRES STRATÉGIQUES
+
+${similarTopics}
+
+⸻
+
+✨ LÉGENDE DÉVELOPPÉE
 
 ${longCaption}
 
 ⸻
 
-✂️ VERSION COURTE (Optimisée conversion)
-
-${shortCaption}
-
-⸻
-
-🏷️ HASHTAGS (Cohérents avec le métier)
-
-${scriptHashtags}`;
-  }
-
-  if (contentType === 'reel' || contentType === 'video') {
-    return `🎬 SCRIPT COMPLET - REEL
-
-🎯 Thème : ${title}
-🎨 Métier : ${professionContext}
-📱 Format : Reel / Vidéo courte
-🎯 Objectif : ${objective || 'Éducation'} + conversion
-
-⸻
-
-⏱️ 0-3s — HOOK (Arrêt brutal)
-
-${hook}
-
-⸻
-
-⏱️ 3-8s — IDENTIFICATION
-
-${identification}
-
-⸻
-
-⏱️ 8-12s — MÉCANISME
-
-${mechanism}
-
-⸻
-
-⏱️ 12-15s — SOLUTION
-
-${concreteSolution}
-
-⸻
-
-⏱️ 15-18s — PROJECTION
-
-${emotionalProjection}
-
-⸻
-
-⏱️ 18-20s — CTA
-
-${strategicCTA}
-
-⸻
-
-📝 LÉGENDE LONGUE
-
-${longCaption}
-
-⸻
-
-✂️ VERSION COURTE
+💬 VERSION COURTE
 
 ${shortCaption}
 
@@ -235,63 +318,207 @@ ${shortCaption}
 ${scriptHashtags}`;
   }
 
-  return `📋 SCRIPT COMPLET - ${contentType.toUpperCase()}
+  if (contentType === 'reel' || contentType === 'video') {
+    return `📌 SUJET DÉVELOPPÉ À PARTIR DU THÈME
 
-🎯 Thème : ${title}
-🎨 Métier : ${professionContext}
-🎯 Objectif : ${objective || 'Éducation'}
+Thème brut fourni : "${title}"
+✅ Sujet développé : "${developedTitle}"
 
 ⸻
 
-1️⃣ HOOK
+🔥 3 PROPOSITIONS DE HOOK
+
+${hooks}
+
+⸻
+
+🔥 SCRIPT DÉVELOPPÉ — prêt à publier
+
+🎯 Thème : ${title}
+📱 Format : ${contentType === 'reel' ? 'Reel' : 'Vidéo'}
+
+⸻
+
+⏱️ 0-3s — HOOK
 
 ${hook}
 
 ⸻
 
-2️⃣ IDENTIFICATION
+⏱️ 3-8s
 
 ${identification}
 
 ⸻
 
-3️⃣ MÉCANISME / CAUSE RÉELLE
+⏱️ 8-12s
 
 ${mechanism}
 
 ⸻
 
-4️⃣ ERREUR COURANTE
-
-${commonError}
-
-⸻
-
-5️⃣ SOLUTION CONCRÈTE
+⏱️ 12-15s
 
 ${concreteSolution}
 
 ⸻
 
-6️⃣ PROJECTION ÉMOTIONNELLE
+⏱️ 15-18s
 
 ${emotionalProjection}
 
 ⸻
 
-7️⃣ CTA STRATÉGIQUE
+⏱️ 18-20s
 
 ${strategicCTA}
 
 ⸻
 
-📝 LÉGENDE LONGUE
+📈 STRUCTURE RÉTENTION 3 SECONDES
+
+${retentionStructure}
+
+⸻
+
+🧠 DÉCLENCHEURS PSYCHOLOGIQUES UTILISÉS
+
+${psychologicalTriggers}
+
+⸻
+
+🎯 ANGLE DU CONTENU
+
+${contentAngle}
+
+⸻
+
+💰 VERSION ORIENTÉE CONVERSION (ADAPTÉE AU SUJET)
+
+${conversionVersion}
+
+⸻
+
+💡 CONSEIL PRO STRATÉGIQUE
+
+${proTip}
+
+⸻
+
+💡 3 SUJETS SIMILAIRES STRATÉGIQUES
+
+${similarTopics}
+
+⸻
+
+✨ LÉGENDE DÉVELOPPÉE
 
 ${longCaption}
 
 ⸻
 
-✂️ VERSION COURTE
+💬 VERSION COURTE
+
+${shortCaption}
+
+⸻
+
+🏷️ HASHTAGS
+
+${scriptHashtags}`;
+  }
+
+  return `📌 SUJET DÉVELOPPÉ À PARTIR DU THÈME
+
+Thème brut fourni : "${title}"
+✅ Sujet développé : "${developedTitle}"
+
+⸻
+
+🔥 3 PROPOSITIONS DE HOOK
+
+${hooks}
+
+⸻
+
+🔥 SCRIPT DÉVELOPPÉ — prêt à publier
+
+🎯 Thème : ${title}
+📱 Format : ${contentType.charAt(0).toUpperCase() + contentType.slice(1)}
+
+⸻
+
+${hook}
+
+⸻
+
+${identification}
+
+⸻
+
+${mechanism}
+
+⸻
+
+${commonError}
+
+⸻
+
+${concreteSolution}
+
+⸻
+
+${emotionalProjection}
+
+⸻
+
+${strategicCTA}
+
+⸻
+
+📈 STRUCTURE RÉTENTION 3 SECONDES
+
+${retentionStructure}
+
+⸻
+
+🧠 DÉCLENCHEURS PSYCHOLOGIQUES UTILISÉS
+
+${psychologicalTriggers}
+
+⸻
+
+🎯 ANGLE DU CONTENU
+
+${contentAngle}
+
+⸻
+
+💰 VERSION ORIENTÉE CONVERSION (ADAPTÉE AU SUJET)
+
+${conversionVersion}
+
+⸻
+
+💡 CONSEIL PRO STRATÉGIQUE
+
+${proTip}
+
+⸻
+
+💡 3 SUJETS SIMILAIRES STRATÉGIQUES
+
+${similarTopics}
+
+⸻
+
+✨ LÉGENDE DÉVELOPPÉE
+
+${longCaption}
+
+⸻
+
+💬 VERSION COURTE
 
 ${shortCaption}
 
@@ -304,11 +531,15 @@ ${scriptHashtags}`;
 
 function generateStrategicHook(title: string, contentType: ContentType, platform: Platform, seed: number): string {
   const hooks = [
-    `"Si ${title.toLowerCase()}… ce n'est pas un manque de volonté."\n\nC'est un mécanisme.`,
-    `"${title}"\n\n[Arrêt brutal]\n\nCe n'est pas ce que tu crois.`,
-    `"Tu te demandes pourquoi ${title.toLowerCase()} ?"\n\nLa vérité va te surprendre.`,
-    `"${title}. Ce que personne ne te dit."`,
-    `"Si tu vis ${title.toLowerCase()}, sache une chose :\n\nCe n'est pas une fatalité."`
+    `${title} ?\nCe n'est pas "juste une mauvaise habitude".\n\nCe n'est pas un caprice.\nCe n'est pas un manque de discipline.\n\nC'est un mécanisme.`,
+
+    `En 2026…\n${title} n'est plus "juste un problème".\n\nC'est souvent un signal silencieux.`,
+
+    `${title}.\n\nTu crois que c'est ta faute.\n\nMais si le problème n'était pas toi ?`,
+
+    `Si tu vis ${title.toLowerCase()}…\nce n'est pas un manque de volonté.\n\nC'est une réponse automatique\nque ton corps a apprise.`,
+
+    `${title}.\nCe que personne ne t'a jamais expliqué.\n\nEt pourtant, ça change tout.`
   ];
 
   return hooks[seed % hooks.length];
@@ -316,10 +547,13 @@ function generateStrategicHook(title: string, contentType: ContentType, platform
 
 function generateIdentification(title: string, profession: string, seed: number): string {
   const identifications = [
-    `Tu t'es déjà dit :\n\n"C'est la dernière fois."\n"Demain j'arrête."\n\nMais au moindre stress…\nTout recommence.\n\nSans même que tu t'en rendes compte.`,
-    `Tu te reconnais ?\n\nTu essaies.\nTu fais de ton mieux.\nMais rien ne change.\n\nEt tu commences à croire que c'est toi le problème.`,
-    `La plupart des clientes me disent :\n\n"J'ai tout essayé"\n"Ça ne marche jamais pour moi"\n"Je pense que c'est normal"\n\nNon. Ce n'est pas normal.`,
-    `Ce moment où tu te dis :\n\n"Pourquoi ça ne fonctionne jamais ?"\n"Qu'est-ce qui ne va pas chez moi ?"\n\nCe n'est pas toi.\nC'est juste qu'on ne t'a pas donné les bonnes clés.`
+    `Tu te dis :\n"C'est la dernière fois."\n"Demain j'arrête, promis."\n\nMais au moindre stress…\nà la moindre attente…\nà la moindre pensée envahissante…\n\nTout recommence\nsans même que tu t'en rendes compte.`,
+
+    `Tu te reconnais ?\n\nTu essaies.\nTu promets.\nTu recommences.\n\nEt au fond, tu te demandes :\n"Pourquoi je n'y arrive pas ?"\n\nMais ce n'est pas toi le problème.`,
+
+    `La plupart des clientes me disent :\n\n"J'ai tout essayé."\n"Ça ne marche jamais pour moi."\n"Je pense que c'est normal."\n\nNon.\nCe n'est pas normal.\nEt surtout : ce n'est pas une fatalité.`,
+
+    `Ce moment où :\n\nTu regardes tes mains.\nTu les caches.\nTu évites les regards.\n\nEt tu te dis :\n"Pourquoi je n'arrive pas à arrêter ?"\n\nCe n'est pas un manque de volonté.`
   ];
 
   return identifications[seed % identifications.length];
@@ -327,10 +561,13 @@ function generateIdentification(title: string, profession: string, seed: number)
 
 function generateMechanism(title: string, profession: string, seed: number): string {
   const mechanisms = [
-    `${title} n'est pas une habitude "bête".\n\nC'est souvent :\n• Un réflexe d'anxiété\n• Une décharge émotionnelle\n• Un besoin de contrôle\n\nLe problème n'est pas visible.\nC'est le déclencheur.`,
-    `Voici ce que la plupart des gens ne comprennent pas :\n\nCe n'est pas une question de technique parfaite.\nCe n'est pas une question de produit magique.\n\nC'est une question de méthode adaptée à TOI.`,
-    `La vraie cause de ${title.toLowerCase()} :\n\nCe n'est pas le manque de volonté.\nCe n'est pas une fatalité génétique.\n\nC'est un mécanisme qu'on peut comprendre et traiter.`,
-    `Ce que personne ne te dit sur ${title.toLowerCase()} :\n\nPlus tu essaies de "réparer" seule, plus tu risques d'aggraver.\nPlus c'est mal fait, plus c'est difficile à rattraper.\nEt plus tu attends, plus tu perds confiance.`
+    `Ce n'est pas un manque de volonté.\n\nC'est une réponse automatique du cerveau face :\n\n• au stress\n• à l'ennui\n• à l'anxiété\n• au besoin de contrôle\n• à une émotion que tu ne sais pas gérer\n\nTon cerveau cherche un apaisement rapide.\nUne micro-décharge.\nUn soulagement immédiat.`,
+
+    `Voici ce que la plupart des gens ne comprennent pas :\n\nCe n'est pas une question de technique parfaite.\nCe n'est pas une question de produit magique.\n\nC'est une réponse automatique.\n\nEt une réponse, ça se comprend.\nÇa se travaille.\nÇa se transforme.`,
+
+    `La vraie cause :\n\nCe n'est pas le manque de volonté.\nCe n'est pas une fatalité génétique.\nCe n'est pas "dans ta tête".\n\nC'est un mécanisme automatique\nque ton corps a appris.\n\nEt ce qu'on apprend,\non peut le désapprendre.`,
+
+    `Ce que personne ne te dit :\n\nPlus tu culpabilises,\nplus le stress monte.\n\nPlus le stress monte,\nplus le mécanisme se renforce.\n\nC'est un cercle.\n\nEt la lutte frontale ne fait qu'aggraver.`
   ];
 
   return mechanisms[seed % mechanisms.length];
@@ -338,10 +575,13 @@ function generateMechanism(title: string, profession: string, seed: number): str
 
 function generateCommonError(title: string, profession: string, seed: number): string {
   const errors = [
-    `Ce qui aggrave le problème :\n\nPlus tu culpabilises → plus tu stresses.\nPlus tu stresses → plus le problème revient.\n\nC'est un cercle invisible.\n\nEt c'est pour ça que "juste arrêter" ne marche pas.`,
-    `L'erreur que tout le monde fait :\n\nEssayer de forcer une solution générique.\n\nMais ton corps, ta situation, tes besoins…\nsont UNIQUES.\n\nCe qui marche pour les autres ne marchera pas forcément pour toi.`,
-    `Ce que la majorité fait mal :\n\nAttendre que ça passe tout seul.\nEssayer des solutions trouvées sur Internet.\nCacher le problème au lieu de le traiter.\n\nRésultat : ça empire.`,
-    `Pourquoi les solutions classiques échouent :\n\nElles ne traitent que le symptôme.\nPas la cause.\n\nC'est comme mettre un pansement\nsur une plaie infectée.`
+    `Le vrai piège ?\n\nPlus tu culpabilises…\nPlus tu stresses.\n\nPlus tu stresses…\nPlus tu recommences.\n\nEt plus tu recommences…\nPlus tu te juges.\n\nC'est un cercle invisible\nqui s'auto-alimente.`,
+
+    `Ce qui ne fonctionne PAS :\n\n❌ Se forcer brutalement\n❌ Se répéter "j'arrête demain"\n❌ Mettre un pansement sans comprendre pourquoi\n❌ Cacher par honte\n❌ Attendre "le bon moment"\n\nLa lutte frontale renforce le mécanisme.`,
+
+    `L'erreur que tout le monde fait :\n\nEssayer de forcer.\n\nMais ton corps, ta situation, ton vécu…\nsont UNIQUES.\n\nCe qui marche pour les autres\nne marchera pas forcément pour toi.\n\nIl faut une vraie stratégie.\nPas une promesse.`,
+
+    `Pourquoi les solutions classiques échouent :\n\nElles ne traitent que le symptôme.\nPas la cause.\n\nElles ignorent le déclencheur.\nElles forcent l'arrêt sans créer l'alternative.\n\nRésultat : ça revient.\nEncore et encore.`
   ];
 
   return errors[seed % errors.length];
@@ -349,10 +589,13 @@ function generateCommonError(title: string, profession: string, seed: number): s
 
 function generateConcreteSolution(title: string, profession: string, seed: number): string {
   const solutions = [
-    `En ${profession}, on agit sur 2 niveaux :\n\n1️⃣ Renforcer (technique adaptée)\n2️⃣ Créer une barrière qui casse le réflexe automatique\n\nQuand c'est traité correctement…\nLe résultat est visible.\nEt durable.`,
-    `La solution que j'applique :\n\n✔️ Comprendre TON besoin réel (pas celui des autres)\n✔️ Adapter la méthode à TA situation\n✔️ Créer un résultat qui tient dans le temps\n\nPas de recette magique.\nJuste une approche personnalisée.`,
-    `Voici comment je traite ${title.toLowerCase()} :\n\n1. On identifie la vraie cause\n2. On adapte la technique à ton cas précis\n3. On crée un environnement favorable\n4. On suit l'évolution\n\nRésultat : durable et confortable.`,
-    `La méthode qui fonctionne :\n\n❌ Pas de solution générique\n❌ Pas de promesse miracle\n✔️ Une vraie écoute de ton besoin\n✔️ Une technique adaptée\n✔️ Un suivi personnalisé\n\nC'est ça qui fait la différence.`
+    `Ce qui fonctionne vraiment :\n\n✔ Renforcer physiquement pour créer une barrière\n✔ Soigner l'aspect esthétique (le cerveau protège ce qui est beau)\n✔ Identifier ton déclencheur émotionnel\n✔ Remplacer le geste par une alternative consciente\n✔ Installer un cadre progressif\n\nQuand c'est structuré, protégé, valorisé…\nle réflexe diminue naturellement.`,
+
+    `En institut, on agit sur deux choses :\n\n– Le renforcement physique\n– Le déclencheur émotionnel\n\nParce que casser une habitude,\nce n'est pas se battre contre soi.\n\nC'est changer l'environnement du geste.\n\nEt ça, ça change tout.`,
+
+    `La méthode que j'applique :\n\n1. On comprend TON vécu\n2. On identifie le déclencheur réel\n3. On renforce physiquement\n4. On crée une alternative au geste\n5. On suit l'évolution\n\nPas de recette magique.\nJuste une stratégie adaptée.`,
+
+    `Ce qui change vraiment :\n\n❌ Pas de solution générique\n❌ Pas de promesse miracle\n✔️ Une écoute réelle\n✔️ Une technique adaptée\n✔️ Un accompagnement progressif\n\nQuand c'est bien fait,\nle résultat tient.\nEt tu reprends confiance.`
   ];
 
   return solutions[seed % solutions.length];
@@ -360,31 +603,44 @@ function generateConcreteSolution(title: string, profession: string, seed: numbe
 
 function generateEmotionalProjection(title: string, profession: string, seed: number): string {
   const projections = [
-    `Imagine :\n\nRegarder tes mains sans honte.\nArrêter de les cacher.\nTe sentir soignée.\n\nC'est souvent là que le déclic se fait.`,
-    `Le résultat ?\n\nPlus besoin de stresser.\nPlus besoin de tout surveiller.\nJuste profiter.\n\nEt retrouver cette confiance que tu avais perdue.`,
-    `Avant : tu évitais.\nTu cachais.\nTu espérais que personne ne remarque.\n\nAprès : tu montres.\nTu assumes.\nTu es fière du résultat.\n\nC'est ça que mes clientes me disent.`,
-    `Le changement n'est pas que physique.\n\nC'est dans le regard.\nDans la posture.\nDans la confiance retrouvée.\n\nEt ça… ça change tout.`
+    `Imagine regarder tes mains\nsans les cacher.\n\nSans honte.\nSans gêne.\nSans cette petite voix qui te critique.\n\nJuste des mains que tu assumes.`,
+
+    `Le résultat ?\n\nPlus besoin de stresser.\nPlus besoin de cacher.\nJuste profiter.\n\nEt retrouver cette confiance\nque tu croyais perdue.`,
+
+    `Avant : tu évitais.\nTu cachais.\nTu espérais que personne ne remarque.\n\nAprès : tu montres.\nTu assumes.\nTu es fière.\n\nC'est souvent là que le vrai changement se voit.`,
+
+    `Imagine ne plus avoir à cacher.\n\nNe plus avoir à t'excuser.\nNe plus avoir honte.\n\nJuste être toi.\nAvec des résultats que tu assumes.\n\nC'est possible.`
   ];
 
   return projections[seed % projections.length];
 }
 
 function generateStrategicCTAForScript(objective: string, title: string, seed: number): string {
+  const titleLower = title.toLowerCase();
+
   const ctas: Record<string, string[]> = {
     éduquer: [
       `Si tu veux en savoir plus :\n\n📌 Sauvegarde ce post\n💬 Pose tes questions en commentaire\n📩 Ou DM-moi pour en discuter`,
-      `Des questions sur ${title.toLowerCase()} ?\n\n💬 Écris-les en commentaire\n📩 Ou envoie-moi un DM\nJe te réponds avec plaisir`,
+
+      `Des questions sur ${titleLower} ?\n\n💬 Écris-les en commentaire\n📩 Ou envoie-moi un DM\nJe te réponds avec plaisir`,
+
+      `${title}.\nSi ça te parle :\n\n💬 Écris "OUI" en commentaire\n📩 Ou DM-moi pour échanger`,
     ],
     convertir: [
-      `Si ${title.toLowerCase()} te concerne :\n\n📍 Prends RDV maintenant (lien en bio)\n💬 Ou DM-moi "RDV"`,
-      `Tu veux résoudre ${title.toLowerCase()} ?\n\n📲 Réserve ton créneau (lien en bio)\n💬 Ou commente "GO"`,
+      `Si ${titleLower} te concerne :\n\n📍 Réserve maintenant (lien en bio)\n💬 Ou écris "RDV" en DM`,
+
+      `Arrêter ${titleLower},\nce n'est pas une question de force.\n\nC'est une stratégie.\nUn accompagnement.\nUn système.\n\n💬 Écris "STOP" en commentaire si tu veux en parler.\nJe te réponds en privé.`,
+
+      `Tu veux résoudre ${titleLower} ?\n\n📲 Réserve ton diagnostic (lien en bio)\n💬 Ou commente "GO"`,
     ],
     attirer: [
       `Ce post résonne pour toi ?\n\n💬 Commente "OUI"\n📌 Sauvegarde-le\n📤 Partage-le à quelqu'un qui en a besoin`,
-      `Tu te reconnais dans ce post ?\n\n💾 Sauvegarde-le\n📩 Partage-le en story\n💬 Dis-moi en commentaire`,
+
+      `Tu te reconnais ?\n\n💾 Sauvegarde ce post\n📩 Partage-le en story\n💬 Dis-moi en commentaire ce que tu en penses`,
     ],
     fidéliser: [
       `Tu fais déjà partie de mes clientes ?\n\n💬 Raconte-moi ton expérience en commentaire\n📍 Et pense à réserver ton prochain RDV`,
+
       `Mes clientes régulières :\n\n💬 Partagez votre transformation\n📩 Et n'oubliez pas de réserver (lien en bio)`,
     ],
   };
@@ -394,8 +650,11 @@ function generateStrategicCTAForScript(objective: string, title: string, seed: n
 }
 
 function generateLongCaption(title: string, profession: string, seed: number): string {
+  const titleLower = title.toLowerCase();
   const captions = [
-    `${title}. Ce n'est pas ce que tu crois.\n\nLa plupart des clientes pensent que ${title.toLowerCase()}, c'est compliqué ou hors de portée.\nEn réalité, ce n'est ni une question de chance… ni une question de budget.\n\nCe n'est pas une fatalité.\nC'est un mécanisme qu'on peut comprendre et traiter.\n\nQuand c'est fait correctement :\n✔️ Le résultat tient dans le temps\n✔️ Tu te sens en confiance\n✔️ Tu n'as plus besoin de cacher\n\nEt surtout… tu retrouves ce sentiment de bien-être que tu cherchais.\n\nJ'ai accompagné des dizaines de clientes dans cette transformation.\nEt chaque fois, c'est la même chose : ce n'est pas juste le résultat qui change.\nC'est la confiance qui revient.`,
+    `Tu crois que tu manques de volonté.\n\nMais si le problème n'était pas ta volonté ?\n\n${title} est souvent lié à un mécanisme automatique du cerveau face au stress ou à l'anxiété. Ce n'est pas "bête". Ce n'est pas "sale". C'est une réponse.\n\nEt une réponse, ça se comprend.\n\nEn institut, on agit sur deux choses :\n– Le renforcement physique\n– Le déclencheur émotionnel\n\nParce que casser une habitude, ce n'est pas se battre contre soi.\nC'est changer l'environnement du geste.\n\nSi tu veux arrêter pour de bon cette année,\nil faut une stratégie, pas juste une promesse.\n\nJe peux t'aider 🤍`,
+
+    `${title}. Ce n'est pas ce que tu crois.\n\nLa plupart des clientes pensent que ${titleLower}, c'est compliqué ou hors de portée.\nEn réalité, ce n'est ni une question de chance… ni une question de budget.\n\nCe n'est pas une fatalité.\nC'est un mécanisme qu'on peut comprendre et traiter.\n\nQuand c'est fait correctement :\n✔️ Le résultat tient dans le temps\n✔️ Tu te sens en confiance\n✔️ Tu n'as plus besoin de cacher\n\nEt surtout… tu retrouves ce sentiment de bien-être que tu cherchais.\n\nJ'ai accompagné des dizaines de clientes dans cette transformation.\nEt chaque fois, c'est la même chose : ce n'est pas juste le résultat qui change.\nC'est la confiance qui revient.`,
 
     `Parlons de ${title.toLowerCase()} (sans filtre).\n\nBeaucoup me disent qu'elles ont essayé, que ça n'a pas marché, qu'elles ont abandonné.\nMais voici ce qu'on ne leur a jamais expliqué.\n\nCe n'est pas une question de technique parfaite.\nCe n'est pas une question de produit magique.\nC'est une question de méthode adaptée à TOI.\n\nPlus tu essaies de "réparer" seule, plus tu risques d'aggraver.\nPlus c'est mal fait, plus c'est difficile à rattraper.\nEt plus tu attends, plus tu perds confiance.\n\nAvec la bonne approche :\n✔️ On comprend d'abord ton besoin réel\n✔️ On adapte la solution à ta situation\n✔️ On obtient un résultat durable et naturel\n\nLa différence ne se voit pas que dans le résultat.\nElle se voit dans la posture, dans le regard, dans la confiance retrouvée.`
   ];

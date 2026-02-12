@@ -521,3 +521,77 @@ Le **Smart Content AI Generator** transforme la création de contenu en un proce
 
 Le système ne génère pas du contenu.
 **Il génère des résultats.**
+
+---
+
+## 🆕 Version 3.0 - Format Complet (Février 2026)
+
+### Évolution majeure du système
+
+La version 3.0 introduit un **format complet et structuré** qui inclut désormais **12 sections** au lieu de simplement le script final.
+
+### Nouveau format de sortie
+
+Chaque génération de contenu produit maintenant :
+
+1. **📌 Sujet développé** - Reformulation stratégique et fluide du thème brut
+2. **🔥 3 propositions de hook** - Variantes émotionnelles pour A/B testing
+3. **🔥 Script développé** - 7-8 slides naturelles et fluides (contenu final)
+4. **📈 Structure de rétention** - Explication de la progression psychologique
+5. **🧠 Déclencheurs psychologiques** - Leviers émotionnels utilisés
+6. **🎯 Angle du contenu** - Ton, intention stratégique et objectif
+7. **💰 Version orientée conversion** - Adaptation pour maximiser l'action
+8. **💡 Conseil pro stratégique** - Tip concret et actionnable
+9. **💡 3 sujets similaires** - Angles connexes pour prolonger la série
+10. **✨ Légende développée** - Texte fluide, humain et persuasif
+11. **💬 Version courte** - Légende alternative orientée conversion
+12. **🏷️ Hashtags** - Adaptés au métier sélectionné
+
+### Philosophie v3
+
+Le système ne génère plus seulement du contenu prêt à publier.
+Il génère un **package stratégique complet** qui permet de :
+
+- ✅ **Créer** : Script final + légendes prêtes à publier
+- ✅ **Comprendre** : Structure, déclencheurs, angle stratégique
+- ✅ **Optimiser** : 3 hooks à tester, version conversion, conseil pro
+- ✅ **Prolonger** : 3 sujets similaires pour créer une série
+
+### Avantages de la v3
+
+| Aspect | Avant (v2) | Maintenant (v3) |
+|--------|-----------|-----------------|
+| **Hook** | 1 seul hook | 3 variantes à tester |
+| **Script** | 7 slides | 7-8 slides + sujet développé |
+| **Légende** | 1 version | 2 versions (longue + courte) |
+| **Stratégie** | Implicite | Explicite (structure + déclencheurs + angle) |
+| **Suite** | Aucune | 3 sujets similaires proposés |
+| **Conseils** | Aucun | 1 conseil pro actionnable |
+
+### Cas d'usage concrets
+
+#### Pour les professionnels expérimentés
+Utiliser le **script développé + légende développée + hashtags** directement.
+Ignorer les sections stratégiques si non nécessaires.
+
+#### Pour les débutants
+Lire la **structure de rétention** et les **déclencheurs psychologiques** pour comprendre pourquoi le contenu fonctionne.
+Utiliser le **conseil pro** pour améliorer leurs futurs contenus.
+
+#### Pour l'optimisation
+Tester les **3 propositions de hook** en A/B testing.
+Adapter avec la **version orientée conversion** pour maximiser les réservations.
+
+#### Pour la planification
+Utiliser les **3 sujets similaires** pour créer une série cohérente sur plusieurs semaines.
+
+### Documentation complète
+
+Pour tous les détails sur le format complet, voir :
+📄 **`CONTENT_GENERATION_FORMAT_COMPLETE.md`**
+
+---
+
+**Dernière mise à jour** : 12 février 2026
+**Version actuelle** : 3.0 (Format complet)
+**Fichier technique** : `src/lib/contentAIGenerator.ts`
