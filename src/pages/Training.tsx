@@ -156,8 +156,8 @@ export default function Training({ onPageChange }: TrainingProps) {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
           <div className="flex flex-col items-center text-center space-y-6">
-            <div className="p-4 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full">
-              <GraduationCap className="w-12 h-12 text-belleya-primary" />
+            <div className="p-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full">
+              <GraduationCap className="w-12 h-12 text-green-600" />
             </div>
 
             <div className="space-y-2">
@@ -170,7 +170,7 @@ export default function Training({ onPageChange }: TrainingProps) {
             <div className="w-full space-y-3 pt-4">
               <button
                 onClick={() => onPageChange?.('settings')}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-md font-medium"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md font-medium"
               >
                 <Settings className="w-5 h-5" />
                 Compléter mon profil entreprise
@@ -199,7 +199,7 @@ export default function Training({ onPageChange }: TrainingProps) {
         </div>
         <button
           onClick={loadData}
-          className="px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         >
           Réessayer
         </button>
@@ -216,7 +216,7 @@ export default function Training({ onPageChange }: TrainingProps) {
         </div>
         <button
           onClick={() => setShowAddStudent(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-600 transition-all shadow-lg hover:shadow-xl"
         >
           <Plus className="w-5 h-5" />
           Nouvel élève
@@ -231,7 +231,7 @@ export default function Training({ onPageChange }: TrainingProps) {
               <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total_students_trained}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-belleya-bright" />
+              <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </div>
@@ -286,14 +286,14 @@ export default function Training({ onPageChange }: TrainingProps) {
                 placeholder="Rechercher un élève..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
             <div className="flex gap-2">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as StudentStatus | 'all')}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="all">Tous les statuts</option>
                 <option value="upcoming">À venir</option>
@@ -303,7 +303,7 @@ export default function Training({ onPageChange }: TrainingProps) {
               <select
                 value={folderFilter}
                 onChange={(e) => setFolderFilter(e.target.value as 'all' | 'complete' | 'incomplete')}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="all">Tous les dossiers</option>
                 <option value="complete">Complets</option>
@@ -328,7 +328,7 @@ export default function Training({ onPageChange }: TrainingProps) {
               {students.length === 0 && (
                 <button
                   onClick={() => setShowAddStudent(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-600 transition-all shadow-lg hover:shadow-xl"
                 >
                   <Plus className="w-5 h-5" />
                   Ajouter un élève
@@ -349,7 +349,7 @@ export default function Training({ onPageChange }: TrainingProps) {
                     onClick={() => setSelectedStudentId(student.id)}
                     className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden group"
                   >
-                    <div className="relative h-32 bg-gradient-to-br from-belleya-primary/10 to-pink-100 flex items-center justify-center">
+                    <div className="relative h-32 bg-gradient-to-br from-green-400/10 to-green-100 flex items-center justify-center">
                       {student.photo_url ? (
                         <img
                           src={student.photo_url}
@@ -357,7 +357,7 @@ export default function Training({ onPageChange }: TrainingProps) {
                           className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
                         />
                       ) : (
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-belleya-primary to-pink-500 flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-md">
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-md">
                           {student.first_name.charAt(0)}{student.last_name.charAt(0)}
                         </div>
                       )}

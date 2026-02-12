@@ -407,7 +407,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
                                 className="flex items-center justify-between p-3 border border-gray-200 bg-gray-50 rounded-lg"
                               >
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                                  <FileText className="w-5 h-5 text-belleya-bright flex-shrink-0" />
+                                  <FileText className="w-5 h-5 text-green-600 flex-shrink-0" />
                                   <div className="min-w-0 flex-1">
                                     <p className="font-medium text-sm truncate">
                                       {doc.custom_name || doc.file_path.split('/').pop()}
@@ -475,7 +475,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
                           }`}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <FileText className={`w-5 h-5 flex-shrink-0 ${doc ? 'text-belleya-bright' : 'text-gray-400'}`} />
+                            <FileText className={`w-5 h-5 flex-shrink-0 ${doc ? 'text-green-600' : 'text-gray-400'}`} />
                             <div className="min-w-0 flex-1">
                               <p className="font-medium text-sm">{label}</p>
                               {doc && (
@@ -535,7 +535,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
                                   }}
                                   disabled={uploading}
                                 />
-                                <div className="flex items-center gap-2 px-3 py-1.5 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors">
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
                                   <Upload className="w-4 h-4" />
                                   <span className="text-sm">Ajouter</span>
                                 </div>
@@ -635,7 +635,7 @@ function EmailModal({ student, documents, selectedDocuments, onToggleDocument, o
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
 
@@ -647,7 +647,7 @@ function EmailModal({ student, documents, selectedDocuments, onToggleDocument, o
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
             />
           </div>
 
@@ -666,7 +666,7 @@ function EmailModal({ student, documents, selectedDocuments, onToggleDocument, o
                       type="checkbox"
                       checked={selectedDocuments.has(doc.id)}
                       onChange={() => onToggleDocument(doc.id)}
-                      className="w-4 h-4 text-belleya-500 border-gray-300 rounded focus:ring-belleya-primary"
+                      className="w-4 h-4 text-green-500 border-gray-300 rounded focus:ring-green-500"
                     />
                     <FileText className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-700 flex-1">

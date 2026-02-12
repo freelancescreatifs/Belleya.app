@@ -286,7 +286,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
                 required
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
@@ -299,7 +299,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
                 required
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -313,7 +313,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
@@ -325,7 +325,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -338,7 +338,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
               type="text"
               value={formData.instagram_username}
               onChange={(e) => setFormData({ ...formData, instagram_username: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               placeholder="@username"
             />
           </div>
@@ -351,7 +351,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
               <select
                 value={formData.formation_id}
                 onChange={(e) => setFormData({ ...formData, formation_id: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="">Sélectionnez une formation</option>
                 {formations.map((formation) => (
@@ -378,7 +378,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
                 required
                 value={formData.training_start_date}
                 onChange={(e) => setFormData({ ...formData, training_start_date: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
@@ -391,7 +391,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
                 required
                 value={formData.training_end_date}
                 onChange={(e) => setFormData({ ...formData, training_end_date: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -403,7 +403,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
             <select
               value={formData.training_level}
               onChange={(e) => setFormData({ ...formData, training_level: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="">Sélectionnez un niveau</option>
               <option value="debutant">Débutant</option>
@@ -438,7 +438,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
                 </div>
               )}
               <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 px-4 py-2 bg-belleya-50 text-belleya-primary rounded-lg hover:bg-belleya-100 transition-colors cursor-pointer">
+                <label className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors cursor-pointer">
                   <Upload className="w-4 h-4" />
                   <span className="text-sm font-medium">
                     {photoPreview ? 'Changer la photo' : 'Ajouter une photo'}
@@ -477,7 +477,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
               value={formData.internal_notes}
               onChange={(e) => setFormData({ ...formData, internal_notes: e.target.value })}
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
               placeholder="Notes personnelles sur l'élève..."
             />
           </div>
@@ -493,7 +493,7 @@ export default function StudentForm({ onClose, onSuccess, student, onStudentCrea
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
             >
               {loading ? 'Enregistrement...' : student ? 'Modifier' : 'Créer'}
             </button>
