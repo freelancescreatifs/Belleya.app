@@ -158,17 +158,14 @@ export default function Admin() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Utilisation de la fonction RPC sécurisée côté backend
+      const { data, error } = await supabase.rpc('is_admin');
 
       if (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
       } else {
-        setIsAdmin(data?.role === 'admin');
+        setIsAdmin(data === true);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -207,9 +204,9 @@ export default function Admin() {
 
         const usersWithDetails = await Promise.all(
           usersResult.data.map(async (u) => {
-            const [roleData, authData, companyData, subscriptionData] = await Promise.all([
+            const [profileData, authData, companyData, subscriptionData] = await Promise.all([
               supabase
-                .from('user_roles')
+                .from('user_profiles')
                 .select('role')
                 .eq('user_id', u.user_id)
                 .maybeSingle(),
@@ -247,7 +244,7 @@ export default function Admin() {
               email: authData.data.user?.email || 'N/A',
               created_at: authData.data.user?.created_at || u.created_at,
               last_sign_in_at: authData.data.user?.last_sign_in_at || null,
-              role: roleData?.data?.role || 'user',
+              role: profileData?.data?.role || 'pro',
               first_name: u.first_name || null,
               last_name: u.last_name || null,
               profession: companyData.data?.primary_profession || null,
@@ -919,7 +916,7 @@ export default function Admin() {
                       <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-end pr-2"
+                          className="h-full bg-blue-500 rounded-full flex items-center justify-end pr-2"
                           style={{ width: `${Math.max(widthPercentage, 5)}%` }}
                         >
                           <span className="text-xs font-semibold text-white">{stat.newUsers}</span>
@@ -944,7 +941,7 @@ export default function Admin() {
                       <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-end pr-2"
+                          className="h-full bg-emerald-500 rounded-full flex items-center justify-end pr-2"
                           style={{ width: `${Math.max(widthPercentage, 5)}%` }}
                         >
                           <span className="text-xs font-semibold text-white">{stat.revenue.toFixed(0)}€</span>
