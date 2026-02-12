@@ -20,6 +20,7 @@ interface KPIStats {
   vipUsers: number;
   depositRevenue: number;
   trialUsers: number;
+  totalClients: number;
 }
 
 interface MonthlyStats {
@@ -75,14 +76,16 @@ export default function Admin() {
     empireUsers: 0,
     vipUsers: 0,
     depositRevenue: 0,
-    trialUsers: 0
+    trialUsers: 0,
+    totalClients: 0
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'partnerships'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editingClientName, setEditingClientName] = useState({ firstName: '', lastName: '' });
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([]);
@@ -264,6 +267,7 @@ export default function Admin() {
         const empireUsers = usersWithDetails.filter(u => u.plan_type === 'empire').length;
         const vipUsers = usersWithDetails.filter(u => u.plan_type === 'vip').length;
         const trialUsers = usersWithDetails.filter(u => u.subscription_status === 'trial').length;
+        const totalClients = usersWithDetails.filter(u => u.role === 'client').length;
 
         setStats(prev => ({
           ...prev,
@@ -274,7 +278,8 @@ export default function Admin() {
           studioUsers,
           empireUsers,
           vipUsers,
-          trialUsers
+          trialUsers,
+          totalClients
         }));
       }
 
@@ -419,6 +424,31 @@ export default function Admin() {
     }
   };
 
+  const handleEditClientInfo = async () => {
+    if (!editingUser) return;
+
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          first_name: editingClientName.firstName,
+          last_name: editingClientName.lastName,
+        })
+        .eq('id', editingUser.id);
+
+      if (error) throw error;
+
+      addToast('Informations client mises à jour avec succès', 'success');
+      setShowEditModal(false);
+      setEditingUser(null);
+      setEditingClientName({ firstName: '', lastName: '' });
+      loadData();
+    } catch (error) {
+      console.error('Error updating client info:', error);
+      addToast('Erreur lors de la mise à jour', 'error');
+    }
+  };
+
   const handleEditSubscription = async (newPlanType: string) => {
     if (!editingUser || !user) return;
 
@@ -541,6 +571,15 @@ export default function Admin() {
     return matchesSearch && matchesSubscription;
   });
 
+  const filteredClients = users.filter(u => {
+    const matchesSearch = u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.first_name && u.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (u.last_name && u.last_name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    return u.role === 'client' && matchesSearch;
+  });
+
   const filteredPartnerships = partnerships.filter(p =>
     p.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.user_email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -580,6 +619,16 @@ export default function Admin() {
           }`}
         >
           Utilisateurs
+        </button>
+        <button
+          onClick={() => setActiveTab('clients')}
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
+            activeTab === 'clients'
+              ? 'border-brand-500 text-brand-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Clients
         </button>
         <button
           onClick={() => setActiveTab('partnerships')}
@@ -707,7 +756,7 @@ export default function Admin() {
 
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Utilisateurs</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
@@ -736,6 +785,16 @@ export default function Admin() {
                   <span className="text-sm font-medium text-gray-700">Utilisateurs actifs</span>
                 </div>
                 <p className="text-3xl font-bold text-gray-900">{stats.activeUsers30d}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-6 border border-pink-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <Users className="w-6 h-6 text-pink-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Clients</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalClients}</p>
               </div>
             </div>
           </div>
@@ -1076,6 +1135,100 @@ export default function Admin() {
         </div>
       )}
 
+      {activeTab === 'clients' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+            <div className="relative flex-1 max-w-full sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher par email ou nom..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+            </div>
+            <button
+              onClick={() => exportToCSV(filteredClients, 'clients')}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Download className="w-5 h-5" />
+              Export CSV
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nom</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date inscription</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Dernier login</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredClients.map((client) => (
+                    <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-4 text-sm text-gray-900">{client.email}</td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {client.first_name || client.last_name
+                          ? `${client.first_name || ''} ${client.last_name || ''}`.trim()
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
+                        {new Date(client.created_at).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
+                        {client.last_sign_in_at ? new Date(client.last_sign_in_at).toLocaleDateString('fr-FR') : '—'}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingUser(client);
+                              setEditingClientName({
+                                firstName: client.first_name || '',
+                                lastName: client.last_name || ''
+                              });
+                              setShowEditModal(true);
+                            }}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Modifier le client"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(client)}
+                            disabled={deletingUserId === client.id}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Supprimer le client"
+                          >
+                            {deletingUserId === client.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {filteredClients.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600">Aucun client trouvé</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {activeTab === 'partnerships' && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
@@ -1158,16 +1311,19 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Modal de modification d'abonnement */}
+      {/* Modal de modification */}
       {showEditModal && editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Modifier l'abonnement</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                {editingUser.role === 'client' ? 'Modifier le client' : 'Modifier l\'abonnement'}
+              </h3>
               <button
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingUser(null);
+                  setEditingClientName({ firstName: '', lastName: '' });
                 }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
@@ -1185,72 +1341,119 @@ export default function Admin() {
               </p>
             </div>
 
-            <div className="mb-6">
-              <p className="text-sm font-medium text-gray-700 mb-3">Sélectionner un plan</p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => handleEditSubscription('start')}
-                  className="w-full p-4 border-2 border-blue-200 hover:border-blue-400 rounded-xl transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <Star className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="font-semibold text-gray-900">Start</p>
-                      <p className="text-sm text-gray-600">Plan de démarrage</p>
-                    </div>
+            {editingUser.role === 'client' ? (
+              <div className="mb-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                    <input
+                      type="text"
+                      value={editingClientName.firstName}
+                      onChange={(e) => setEditingClientName({ ...editingClientName, firstName: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                      placeholder="Prénom du client"
+                    />
                   </div>
-                </button>
-
-                <button
-                  onClick={() => handleEditSubscription('studio')}
-                  className="w-full p-4 border-2 border-purple-200 hover:border-purple-400 rounded-xl transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <Star className="w-5 h-5 text-purple-600" />
-                    <div>
-                      <p className="font-semibold text-gray-900">Studio</p>
-                      <p className="text-sm text-gray-600">Plan intermédiaire</p>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                    <input
+                      type="text"
+                      value={editingClientName.lastName}
+                      onChange={(e) => setEditingClientName({ ...editingClientName, lastName: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                      placeholder="Nom du client"
+                    />
                   </div>
-                </button>
-
-                <button
-                  onClick={() => handleEditSubscription('empire')}
-                  className="w-full p-4 border-2 border-amber-200 hover:border-amber-400 rounded-xl transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <Crown className="w-5 h-5 text-amber-600" />
-                    <div>
-                      <p className="font-semibold text-gray-900">Empire</p>
-                      <p className="text-sm text-gray-600">Plan premium</p>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => handleEditSubscription('vip')}
-                  className="w-full p-4 border-2 border-rose-200 hover:border-rose-400 rounded-xl transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <Crown className="w-5 h-5 text-rose-600" />
-                    <div>
-                      <p className="font-semibold text-gray-900">VIP</p>
-                      <p className="text-sm text-gray-600">Accès gratuit illimité</p>
-                    </div>
-                  </div>
-                </button>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={handleEditClientInfo}
+                    className="flex-1 px-4 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
+                  >
+                    Enregistrer
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditingUser(null);
+                      setEditingClientName({ firstName: '', lastName: '' });
+                    }}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Sélectionner un plan</p>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleEditSubscription('start')}
+                      className="w-full p-4 border-2 border-blue-200 hover:border-blue-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Star className="w-5 h-5 text-blue-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">Start</p>
+                          <p className="text-sm text-gray-600">Plan de démarrage</p>
+                        </div>
+                      </div>
+                    </button>
 
-            <button
-              onClick={() => {
-                setShowEditModal(false);
-                setEditingUser(null);
-              }}
-              className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Annuler
-            </button>
+                    <button
+                      onClick={() => handleEditSubscription('studio')}
+                      className="w-full p-4 border-2 border-purple-200 hover:border-purple-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Star className="w-5 h-5 text-purple-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">Studio</p>
+                          <p className="text-sm text-gray-600">Plan intermédiaire</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleEditSubscription('empire')}
+                      className="w-full p-4 border-2 border-amber-200 hover:border-amber-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Crown className="w-5 h-5 text-amber-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">Empire</p>
+                          <p className="text-sm text-gray-600">Plan premium</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleEditSubscription('vip')}
+                      className="w-full p-4 border-2 border-rose-200 hover:border-rose-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Crown className="w-5 h-5 text-rose-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">VIP</p>
+                          <p className="text-sm text-gray-600">Accès gratuit illimité</p>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingUser(null);
+                  }}
+                  className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
