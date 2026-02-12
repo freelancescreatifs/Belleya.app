@@ -29,6 +29,8 @@ interface MonthlyStats {
 
 interface UserData {
   id: string;
+  user_id: string;
+  company_id: string | null;
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
@@ -235,6 +237,8 @@ export default function Admin() {
 
             return {
               id: u.id,
+              user_id: u.user_id,
+              company_id: u.company_id,
               email: authData.data.user?.email || 'N/A',
               created_at: authData.data.user?.created_at || u.created_at,
               last_sign_in_at: authData.data.user?.last_sign_in_at || null,
@@ -388,16 +392,16 @@ export default function Admin() {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async (user: UserData) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
       return;
     }
 
-    setDeletingUserId(userId);
+    setDeletingUserId(user.id);
 
     try {
-      // Supprimer l'utilisateur via l'API admin
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      // Supprimer l'utilisateur via l'API admin en utilisant le user_id (auth.users)
+      const { error } = await supabase.auth.admin.deleteUser(user.user_id);
 
       if (error) throw error;
 
@@ -415,14 +419,7 @@ export default function Admin() {
     if (!editingUser || !user) return;
 
     try {
-      // Trouver le company_id de l'utilisateur
-      const { data: profileData } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('user_id', editingUser.id)
-        .single();
-
-      if (!profileData?.company_id) {
+      if (!editingUser.company_id) {
         addToast('Erreur : utilisateur sans company_id', 'error');
         return;
       }
@@ -431,7 +428,7 @@ export default function Admin() {
       const { error: subError } = await supabase
         .from('subscriptions')
         .upsert({
-          company_id: profileData.company_id,
+          company_id: editingUser.company_id,
           plan_type: newPlanType,
           subscription_status: 'active',
           trial_end_date: newPlanType === 'vip' ? null : undefined,
@@ -455,18 +452,11 @@ export default function Admin() {
     }
   };
 
-  const handleDeleteSubscription = async (userId: string) => {
+  const handleDeleteSubscription = async (user: UserData) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) return;
 
     try {
-      // Trouver le company_id
-      const { data: profileData } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('user_id', userId)
-        .single();
-
-      if (!profileData?.company_id) {
+      if (!user.company_id) {
         addToast('Erreur : utilisateur sans company_id', 'error');
         return;
       }
@@ -474,7 +464,7 @@ export default function Admin() {
       const { error } = await supabase
         .from('subscriptions')
         .delete()
-        .eq('company_id', profileData.company_id);
+        .eq('company_id', user.company_id);
 
       if (error) throw error;
 
@@ -1030,7 +1020,7 @@ export default function Admin() {
                           </button>
                           {user.plan_type && (
                             <button
-                              onClick={() => handleDeleteSubscription(user.id)}
+                              onClick={() => handleDeleteSubscription(user)}
                               className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                               title="Supprimer l'abonnement"
                             >
@@ -1038,7 +1028,7 @@ export default function Admin() {
                             </button>
                           )}
                           <button
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user)}
                             disabled={deletingUserId === user.id}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Supprimer l'utilisateur"
