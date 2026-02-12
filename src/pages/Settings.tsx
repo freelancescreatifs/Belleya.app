@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Building2, FileText, Calculator, LayoutGrid, Globe } from 'lucide-react';
+import { Building2, FileText, Calculator, LayoutGrid, Globe, Crown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import CompanyProfileForm from '../components/settings/CompanyProfileForm';
 import MyDocuments from '../components/settings/MyDocuments';
 import ProfitabilityCalculator from '../components/settings/ProfitabilityCalculator';
 import SocialMediaSettings from '../components/settings/SocialMediaSettings';
 import LanguageSettings from '../components/settings/LanguageSettings';
+import SubscriptionStatus from '../components/settings/SubscriptionStatus';
 
 export default function Settings() {
   const { user, refreshProfile } = useAuth();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language' | 'subscription'>('company');
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
@@ -78,6 +79,17 @@ export default function Settings() {
               <Globe className="w-5 h-5" />
               {t('settings.tabs.language')}
             </button>
+            <button
+              onClick={() => setActiveTab('subscription')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+                activeTab === 'subscription'
+                  ? 'text-[#C43586] border-b-2 border-[#C43586]'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Crown className="w-5 h-5" />
+              Mon abonnement
+            </button>
           </div>
         </div>
 
@@ -103,6 +115,10 @@ export default function Settings() {
 
           {activeTab === 'language' && user && (
             <LanguageSettings userId={user.id} />
+          )}
+
+          {activeTab === 'subscription' && user && (
+            <SubscriptionStatus />
           )}
         </div>
       </div>

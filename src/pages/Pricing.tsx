@@ -23,6 +23,7 @@ const plans: PricingPlan[] = [
     popular: false,
     description: 'Pour les indépendantes qui veulent structurer leur activité et arrêter de tout gérer à la main.',
     features: [
+      '✅ Organisation & Structure',
       'Gestion des objectifs',
       'Gestion des tâches',
       'Agenda intelligent synchronisé',
@@ -32,18 +33,20 @@ const plans: PricingPlan[] = [
       'Envoi automatique du récapitulatif client',
       'Suivi des transactions',
       'Dashboard financier clair',
-      'Partenariats Belleya',
+      '📱 Réseaux sociaux intégrés',
       'Gestion des réseaux sociaux',
       'Calendrier éditorial',
-      'Suggestions de sujets selon les événements',
+      'Suggestions de sujets selon les événements de l\'année',
       'Boîte à idées IA adaptée à ton métier',
-      'Stockage des inspirations',
+      'Stockage des inspirations (toi + clientes)',
+      '💰 Gestion financière simplifiée',
       'Suivi des paiements',
       'Calculateur de rentabilité',
       'Adaptation selon ton statut',
       'Estimation automatique TVA / CFE',
       'Export & import complet des données',
-      'Support WhatsApp 48h'
+      'Support WhatsApp 48h',
+      '🎯 Idéal pour se structurer dès le départ'
     ]
   },
   {
@@ -56,6 +59,7 @@ const plans: PricingPlan[] = [
     description: 'Pour les professionnelles qui veulent scaler intelligemment.',
     features: [
       '✨ Tout Start inclus +',
+      '💼 Business & Clients',
       'Clientes illimitées',
       'Gestion des acomptes',
       'Gestion élèves / formations',
@@ -63,14 +67,18 @@ const plans: PricingPlan[] = [
       'Système de fidélisation',
       'Gestion des stocks',
       'Gestion complète des finances',
+      '📈 Croissance & Marketing',
       'Marketing automatique par email',
       'Emails anniversaires & relances',
+      'Partenariats Belleya',
       'Visibilité sur la plateforme sociale Belleya',
       'Outils d\'optimisation conversion',
+      '💰 Finance avancée',
       'Calcul automatique charges & cotisations',
       'Exports comptables',
       'Export & import simplifié',
-      'Support WhatsApp 24H'
+      'Support WhatsApp 24H',
+      '🎯 Idéal pour augmenter ton chiffre d\'affaires'
     ]
   },
   {
@@ -83,15 +91,18 @@ const plans: PricingPlan[] = [
     description: 'Pour celles qui veulent automatiser et générer des revenus récurrents.',
     features: [
       '✨ Tout Studio inclus +',
+      '🚀 Expansion & Automatisation',
       'Marketing automatisé avancé',
       'Campagnes multi-canaux (SMS + Email)',
       'Optimisation conversion client',
-      'Rappels intelligents',
+      'Rappels intelligents (anniversaires, relances)',
+      '🤝 Revenus complémentaires',
       'Partenariat officiel Belleya',
       'Revenus récurrents via affiliation',
       'Mise en avant premium sur la plateforme',
       'Visibilité renforcée côté client',
-      'Support prioritaire express'
+      '⚡ Support prioritaire express',
+      '🎯 Idéal pour remplir automatiquement ton agenda et scaler'
     ]
   }
 ];
@@ -235,7 +246,7 @@ export default function Pricing() {
             >
               {plan.popular && (
                 <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 rounded-bl-2xl font-medium text-sm">
-                  Le + populaire
+                  Le plus choisi
                 </div>
               )}
 
@@ -279,25 +290,132 @@ export default function Pricing() {
                 </button>
 
                 <div className="mt-8 space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-start gap-3 ${
-                        feature.startsWith('✨') ? 'pt-4 border-t border-slate-200 font-semibold text-slate-900' : ''
-                      }`}
-                    >
-                      {!feature.startsWith('✨') && (
-                        <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                      )}
-                      <span className={`text-sm ${feature.startsWith('✨') ? 'text-slate-900' : 'text-slate-600'}`}>
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
+                  {plan.features.map((feature, index) => {
+                    const isSectionTitle = feature.startsWith('✨') || feature.startsWith('✅') ||
+                                          feature.startsWith('📱') || feature.startsWith('💰') ||
+                                          feature.startsWith('💼') || feature.startsWith('📈') ||
+                                          feature.startsWith('🚀') || feature.startsWith('🤝') ||
+                                          feature.startsWith('⚡') || feature.startsWith('🎯');
+
+                    return (
+                      <div
+                        key={index}
+                        className={`flex items-start gap-3 ${
+                          isSectionTitle ? 'pt-4 border-t border-slate-200 font-semibold text-slate-900' : ''
+                        }`}
+                      >
+                        {!isSectionTitle && (
+                          <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        <span className={`text-sm ${isSectionTitle ? 'text-slate-900' : 'text-slate-600'}`}>
+                          {feature}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-12">
+          <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white">
+            <h3 className="text-2xl font-bold text-center">Tableau comparatif</h3>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Fonctionnalités</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-emerald-600">START</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-amber-600">STUDIO</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-purple-600">EMPIRE</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Nombre de clientes</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">50</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">Illimité</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">Illimité</td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Agenda intelligent</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Réservation en ligne</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Réseaux sociaux & calendrier éditorial</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Boîte à idées IA</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Gestion des acomptes</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Gestion élèves / formations</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Marketing automatique</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Système de fidélisation</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Campagnes SMS + Email</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Partenariat officiel Belleya</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Revenus d'affiliation</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center text-slate-400">-</td>
+                  <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-sm text-slate-600">Support</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">48h</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">24h</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">Prioritaire</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-center text-white">
