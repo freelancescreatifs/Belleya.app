@@ -216,7 +216,7 @@ export default function Training({ onPageChange }: TrainingProps) {
         </div>
         <button
           onClick={() => setShowAddStudent(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-600 transition-all shadow-lg hover:shadow-xl"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-belleya-primary to-belleya-bright text-white rounded-lg hover:from-belleya-primary hover:to-belleya-deep transition-all shadow-lg hover:shadow-xl"
         >
           <Plus className="w-5 h-5" />
           Nouvel élève

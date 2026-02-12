@@ -811,7 +811,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                               </span>
                             )}
                             <div
-                              className="bg-belleya-bright rounded-t-lg transition-all group-hover:bg-belleya-deep w-full cursor-pointer"
+                              className="bg-gradient-to-t from-green-400 to-green-500 rounded-t-lg transition-all group-hover:from-green-500 group-hover:to-green-600 w-full cursor-pointer"
                               style={{
                                 height: `${revenueHeight}%`,
                                 minHeight: data.revenue > 0 ? '4px' : '0'
