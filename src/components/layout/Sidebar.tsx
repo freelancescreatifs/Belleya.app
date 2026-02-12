@@ -26,7 +26,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { prefetchClients } from '../../lib/clientsCache';
 import { useMenuPreferences } from '../../lib/useMenuPreferences';
-import { useIsAdmin } from '../../hooks/useIsAdmin';
 import NotificationCenter from '../dashboard/NotificationCenter';
 
 interface SidebarProps {
@@ -40,7 +39,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
   const { signOut, user } = useAuth();
   const { t } = useTranslation();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const { isAdmin } = useIsAdmin();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [internalMobileOpen, setInternalMobileOpen] = useState(false);
   const prefetchTimeoutRef = useRef<NodeJS.Timeout>();
   const hasPrefetchedRef = useRef(false);
@@ -65,6 +64,29 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
     { id: 'marketing', label: t('nav.marketing'), icon: Mail },
     { id: 'partnerships', label: t('nav.partnerships'), icon: Handshake },
   ];
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, [user]);
+
+  const checkAdminStatus = async () => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    try {
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setIsAdmin(data?.role === 'admin');
+    } catch (error) {
+      setIsAdmin(false);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
