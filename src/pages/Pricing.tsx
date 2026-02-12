@@ -115,6 +115,7 @@ export default function Pricing() {
 
   async function handleLogout() {
     await supabase.auth.signOut();
+    window.location.href = '/';
   }
 
   async function handleSelectPlan(planId: string) {
