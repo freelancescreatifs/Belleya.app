@@ -19,6 +19,13 @@ interface UserData {
   created_at: string;
   last_sign_in_at: string | null;
   role: string;
+  first_name: string | null;
+  last_name: string | null;
+  profession: string | null;
+  plan_type: string | null;
+  subscription_status: string | null;
+  trial_end_date: string | null;
+  days_remaining: number | null;
 }
 
 interface PartnershipData {
@@ -28,6 +35,7 @@ interface PartnershipData {
   commission_rate: number;
   status: string;
   user_email: string;
+  user_name: string;
   monthly_revenue: number;
   is_default: boolean;
 }
@@ -93,7 +101,14 @@ export default function Admin() {
       const [usersResult, partnershipsResult] = await Promise.all([
         supabase
           .from('user_profiles')
-          .select('id, email, created_at')
+          .select(`
+            id,
+            user_id,
+            first_name,
+            last_name,
+            created_at,
+            company_id
+          `)
           .order('created_at', { ascending: false }),
         supabase
           .from('partnerships')
@@ -115,25 +130,59 @@ export default function Admin() {
           activeUsers30d: totalUsers
         }));
 
-        const usersWithRoles = await Promise.all(
+        const usersWithDetails = await Promise.all(
           usersResult.data.map(async (u) => {
-            const { data: roleData } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', u.id)
-              .maybeSingle();
+            const [roleData, authData, companyData, subscriptionData] = await Promise.all([
+              supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', u.user_id)
+                .maybeSingle(),
+              supabase.auth.admin.getUserById(u.user_id).catch(() => ({ data: { user: null } })),
+              u.company_id
+                ? supabase
+                    .from('company_profiles')
+                    .select('primary_profession')
+                    .eq('id', u.company_id)
+                    .maybeSingle()
+                : Promise.resolve({ data: null }),
+              u.company_id
+                ? supabase
+                    .from('subscriptions')
+                    .select('plan_type, subscription_status, trial_end_date')
+                    .eq('company_id', u.company_id)
+                    .maybeSingle()
+                : Promise.resolve({ data: null })
+            ]);
+
+            const daysRemaining = subscriptionData.data?.trial_end_date
+              ? Math.max(
+                  0,
+                  Math.ceil(
+                    (new Date(subscriptionData.data.trial_end_date).getTime() - now.getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  )
+                )
+              : null;
 
             return {
               id: u.id,
-              email: u.email || 'N/A',
-              created_at: u.created_at,
-              last_sign_in_at: null,
-              role: roleData?.role || 'user'
+              email: authData.data.user?.email || 'N/A',
+              created_at: authData.data.user?.created_at || u.created_at,
+              last_sign_in_at: authData.data.user?.last_sign_in_at || null,
+              role: roleData?.data?.role || 'user',
+              first_name: u.first_name || null,
+              last_name: u.last_name || null,
+              profession: companyData.data?.primary_profession || null,
+              plan_type: subscriptionData.data?.plan_type || null,
+              subscription_status: subscriptionData.data?.subscription_status || null,
+              trial_end_date: subscriptionData.data?.trial_end_date || null,
+              days_remaining: daysRemaining
             };
           })
         );
 
-        setUsers(usersWithRoles);
+        setUsers(usersWithDetails);
       }
 
       if (partnershipsResult.data) {
@@ -173,16 +222,27 @@ export default function Admin() {
           partnershipsResult.data.map(async (p) => {
             const { data: userData } = await supabase
               .from('user_profiles')
-              .select('email')
-              .eq('id', p.user_id)
-              .single();
+              .select('user_id, first_name, last_name')
+              .eq('user_id', p.user_id)
+              .maybeSingle();
+
+            let userEmail = 'N/A';
+            if (userData?.user_id) {
+              const authData = await supabase.auth.admin.getUserById(userData.user_id).catch(() => ({ data: { user: null } }));
+              userEmail = authData.data.user?.email || 'N/A';
+            }
+
+            const userName = userData?.first_name && userData?.last_name
+              ? `${userData.first_name} ${userData.last_name}`
+              : userData?.first_name || userData?.last_name || 'N/A';
 
             const partnershipMonthlySales = monthlySales.filter(s => s.partnership_id === p.id);
             const monthlyRevenue = partnershipMonthlySales.reduce((sum, s) => sum + s.commission_earned, 0);
 
             return {
               ...p,
-              user_email: userData?.email || 'N/A',
+              user_email: userEmail,
+              user_name: userName,
               monthly_revenue: monthlyRevenue
             };
           })
@@ -462,29 +522,88 @@ export default function Admin() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Rôle</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date inscription</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Dernier login</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nom</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Métier</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Abonnement</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Statut</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Jours restants</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Rôle</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date inscription</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Dernier login</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredUsers.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 text-sm text-gray-900">{user.email}</td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {user.first_name || user.last_name
+                          ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {user.profession ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+                            {user.profession === 'nail_artist' ? 'Nail Artist' :
+                             user.profession === 'hair_stylist' ? 'Coiffeuse' :
+                             user.profession === 'esthetician' ? 'Esthéticienne' :
+                             user.profession === 'makeup_artist' ? 'Maquilleuse' :
+                             user.profession === 'lash_tech' ? 'Lash Tech' :
+                             user.profession === 'brow_artist' ? 'Brow Artist' :
+                             user.profession}
+                          </span>
+                        ) : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {user.plan_type ? (
+                          <span className="font-medium capitalize">{user.plan_type}</span>
+                        ) : '—'}
+                      </td>
+                      <td className="px-4 py-4">
+                        {user.subscription_status ? (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            user.subscription_status === 'active'
+                              ? 'bg-green-100 text-green-800'
+                              : user.subscription_status === 'trial'
+                              ? 'bg-blue-100 text-blue-800'
+                              : user.subscription_status === 'expired'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {user.subscription_status === 'active' ? 'Actif' :
+                             user.subscription_status === 'trial' ? 'Essai' :
+                             user.subscription_status === 'expired' ? 'Expiré' :
+                             user.subscription_status}
+                          </span>
+                        ) : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {user.days_remaining !== null ? (
+                          <span className={`font-semibold ${
+                            user.days_remaining <= 3 ? 'text-red-600' :
+                            user.days_remaining <= 7 ? 'text-amber-600' :
+                            'text-green-600'
+                          }`}>
+                            {user.days_remaining} jours
+                          </span>
+                        ) : '—'}
+                      </td>
+                      <td className="px-4 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           user.role === 'admin'
                             ? 'bg-brand-100 text-brand-800'
+                            : user.role === 'pro'
+                            ? 'bg-purple-100 text-purple-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}>
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
                         {new Date(user.created_at).toLocaleDateString('fr-FR')}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
                         {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('fr-FR') : '—'}
                       </td>
                     </tr>
@@ -530,7 +649,8 @@ export default function Admin() {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Entreprise</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Utilisateur</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nom utilisateur</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Type</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Commission</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Statut</th>
@@ -550,6 +670,7 @@ export default function Admin() {
                           )}
                         </div>
                       </td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{partnership.user_name}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{partnership.user_email}</td>
                       <td className="px-6 py-4 text-sm text-gray-600 capitalize">{partnership.partnership_type}</td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">{partnership.commission_rate}%</td>
