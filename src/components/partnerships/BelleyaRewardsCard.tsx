@@ -19,13 +19,16 @@ export default function BelleyaRewardsCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (companyProfile?.id) {
-      loadData();
-    } else if (companyProfile !== undefined) {
-      // Company profile loaded but no ID, stop loading
-      setLoading(false);
-    }
-  }, [companyProfile?.id, companyProfile]);
+    const timer = setTimeout(() => {
+      if (companyProfile?.id) {
+        loadData();
+      } else {
+        setLoading(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [companyProfile]);
 
   async function loadData() {
     if (!companyProfile?.id) {
