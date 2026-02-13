@@ -255,7 +255,13 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                         </button>
                       ) : (
                         <button
-                          onClick={() => setShowInvoiceForm(true)}
+                          onClick={() => {
+                            if (!event.client_id) {
+                              alert('Veuillez d\'abord associer un client à ce rendez-vous avant de créer un reçu.');
+                              return;
+                            }
+                            setShowInvoiceForm(true);
+                          }}
                           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
                         >
                           <Plus className="w-4 h-4" />
