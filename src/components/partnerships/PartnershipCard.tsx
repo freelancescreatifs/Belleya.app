@@ -75,15 +75,17 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
         partnership.is_default ? 'border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50' : 'border-gray-200 hover:border-belleya-300'
       }`}
     >
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onEdit();
-        }}
-        className="absolute top-4 left-4 p-2 bg-white rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50 z-10"
-      >
-        <Edit className="w-4 h-4 text-gray-600" />
-      </button>
+      {!partnership.is_default && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          className="absolute top-4 right-4 p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors z-10 shadow-sm"
+        >
+          <Edit className="w-4 h-4 text-gray-600" />
+        </button>
+      )}
 
       <div className="flex items-start gap-4 mb-4">
         {partnership.is_default ? (

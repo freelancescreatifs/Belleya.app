@@ -32,6 +32,7 @@ interface PartnershipFormModalProps {
 export default function PartnershipFormModal({ partnership, onClose, onSave }: PartnershipFormModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const isBelleya = partnership?.is_default && partnership?.company_name === 'Belleya';
   const [form, setForm] = useState({
     company_name: '',
@@ -74,6 +75,49 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
       });
     }
   }, [partnership]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Veuillez sélectionner une image valide');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('L\'image ne doit pas dépasser 2 MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `partnership-logo-${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('service-photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('service-photos')
+        .getPublicUrl(filePath);
+
+      setForm({ ...form, logo_url: publicUrl });
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      alert('Erreur lors de l\'upload du logo');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setForm({ ...form, logo_url: '' });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,18 +233,41 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Logo (URL)
+                    Logo du partenaire
                   </label>
-                  <div className="flex gap-3">
-                    <input
-                      type="url"
-                      value={form.logo_url}
-                      onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
-                      placeholder="https://example.com/logo.png"
-                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500"
-                    />
-                    {form.logo_url && (
-                      <img src={form.logo_url} alt="Logo" className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
+                  <div className="space-y-3">
+                    {form.logo_url ? (
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={form.logo_url}
+                          alt="Logo"
+                          className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveLogo}
+                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-belleya-400 hover:bg-gray-50 transition-all">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600 font-medium">
+                            {uploading ? 'Upload en cours...' : 'Cliquez pour uploader une image'}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">PNG, JPG jusqu'à 2MB</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
                     )}
                   </div>
                 </div>
