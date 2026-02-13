@@ -1,5 +1,4 @@
 import { TrendingUp, Calendar, AlertCircle, CheckCircle, Clock, Edit, Sparkles } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 
 interface Partnership {
   id: string;
@@ -48,7 +47,6 @@ const statusConfig = {
 };
 
 export default function PartnershipCard({ partnership, sales, onClick, onEdit }: PartnershipCardProps) {
-  const { user } = useAuth();
   const totalRevenue = sales.reduce((sum, sale) => sum + sale.commission_earned, 0);
   const totalSales = sales.length;
   const pendingRevenue = sales
@@ -58,10 +56,8 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   const status = statusConfig[partnership.status];
   const StatusIcon = status.icon;
 
-  const effectiveCommissionRate = partnership.is_default
-    ? (user?.email?.toLowerCase() === 'noemieae@gmail.com'
-        ? 40
-        : (partnership.is_client_support_involved ? 15 : 10))
+  const effectiveCommissionRate = partnership.is_default && partnership.is_client_support_involved
+    ? 30
     : partnership.commission_rate;
 
   const getRentabilityStatus = () => {
@@ -75,7 +71,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   return (
     <div
       onClick={onClick}
-      className={`relative bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
+      className={`bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
         partnership.is_default ? 'border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50' : 'border-gray-200 hover:border-belleya-300'
       }`}
     >
@@ -94,7 +90,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
       <div className="flex items-start gap-4 mb-4">
         {partnership.is_default ? (
           <img
-            src="/logo-belleya1.png"
+            src="/logo-1.png"
             alt="Belleya Logo"
             className="w-16 h-16 rounded-xl object-cover border border-belleya-200 flex-shrink-0"
           />
