@@ -251,7 +251,7 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
                         >
                           <Receipt className="w-4 h-4" />
-                          Voir le récap
+                          Voir le réçu
                         </button>
                       ) : (
                         <button
@@ -259,7 +259,7 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
                         >
                           <Plus className="w-4 h-4" />
-                          +Créer un reçu
+                          Créer un reçu
                         </button>
                       )}
                     </div>
