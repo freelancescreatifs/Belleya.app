@@ -1,4 +1,5 @@
 import { TrendingUp, Calendar, AlertCircle, CheckCircle, Clock, Edit, Sparkles } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Partnership {
   id: string;
@@ -47,6 +48,7 @@ const statusConfig = {
 };
 
 export default function PartnershipCard({ partnership, sales, onClick, onEdit }: PartnershipCardProps) {
+  const { user } = useAuth();
   const totalRevenue = sales.reduce((sum, sale) => sum + sale.commission_earned, 0);
   const totalSales = sales.length;
   const pendingRevenue = sales
@@ -56,8 +58,10 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   const status = statusConfig[partnership.status];
   const StatusIcon = status.icon;
 
-  const effectiveCommissionRate = partnership.is_default && partnership.is_client_support_involved
-    ? 30
+  const effectiveCommissionRate = partnership.is_default
+    ? (user?.email?.toLowerCase() === 'noemieae@gmail.com'
+        ? 40
+        : (partnership.is_client_support_involved ? 30 : partnership.commission_rate))
     : partnership.commission_rate;
 
   const getRentabilityStatus = () => {
