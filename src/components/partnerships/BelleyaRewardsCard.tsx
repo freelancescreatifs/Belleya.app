@@ -21,11 +21,17 @@ export default function BelleyaRewardsCard() {
   useEffect(() => {
     if (companyProfile?.id) {
       loadData();
+    } else if (companyProfile !== undefined) {
+      // Company profile loaded but no ID, stop loading
+      setLoading(false);
     }
-  }, [companyProfile?.id]);
+  }, [companyProfile?.id, companyProfile]);
 
   async function loadData() {
-    if (!companyProfile?.id) return;
+    if (!companyProfile?.id) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const [submissionsData, balance] = await Promise.all([
@@ -58,6 +64,8 @@ export default function BelleyaRewardsCard() {
 
   const status = getMainStatus();
   const StatusIcon = status.icon;
+
+  console.log('[BelleyaRewardsCard] Rendering - loading:', loading, 'companyProfile:', companyProfile?.id, 'submissions:', submissions.length);
 
   if (loading) {
     return (
