@@ -61,7 +61,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   const effectiveCommissionRate = partnership.is_default
     ? (user?.email?.toLowerCase() === 'noemieae@gmail.com'
         ? 40
-        : (partnership.is_client_support_involved ? 30 : partnership.commission_rate))
+        : (partnership.is_client_support_involved ? 15 : 10))
     : partnership.commission_rate;
 
   const getRentabilityStatus = () => {

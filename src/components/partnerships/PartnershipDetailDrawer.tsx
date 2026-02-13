@@ -55,7 +55,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
   const effectiveCommissionRate = partnership.is_default
     ? (user?.email?.toLowerCase() === 'noemieae@gmail.com'
         ? 40
-        : (partnership.is_client_support_involved ? 30 : partnership.commission_rate))
+        : (partnership.is_client_support_involved ? 15 : 10))
     : partnership.commission_rate;
 
   const totalRevenue = sales.reduce((sum, sale) => sum + sale.commission_earned, 0);

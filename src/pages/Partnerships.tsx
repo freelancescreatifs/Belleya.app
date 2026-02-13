@@ -85,11 +85,11 @@ export default function Partnerships() {
             user_id: user.id,
             company_name: 'Belleya',
             partnership_type: 'affiliation',
-            commission_rate: 25,
+            commission_rate: 10,
             compensation_mode: 'recurring',
             status: 'active',
             start_date: new Date().toISOString().split('T')[0],
-            conditions: 'Programme officiel Belleya - Commission mensuelle sur chaque vente HT. 25% par défaut, 30% si impliqué dans le service client.',
+            conditions: 'Programme officiel Belleya - Commission mensuelle sur chaque vente HT. 10% par défaut, 15% si impliqué dans le service client.',
             is_default: true,
             is_client_support_involved: false,
             notes: 'Partenariat officiel Belleya avec commission récurrente mensuelle.'
