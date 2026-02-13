@@ -261,20 +261,18 @@ export default function Partnerships() {
           </button>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <BelleyaRewardsCard />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {partnerships.map((partnership) => (
-              <PartnershipCard
-                key={partnership.id}
-                partnership={partnership}
-                sales={sales.filter(s => s.partnership_id === partnership.id)}
-                onClick={() => handlePartnershipClick(partnership)}
-                onEdit={() => handleEditPartnership(partnership)}
-              />
-            ))}
-          </div>
+          {partnerships.map((partnership) => (
+            <PartnershipCard
+              key={partnership.id}
+              partnership={partnership}
+              sales={sales.filter(s => s.partnership_id === partnership.id)}
+              onClick={() => handlePartnershipClick(partnership)}
+              onEdit={() => handleEditPartnership(partnership)}
+            />
+          ))}
         </div>
       )}
 
