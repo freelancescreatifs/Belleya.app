@@ -27,6 +27,8 @@ import PublicProfile from './pages/PublicProfile';
 import Notifications from './pages/Notifications';
 import ProviderPublicProfile from './pages/ProviderPublicProfile';
 import Pricing from './pages/Pricing';
+import MentionsLegales from './pages/MentionsLegales';
+import CGV from './pages/CGV';
 import ClientLayout from './components/client/ClientLayout';
 import ClientHome from './pages/client/ClientHome';
 import ClientBookings from './pages/client/ClientBookings';
@@ -109,6 +111,8 @@ function AppContent() {
   const isPublicProfilePage = pathname.startsWith('/profile/');
   const isStudentDetailPage = pathname.startsWith('/training/students/');
   const isPricingPage = pathname === '/pricing';
+  const isMentionsLegalesPage = pathname === '/mentions-legales';
+  const isCGVPage = pathname === '/cgv';
 
   if (isBookingPage) {
     const slug = pathname.replace('/book/', '');
@@ -144,6 +148,24 @@ function AppContent() {
     return (
       <>
         <Pricing />
+        <ChatBot />
+      </>
+    );
+  }
+
+  if (isMentionsLegalesPage) {
+    return (
+      <>
+        <MentionsLegales />
+        <ChatBot />
+      </>
+    );
+  }
+
+  if (isCGVPage) {
+    return (
+      <>
+        <CGV />
         <ChatBot />
       </>
     );

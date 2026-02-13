@@ -19,8 +19,16 @@ interface LandingProps {
 
 export default function Landing({ onSelectRole }: LandingProps) {
   const { t } = useTranslation();
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" style={{ scrollBehavior: 'smooth' }}>
       <div className="w-full bg-gradient-to-r from-brand-50 to-brand-100/50 border-b border-brand-100">
         <div className="container mx-auto px-4 py-3">
           <CountdownTimer />
@@ -311,7 +319,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
       <BeforeAfterSection />
 
-      <section className="relative py-20 md:py-32 bg-gradient-to-b from-white via-rose-50/20 to-white overflow-hidden">
+      <section id="features" className="relative py-20 md:py-32 bg-gradient-to-b from-white via-rose-50/20 to-white overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(239,170,154,0.08),rgba(255,255,255,0))]"></div>
 
         <div className="container mx-auto px-4 relative">
@@ -454,7 +462,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
         </div>
       </section>
 
-      <section className="py-20 md:py-32 bg-gradient-to-b from-white to-[#efaa9a]/10">
+      <section id="pricing" className="py-20 md:py-32 bg-gradient-to-b from-white to-[#efaa9a]/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 text-orange-800 px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4 md:mb-6">
@@ -712,9 +720,27 @@ export default function Landing({ onSelectRole }: LandingProps) {
             </div>
 
             <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm md:text-base text-gray-600">
-              <a href="#" className="hover:text-[rgb(113,19,65)] transition-colors">Fonctionnalités</a>
-              <a href="#" className="hover:text-[rgb(113,19,65)] transition-colors">Tarifs</a>
-              <a href="#" className="hover:text-[rgb(113,19,65)] transition-colors">Contact</a>
+              <button
+                onClick={() => scrollToSection('features')}
+                className="hover:text-[rgb(113,19,65)] transition-colors"
+              >
+                Fonctionnalités
+              </button>
+              <button
+                onClick={() => scrollToSection('pricing')}
+                className="hover:text-[rgb(113,19,65)] transition-colors"
+              >
+                Tarifs
+              </button>
+              <a
+                href="https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY?mode=gi_t"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[rgb(113,19,65)] transition-colors flex items-center gap-1"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Contact
+              </a>
               <button
                 onClick={() => onSelectRole('client')}
                 className="hover:text-[rgb(113,19,65)] transition-colors flex items-center gap-1"
@@ -722,8 +748,12 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 <Users className="w-4 h-4" />
                 Espace Cliente
               </button>
-              <a href="#" className="hover:text-[rgb(113,19,65)] transition-colors">Mentions légales</a>
-              <a href="#" className="hover:text-[rgb(113,19,65)] transition-colors">CGV</a>
+              <a href="/mentions-legales" className="hover:text-[rgb(113,19,65)] transition-colors">
+                Mentions légales
+              </a>
+              <a href="/cgv" className="hover:text-[rgb(113,19,65)] transition-colors">
+                CGV
+              </a>
             </div>
 
             <p className="text-gray-500 text-sm">
