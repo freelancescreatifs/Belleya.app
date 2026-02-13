@@ -93,21 +93,17 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
 
       <div className="flex items-start gap-4 mb-4">
         {partnership.is_default ? (
-          <div className="w-16 h-16 rounded-xl border border-belleya-200 flex-shrink-0 bg-white p-1.5 flex items-center justify-center">
-            <img
-              src="/logo-belleya1.png"
-              alt="Belleya Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <img
+            src="/logo-belleya1.png"
+            alt="Belleya Logo"
+            className="w-16 h-16 rounded-xl object-cover border border-belleya-200 flex-shrink-0"
+          />
         ) : partnership.logo_url ? (
-          <div className="w-16 h-16 rounded-xl border border-gray-200 flex-shrink-0 bg-white p-1.5 flex items-center justify-center">
-            <img
-              src={partnership.logo_url}
-              alt={partnership.company_name}
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <img
+            src={partnership.logo_url}
+            alt={partnership.company_name}
+            className="w-16 h-16 rounded-xl object-cover border border-gray-200 flex-shrink-0"
+          />
         ) : (
           <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belleya-200 flex-shrink-0">
             <span className="text-2xl font-bold text-belleya-primary">
