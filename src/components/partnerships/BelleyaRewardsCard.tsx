@@ -88,11 +88,9 @@ export default function BelleyaRewardsCard() {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img
-                  src="/logo-1.png"
-                  alt="Belleya Logo"
-                  className="w-10 h-10 rounded-lg object-cover border border-belleya-200"
-                />
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center border border-belleya-200">
+                  <span className="text-xl font-bold text-belleya-primary">B</span>
+                </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Programme Belleya</h3>
                   <p className="text-sm text-gray-600">Jusqu'à 2 mois gratuits</p>
@@ -298,11 +296,9 @@ export default function BelleyaRewardsCard() {
         className="bg-white rounded-xl border-2 border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
       >
         <div className="flex items-start gap-4 mb-4">
-          <img
-            src="/logo-1.png"
-            alt="Belleya Logo"
-            className="w-16 h-16 rounded-xl object-cover border border-belleya-200 flex-shrink-0"
-          />
+          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belleya-200 flex-shrink-0">
+            <span className="text-2xl font-bold text-belleya-primary">B</span>
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
               <h3 className="text-xl font-bold text-gray-900">Belleya</h3>

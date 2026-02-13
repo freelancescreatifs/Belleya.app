@@ -71,29 +71,25 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   return (
     <div
       onClick={onClick}
-      className={`relative bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
+      className={`bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
         partnership.is_default ? 'border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50' : 'border-gray-200 hover:border-belleya-300'
       }`}
     >
-      {!partnership.is_default && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          className="absolute top-4 right-4 p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors z-10 shadow-sm"
-        >
-          <Edit className="w-4 h-4 text-gray-600" />
-        </button>
-      )}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit();
+        }}
+        className="absolute top-4 left-4 p-2 bg-white rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50 z-10"
+      >
+        <Edit className="w-4 h-4 text-gray-600" />
+      </button>
 
       <div className="flex items-start gap-4 mb-4">
         {partnership.is_default ? (
-          <img
-            src="/logo-belleya1.png"
-            alt="Belleya Logo"
-            className="w-16 h-16 rounded-xl object-cover border border-belleya-200 flex-shrink-0"
-          />
+          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belleya-200 flex-shrink-0">
+            <span className="text-2xl font-bold text-belleya-primary">B</span>
+          </div>
         ) : partnership.logo_url ? (
           <img
             src={partnership.logo_url}
