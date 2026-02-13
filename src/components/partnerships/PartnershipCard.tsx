@@ -71,7 +71,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
+      className={`relative bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
         partnership.is_default ? 'border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50' : 'border-gray-200 hover:border-belleya-300'
       }`}
     >
@@ -90,7 +90,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
       <div className="flex items-start gap-4 mb-4">
         {partnership.is_default ? (
           <img
-            src="/logo-1.png"
+            src="/logo-belleya1.png"
             alt="Belleya Logo"
             className="w-16 h-16 rounded-xl object-cover border border-belleya-200 flex-shrink-0"
           />
