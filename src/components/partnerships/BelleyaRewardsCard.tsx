@@ -332,7 +332,7 @@ export default function BelleyaRewardsCard() {
           </div>
 
           <div className="flex items-center justify-between py-2 border-t border-gray-100">
-            <span className="text-sm text-gray-600">Commission</span>
+            <span className="text-sm text-gray-600">Récompense</span>
             <span className="text-sm font-semibold text-belleya-bright">Jusqu'à 2 mois</span>
           </div>
         </div>

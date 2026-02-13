@@ -71,38 +71,33 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group relative ${
+      className={`bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
         partnership.is_default ? 'border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50' : 'border-gray-200 hover:border-belleya-300'
       }`}
     >
-      {partnership.is_default && (
-        <div className="absolute top-4 right-4">
-          <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-semibold rounded-full shadow-md">
-            <Sparkles className="w-3 h-3" />
-            Programme officiel
-          </div>
-        </div>
-      )}
-
       <button
         onClick={(e) => {
           e.stopPropagation();
           onEdit();
         }}
-        className="absolute top-4 left-4 p-2 bg-white rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50"
+        className="absolute top-4 left-4 p-2 bg-white rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50 z-10"
       >
         <Edit className="w-4 h-4 text-gray-600" />
       </button>
 
-      <div className="flex items-start gap-4 mb-4 mt-8">
-        {partnership.logo_url ? (
+      <div className="flex items-start gap-4 mb-4">
+        {partnership.is_default ? (
+          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belleya-200 flex-shrink-0">
+            <span className="text-2xl font-bold text-belleya-primary">B</span>
+          </div>
+        ) : partnership.logo_url ? (
           <img
             src={partnership.logo_url}
             alt={partnership.company_name}
-            className="w-16 h-16 rounded-lg object-cover border border-gray-200"
+            className="w-16 h-16 rounded-xl object-cover border border-gray-200 flex-shrink-0"
           />
         ) : (
-          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center border border-belleya-200">
+          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belleya-200 flex-shrink-0">
             <span className="text-2xl font-bold text-belleya-primary">
               {partnership.company_name.charAt(0).toUpperCase()}
             </span>
@@ -110,23 +105,29 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
         )}
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-gray-900 text-lg mb-1 truncate">{partnership.company_name}</h3>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium border border-blue-200">
-              {partnershipTypeLabels[partnership.partnership_type]}
-            </span>
-            <span className={`text-xs px-2 py-1 rounded-full font-medium border ${status.color} flex items-center gap-1`}>
-              <StatusIcon className="w-3 h-3" />
-              {status.label}
-            </span>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-xl font-bold text-gray-900">{partnership.company_name}</h3>
+            {partnership.is_default && (
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                <Sparkles className="w-3 h-3" />
+                Officiel
+              </div>
+            )}
+          </div>
+          <p className="text-sm text-gray-600 mb-2">{partnershipTypeLabels[partnership.partnership_type]}</p>
+          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border-2 ${status.color}`}>
+            <StatusIcon className="w-3.5 h-3.5" />
+            {status.label}
           </div>
         </div>
       </div>
 
       <div className="space-y-3 mb-4">
         <div className="flex items-center justify-between py-2 border-t border-gray-100">
-          <span className="text-sm text-gray-600">Commission</span>
-          <span className="text-sm font-bold text-gray-900">{effectiveCommissionRate} %</span>
+          <span className="text-sm text-gray-600">
+            {partnership.is_default ? 'Récompense' : 'Commission'}
+          </span>
+          <span className="text-sm font-semibold text-gray-900">{effectiveCommissionRate} %</span>
         </div>
 
         <div className="flex items-center justify-between py-2 border-t border-gray-100">
@@ -138,7 +139,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
 
         <div className="flex items-center justify-between py-2 border-t border-gray-100">
           <span className="text-sm text-gray-600">Ventes générées</span>
-          <span className="text-sm font-bold text-gray-900">{totalSales}</span>
+          <span className="text-sm font-semibold text-gray-900">{totalSales}</span>
         </div>
       </div>
 
