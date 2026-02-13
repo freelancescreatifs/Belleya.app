@@ -89,7 +89,7 @@ export default function BelleyaRewardsCard() {
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
-                  src="/logo-1.png"
+                  src="/logo-belleya1.png"
                   alt="Belleya Logo"
                   className="w-10 h-10 rounded-lg object-cover border border-belleya-200"
                 />
@@ -299,7 +299,7 @@ export default function BelleyaRewardsCard() {
       >
         <div className="flex items-start gap-4 mb-4">
           <img
-            src="/logo-1.png"
+            src="/logo-belleya1.png"
             alt="Belleya Logo"
             className="w-16 h-16 rounded-xl object-cover border border-belleya-200 flex-shrink-0"
           />
