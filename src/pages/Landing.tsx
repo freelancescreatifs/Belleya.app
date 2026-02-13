@@ -9,6 +9,7 @@ import AnimatedKeywords from '../components/landing/AnimatedKeywords';
 import BeforeAfterSection from '../components/landing/BeforeAfterSection';
 import CountdownTimer from '../components/landing/CountdownTimer';
 import TestimonialsSlider from '../components/landing/TestimonialsSlider';
+import ReviewsSection from '../components/landing/ReviewsSection';
 import ComparisonSection from '../components/landing/ComparisonSection';
 import LanguageSwitcher from '../components/shared/LanguageSwitcher';
 
@@ -628,6 +629,8 @@ export default function Landing({ onSelectRole }: LandingProps) {
       </section>
 
       <TestimonialsSlider />
+
+      <ReviewsSection />
 
       <section className="py-20 md:py-32 bg-[#efaa9a]/10">
         <div className="container mx-auto px-4">

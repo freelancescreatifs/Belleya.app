@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, Edit2, Trash2, Crown, X, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
+import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, Edit2, Trash2, Crown, X, ChevronLeft, ChevronRight, CreditCard, Gift } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
+import RewardsValidation from '../components/admin/RewardsValidation';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -81,7 +82,7 @@ export default function Admin() {
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships' | 'rewards'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -622,6 +623,17 @@ export default function Admin() {
           }`}
         >
           Partenariats
+        </button>
+        <button
+          onClick={() => setActiveTab('rewards')}
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
+            activeTab === 'rewards'
+              ? 'border-brand-500 text-brand-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <Gift className="w-4 h-4 inline mr-1" />
+          Avis & Récompenses
         </button>
       </div>
 
@@ -1292,6 +1304,10 @@ export default function Admin() {
             )}
           </div>
         </div>
+      )}
+
+      {activeTab === 'rewards' && (
+        <RewardsValidation />
       )}
 
       {/* Modal de modification */}
