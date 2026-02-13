@@ -88,11 +88,9 @@ export default function BelleyaRewardsCard() {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img
-                  src="/belleyaa.png"
-                  alt="Belleya"
-                  className="w-10 h-10 rounded-lg object-cover"
-                />
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center border border-belleya-200">
+                  <span className="text-xl font-bold text-belleya-primary">B</span>
+                </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Programme Belleya</h3>
                   <p className="text-sm text-gray-600">Jusqu'à 2 mois gratuits</p>
@@ -295,25 +293,20 @@ export default function BelleyaRewardsCard() {
     <>
       <div
         onClick={() => setShowDetail(true)}
-        className="bg-white rounded-xl border-2 border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group relative"
+        className="bg-white rounded-xl border-2 border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
       >
-        <div className="absolute top-4 right-4">
-          <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-semibold rounded-full shadow-md">
-            <Sparkles className="w-3 h-3" />
-            Programme Officiel
-          </div>
-        </div>
-
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-16 h-16 rounded-xl bg-white border-2 border-pink-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-            <img
-              src="/belleyaa.png"
-              alt="Belleya"
-              className="w-full h-full object-cover"
-            />
+          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belleya-200 flex-shrink-0">
+            <span className="text-2xl font-bold text-belleya-primary">B</span>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-gray-900 mb-1">Belleya</h3>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-xl font-bold text-gray-900">Belleya</h3>
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                <Sparkles className="w-3 h-3" />
+                Officiel
+              </div>
+            </div>
             <p className="text-sm text-gray-600 mb-2">Affiliation</p>
             <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border-2 ${status.color}`}>
               <StatusIcon className="w-3.5 h-3.5" />
@@ -340,7 +333,7 @@ export default function BelleyaRewardsCard() {
 
           <div className="flex items-center justify-between py-2 border-t border-gray-100">
             <span className="text-sm text-gray-600">Commission</span>
-            <span className="text-lg font-bold text-belleya-bright">Jusqu'à 2 mois</span>
+            <span className="text-sm font-semibold text-belleya-bright">Jusqu'à 2 mois</span>
           </div>
         </div>
 
