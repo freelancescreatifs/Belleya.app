@@ -61,7 +61,7 @@ interface PartnershipData {
 
 export default function Admin() {
   const { user } = useAuth();
-  const { addToast } = useToast();
+  const { showToast } = useToast();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<KPIStats>({
@@ -303,6 +303,15 @@ export default function Admin() {
           depositRevenue
         }));
 
+        const emailLookup: Record<string, string> = {};
+        if (usersResult.data) {
+          usersResult.data.forEach((u: any) => {
+            if (u.user_id && u.email) {
+              emailLookup[u.user_id] = u.email;
+            }
+          });
+        }
+
         const partnershipsWithUserData = await Promise.all(
           partnershipsResult.data.map(async (p) => {
             const { data: userData } = await supabase
@@ -311,11 +320,7 @@ export default function Admin() {
               .eq('user_id', p.user_id)
               .maybeSingle();
 
-            let userEmail = 'N/A';
-            if (userData?.user_id) {
-              const authData = await supabase.auth.admin.getUserById(userData.user_id).catch(() => ({ data: { user: null } }));
-              userEmail = authData.data.user?.email || 'N/A';
-            }
+            const userEmail = emailLookup[p.user_id] || 'N/A';
 
             const userName = userData?.first_name && userData?.last_name
               ? `${userData.first_name} ${userData.last_name}`
@@ -398,11 +403,11 @@ export default function Admin() {
 
       if (error) throw error;
 
-      addToast('Utilisateur supprimé avec succès', 'success');
+      showToast('success', 'Utilisateur supprimé avec succès');
       loadData();
     } catch (error) {
       console.error('Error deleting user:', error);
-      addToast('Erreur lors de la suppression de l\'utilisateur', 'error');
+      showToast('error', 'Erreur lors de la suppression de l\'utilisateur');
     } finally {
       setDeletingUserId(null);
     }
@@ -422,14 +427,14 @@ export default function Admin() {
 
       if (error) throw error;
 
-      addToast('Informations client mises à jour avec succès', 'success');
+      showToast('success', 'Informations client mises à jour avec succès');
       setShowEditModal(false);
       setEditingUser(null);
       setEditingClientName({ firstName: '', lastName: '' });
       loadData();
     } catch (error) {
       console.error('Error updating client info:', error);
-      addToast('Erreur lors de la mise à jour', 'error');
+      showToast('error', 'Erreur lors de la mise à jour');
     }
   };
 
@@ -438,7 +443,7 @@ export default function Admin() {
 
     try {
       if (!editingUser.company_id) {
-        addToast('Erreur : utilisateur sans company_id', 'error');
+        showToast('error', 'Erreur : utilisateur sans company_id');
         return;
       }
 
@@ -460,13 +465,13 @@ export default function Admin() {
 
       if (subError) throw subError;
 
-      addToast('Abonnement modifié avec succès', 'success');
+      showToast('success', 'Abonnement modifié avec succès');
       setShowEditModal(false);
       setEditingUser(null);
       loadData();
     } catch (error) {
       console.error('Error updating subscription:', error);
-      addToast('Erreur lors de la modification', 'error');
+      showToast('error', 'Erreur lors de la modification');
     }
   };
 
@@ -475,7 +480,7 @@ export default function Admin() {
 
     try {
       if (!user.company_id) {
-        addToast('Erreur : utilisateur sans company_id', 'error');
+        showToast('error', 'Erreur : utilisateur sans company_id');
         return;
       }
 
@@ -486,11 +491,11 @@ export default function Admin() {
 
       if (error) throw error;
 
-      addToast('Abonnement supprimé avec succès', 'success');
+      showToast('success', 'Abonnement supprimé avec succès');
       loadData();
     } catch (error) {
       console.error('Error deleting subscription:', error);
-      addToast('Erreur lors de la suppression', 'error');
+      showToast('error', 'Erreur lors de la suppression');
     }
   };
 
