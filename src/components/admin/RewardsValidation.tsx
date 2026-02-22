@@ -46,16 +46,13 @@ export default function RewardsValidation() {
 
           let email = '';
           if (companyData?.user_id) {
-            const { data: profileData } = await supabase
-              .from('user_profiles')
-              .select('id')
+            const { data: viewData } = await supabase
+              .from('admin_users_view')
+              .select('email')
               .eq('user_id', companyData.user_id)
-              .single();
+              .maybeSingle();
 
-            if (profileData) {
-              const { data: { user } } = await supabase.auth.admin.getUserById(companyData.user_id);
-              email = user?.email || '';
-            }
+            email = viewData?.email || '';
           }
 
           return {
