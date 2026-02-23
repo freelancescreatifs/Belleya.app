@@ -120,6 +120,16 @@ export default function Pricing() {
 
   useEffect(() => {
     if (autoTriggeredRef.current) return;
+
+    const storedPlan = localStorage.getItem('auto_checkout_plan');
+    if (storedPlan && VALID_PLANS.includes(storedPlan)) {
+      autoTriggeredRef.current = true;
+      localStorage.removeItem('auto_checkout_plan');
+      setAutoRedirecting(true);
+      const timer = setTimeout(() => handleSelectPlan(storedPlan), 500);
+      return () => clearTimeout(timer);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const auto = params.get('auto');
     const plan = params.get('plan');
@@ -157,6 +167,10 @@ export default function Pricing() {
         throw new Error(fnError.message || 'Erreur lors de la creation de la session');
       }
 
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
       if (data?.url) {
         window.location.href = data.url;
       } else {
@@ -164,6 +178,7 @@ export default function Pricing() {
       }
     } catch (err: any) {
       console.error('Error creating checkout session:', err);
+      setAutoRedirecting(false);
       setError(err.message || 'Une erreur est survenue. Veuillez reessayer.');
     } finally {
       setLoading(false);

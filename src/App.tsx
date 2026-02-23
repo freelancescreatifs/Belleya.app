@@ -54,6 +54,7 @@ function AppContent() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [navigationLocked, setNavigationLocked] = useState(false);
   const [profileRetryCount, setProfileRetryCount] = useState(0);
+  const [pendingCheckout, setPendingCheckout] = useState(false);
   const pendingPlanCheckedRef = useRef(false);
 
   const safeNavigate = (to: string, source?: string) => {
@@ -88,11 +89,14 @@ function AppContent() {
       const pendingPlan = localStorage.getItem('pending_plan');
       if (pendingPlan) {
         localStorage.removeItem('pending_plan');
-        window.location.href = `/pricing?plan=${pendingPlan}&auto=true`;
+        localStorage.setItem('auto_checkout_plan', pendingPlan);
+        setPendingCheckout(true);
+        safeNavigate('pricing', 'pending-plan');
       }
     }
     if (!user) {
       pendingPlanCheckedRef.current = false;
+      setPendingCheckout(false);
     }
   }, [user, profile]);
 
@@ -263,6 +267,17 @@ function AppContent() {
           >
             Se déconnecter
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (pendingCheckout && currentPage === 'pricing') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-3 border-[#C73E6B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-lg font-medium text-slate-700">Redirection vers le paiement...</p>
         </div>
       </div>
     );

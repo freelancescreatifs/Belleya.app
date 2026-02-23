@@ -9,11 +9,13 @@ const corsHeaders = {
     "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const PRICE_MAP: Record<string, string> = {
-  start: "price_start_placeholder",
-  studio: "price_studio_placeholder",
-  empire: "price_empire_placeholder",
-};
+function getPriceMap(): Record<string, string> {
+  return {
+    start: Deno.env.get("STRIPE_PRICE_START") || "",
+    studio: Deno.env.get("STRIPE_PRICE_STUDIO") || "",
+    empire: Deno.env.get("STRIPE_PRICE_EMPIRE") || "",
+  };
+}
 
 const PLAN_NAMES: Record<string, string> = {
   start: "Belleya Start",
@@ -30,7 +32,21 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      console.error("[create-checkout-session] STRIPE_SECRET_KEY is not set");
+      return new Response(
+        JSON.stringify({
+          error: "Configuration paiement manquante. Contactez le support.",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2023-10-16",
     });
 
@@ -64,14 +80,32 @@ Deno.serve(async (req: Request) => {
     }
 
     const { planId } = await req.json();
+    const priceMap = getPriceMap();
+    const validPlans = ["start", "studio", "empire"];
 
-    if (!planId || !PRICE_MAP[planId]) {
+    if (!planId || !validPlans.includes(planId)) {
       return new Response(
         JSON.stringify({
           error: "Invalid plan. Must be one of: start, studio, empire",
         }),
         {
           status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const priceId = priceMap[planId];
+    if (!priceId) {
+      console.error(
+        `[create-checkout-session] STRIPE_PRICE_${planId.toUpperCase()} is not set`
+      );
+      return new Response(
+        JSON.stringify({
+          error: `Prix Stripe non configure pour le plan: ${planId}. Contactez le support.`,
+        }),
+        {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
@@ -141,7 +175,7 @@ Deno.serve(async (req: Request) => {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: PRICE_MAP[planId],
+          price: priceId,
           quantity: 1,
         },
       ],

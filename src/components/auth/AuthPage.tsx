@@ -24,14 +24,15 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
     setLoading(true);
 
     try {
+      if (selectedPlan) {
+        localStorage.setItem('pending_plan', selectedPlan);
+      }
+
       if (isSignUp) {
         if (!firstName.trim() || !lastName.trim()) {
           throw new Error('Le prenom et le nom sont requis');
         }
 
-        if (selectedPlan) {
-          localStorage.setItem('pending_plan', selectedPlan);
-        }
         console.log('[AuthPage] Starting signup process...');
         await signUp(email, password, role, firstName, lastName);
         console.log('[AuthPage] Signup completed successfully');
@@ -72,6 +73,9 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
     setLoading(true);
 
     try {
+      if (selectedPlan) {
+        localStorage.setItem('pending_plan', selectedPlan);
+      }
       await signInWithGoogle(role);
     } catch (err: any) {
       console.error('[AuthPage] Google sign-in error:', err);
