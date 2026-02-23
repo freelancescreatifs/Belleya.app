@@ -38,13 +38,14 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: callerProfile } = await supabase
-      .from('user_profiles')
+    const { data: adminRole } = await supabase
+      .from('user_roles')
       .select('role')
       .eq('user_id', callerUser.id)
+      .eq('role', 'admin')
       .maybeSingle();
 
-    if (!callerProfile || callerProfile.role !== 'admin') {
+    if (!adminRole) {
       return new Response(
         JSON.stringify({ error: 'Access denied: Admin privileges required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
