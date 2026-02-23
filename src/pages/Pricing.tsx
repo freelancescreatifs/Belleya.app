@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface PricingPlan {
@@ -111,6 +111,7 @@ const plans: PricingPlan[] = [
 export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [daysUntilIncrease] = useState(30);
 
   async function handleLogout() {
@@ -121,6 +122,7 @@ export default function Pricing() {
   async function handleSelectPlan(planId: string) {
     setSelectedPlan(planId);
     setLoading(true);
+    setError(null);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -129,61 +131,22 @@ export default function Pricing() {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('user_id', user.id)
-        .single();
+      const { data, error: fnError } = await supabase.functions.invoke('create-checkout-session', {
+        body: { planId },
+      });
 
-      if (profile?.company_id) {
-        const { data: existingSubscription } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('company_id', profile.company_id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (existingSubscription) {
-          const plan = plans.find(p => p.id === planId);
-          if (!plan) return;
-
-          const { error } = await supabase
-            .from('subscriptions')
-            .update({
-              plan_type: planId,
-              monthly_price: plan.currentPrice,
-              is_legacy_price: true
-            })
-            .eq('id', existingSubscription.id);
-
-          if (error) throw error;
-        } else {
-          const plan = plans.find(p => p.id === planId);
-          if (!plan) return;
-
-          const trialEndDate = new Date();
-          trialEndDate.setDate(trialEndDate.getDate() + 14);
-
-          const { error } = await supabase
-            .from('subscriptions')
-            .insert({
-              company_id: profile.company_id,
-              plan_type: planId,
-              subscription_status: 'trial',
-              trial_start_date: new Date().toISOString(),
-              trial_end_date: trialEndDate.toISOString(),
-              monthly_price: plan.currentPrice,
-              is_legacy_price: true
-            });
-
-          if (error) throw error;
-        }
-
-        window.location.href = '/';
+      if (fnError) {
+        throw new Error(fnError.message || 'Erreur lors de la creation de la session');
       }
-    } catch (error) {
-      console.error('Error creating trial:', error);
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('Aucune URL de paiement retournee');
+      }
+    } catch (err: any) {
+      console.error('Error creating checkout session:', err);
+      setError(err.message || 'Une erreur est survenue. Veuillez reessayer.');
     } finally {
       setLoading(false);
       setSelectedPlan(null);
@@ -223,6 +186,14 @@ export default function Pricing() {
             14 jours gratuits - accès complet - sans engagement
           </div>
         </div>
+
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+            <p className="text-sm text-red-700">{error}</p>
+            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600 text-lg font-bold">&times;</button>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-3 gap-8 mb-12 mt-8">
           {plans.map((plan) => {

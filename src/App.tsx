@@ -27,6 +27,8 @@ import PublicProfile from './pages/PublicProfile';
 import Notifications from './pages/Notifications';
 import ProviderPublicProfile from './pages/ProviderPublicProfile';
 import Pricing from './pages/Pricing';
+import SubscriptionSuccess from './pages/SubscriptionSuccess';
+import SubscriptionCancel from './pages/SubscriptionCancel';
 import MentionsLegales from './pages/MentionsLegales';
 import CGV from './pages/CGV';
 import ClientLayout from './components/client/ClientLayout';
@@ -111,6 +113,8 @@ function AppContent() {
   const isPublicProfilePage = pathname.startsWith('/profile/');
   const isStudentDetailPage = pathname.startsWith('/training/students/');
   const isPricingPage = pathname === '/pricing';
+  const isSubscriptionSuccessPage = pathname === '/subscription-success';
+  const isSubscriptionCancelPage = pathname === '/subscription-cancel';
   const isMentionsLegalesPage = pathname === '/mentions-legales';
   const isCGVPage = pathname === '/cgv';
 
@@ -151,6 +155,14 @@ function AppContent() {
         <ChatBot />
       </>
     );
+  }
+
+  if (isSubscriptionSuccessPage) {
+    return <SubscriptionSuccess />;
+  }
+
+  if (isSubscriptionCancelPage) {
+    return <SubscriptionCancel />;
   }
 
   if (isMentionsLegalesPage) {

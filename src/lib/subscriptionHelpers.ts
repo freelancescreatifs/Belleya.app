@@ -55,6 +55,10 @@ export async function checkSubscriptionAccess(companyId: string): Promise<{
     return { hasAccess: true };
   }
 
+  if (status.subscriptionStatus === 'past_due') {
+    return { hasAccess: true, reason: 'past_due' };
+  }
+
   if (status.subscriptionStatus === 'expired') {
     return { hasAccess: false, reason: 'expired' };
   }
@@ -142,4 +146,29 @@ export function getPlanName(planType: string): string {
   };
 
   return names[planType] || planType;
+}
+
+export async function initiateStripeCheckout(planId: string): Promise<{ url?: string; error?: string }> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { error: 'not_authenticated' };
+    }
+
+    const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+      body: { planId },
+    });
+
+    if (error) {
+      return { error: error.message || 'Erreur lors de la creation de la session' };
+    }
+
+    if (data?.url) {
+      return { url: data.url };
+    }
+
+    return { error: 'Aucune URL de paiement retournee' };
+  } catch (err: any) {
+    return { error: err.message || 'Une erreur est survenue' };
+  }
 }
