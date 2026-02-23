@@ -511,19 +511,28 @@ export default function Admin() {
     setAddingUser(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: newUserForm.email,
-        password: newUserForm.password,
-        options: {
-          data: {
-            role: newUserForm.role,
-            first_name: newUserForm.firstName || undefined,
-            last_name: newUserForm.lastName || undefined,
-          }
-        }
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-user`;
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) throw new Error('Session expired');
+
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          email: newUserForm.email,
+          password: newUserForm.password,
+          role: newUserForm.role,
+          firstName: newUserForm.firstName || null,
+          lastName: newUserForm.lastName || null,
+        }),
       });
 
-      if (error) throw error;
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Erreur lors de la création');
 
       showToast('success', 'Utilisateur créé avec succès');
       setShowAddUserModal(false);
