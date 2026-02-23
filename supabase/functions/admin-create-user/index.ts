@@ -68,12 +68,14 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const userRole = role || 'pro';
+
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: {
-        role: role || 'pro',
+        role: userRole,
         first_name: firstName || null,
         last_name: lastName || null,
       },
@@ -84,6 +86,20 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: createError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    const { error: profileError } = await supabase
+      .from('user_profiles')
+      .upsert({
+        user_id: newUser.user.id,
+        role: userRole,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        created_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+
+    if (profileError) {
+      console.error('[admin-create-user] Profile insert error (non-fatal):', profileError);
     }
 
     return new Response(

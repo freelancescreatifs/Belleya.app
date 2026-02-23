@@ -543,7 +543,7 @@ export default function Admin() {
       setShowAddUserModal(false);
       setNewUserForm({ firstName: '', lastName: '', email: '', password: '', role: 'pro' });
       showToast('success', 'Utilisateur créé avec succès');
-      setTimeout(() => loadData(), 1000);
+      setTimeout(() => loadData(), 1500);
     } catch (error: any) {
       console.error('Error creating user:', error);
       const msg = error.message || '';
@@ -1098,18 +1098,27 @@ export default function Admin() {
                         ) : '—'}
                       </td>
                       <td className="px-4 py-4 text-sm">
-                        <select
-                          value={user.subscription_status === 'cancelled' ? '' : (user.plan_type || '')}
-                          onChange={(e) => handleInlineSubscriptionChange(user, e.target.value)}
-                          disabled={!user.company_id || updatingSubscription === user.id}
-                          className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <option value="">---</option>
-                          <option value="start">Start</option>
-                          <option value="studio">Studio</option>
-                          <option value="empire">Empire</option>
-                          <option value="vip">VIP</option>
-                        </select>
+                        <div className="relative group">
+                          <select
+                            value={user.subscription_status === 'cancelled' ? '' : (user.plan_type || '')}
+                            onChange={(e) => handleInlineSubscriptionChange(user, e.target.value)}
+                            disabled={!user.company_id || updatingSubscription === user.id}
+                            className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <option value="">---</option>
+                            <option value="start">Start</option>
+                            <option value="studio">Studio</option>
+                            <option value="empire">Empire</option>
+                            <option value="vip">VIP</option>
+                          </select>
+                          {!user.company_id && (
+                            <div className="absolute bottom-full left-0 mb-1 hidden group-hover:block z-10">
+                              <div className="bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                                Pas de profil entreprise
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         {user.subscription_status ? (
