@@ -3,6 +3,7 @@ import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Hand
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
+import ToastContainer from '../components/shared/ToastContainer';
 import RewardsValidation from '../components/admin/RewardsValidation';
 
 type PeriodFilter = 'day' | 'month' | 'year';
@@ -61,7 +62,7 @@ interface PartnershipData {
 
 export default function Admin() {
   const { user } = useAuth();
-  const { showToast } = useToast();
+  const { toasts, showToast, dismissToast } = useToast();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<KPIStats>({
@@ -539,13 +540,18 @@ export default function Admin() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Erreur lors de la création');
 
-      showToast('success', 'Utilisateur créé avec succès');
       setShowAddUserModal(false);
       setNewUserForm({ firstName: '', lastName: '', email: '', password: '', role: 'pro' });
-      setTimeout(() => loadData(), 100);
+      showToast('success', 'Utilisateur créé avec succès');
+      setTimeout(() => loadData(), 1000);
     } catch (error: any) {
       console.error('Error creating user:', error);
-      showToast('error', error.message || 'Erreur lors de la création');
+      const msg = error.message || '';
+      if (msg.includes('already been registered') || msg.includes('already exists')) {
+        showToast('error', 'Cet email est déjà utilisé par un autre compte');
+      } else {
+        showToast('error', msg || 'Erreur lors de la création');
+      }
     } finally {
       setAddingUser(false);
     }
@@ -1569,6 +1575,8 @@ export default function Admin() {
           </div>
         </div>
       )}
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
