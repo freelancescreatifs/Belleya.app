@@ -396,23 +396,28 @@ export default function Admin() {
   const handleConfirmDeleteUser = async () => {
     if (!userToDelete) return;
 
-    setDeletingUserId(userToDelete.id);
+    const targetId = userToDelete.id;
+    const targetUserId = userToDelete.user_id;
+
+    setDeletingUserId(targetId);
 
     try {
       const { error } = await supabase.rpc('admin_delete_user', {
-        target_user_id: userToDelete.user_id
+        target_user_id: targetUserId
       });
 
       if (error) throw error;
 
-      showToast('success', 'Utilisateur supprimé avec succès');
+      setUsers(prev => prev.filter(u => u.id !== targetId));
+      setDeletingUserId(null);
       setUserToDelete(null);
-      setTimeout(() => loadData(), 100);
+      showToast('success', 'Utilisateur supprimé avec succès');
+      loadData();
     } catch (error) {
       console.error('Error deleting user:', error);
-      showToast('error', 'Erreur lors de la suppression de l\'utilisateur');
-    } finally {
       setDeletingUserId(null);
+      setUserToDelete(null);
+      showToast('error', 'Erreur lors de la suppression de l\'utilisateur');
     }
   };
 
@@ -1155,11 +1160,13 @@ export default function Admin() {
                           className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Supprimer l'utilisateur"
                         >
-                          {deletingUserId === user.id ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
+                          <span className="flex items-center justify-center w-4 h-4">
+                            {deletingUserId === user.id ? (
+                              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 inline-block" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </span>
                         </button>
                       </td>
                     </tr>
@@ -1248,11 +1255,13 @@ export default function Admin() {
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Supprimer le client"
                           >
-                            {deletingUserId === client.id ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
+                            <span className="flex items-center justify-center w-4 h-4">
+                              {deletingUserId === client.id ? (
+                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 inline-block" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </span>
                           </button>
                         </div>
                       </td>
@@ -1541,11 +1550,13 @@ export default function Admin() {
                 disabled={deletingUserId === userToDelete.id}
                 className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {deletingUserId === userToDelete.id ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
+                <span className="flex items-center justify-center w-4 h-4">
+                  {deletingUserId === userToDelete.id ? (
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </span>
                 Supprimer
               </button>
               <button
