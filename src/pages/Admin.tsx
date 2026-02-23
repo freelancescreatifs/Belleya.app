@@ -407,7 +407,7 @@ export default function Admin() {
 
       showToast('success', 'Utilisateur supprimé avec succès');
       setUserToDelete(null);
-      loadData();
+      setTimeout(() => loadData(), 100);
     } catch (error) {
       console.error('Error deleting user:', error);
       showToast('error', 'Erreur lors de la suppression de l\'utilisateur');
@@ -434,7 +434,7 @@ export default function Admin() {
       setShowEditModal(false);
       setEditingUser(null);
       setEditingClientName({ firstName: '', lastName: '' });
-      loadData();
+      setTimeout(() => loadData(), 100);
     } catch (error) {
       console.error('Error updating client info:', error);
       showToast('error', 'Erreur lors de la mise à jour');
@@ -537,7 +537,7 @@ export default function Admin() {
       showToast('success', 'Utilisateur créé avec succès');
       setShowAddUserModal(false);
       setNewUserForm({ firstName: '', lastName: '', email: '', password: '', role: 'pro' });
-      loadData();
+      setTimeout(() => loadData(), 100);
     } catch (error: any) {
       console.error('Error creating user:', error);
       showToast('error', error.message || 'Erreur lors de la création');
@@ -957,12 +957,12 @@ export default function Admin() {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Nouveaux abonnés par mois</h3>
               <div className="space-y-3">
-                {monthlyStats.map((stat, index) => {
+                {monthlyStats.map((stat) => {
                   const maxUsers = Math.max(...monthlyStats.map(s => s.newUsers), 1);
                   const widthPercentage = (stat.newUsers / maxUsers) * 100;
 
                   return (
-                    <div key={index} className="flex items-center gap-3">
+                    <div key={stat.month} className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
                         <div
@@ -982,12 +982,12 @@ export default function Admin() {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Revenus par mois</h3>
               <div className="space-y-3">
-                {monthlyStats.map((stat, index) => {
+                {monthlyStats.map((stat) => {
                   const maxRevenue = Math.max(...monthlyStats.map(s => s.revenue), 1);
                   const widthPercentage = (stat.revenue / maxRevenue) * 100;
 
                   return (
-                    <div key={index} className="flex items-center gap-3">
+                    <div key={stat.month} className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
                         <div
@@ -1501,12 +1501,14 @@ export default function Admin() {
                 disabled={addingUser}
                 className="flex-1 px-4 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {addingUser ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <UserPlus className="w-4 h-4" />
-                )}
-                {addingUser ? 'Création...' : 'Créer'}
+                <span className="w-4 h-4 flex items-center justify-center">
+                  {addingUser ? (
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block"></span>
+                  ) : (
+                    <UserPlus className="w-4 h-4" />
+                  )}
+                </span>
+                <span>{addingUser ? 'Création...' : 'Créer'}</span>
               </button>
               <button
                 onClick={() => {
