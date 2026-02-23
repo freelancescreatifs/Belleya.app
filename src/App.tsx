@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './components/auth/AuthPage';
 import Landing from './pages/Landing';
@@ -51,8 +51,10 @@ function AppContent() {
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'client' | 'pro' | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [navigationLocked, setNavigationLocked] = useState(false);
   const [profileRetryCount, setProfileRetryCount] = useState(0);
+  const pendingPlanCheckedRef = useRef(false);
 
   const safeNavigate = (to: string, source?: string) => {
     console.trace('[NAVIGATION TRACE] safeNavigate called →', { to, source, currentPage, navigationLocked });
@@ -79,6 +81,20 @@ function AppContent() {
       safeNavigate('home', 'auth-change');
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && profile && !pendingPlanCheckedRef.current) {
+      pendingPlanCheckedRef.current = true;
+      const pendingPlan = localStorage.getItem('pending_plan');
+      if (pendingPlan) {
+        localStorage.removeItem('pending_plan');
+        window.location.href = `/pricing?plan=${pendingPlan}&auto=true`;
+      }
+    }
+    if (!user) {
+      pendingPlanCheckedRef.current = false;
+    }
+  }, [user, profile]);
 
   useEffect(() => {
     if (user && !profile && !loading && profileRetryCount < 10) {
@@ -201,14 +217,17 @@ function AppContent() {
     if (!selectedRole) {
       return (
         <>
-          <Landing onSelectRole={setSelectedRole} />
+          <Landing onSelectRole={(role, plan) => {
+            setSelectedRole(role);
+            if (plan) setSelectedPlan(plan);
+          }} />
           <ChatBot />
         </>
       );
     }
     return (
       <>
-        <AuthPage role={selectedRole} onBack={() => setSelectedRole(null)} />
+        <AuthPage role={selectedRole} selectedPlan={selectedPlan} onBack={() => { setSelectedRole(null); setSelectedPlan(null); }} />
         <ChatBot />
       </>
     );

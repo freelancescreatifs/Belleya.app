@@ -4,10 +4,11 @@ import { useAuth } from '../../contexts/AuthContext';
 
 interface AuthPageProps {
   role: 'client' | 'pro';
+  selectedPlan?: string | null;
   onBack: () => void;
 }
 
-export default function AuthPage({ role, onBack }: AuthPageProps) {
+export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,6 +29,9 @@ export default function AuthPage({ role, onBack }: AuthPageProps) {
           throw new Error('Le prenom et le nom sont requis');
         }
 
+        if (selectedPlan) {
+          localStorage.setItem('pending_plan', selectedPlan);
+        }
         console.log('[AuthPage] Starting signup process...');
         await signUp(email, password, role, firstName, lastName);
         console.log('[AuthPage] Signup completed successfully');
