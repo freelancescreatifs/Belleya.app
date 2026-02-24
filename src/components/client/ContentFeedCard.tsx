@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Share2, X } from 'lucide-react';
+import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import ShareDrawer from './ShareDrawer';
 
 interface ContentFeedCardProps {
   content: {
@@ -42,6 +43,7 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showShareDrawer, setShowShareDrawer] = useState(false);
 
   useEffect(() => {
     checkIfLiked();
@@ -98,11 +100,11 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
           id,
           user_id,
           comment_text,
-          created_at
+          created_at,
+          is_approved
         `)
         .eq('content_type', contentType)
         .eq('content_id', content.id)
-        .eq('is_approved', true)
         .order('created_at', { ascending: false });
 
       if (commentsData) {
@@ -198,7 +200,7 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
               className="w-10 h-10 rounded-full object-cover"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-100 to-purple-500 flex items-center justify-center text-white font-semibold">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-belleya-deep flex items-center justify-center text-white font-semibold">
               {provider.company_name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -243,7 +245,10 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
             <span className="text-sm font-medium">{commentsCount}</span>
           </button>
 
-          <button className="flex items-center gap-2 text-gray-700 hover:text-belleya-bright transition-colors ml-auto">
+          <button
+            onClick={() => setShowShareDrawer(true)}
+            className="flex items-center gap-2 text-gray-700 hover:text-belleya-bright transition-colors ml-auto"
+          >
             <Share2 className="w-6 h-6" />
           </button>
         </div>
@@ -297,10 +302,14 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
               </button>
             </div>
 
+            {comments.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-2">Aucun commentaire</p>
+            )}
+
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {comments.map((comment) => (
                 <div key={comment.id} className="flex items-start gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-belleya-deep flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                     {comment.user_name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2">
@@ -314,6 +323,16 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
           </div>
         )}
       </div>
+
+      <ShareDrawer
+        isOpen={showShareDrawer}
+        onClose={() => setShowShareDrawer(false)}
+        contentTitle={content.title}
+        contentDescription={content.description}
+        contentImageUrl={content.media_url}
+        providerName={provider.company_name}
+        shareUrl={provider.booking_slug ? `/provider/${provider.booking_slug}` : ''}
+      />
     </div>
   );
 }
