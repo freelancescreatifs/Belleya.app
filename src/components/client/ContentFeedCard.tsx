@@ -65,27 +65,51 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
     }
   };
 
+  const refreshLikesCount = async () => {
+    const table = contentType === 'client_photo' ? 'client_results_photos' : 'content_calendar';
+    const { data } = await supabase
+      .from(table)
+      .select('likes_count')
+      .eq('id', content.id)
+      .maybeSingle();
+    if (data) setLikesCount(data.likes_count || 0);
+  };
+
+  const refreshCommentsCount = async () => {
+    const table = contentType === 'client_photo' ? 'client_results_photos' : 'content_calendar';
+    const { data } = await supabase
+      .from(table)
+      .select('comments_count')
+      .eq('id', content.id)
+      .maybeSingle();
+    if (data) setCommentsCount(data.comments_count || 0);
+  };
+
   const handleLike = async () => {
     try {
       if (isLiked) {
-        await supabase
+        const { error } = await supabase
           .from('content_likes')
           .delete()
           .eq('content_type', contentType)
           .eq('content_id', content.id)
           .eq('user_id', currentUserId);
-        setIsLiked(false);
-        setLikesCount(prev => Math.max(0, prev - 1));
+        if (!error) {
+          setIsLiked(false);
+          await refreshLikesCount();
+        }
       } else {
-        await supabase
+        const { error } = await supabase
           .from('content_likes')
           .insert({
             content_type: contentType,
             content_id: content.id,
             user_id: currentUserId
           });
-        setIsLiked(true);
-        setLikesCount(prev => prev + 1);
+        if (!error) {
+          setIsLiked(true);
+          await refreshLikesCount();
+        }
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -156,7 +180,7 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
 
       if (data) {
         setNewComment('');
-        setCommentsCount(prev => prev + 1);
+        await refreshCommentsCount();
         await loadComments();
       }
     } catch (error) {
