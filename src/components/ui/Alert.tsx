@@ -1,5 +1,5 @@
 import React from 'react'
-import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react'
+import { CircleCheck as CheckCircle, Circle as XCircle, CircleAlert as AlertCircle, Info } from 'lucide-react'
 
 interface AlertProps {
   type: 'success' | 'error' | 'warning' | 'info'
