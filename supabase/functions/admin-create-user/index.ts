@@ -9,7 +9,7 @@ const corsHeaders = {
 async function waitForCompanyId(
   supabase: ReturnType<typeof createClient>,
   userId: string,
-  maxRetries = 8
+  maxRetries = 6
 ): Promise<string | null> {
   for (let i = 0; i < maxRetries; i++) {
     const { data } = await supabase
@@ -19,11 +19,37 @@ async function waitForCompanyId(
       .maybeSingle();
 
     if (data?.company_id) return data.company_id;
-    if (i < maxRetries - 1) {
-      await new Promise((r) => setTimeout(r, 500));
-    }
+    await new Promise((r) => setTimeout(r, 1000));
   }
   return null;
+}
+
+async function createCompanyProfileFallback(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  companyName: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('company_profiles')
+    .insert({
+      user_id: userId,
+      company_name: companyName || 'Mon Entreprise',
+      activity_type: 'onglerie',
+      creation_date: new Date().toISOString().split('T')[0],
+      country: 'France',
+      legal_status: 'MICRO',
+      vat_mode: 'VAT_FRANCHISE',
+      acre: false,
+      versement_liberatoire: false,
+    })
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    console.error('[admin-create-user] Fallback company creation error:', error);
+    return null;
+  }
+  return data?.id ?? null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -108,23 +134,15 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { error: profileError } = await supabase
-      .from('user_profiles')
-      .upsert({
-        user_id: newUser.user.id,
-        role: userRole,
-        first_name: firstName || null,
-        last_name: lastName || null,
-        created_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
-
-    if (profileError) {
-      console.error('[admin-create-user] Profile insert error (non-fatal):', profileError);
-    }
-
     let companyId: string | null = null;
+
     if (userRole === 'pro') {
       companyId = await waitForCompanyId(supabase, newUser.user.id);
+
+      if (!companyId) {
+        const name = [firstName, lastName].filter(Boolean).join(' ') || email.split('@')[0];
+        companyId = await createCompanyProfileFallback(supabase, newUser.user.id, name);
+      }
     }
 
     return new Response(

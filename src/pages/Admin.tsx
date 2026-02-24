@@ -542,8 +542,13 @@ export default function Admin() {
 
       setShowAddUserModal(false);
       setNewUserForm({ firstName: '', lastName: '', email: '', password: '', role: 'pro' });
-      showToast('success', 'Utilisateur créé avec succès');
-      setTimeout(() => loadData(), 1500);
+
+      if (newUserForm.role === 'pro' && !result.user?.company_id) {
+        showToast('error', 'Utilisateur créé mais profil entreprise manquant. Rechargez la page.');
+      } else {
+        showToast('success', 'Utilisateur créé avec succès');
+      }
+      setTimeout(() => loadData(), 500);
     } catch (error: any) {
       console.error('Error creating user:', error);
       const msg = error.message || '';
