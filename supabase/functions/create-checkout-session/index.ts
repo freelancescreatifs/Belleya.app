@@ -28,10 +28,59 @@ async function getCompanyId(
       .maybeSingle();
 
     if (data?.company_id) return data.company_id;
+
+    const { data: cp } = await supabase
+      .from("company_profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (cp?.id) {
+      await supabase
+        .from("user_profiles")
+        .update({ company_id: cp.id })
+        .eq("user_id", userId);
+      return cp.id;
+    }
+
     if (i < maxRetries - 1) {
       await new Promise((r) => setTimeout(r, 1000));
     }
   }
+
+  const { data: user } = await supabase.auth.admin.getUserById(userId);
+  if (user?.user) {
+    const meta = user.user.user_metadata || {};
+    const companyName =
+      [meta.first_name, meta.last_name].filter(Boolean).join(" ") ||
+      user.user.email?.split("@")[0] ||
+      "Mon Entreprise";
+
+    const { data: newCp } = await supabase
+      .from("company_profiles")
+      .insert({
+        user_id: userId,
+        company_name: companyName,
+        activity_type: "onglerie",
+        creation_date: new Date().toISOString().split("T")[0],
+        country: "France",
+        legal_status: "MICRO",
+        vat_mode: "VAT_FRANCHISE",
+        acre: false,
+        versement_liberatoire: false,
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (newCp?.id) {
+      await supabase
+        .from("user_profiles")
+        .update({ company_id: newCp.id })
+        .eq("user_id", userId);
+      return newCp.id;
+    }
+  }
+
   return null;
 }
 

@@ -127,6 +127,15 @@ async function waitForCompanyProfile(maxRetries = 10, delayMs = 1500): Promise<s
       .maybeSingle();
 
     if (data?.company_id) return data.company_id;
+
+    const { data: cp } = await supabase
+      .from('company_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (cp?.id) return cp.id;
+
     if (i < maxRetries - 1) {
       await new Promise(r => setTimeout(r, delayMs));
     }
