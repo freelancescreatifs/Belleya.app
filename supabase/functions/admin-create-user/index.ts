@@ -6,6 +6,26 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
+async function waitForCompanyId(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  maxRetries = 8
+): Promise<string | null> {
+  for (let i = 0; i < maxRetries; i++) {
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('company_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (data?.company_id) return data.company_id;
+    if (i < maxRetries - 1) {
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  }
+  return null;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -102,8 +122,19 @@ Deno.serve(async (req: Request) => {
       console.error('[admin-create-user] Profile insert error (non-fatal):', profileError);
     }
 
+    let companyId: string | null = null;
+    if (userRole === 'pro') {
+      companyId = await waitForCompanyId(supabase, newUser.user.id);
+    }
+
     return new Response(
-      JSON.stringify({ user: { id: newUser.user.id, email: newUser.user.email } }),
+      JSON.stringify({
+        user: {
+          id: newUser.user.id,
+          email: newUser.user.email,
+          company_id: companyId,
+        },
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {

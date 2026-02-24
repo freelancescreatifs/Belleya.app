@@ -134,17 +134,29 @@ export default function Pricing() {
     window.location.href = '/';
   }
 
+  async function waitForSession(maxRetries = 10, delayMs = 500): Promise<boolean> {
+    for (let i = 0; i < maxRetries; i++) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) return true;
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+    return false;
+  }
+
   async function handleSelectPlan(planId: string) {
     setSelectedPlan(planId);
     setLoading(true);
     setError(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        localStorage.setItem('pending_plan', planId);
-        window.location.href = '/';
-        return;
+      const sessionReady = await waitForSession();
+      if (!sessionReady) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          localStorage.setItem('pending_plan', planId);
+          window.location.href = '/';
+          return;
+        }
       }
 
       const { data, error: fnError } = await supabase.functions.invoke('create-checkout-session', {

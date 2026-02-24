@@ -45,6 +45,7 @@ import {
   Video,
   Lightbulb,
   Mail,
+  Loader2,
 } from 'lucide-react';
 
 function AppContent() {
@@ -81,15 +82,14 @@ function AppContent() {
     }
   }, [user]);
 
+  const pendingPlan = user && profile ? localStorage.getItem('pending_plan') : null;
+
   useEffect(() => {
-    if (user && profile) {
-      const pendingPlan = localStorage.getItem('pending_plan');
-      if (pendingPlan) {
-        localStorage.removeItem('pending_plan');
-        window.location.href = `/pricing?plan=${pendingPlan}&auto=true`;
-      }
+    if (user && profile && pendingPlan) {
+      localStorage.removeItem('pending_plan');
+      window.location.href = `/pricing?plan=${pendingPlan}&auto=true`;
     }
-  }, [user, profile]);
+  }, [user, profile, pendingPlan]);
 
   useEffect(() => {
     if (user && !profile && !loading && profileRetryCount < 10) {
@@ -261,6 +261,18 @@ function AppContent() {
           >
             Se déconnecter
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (pendingPlan) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-belleya-deep animate-spin mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Redirection vers le paiement...</h2>
+          <p className="text-slate-600">Veuillez patienter, nous preparons votre abonnement.</p>
         </div>
       </div>
     );

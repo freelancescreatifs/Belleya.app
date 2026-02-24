@@ -15,11 +15,25 @@ const PRICE_MAP: Record<string, string> = {
   empire: "price_1T3zlNBfytXsUv43BDro3DSM",
 };
 
-const PLAN_NAMES: Record<string, string> = {
-  start: "Belleya Start",
-  studio: "Belleya Studio",
-  empire: "Belleya Empire",
-};
+async function getCompanyId(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  maxRetries = 5
+): Promise<string | null> {
+  for (let i = 0; i < maxRetries; i++) {
+    const { data } = await supabase
+      .from("user_profiles")
+      .select("company_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (data?.company_id) return data.company_id;
+    if (i < maxRetries - 1) {
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+  return null;
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -77,15 +91,14 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from("user_profiles")
-      .select("company_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const companyId = await getCompanyId(supabase, user.id);
 
-    if (profileError || !profile?.company_id) {
+    if (!companyId) {
       return new Response(
-        JSON.stringify({ error: "User profile or company not found" }),
+        JSON.stringify({
+          error:
+            "Votre profil entreprise est en cours de creation. Veuillez reessayer dans quelques secondes.",
+        }),
         {
           status: 404,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -96,7 +109,7 @@ Deno.serve(async (req: Request) => {
     const { data: subscription, error: subError } = await supabase
       .from("subscriptions")
       .select("id, stripe_customer_id, subscription_status")
-      .eq("company_id", profile.company_id)
+      .eq("company_id", companyId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -118,7 +131,7 @@ Deno.serve(async (req: Request) => {
         email: user.email,
         metadata: {
           supabase_user_id: user.id,
-          company_id: profile.company_id,
+          company_id: companyId,
         },
       });
       stripeCustomerId = customer.id;
@@ -148,12 +161,12 @@ Deno.serve(async (req: Request) => {
       subscription_data: {
         trial_period_days: 14,
         metadata: {
-          company_id: profile.company_id,
+          company_id: companyId,
           plan_type: planId,
         },
       },
       metadata: {
-        company_id: profile.company_id,
+        company_id: companyId,
         plan_type: planId,
         supabase_user_id: user.id,
       },
