@@ -10,9 +10,9 @@ const corsHeaders = {
 };
 
 const PRICE_MAP: Record<string, string> = {
-  start: "price_start_placeholder",
-  studio: "price_studio_placeholder",
-  empire: "price_empire_placeholder",
+  start: "price_1T3zuDBfytXsUv437YS4Nnmg",
+  studio: "price_1T3zl6BfytXsUv439myWeh1D",
+  empire: "price_1T3zlNBfytXsUv43BDro3DSM",
 };
 
 const PLAN_NAMES: Record<string, string> = {

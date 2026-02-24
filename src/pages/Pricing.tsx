@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star, AlertCircle, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface PricingPlan {
@@ -87,7 +87,7 @@ const plans: PricingPlan[] = [
     name: 'BELLEYA EMPIRE',
     currentPrice: 59,
     futurePrice: 79,
-    icon: <Crown className="w-8 h-8 text-purple-600" />,
+    icon: <Crown className="w-8 h-8 text-belleya-deep" />,
     popular: false,
     description: 'Pour celles qui veulent automatiser et générer des revenus récurrents.',
     features: [
@@ -111,8 +111,23 @@ const plans: PricingPlan[] = [
 export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [autoCheckoutLoading, setAutoCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [daysUntilIncrease] = useState(30);
+  const autoCheckoutTriggered = useRef(false);
+
+  useEffect(() => {
+    if (autoCheckoutTriggered.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    const auto = params.get('auto');
+
+    if (auto === 'true' && plan && ['start', 'studio', 'empire'].includes(plan)) {
+      autoCheckoutTriggered.current = true;
+      setAutoCheckoutLoading(true);
+      handleSelectPlan(plan);
+    }
+  }, []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -127,6 +142,7 @@ export default function Pricing() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        localStorage.setItem('pending_plan', planId);
         window.location.href = '/';
         return;
       }
@@ -147,16 +163,28 @@ export default function Pricing() {
     } catch (err: any) {
       console.error('Error creating checkout session:', err);
       setError(err.message || 'Une erreur est survenue. Veuillez reessayer.');
+      setAutoCheckoutLoading(false);
     } finally {
       setLoading(false);
       setSelectedPlan(null);
     }
   }
 
+  if (autoCheckoutLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-belleya-deep animate-spin mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Redirection vers le paiement...</h2>
+          <p className="text-slate-600">Veuillez patienter, nous preparons votre abonnement.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Bouton déconnexion */}
         <div className="flex justify-end mb-4">
           <button
             onClick={handleLogout}
@@ -213,7 +241,7 @@ export default function Pricing() {
                 </div>
               )}
               {isEmpire && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-belleya-bright text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                   <Crown className="w-4 h-4" />
                   Premium
                 </div>
@@ -244,7 +272,7 @@ export default function Pricing() {
                     plan.popular
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-xl hover:scale-105'
                       : isEmpire
-                      ? 'bg-gradient-to-r from-belleya-deep to-purple-600 text-white hover:shadow-xl hover:scale-105'
+                      ? 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-xl hover:scale-105'
                       : 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-xl hover:scale-105'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
@@ -300,7 +328,7 @@ export default function Pricing() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Fonctionnalités</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-belleya-bright">START</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-amber-600">STUDIO</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-purple-600">EMPIRE</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-belleya-deep">EMPIRE</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">

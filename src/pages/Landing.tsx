@@ -14,7 +14,7 @@ import ComparisonSection from '../components/landing/ComparisonSection';
 import LanguageSwitcher from '../components/shared/LanguageSwitcher';
 
 interface LandingProps {
-  onSelectRole: (role: 'client' | 'pro') => void;
+  onSelectRole: (role: 'client' | 'pro', plan?: string) => void;
 }
 
 export default function Landing({ onSelectRole }: LandingProps) {
@@ -485,6 +485,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             {[
               {
                 name: "BELLEYA START",
+                planId: "start",
                 price: "29",
                 futurePrice: "39",
                 popular: false,
@@ -509,6 +510,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               },
               {
                 name: "BELLEYA STUDIO",
+                planId: "studio",
                 price: "39",
                 futurePrice: "49",
                 popular: true,
@@ -533,6 +535,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               },
               {
                 name: "BELLEYA EMPIRE",
+                planId: "empire",
                 price: "59",
                 futurePrice: "79",
                 popular: false,
@@ -571,7 +574,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     </div>
                   )}
                   {plan.isEmpire && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-belleya-bright text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                       <Crown className="w-3 h-3 md:w-4 md:h-4" />
                       Premium
                     </div>
@@ -582,7 +585,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                       <Icon className={`w-6 h-6 md:w-8 md:h-8 ${
                         plan.color === 'belleya-powder' ? 'text-belleya-powder' :
                         plan.color === 'amber' ? 'text-amber-600' :
-                        plan.isEmpire ? 'text-purple-600' :
+                        plan.isEmpire ? 'text-belleya-deep' :
                         'text-belleya-deep'
                       }`} />
                       <h3 className="text-lg md:text-2xl font-bold text-gray-900">{plan.name}</h3>
@@ -609,12 +612,12 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   </ul>
 
                   <button
-                    onClick={() => onSelectRole('pro')}
+                    onClick={() => onSelectRole('pro', plan.planId)}
                     className={`w-full py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all ${
                       plan.popular
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:scale-105'
                         : plan.isEmpire
-                        ? 'bg-gradient-to-r from-belleya-deep to-purple-600 text-white hover:shadow-lg hover:scale-105'
+                        ? 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
                         : 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
                     }`}
                   >
