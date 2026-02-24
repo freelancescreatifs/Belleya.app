@@ -9,11 +9,54 @@ const corsHeaders = {
     "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const PRICE_MAP: Record<string, string> = {
-  start: "price_1T3zuDBfytXsUv437YS4Nnmg",
-  studio: "price_1T3zl6BfytXsUv439myWeh1D",
-  empire: "price_1T3zlNBfytXsUv43BDro3DSM",
+const PLAN_CONFIG: Record<string, { name: string; amount: number; lookupKey: string }> = {
+  start: { name: "Belleya Start", amount: 2900, lookupKey: "belleya_start_monthly" },
+  studio: { name: "Belleya Studio", amount: 3900, lookupKey: "belleya_studio_monthly" },
+  empire: { name: "Belleya Empire", amount: 5900, lookupKey: "belleya_empire_monthly" },
 };
+
+const VALID_PLANS = Object.keys(PLAN_CONFIG);
+
+async function getOrCreatePrice(stripe: Stripe, planId: string): Promise<string> {
+  const config = PLAN_CONFIG[planId];
+
+  const existing = await stripe.prices.list({
+    lookup_keys: [config.lookupKey],
+    active: true,
+    limit: 1,
+  });
+
+  if (existing.data.length > 0) {
+    return existing.data[0].id;
+  }
+
+  const products = await stripe.products.list({
+    active: true,
+    limit: 100,
+  });
+
+  let product = products.data.find(
+    (p) => p.metadata?.belleya_plan === planId
+  );
+
+  if (!product) {
+    product = await stripe.products.create({
+      name: config.name,
+      metadata: { belleya_plan: planId },
+    });
+  }
+
+  const price = await stripe.prices.create({
+    product: product.id,
+    unit_amount: config.amount,
+    currency: "eur",
+    recurring: { interval: "month" },
+    lookup_key: config.lookupKey,
+    metadata: { belleya_plan: planId },
+  });
+
+  return price.id;
+}
 
 async function getCompanyId(
   supabase: ReturnType<typeof createClient>,
@@ -48,12 +91,18 @@ async function getCompanyId(
     }
   }
 
-  const { data: user } = await supabase.auth.admin.getUserById(userId);
-  if (user?.user) {
-    const meta = user.user.user_metadata || {};
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("id, user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+  if (authUser?.user) {
+    const meta = authUser.user.user_metadata || {};
     const companyName =
       [meta.first_name, meta.last_name].filter(Boolean).join(" ") ||
-      user.user.email?.split("@")[0] ||
+      authUser.user.email?.split("@")[0] ||
       "Mon Entreprise";
 
     const { data: newCp } = await supabase
@@ -93,7 +142,18 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
+    if (!stripeKey) {
+      return new Response(
+        JSON.stringify({ error: "Stripe is not configured" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2023-10-16",
     });
 
@@ -128,7 +188,7 @@ Deno.serve(async (req: Request) => {
 
     const { planId } = await req.json();
 
-    if (!planId || !PRICE_MAP[planId]) {
+    if (!planId || !VALID_PLANS.includes(planId)) {
       return new Response(
         JSON.stringify({
           error: "Invalid plan. Must be one of: start, studio, empire",
@@ -155,6 +215,8 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+
+    const priceId = await getOrCreatePrice(stripe, planId);
 
     const { data: subscription, error: subError } = await supabase
       .from("subscriptions")
@@ -204,7 +266,7 @@ Deno.serve(async (req: Request) => {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: PRICE_MAP[planId],
+          price: priceId,
           quantity: 1,
         },
       ],
