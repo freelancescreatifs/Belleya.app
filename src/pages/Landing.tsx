@@ -14,7 +14,7 @@ import ComparisonSection from '../components/landing/ComparisonSection';
 import LanguageSwitcher from '../components/shared/LanguageSwitcher';
 
 interface LandingProps {
-  onSelectRole: (role: 'client' | 'pro', plan?: string) => void;
+  onSelectRole: (role: 'client' | 'pro') => void;
 }
 
 export default function Landing({ onSelectRole }: LandingProps) {
@@ -484,7 +484,6 @@ export default function Landing({ onSelectRole }: LandingProps) {
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-8">
             {[
               {
-                id: 'start',
                 name: "BELLEYA START",
                 price: "29",
                 futurePrice: "39",
@@ -509,7 +508,6 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 ]
               },
               {
-                id: 'studio',
                 name: "BELLEYA STUDIO",
                 price: "39",
                 futurePrice: "49",
@@ -534,7 +532,6 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 ]
               },
               {
-                id: 'empire',
                 name: "BELLEYA EMPIRE",
                 price: "59",
                 futurePrice: "79",
@@ -612,7 +609,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   </ul>
 
                   <button
-                    onClick={() => onSelectRole('pro', plan.id)}
+                    onClick={() => onSelectRole('pro')}
                     className={`w-full py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all ${
                       plan.popular
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:scale-105'

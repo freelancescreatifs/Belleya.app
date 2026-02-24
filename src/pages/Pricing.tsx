@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star, AlertCircle, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface PricingPlan {
@@ -108,39 +108,11 @@ const plans: PricingPlan[] = [
   }
 ];
 
-const VALID_PLANS = ['start', 'studio', 'empire'];
-
 export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [autoRedirecting, setAutoRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [daysUntilIncrease] = useState(30);
-  const autoTriggeredRef = useRef(false);
-
-  useEffect(() => {
-    if (autoTriggeredRef.current) return;
-
-    const storedPlan = localStorage.getItem('auto_checkout_plan');
-    if (storedPlan && VALID_PLANS.includes(storedPlan)) {
-      autoTriggeredRef.current = true;
-      localStorage.removeItem('auto_checkout_plan');
-      setAutoRedirecting(true);
-      const timer = setTimeout(() => handleSelectPlan(storedPlan), 500);
-      return () => clearTimeout(timer);
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    const auto = params.get('auto');
-    const plan = params.get('plan');
-    if (auto === 'true' && plan && VALID_PLANS.includes(plan)) {
-      autoTriggeredRef.current = true;
-      setAutoRedirecting(true);
-      window.history.replaceState({}, '', '/pricing');
-      const timer = setTimeout(() => handleSelectPlan(plan), 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -167,10 +139,6 @@ export default function Pricing() {
         throw new Error(fnError.message || 'Erreur lors de la creation de la session');
       }
 
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
       if (data?.url) {
         window.location.href = data.url;
       } else {
@@ -178,7 +146,6 @@ export default function Pricing() {
       }
     } catch (err: any) {
       console.error('Error creating checkout session:', err);
-      setAutoRedirecting(false);
       setError(err.message || 'Une erreur est survenue. Veuillez reessayer.');
     } finally {
       setLoading(false);
@@ -220,18 +187,11 @@ export default function Pricing() {
           </div>
         </div>
 
-        {autoRedirecting && (
-          <div className="mb-8 bg-belleya-50 border border-belleya-200 rounded-xl p-6 flex items-center justify-center gap-3">
-            <Loader2 className="w-5 h-5 text-belleya-deep animate-spin" />
-            <p className="text-sm font-medium text-belleya-deep">Redirection vers le paiement en cours...</p>
-          </div>
-        )}
-
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
             <p className="text-sm text-red-700">{error}</p>
-            <button onClick={() => { setError(null); setAutoRedirecting(false); }} className="ml-auto text-red-400 hover:text-red-600 text-lg font-bold">&times;</button>
+            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600 text-lg font-bold">&times;</button>
           </div>
         )}
 
