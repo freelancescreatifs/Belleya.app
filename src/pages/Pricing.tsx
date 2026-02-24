@@ -1,6 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star, AlertCircle, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Check, Zap, Crown, Sparkles, Clock, LogOut, Star, AlertCircle, Loader2, RefreshCw, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+interface PricingProps {
+  autoPlan?: string;
+  onDone?: () => void;
+}
 
 interface PricingPlan {
   id: string;
@@ -21,33 +26,33 @@ const plans: PricingPlan[] = [
     futurePrice: 39,
     icon: <Sparkles className="w-8 h-8 text-belleya-bright" />,
     popular: false,
-    description: 'Pour les indépendantes qui veulent structurer leur activité et arrêter de tout gérer à la main.',
+    description: 'Pour les independantes qui veulent structurer leur activite et arreter de tout gerer a la main.',
     features: [
-      '✅ Organisation & Structure',
+      '\u2705 Organisation & Structure',
       'Gestion des objectifs',
-      'Gestion des tâches',
-      'Agenda intelligent synchronisé',
-      'Réservation en ligne',
-      'Jusqu\'à 50 clientes',
+      'Gestion des taches',
+      'Agenda intelligent synchronise',
+      'Reservation en ligne',
+      'Jusqu\'a 50 clientes',
       'Notifications automatiques',
-      'Envoi automatique du récapitulatif client',
+      'Envoi automatique du recapitulatif client',
       'Suivi des transactions',
       'Dashboard financier clair',
-      '📱 Réseaux sociaux intégrés',
-      'Gestion des réseaux sociaux',
-      'Calendrier éditorial',
-      'Suggestions de sujets selon les événements de l\'année',
-      'Boîte à idées IA adaptée à ton métier',
+      '\ud83d\udcf1 Reseaux sociaux integres',
+      'Gestion des reseaux sociaux',
+      'Calendrier editorial',
+      'Suggestions de sujets selon les evenements de l\'annee',
+      'Boite a idees IA adaptee a ton metier',
       'Stockage des inspirations (toi + clientes)',
-      '💰 Gestion financière simplifiée',
+      '\ud83d\udcb0 Gestion financiere simplifiee',
       'Suivi des paiements',
-      'Calculateur de rentabilité',
+      'Calculateur de rentabilite',
       'Adaptation selon ton statut',
       'Estimation automatique TVA / CFE',
-      'Export & import complet des données',
+      'Export & import complet des donnees',
       'Partenariat officiel Belleya',
       'Support WhatsApp 48h',
-      '🎯 Idéal pour se structurer dès le départ'
+      '\ud83c\udfaf Ideal pour se structurer des le depart'
     ]
   },
   {
@@ -59,27 +64,27 @@ const plans: PricingPlan[] = [
     popular: true,
     description: 'Pour les professionnelles qui veulent scaler intelligemment.',
     features: [
-      '✨ Tout Start inclus +',
-      '💼 Business & Clients',
-      'Clientes illimitées',
+      '\u2728 Tout Start inclus +',
+      '\ud83d\udcbc Business & Clients',
+      'Clientes illimitees',
       'Gestion des acomptes',
-      'Gestion élèves / formations',
-      'Historique détaillé client',
-      'Système de fidélisation',
+      'Gestion eleves / formations',
+      'Historique detaille client',
+      'Systeme de fidelisation',
       'Gestion des stocks',
-      'Gestion complète des finances',
-      '📈 Croissance & Marketing',
+      'Gestion complete des finances',
+      '\ud83d\udcc8 Croissance & Marketing',
       'Marketing automatique par email',
       'Emails anniversaires & relances',
       'Partenariat officiel Belleya',
-      'Visibilité sur la plateforme sociale Belleya',
+      'Visibilite sur la plateforme sociale Belleya',
       'Outils d\'optimisation conversion',
-      '💰 Finance avancée',
+      '\ud83d\udcb0 Finance avancee',
       'Calcul automatique charges & cotisations',
       'Exports comptables',
-      'Export & import simplifié',
+      'Export & import simplifie',
       'Support WhatsApp 24H',
-      '🎯 Idéal pour augmenter ton chiffre d\'affaires'
+      '\ud83c\udfaf Ideal pour augmenter ton chiffre d\'affaires'
     ]
   },
   {
@@ -89,68 +94,132 @@ const plans: PricingPlan[] = [
     futurePrice: 79,
     icon: <Crown className="w-8 h-8 text-belleya-deep" />,
     popular: false,
-    description: 'Pour celles qui veulent automatiser et générer des revenus récurrents.',
+    description: 'Pour celles qui veulent automatiser et generer des revenus recurrents.',
     features: [
-      '✨ Tout Studio inclus +',
-      '🚀 Expansion & Automatisation',
-      'Marketing automatisé avancé',
+      '\u2728 Tout Studio inclus +',
+      '\ud83d\ude80 Expansion & Automatisation',
+      'Marketing automatise avance',
       'Campagnes multi-canaux (SMS + Email)',
       'Optimisation conversion client',
       'Rappels intelligents (anniversaires, relances)',
-      '🤝 Revenus complémentaires',
+      '\ud83e\udd1d Revenus complementaires',
       'Partenariat officiel Belleya',
       'Gestion des Revenus d\'affiliation de vos partenaires',
       'Mise en avant premium sur la plateforme',
-      'Visibilité renforcée côté client',
-      '⚡ Support prioritaire express',
-      '🎯 Idéal pour remplir automatiquement ton agenda et scaler'
+      'Visibilite renforcee cote client',
+      '\u26a1 Support prioritaire express',
+      '\ud83c\udfaf Ideal pour remplir automatiquement ton agenda et scaler'
     ]
   }
 ];
 
-export default function Pricing() {
+const VALID_PLANS = ['start', 'studio', 'empire'];
+
+async function waitForCompanyProfile(maxRetries = 10, delayMs = 1500): Promise<string | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  for (let i = 0; i < maxRetries; i++) {
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('company_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (data?.company_id) return data.company_id;
+    if (i < maxRetries - 1) {
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  return null;
+}
+
+export default function Pricing({ autoPlan, onDone }: PricingProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [autoCheckoutLoading, setAutoCheckoutLoading] = useState(false);
+  const [autoCheckoutStatus, setAutoCheckoutStatus] = useState('');
+  const [autoCheckoutSeconds, setAutoCheckoutSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [daysUntilIncrease] = useState(30);
   const autoCheckoutTriggered = useRef(false);
+  const abortRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    if (autoCheckoutTriggered.current) return;
-    const params = new URLSearchParams(window.location.search);
-    const plan = params.get('plan');
-    const auto = params.get('auto');
-
-    if (auto === 'true' && plan && ['start', 'studio', 'empire'].includes(plan)) {
-      autoCheckoutTriggered.current = true;
-      setAutoCheckoutLoading(true);
-      handleSelectPlan(plan);
+  const cancelAutoCheckout = useCallback(() => {
+    abortRef.current = true;
+    setAutoCheckoutLoading(false);
+    setAutoCheckoutStatus('');
+    setAutoCheckoutSeconds(0);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
   }, []);
 
+  useEffect(() => {
+    if (autoCheckoutTriggered.current) return;
+
+    let planToUse: string | null = null;
+
+    if (autoPlan && VALID_PLANS.includes(autoPlan)) {
+      planToUse = autoPlan;
+    } else {
+      const params = new URLSearchParams(window.location.search);
+      const urlPlan = params.get('plan');
+      const auto = params.get('auto');
+      if (auto === 'true' && urlPlan && VALID_PLANS.includes(urlPlan)) {
+        planToUse = urlPlan;
+      }
+    }
+
+    if (planToUse) {
+      autoCheckoutTriggered.current = true;
+      setAutoCheckoutLoading(true);
+      handleSelectPlan(planToUse);
+    }
+  }, [autoPlan]);
+
+  useEffect(() => {
+    if (autoCheckoutLoading) {
+      setAutoCheckoutSeconds(0);
+      timerRef.current = setInterval(() => {
+        setAutoCheckoutSeconds(prev => {
+          if (prev >= 30) {
+            cancelAutoCheckout();
+            setError('Le processus a pris trop de temps. Veuillez reessayer en cliquant sur le plan souhaite.');
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [autoCheckoutLoading, cancelAutoCheckout]);
+
   async function handleLogout() {
     await supabase.auth.signOut();
-    window.location.href = '/';
-  }
-
-  async function waitForSession(maxRetries = 10, delayMs = 500): Promise<boolean> {
-    for (let i = 0; i < maxRetries; i++) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) return true;
-      await new Promise(r => setTimeout(r, delayMs));
+    if (onDone) {
+      onDone();
+    } else {
+      window.location.href = '/';
     }
-    return false;
   }
 
   async function handleSelectPlan(planId: string) {
     setSelectedPlan(planId);
     setLoading(true);
     setError(null);
+    abortRef.current = false;
 
     try {
-      const sessionReady = await waitForSession();
-      if (!sessionReady) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           localStorage.setItem('pending_plan', planId);
@@ -159,36 +228,91 @@ export default function Pricing() {
         }
       }
 
-      const { data, error: fnError } = await supabase.functions.invoke('create-checkout-session', {
-        body: { planId },
-      });
+      if (abortRef.current) return;
 
-      if (fnError) {
-        throw new Error(fnError.message || 'Erreur lors de la creation de la session');
+      setAutoCheckoutStatus('Preparation de votre espace...');
+      const companyId = await waitForCompanyProfile(10, 1500);
+
+      if (abortRef.current) return;
+
+      if (!companyId) {
+        throw new Error('Votre profil est en cours de creation. Veuillez patienter quelques secondes puis reessayer.');
       }
 
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
+      setAutoCheckoutStatus('Connexion au paiement...');
+
+      let lastError: string | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (abortRef.current) return;
+
+        const { data, error: fnError } = await supabase.functions.invoke('create-checkout-session', {
+          body: { planId },
+        });
+
+        if (fnError) {
+          lastError = fnError.message || 'Erreur lors de la creation de la session';
+
+          if (attempt < 2) {
+            await new Promise(r => setTimeout(r, 2000));
+            continue;
+          }
+          throw new Error(lastError);
+        }
+
+        if (data?.retry === true) {
+          lastError = data.error || 'Profil en cours de creation';
+          if (attempt < 2) {
+            await new Promise(r => setTimeout(r, 2000));
+            continue;
+          }
+          throw new Error(lastError);
+        }
+
+        if (data?.url) {
+          window.location.href = data.url;
+          return;
+        }
+
         throw new Error('Aucune URL de paiement retournee');
       }
+
+      throw new Error(lastError || 'Echec apres plusieurs tentatives');
     } catch (err: any) {
       console.error('Error creating checkout session:', err);
       setError(err.message || 'Une erreur est survenue. Veuillez reessayer.');
       setAutoCheckoutLoading(false);
+      setAutoCheckoutStatus('');
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     } finally {
       setLoading(false);
       setSelectedPlan(null);
     }
   }
 
-  if (autoCheckoutLoading) {
+  if (autoCheckoutLoading && !error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
           <Loader2 className="w-12 h-12 text-belleya-deep animate-spin mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Redirection vers le paiement...</h2>
-          <p className="text-slate-600">Veuillez patienter, nous preparons votre abonnement.</p>
+          <p className="text-slate-600 mb-1">
+            {autoCheckoutStatus || 'Veuillez patienter, nous preparons votre abonnement.'}
+          </p>
+          <p className="text-sm text-slate-400 mb-6">
+            {autoCheckoutSeconds}s
+          </p>
+          <button
+            onClick={() => {
+              cancelAutoCheckout();
+              if (onDone) onDone();
+            }}
+            className="text-sm text-slate-500 hover:text-slate-700 underline transition-colors"
+          >
+            Annuler
+          </button>
         </div>
       </div>
     );
@@ -203,7 +327,7 @@ export default function Pricing() {
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-belleya-deep transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Se déconnecter
+            Se deconnecter
           </button>
         </div>
 
@@ -218,20 +342,34 @@ export default function Pricing() {
           </h1>
 
           <p className="text-xl text-slate-600 mb-6">
-            Choisis l'offre qui correspond à ton ambition
+            Choisis l'offre qui correspond a ton ambition
           </p>
 
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-belleya-bright to-belleya-vivid text-white px-6 py-3 rounded-full font-medium shadow-lg">
             <Sparkles className="w-5 h-5" />
-            14 jours gratuits - accès complet - sans engagement
+            14 jours gratuits - acces complet - sans engagement
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-sm text-red-700">{error}</p>
-            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600 text-lg font-bold">&times;</button>
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-red-700 mb-2">{error}</p>
+              <button
+                onClick={() => {
+                  setError(null);
+                  autoCheckoutTriggered.current = false;
+                }}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-800 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Reessayer
+              </button>
+            </div>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 text-lg font-bold flex-shrink-0">
+              <X className="w-5 h-5" />
+            </button>
           </div>
         )}
 
@@ -268,8 +406,8 @@ export default function Pricing() {
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-5xl font-bold text-slate-900">{plan.currentPrice}</span>
-                    <span className="text-slate-600">€/mois</span>
-                    <span className="text-2xl font-semibold text-gray-400 line-through ml-1">{plan.futurePrice}€</span>
+                    <span className="text-slate-600">/mois</span>
+                    <span className="text-2xl font-semibold text-gray-400 line-through ml-1">{plan.futurePrice}</span>
                   </div>
                 </div>
 
@@ -300,11 +438,11 @@ export default function Pricing() {
 
                 <div className="mt-8 space-y-3">
                   {plan.features.map((feature, index) => {
-                    const isSectionTitle = feature.startsWith('✨') || feature.startsWith('✅') ||
-                                          feature.startsWith('📱') || feature.startsWith('💰') ||
-                                          feature.startsWith('💼') || feature.startsWith('📈') ||
-                                          feature.startsWith('🚀') || feature.startsWith('🤝') ||
-                                          feature.startsWith('⚡') || feature.startsWith('🎯');
+                    const isSectionTitle = feature.startsWith('\u2728') || feature.startsWith('\u2705') ||
+                                          feature.startsWith('\ud83d\udcf1') || feature.startsWith('\ud83d\udcb0') ||
+                                          feature.startsWith('\ud83d\udcbc') || feature.startsWith('\ud83d\udcc8') ||
+                                          feature.startsWith('\ud83d\ude80') || feature.startsWith('\ud83e\udd1d') ||
+                                          feature.startsWith('\u26a1') || feature.startsWith('\ud83c\udfaf');
 
                     return (
                       <div
@@ -337,7 +475,7 @@ export default function Pricing() {
             <table className="w-full">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Fonctionnalités</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Fonctionnalites</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-belleya-bright">START</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-amber-600">STUDIO</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-belleya-deep">EMPIRE</th>
@@ -347,8 +485,8 @@ export default function Pricing() {
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Nombre de clientes</td>
                   <td className="px-6 py-4 text-center text-sm text-slate-900">50</td>
-                  <td className="px-6 py-4 text-center text-sm text-slate-900">Illimité</td>
-                  <td className="px-6 py-4 text-center text-sm text-slate-900">Illimité</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">Illimite</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-900">Illimite</td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-slate-600">Agenda intelligent</td>
@@ -357,19 +495,19 @@ export default function Pricing() {
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-4 text-sm text-slate-600">Réservation en ligne</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">Reservation en ligne</td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-4 text-sm text-slate-600">Réseaux sociaux & calendrier éditorial</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">Reseaux sociaux & calendrier editorial</td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-4 text-sm text-slate-600">Boîte à idées IA</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">Boite a idees IA</td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
@@ -381,7 +519,7 @@ export default function Pricing() {
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-4 text-sm text-slate-600">Gestion élèves / formations</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">Gestion eleves / formations</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
@@ -393,7 +531,7 @@ export default function Pricing() {
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-4 text-sm text-slate-600">Système de fidélisation</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">Systeme de fidelisation</td>
                   <td className="px-6 py-4 text-center text-slate-400">-</td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><Check className="w-5 h-5 text-belleya-vivid mx-auto" /></td>
@@ -435,12 +573,12 @@ export default function Pricing() {
               <p className="text-white/90">D'essai gratuit sans engagement</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-white mb-2">Prix bloqué</div>
-              <p className="text-white/90">Le prix auquel vous avez souscris restera le même, vous n'aurez pas d'augmentation future dessus</p>
+              <div className="text-3xl font-bold text-white mb-2">Prix bloque</div>
+              <p className="text-white/90">Le prix auquel vous avez souscris restera le meme, vous n'aurez pas d'augmentation future dessus</p>
             </div>
             <div>
               <div className="text-3xl font-bold text-white mb-2">Support 24/48h</div>
-              <p className="text-white/90">Équipe réactive sur WhatsApp</p>
+              <p className="text-white/90">Equipe reactive sur WhatsApp</p>
             </div>
           </div>
         </div>

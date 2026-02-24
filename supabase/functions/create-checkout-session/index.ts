@@ -18,7 +18,7 @@ const PRICE_MAP: Record<string, string> = {
 async function getCompanyId(
   supabase: ReturnType<typeof createClient>,
   userId: string,
-  maxRetries = 5
+  maxRetries = 8
 ): Promise<string | null> {
   for (let i = 0; i < maxRetries; i++) {
     const { data } = await supabase
@@ -98,9 +98,10 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({
           error:
             "Votre profil entreprise est en cours de creation. Veuillez reessayer dans quelques secondes.",
+          retry: true,
         }),
         {
-          status: 404,
+          status: 422,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );

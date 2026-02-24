@@ -55,6 +55,7 @@ function AppContent() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [navigationLocked, setNavigationLocked] = useState(false);
   const [profileRetryCount, setProfileRetryCount] = useState(0);
+  const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<string | null>(null);
 
   const safeNavigate = (to: string, source?: string) => {
     console.trace('[NAVIGATION TRACE] safeNavigate called →', { to, source, currentPage, navigationLocked });
@@ -82,14 +83,15 @@ function AppContent() {
     }
   }, [user]);
 
-  const pendingPlan = user && profile ? localStorage.getItem('pending_plan') : null;
-
   useEffect(() => {
-    if (user && profile && pendingPlan) {
-      localStorage.removeItem('pending_plan');
-      window.location.href = `/pricing?plan=${pendingPlan}&auto=true`;
+    if (user && profile) {
+      const storedPlan = localStorage.getItem('pending_plan');
+      if (storedPlan) {
+        localStorage.removeItem('pending_plan');
+        setPendingCheckoutPlan(storedPlan);
+      }
     }
-  }, [user, profile, pendingPlan]);
+  }, [user, profile]);
 
   useEffect(() => {
     if (user && !profile && !loading && profileRetryCount < 10) {
@@ -160,9 +162,11 @@ function AppContent() {
   }
 
   if (isPricingPage) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlPlan = urlParams.get('auto') === 'true' ? urlParams.get('plan') : undefined;
     return (
       <>
-        <Pricing />
+        <Pricing autoPlan={urlPlan || undefined} />
         <ChatBot />
       </>
     );
@@ -266,15 +270,12 @@ function AppContent() {
     );
   }
 
-  if (pendingPlan) {
+  if (pendingCheckoutPlan) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-belleya-deep animate-spin mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Redirection vers le paiement...</h2>
-          <p className="text-slate-600">Veuillez patienter, nous preparons votre abonnement.</p>
-        </div>
-      </div>
+      <>
+        <Pricing autoPlan={pendingCheckoutPlan} onDone={() => setPendingCheckoutPlan(null)} />
+        <ChatBot />
+      </>
     );
   }
 
@@ -350,7 +351,7 @@ function AppContent() {
       case 'notifications':
         return <Notifications />;
       case 'pricing':
-        return <Pricing />;
+        return <Pricing autoPlan={undefined} />;
       default:
         return <Dashboard />;
     }
