@@ -1,398 +1,56 @@
-import { useState, useEffect, useRef } from 'react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import AuthPage from './components/auth/AuthPage';
-import Landing from './pages/Landing';
-import PublicBooking from './pages/PublicBooking';
-import Sidebar from './components/layout/Sidebar';
-import BottomNavigation from './components/layout/BottomNavigation';
-import Dashboard from './pages/Dashboard';
-import Settings from './pages/Settings';
-import Agenda from './pages/Agenda';
-import Clients from './pages/Clients';
-import Services from './pages/Services';
-import Finances from './pages/Finances';
-import Stock from './pages/Stock';
-import Profitability from './pages/Profitability';
-import Tasks from './pages/Tasks';
-import Goals from './pages/Goals';
-import Training from './pages/Training';
-import StudentDetail from './pages/StudentDetail';
-import Placeholder from './pages/Placeholder';
-import Content from './pages/Content';
-import Partnerships from './pages/Partnerships';
-import Admin from './pages/Admin';
-import Marketing from './pages/Marketing';
-import Inspiration from './pages/Inspiration';
-import PublicProfile from './pages/PublicProfile';
-import Notifications from './pages/Notifications';
-import ProviderPublicProfile from './pages/ProviderPublicProfile';
-import Pricing from './pages/Pricing';
-import SubscriptionSuccess from './pages/SubscriptionSuccess';
-import SubscriptionCancel from './pages/SubscriptionCancel';
-import MentionsLegales from './pages/MentionsLegales';
-import CGV from './pages/CGV';
-import ClientLayout from './components/client/ClientLayout';
-import ClientHome from './pages/client/ClientHome';
-import ClientBookings from './pages/client/ClientBookings';
-import ClientMap from './pages/client/ClientMap';
-import ClientFavorites from './pages/client/ClientFavorites';
-import ClientProfile from './pages/client/ClientProfile';
-import ProviderProfile from './pages/client/ProviderProfile';
-import ChatBot from './components/shared/ChatBot';
-import TrialBanner from './components/shared/TrialBanner';
-import {
-  Handshake,
-  Video,
-  Lightbulb,
-  Mail,
-} from 'lucide-react';
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from './hooks/useAuth'
+import { HomePage } from './pages/HomePage'
+import { LoginPage } from './pages/LoginPage'
+import { SignupPage } from './pages/SignupPage'
+import { PricingPage } from './pages/PricingPage'
+import { SuccessPage } from './pages/SuccessPage'
 
-function AppContent() {
-  const { user, profile, loading, signOut, refreshProfile } = useAuth();
-  const [currentPage, setCurrentPage] = useState('home');
-  const [selectedRole, setSelectedRole] = useState<'client' | 'pro' | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [navigationLocked, setNavigationLocked] = useState(false);
-  const [profileRetryCount, setProfileRetryCount] = useState(0);
-  const [pendingCheckout, setPendingCheckout] = useState(false);
-  const pendingPlanCheckedRef = useRef(false);
-
-  const safeNavigate = (to: string, source?: string) => {
-    console.trace('[NAVIGATION TRACE] safeNavigate called →', { to, source, currentPage, navigationLocked });
-
-    if (navigationLocked && source !== 'user-action') {
-      console.error('[NAVIGATION BLOCKED] Navigation forbidden - lock is active', { to, source });
-      return;
-    }
-
-    if (source === 'agenda') {
-      console.error('[NAVIGATION BLOCKED] Navigation forbidden from Agenda flow', { to });
-      return;
-    }
-
-    console.log('[NAVIGATION ALLOWED] Navigating to:', to);
-    setCurrentPage(to);
-  };
-
-  useEffect(() => {
-    if (!user) {
-      console.log('[NAVIGATION] User logged out, resetting to home');
-      setSelectedRole(null);
-      setProfileRetryCount(0);
-      safeNavigate('home', 'auth-change');
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user && profile && !pendingPlanCheckedRef.current) {
-      pendingPlanCheckedRef.current = true;
-      const pendingPlan = localStorage.getItem('pending_plan');
-      if (pendingPlan) {
-        localStorage.removeItem('pending_plan');
-        localStorage.setItem('auto_checkout_plan', pendingPlan);
-        setPendingCheckout(true);
-        safeNavigate('pricing', 'pending-plan');
-      }
-    }
-    if (!user) {
-      pendingPlanCheckedRef.current = false;
-      setPendingCheckout(false);
-    }
-  }, [user, profile]);
-
-  useEffect(() => {
-    if (user && !profile && !loading && profileRetryCount < 10) {
-      const timer = setTimeout(async () => {
-        console.log(`[App] Retrying profile load (${profileRetryCount + 1}/10)`);
-        setProfileRetryCount(prev => prev + 1);
-        await refreshProfile();
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [user, profile, loading, profileRetryCount, refreshProfile]);
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (hash) {
-        safeNavigate(hash, 'hashchange');
-        window.location.hash = '';
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
-
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const pathname = window.location.pathname;
-  const isBookingPage = pathname.startsWith('/book/');
-  const isProviderProfilePage = pathname.startsWith('/provider/');
-  const isPublicProfilePage = pathname.startsWith('/profile/');
-  const isStudentDetailPage = pathname.startsWith('/training/students/');
-  const isPricingPage = pathname === '/pricing';
-  const isSubscriptionSuccessPage = pathname === '/subscription-success';
-  const isSubscriptionCancelPage = pathname === '/subscription-cancel';
-  const isMentionsLegalesPage = pathname === '/mentions-legales';
-  const isCGVPage = pathname === '/cgv';
-
-  if (isBookingPage) {
-    const slug = pathname.replace('/book/', '');
-    return (
-      <>
-        <PublicBooking slug={slug} />
-        <ChatBot />
-      </>
-    );
-  }
-
-  if (isProviderProfilePage) {
-    const slug = pathname.replace('/provider/', '');
-    return (
-      <>
-        <ProviderProfile slug={slug} />
-        <ChatBot />
-      </>
-    );
-  }
-
-  if (isPublicProfilePage) {
-    const slug = pathname.replace('/profile/', '');
-    return (
-      <>
-        <ProviderPublicProfile />
-        <ChatBot />
-      </>
-    );
-  }
-
-  if (isPricingPage) {
-    return (
-      <>
-        <Pricing />
-        <ChatBot />
-      </>
-    );
-  }
-
-  if (isSubscriptionSuccessPage) {
-    return <SubscriptionSuccess />;
-  }
-
-  if (isSubscriptionCancelPage) {
-    return <SubscriptionCancel />;
-  }
-
-  if (isMentionsLegalesPage) {
-    return (
-      <>
-        <MentionsLegales />
-        <ChatBot />
-      </>
-    );
-  }
-
-  if (isCGVPage) {
-    return (
-      <>
-        <CGV />
-        <ChatBot />
-      </>
-    );
-  }
-
-  useEffect(() => {
-    if (isStudentDetailPage && user) {
-      safeNavigate(pathname, 'student-detail-route');
-    }
-  }, [pathname, isStudentDetailPage, user]);
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
-    );
+    )
   }
 
   if (!user) {
-    if (!selectedRole) {
-      return (
-        <>
-          <Landing onSelectRole={(role, plan) => {
-            setSelectedRole(role);
-            if (plan) setSelectedPlan(plan);
-          }} />
-          <ChatBot />
-        </>
-      );
-    }
-    return (
-      <>
-        <AuthPage role={selectedRole} selectedPlan={selectedPlan} onBack={() => { setSelectedRole(null); setSelectedPlan(null); }} />
-        <ChatBot />
-      </>
-    );
+    return <Navigate to="/login" replace />
   }
 
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <div className="text-gray-500 mb-2">Chargement du profil...</div>
-          {profileRetryCount > 0 && (
-            <div className="text-sm text-gray-400 mb-4">
-              Tentative {profileRetryCount}/10
-            </div>
-          )}
-          {profileRetryCount >= 10 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-yellow-800 mb-2">
-                Le profil prend plus de temps que prévu à se charger.
-              </p>
-              <p className="text-xs text-yellow-600">
-                Veuillez vous déconnecter et vous reconnecter.
-              </p>
-            </div>
-          )}
-          <button
-            onClick={async () => {
-              await signOut();
-              setSelectedRole(null);
-              setProfileRetryCount(0);
-            }}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
-          >
-            Se déconnecter
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (pendingCheckout && currentPage === 'pricing') {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-[#efaa9a]/10 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-3 border-[#C73E6B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-lg font-medium text-slate-700">Redirection vers le paiement...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (profile.role === 'client') {
-    const renderClientPage = () => {
-      switch (currentPage) {
-        case 'home':
-          return <ClientHome onNavigateToMap={() => setCurrentPage('map')} />;
-        case 'bookings':
-          return <ClientBookings />;
-        case 'map':
-          return <ClientMap />;
-        case 'favorites':
-          return <ClientFavorites />;
-        case 'profile':
-          return <ClientProfile />;
-        default:
-          return <ClientHome onNavigateToMap={() => setCurrentPage('map')} />;
-      }
-    };
-
-    return (
-      <>
-        <ClientLayout currentPage={currentPage} onPageChange={setCurrentPage}>
-          {renderClientPage()}
-        </ClientLayout>
-        <ChatBot />
-      </>
-    );
-  }
-
-  const renderPage = () => {
-    if (currentPage.startsWith('training/students/')) {
-      return <StudentDetail onPageChange={setCurrentPage} />;
-    }
-
-    switch (currentPage) {
-      case 'home':
-      case 'dashboard':
-        return <Dashboard onPageChange={setCurrentPage} />;
-      case 'settings':
-        return <Settings />;
-      case 'agenda':
-        return <Agenda />;
-      case 'clients':
-        return <Clients />;
-      case 'services':
-        return <Services />;
-      case 'finances':
-        return <Finances />;
-      case 'stock':
-        return <Stock />;
-      case 'tasks':
-        return <Tasks />;
-      case 'goals':
-        return <Goals />;
-      case 'training':
-        return <Training onPageChange={setCurrentPage} />;
-      case 'content':
-        return <Content />;
-      case 'public-profile':
-        return <PublicProfile />;
-      case 'inspiration':
-        return <Inspiration />;
-      case 'marketing':
-        return <Marketing />;
-      case 'profitability':
-        return <Profitability />;
-      case 'partnerships':
-        return <Partnerships />;
-      case 'admin':
-        return <Admin />;
-      case 'notifications':
-        return <Notifications />;
-      case 'pricing':
-        return <Pricing />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
-  return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar desktop only */}
-      <div className="hidden lg:block">
-        <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
-      </div>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Trial Banner */}
-        <TrialBanner />
-
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto w-full lg:w-auto pb-20 lg:pb-0">
-          {renderPage()}
-        </main>
-      </div>
-
-      {/* Bottom Navigation mobile only */}
-      <BottomNavigation currentPage={currentPage} onPageChange={setCurrentPage} />
-
-      {/* ChatBot accessible from all pages */}
-      <ChatBot />
-    </div>
-  );
+  return <>{children}</>
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route 
+          path="/pricing" 
+          element={
+            <ProtectedRoute>
+              <PricingPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/success" 
+          element={
+            <ProtectedRoute>
+              <SuccessPage />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </Router>
+  )
 }
 
-export default App;
+export default App
