@@ -121,6 +121,8 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
     })).filter(client => client.first_name || client.last_name || client.email || client.phone);
   };
 
+  const [emailsSent, setEmailsSent] = useState(0);
+
   const handleImport = async () => {
     if (!user) return;
 
@@ -129,6 +131,7 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
     let imported = 0;
     let skipped = 0;
     let errors = 0;
+    const importedWithEmail: { email: string; firstName: string }[] = [];
 
     for (const client of clients) {
       if (!client.first_name && !client.last_name) {
@@ -168,11 +171,39 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
           console.error('Error inserting client:', insertError);
         } else {
           imported++;
+          if (client.email) {
+            importedWithEmail.push({ email: client.email, firstName: client.first_name || 'Client(e)' });
+          }
         }
       } catch (err) {
         errors++;
         console.error('Error processing client:', err);
       }
+    }
+
+    if (importedWithEmail.length > 0) {
+      (async () => {
+        try {
+          const { data: company } = await supabase
+            .from('company_profiles')
+            .select('company_name, booking_slug')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (company) {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: {
+                clients: importedWithEmail,
+                providerName: company.company_name || 'Votre professionnel(le)',
+                bookingSlug: company.booking_slug || null,
+              },
+            });
+            setEmailsSent(importedWithEmail.length);
+          }
+        } catch (e) {
+          console.error('Welcome emails failed (non-blocking):', e);
+        }
+      })();
     }
 
     setImportResults({ imported, skipped, errors });
@@ -405,6 +436,13 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
                   <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
                     <span className="text-sm font-medium text-red-800">Erreurs</span>
                     <span className="text-lg font-bold text-red-900">{importResults.errors}</span>
+                  </div>
+                )}
+
+                {emailsSent > 0 && (
+                  <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                    <span className="text-sm font-medium text-blue-800">Emails de bienvenue envoyés</span>
+                    <span className="text-lg font-bold text-blue-900">{emailsSent}</span>
                   </div>
                 )}
               </div>
