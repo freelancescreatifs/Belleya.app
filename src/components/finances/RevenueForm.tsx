@@ -33,7 +33,7 @@ interface RevenueFormData {
   service_type: ServiceType;
   service_id: string;
   service_name: string;
-  amount: number;
+  amount: number | string;
   payment_method: string;
   client_id: string;
   student_id: string;
@@ -63,7 +63,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
     service_type: 'prestation',
     service_id: '',
     service_name: '',
-    amount: 0,
+    amount: '',
     payment_method: '',
     client_id: '',
     student_id: '',
@@ -230,7 +230,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
       service_type: newType,
       service_id: '',
       service_name: '',
-      amount: 0,
+      amount: '',
       client_id: '',
       student_id: '',
       selected_supplements: [],
@@ -247,7 +247,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
         ...formData,
         service_id: 'other',
         service_name: '',
-        amount: 0,
+        amount: '',
         selected_supplements: []
       });
       setSupplements([]);
@@ -620,8 +620,8 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
 
                   if (partnershipId) {
                     const partnership = partnerships.find(p => p.id === partnershipId);
-                    if (partnership && formData.amount === 0) {
-                      const suggestedAmount = formData.amount * (partnership.commission_rate / 100);
+                    if (partnership && !formData.amount) {
+                      const suggestedAmount = (Number(formData.amount) || 0) * (partnership.commission_rate / 100);
                       if (suggestedAmount > 0) {
                         setFormData(prev => ({ ...prev, amount: suggestedAmount }));
                       }
@@ -665,8 +665,10 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
               type="number"
               step="0.01"
               value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+              onFocus={(e) => e.target.select()}
               required
+              placeholder="0.00"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
             />
           </div>
@@ -714,7 +716,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
             </div>
             {formData.selected_supplements.length > 0 && (
               <p className="text-xs text-gray-600 mt-1">
-                Base: {formData.amount.toFixed(2)}€ + Suppléments: {(calculateTotal() - formData.amount).toFixed(2)}€
+                Base: {(Number(formData.amount) || 0).toFixed(2)}€ + Suppléments: {(calculateTotal() - (Number(formData.amount) || 0)).toFixed(2)}€
               </p>
             )}
           </div>

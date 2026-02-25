@@ -47,8 +47,8 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
   const [isUpdating, setIsUpdating] = useState(false);
   const [saleForm, setSaleForm] = useState({
     sale_date: new Date().toISOString().split('T')[0],
-    sale_amount: 0,
-    commission_earned: 0,
+    sale_amount: '' as string | number,
+    commission_earned: '' as string | number,
     notes: ''
   });
 
@@ -94,7 +94,9 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
   };
 
   const handleAddSale = async () => {
-    if (!user || saleForm.sale_amount <= 0) return;
+    const saleAmount = Number(saleForm.sale_amount) || 0;
+    const commissionEarned = Number(saleForm.commission_earned) || 0;
+    if (!user || saleAmount <= 0) return;
 
     try {
       const { error } = await supabase
@@ -103,8 +105,8 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
           partnership_id: partnership.id,
           user_id: user.id,
           sale_date: saleForm.sale_date,
-          sale_amount: saleForm.sale_amount,
-          commission_earned: saleForm.commission_earned || (saleForm.sale_amount * effectiveCommissionRate / 100),
+          sale_amount: saleAmount,
+          commission_earned: commissionEarned || (saleAmount * effectiveCommissionRate / 100),
           notes: saleForm.notes || null
         });
 
@@ -112,8 +114,8 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
 
       setSaleForm({
         sale_date: new Date().toISOString().split('T')[0],
-        sale_amount: 0,
-        commission_earned: 0,
+        sale_amount: '',
+        commission_earned: '',
         notes: ''
       });
       setShowAddSale(false);
@@ -433,9 +435,11 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                     <input
                       type="number"
                       value={saleForm.sale_amount}
-                      onChange={(e) => setSaleForm({ ...saleForm, sale_amount: Number(e.target.value) })}
+                      onChange={(e) => setSaleForm({ ...saleForm, sale_amount: e.target.value === '' ? '' : Number(e.target.value) })}
+                      onFocus={(e) => e.target.select()}
                       min="0"
                       step="0.01"
+                      placeholder="0.00"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
                     />
                   </div>
@@ -444,16 +448,17 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                     <label className="text-sm font-medium text-gray-700 block mb-1">
                       Commission gagnée (€)
                       <span className="text-xs text-gray-500 ml-2">
-                        Auto: {(saleForm.sale_amount * effectiveCommissionRate / 100).toFixed(2)} €
+                        Auto: {((Number(saleForm.sale_amount) || 0) * effectiveCommissionRate / 100).toFixed(2)} €
                       </span>
                     </label>
                     <input
                       type="number"
                       value={saleForm.commission_earned}
-                      onChange={(e) => setSaleForm({ ...saleForm, commission_earned: Number(e.target.value) })}
+                      onChange={(e) => setSaleForm({ ...saleForm, commission_earned: e.target.value === '' ? '' : Number(e.target.value) })}
+                      onFocus={(e) => e.target.select()}
                       min="0"
                       step="0.01"
-                      placeholder={(saleForm.sale_amount * effectiveCommissionRate / 100).toFixed(2)}
+                      placeholder={((Number(saleForm.sale_amount) || 0) * effectiveCommissionRate / 100).toFixed(2)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
                     />
                   </div>
