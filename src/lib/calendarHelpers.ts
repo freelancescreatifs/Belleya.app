@@ -27,7 +27,7 @@ export function getEventColor(item: CalendarItem): string {
     return 'bg-blue-500';
   }
 
-  return 'bg-purple-500';
+  return 'bg-rose-500';
 }
 
 export function getEventTextColor(item: CalendarItem): string {

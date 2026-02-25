@@ -296,7 +296,7 @@ export default function Agenda() {
       .from('content_calendar')
       .select('*')
       .eq('user_id', user.id)
-      .eq('status', 'scheduled')
+      .in('status', ['script', 'shooting', 'editing', 'scheduled', 'published'])
       .not('publication_date', 'is', null)
       .order('publication_date', { ascending: true });
 
@@ -343,7 +343,7 @@ export default function Agenda() {
       }
 
       filteredEvents.forEach((event) => {
-        let color = 'bg-purple-500';
+        let color = 'bg-rose-500';
         if (event.type === 'pro') {
           color = 'bg-blue-500';
         }
@@ -913,6 +913,7 @@ export default function Agenda() {
             setShowContentForm(true);
             setSelectedItem(null);
           }}
+          onRefresh={loadSocialMediaContents}
         />
       )}
 

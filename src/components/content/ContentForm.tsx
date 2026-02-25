@@ -708,7 +708,7 @@ export default function ContentForm({
     const allSteps = {
       script: { key: 'date_script', label: 'Script', icon: FileText, color: 'blue' },
       shooting: { key: 'date_shooting', label: 'Tournage', icon: Video, color: 'red' },
-      editing: { key: 'date_editing', label: 'Montage', icon: Scissors, color: 'purple' },
+      editing: { key: 'date_editing', label: 'Montage', icon: Scissors, color: 'teal' },
       scheduling: { key: 'date_scheduling', label: 'Planifié', icon: Send, color: 'green' }
     };
 
