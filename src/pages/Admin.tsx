@@ -403,22 +403,33 @@ export default function Admin() {
     setDeletingUserId(targetId);
 
     try {
-      const { error } = await supabase.rpc('admin_delete_user', {
-        target_user_id: targetUserId
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) throw new Error('Session expired');
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`;
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ target_user_id: targetUserId }),
       });
 
-      if (error) throw error;
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Erreur lors de la suppression');
 
       setUsers(prev => prev.filter(u => u.id !== targetId));
       setDeletingUserId(null);
       setUserToDelete(null);
       showToast('success', 'Utilisateur supprimé avec succès');
       loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
       setDeletingUserId(null);
       setUserToDelete(null);
-      showToast('error', 'Erreur lors de la suppression de l\'utilisateur');
+      showToast('error', error.message || 'Erreur lors de la suppression de l\'utilisateur');
     }
   };
 
