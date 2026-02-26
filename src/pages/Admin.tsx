@@ -271,10 +271,21 @@ export default function Admin() {
         }));
       }
 
-      // Calculer les revenus d'acomptes pour la période sélectionnée
-      // Pour l'instant à 0 car pas de système de commission sur les acomptes
       const { start, end } = getDateRange();
-      const depositRevenue = 0;
+
+      const { data: paidPayments } = await supabase
+        .from('booking_payments')
+        .select('amount, platform_commission')
+        .eq('status', 'paid')
+        .gte('paid_at', start)
+        .lte('paid_at', end);
+
+      const depositRevenue = (paidPayments || []).reduce((sum, p) => {
+        const commission = p.platform_commission != null
+          ? Number(p.platform_commission)
+          : Number(p.amount) * 0.015;
+        return sum + commission;
+      }, 0);
 
       if (partnershipsResult.data) {
         const { data: salesData } = await supabase
@@ -917,7 +928,7 @@ export default function Admin() {
                   <span className="text-sm font-medium text-gray-700">Acomptes</span>
                 </div>
                 <p className="text-3xl font-bold text-gray-900">{stats.depositRevenue.toFixed(2)} €</p>
-                <p className="text-xs text-gray-600 mt-1">Revenus des acomptes</p>
+                <p className="text-xs text-gray-600 mt-1">Commission plateforme (1,5%)</p>
               </div>
 
               <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">

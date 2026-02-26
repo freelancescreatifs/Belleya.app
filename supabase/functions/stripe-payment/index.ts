@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
+const PLATFORM_COMMISSION_RATE = 0.015;
+
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
 });
@@ -38,7 +40,7 @@ Deno.serve(async (req: Request) => {
       .from('bookings')
       .select(`
         *,
-        company:company_profiles!inner(id, company_name, deposit_amount, deposit_required),
+        company:company_profiles!inner(id, company_name, deposit_amount, deposit_required, deposit_fee_payer),
         service:services(name, price)
       `)
       .eq('id', bookingId)
@@ -73,11 +75,18 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const amount = Math.round((booking.company.deposit_amount || 20) * 100);
-    const applicationFeeAmount = Math.round(amount * 0.05);
+    const depositAmount = booking.company.deposit_amount || 20;
+    const feePayerIsClient = booking.company.deposit_fee_payer === 'client';
+    const commissionOnDeposit = depositAmount * PLATFORM_COMMISSION_RATE;
+
+    const chargedAmount = feePayerIsClient
+      ? Math.round((depositAmount + commissionOnDeposit) * 100)
+      : Math.round(depositAmount * 100);
+
+    const applicationFeeAmount = Math.round(commissionOnDeposit * 100);
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount,
+      amount: chargedAmount,
       currency: 'eur',
       application_fee_amount: applicationFeeAmount,
       transfer_data: {
@@ -87,6 +96,7 @@ Deno.serve(async (req: Request) => {
         booking_id: bookingId,
         company_id: booking.company.id,
         service_name: booking.service?.name || 'Service',
+        fee_payer: feePayerIsClient ? 'client' : 'provider',
       },
       description: `Acompte pour ${booking.service?.name || 'réservation'} - ${booking.company.company_name}`,
       receipt_email: clientEmail,
@@ -100,13 +110,17 @@ Deno.serve(async (req: Request) => {
         client_id: booking.client_id,
         provider: 'stripe',
         payment_intent_id: paymentIntent.id,
-        amount: booking.company.deposit_amount || 20,
+        amount: depositAmount,
         currency: 'EUR',
         status: 'pending',
+        platform_commission: commissionOnDeposit,
+        commission_rate: PLATFORM_COMMISSION_RATE,
         metadata: {
           client_email: clientEmail,
           client_name: clientName,
           service_name: booking.service?.name,
+          fee_payer: feePayerIsClient ? 'client' : 'provider',
+          charged_amount: chargedAmount / 100,
         },
       });
 
@@ -122,7 +136,10 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
-        amount: amount / 100,
+        amount: chargedAmount / 100,
+        depositAmount,
+        commission: feePayerIsClient ? commissionOnDeposit : 0,
+        feePayerIsClient,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
