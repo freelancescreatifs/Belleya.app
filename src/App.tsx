@@ -27,12 +27,10 @@ import PublicProfile from './pages/PublicProfile';
 import Notifications from './pages/Notifications';
 import ProviderPublicProfile from './pages/ProviderPublicProfile';
 import Pricing from './pages/Pricing';
+import SubscriptionSuccess from './pages/SubscriptionSuccess';
+import SubscriptionCancel from './pages/SubscriptionCancel';
 import MentionsLegales from './pages/MentionsLegales';
 import CGV from './pages/CGV';
-import PartnerLanding from './pages/partner/PartnerLanding';
-import PartnerApply from './pages/partner/PartnerApply';
-import PartnerLogin from './pages/partner/PartnerLogin';
-import PartnerDashboard from './pages/partner/PartnerDashboard';
 import ClientLayout from './components/client/ClientLayout';
 import ClientHome from './pages/client/ClientHome';
 import ClientBookings from './pages/client/ClientBookings';
@@ -47,14 +45,17 @@ import {
   Video,
   Lightbulb,
   Mail,
+  Loader2,
 } from 'lucide-react';
 
 function AppContent() {
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedRole, setSelectedRole] = useState<'client' | 'pro' | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [navigationLocked, setNavigationLocked] = useState(false);
   const [profileRetryCount, setProfileRetryCount] = useState(0);
+  const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<string | null>(null);
 
   const safeNavigate = (to: string, source?: string) => {
     console.trace('[NAVIGATION TRACE] safeNavigate called →', { to, source, currentPage, navigationLocked });
@@ -81,6 +82,16 @@ function AppContent() {
       safeNavigate('home', 'auth-change');
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && profile) {
+      const storedPlan = localStorage.getItem('pending_plan');
+      if (storedPlan) {
+        localStorage.removeItem('pending_plan');
+        setPendingCheckoutPlan(storedPlan);
+      }
+    }
+  }, [user, profile]);
 
   useEffect(() => {
     if (user && !profile && !loading && profileRetryCount < 10) {
@@ -115,12 +126,10 @@ function AppContent() {
   const isPublicProfilePage = pathname.startsWith('/profile/');
   const isStudentDetailPage = pathname.startsWith('/training/students/');
   const isPricingPage = pathname === '/pricing';
+  const isSubscriptionSuccessPage = pathname === '/subscription-success';
+  const isSubscriptionCancelPage = pathname === '/subscription-cancel';
   const isMentionsLegalesPage = pathname === '/mentions-legales';
   const isCGVPage = pathname === '/cgv';
-  const isPartnerLandingPage = pathname === '/partenaire';
-  const isPartnerApplyPage = pathname === '/partenaire/postuler';
-  const isPartnerLoginPage = pathname === '/partenaire/connexion';
-  const isPartnerDashboardPage = pathname === '/partner/dashboard';
 
   if (isBookingPage) {
     const slug = pathname.replace('/book/', '');
@@ -153,12 +162,22 @@ function AppContent() {
   }
 
   if (isPricingPage) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlPlan = urlParams.get('auto') === 'true' ? urlParams.get('plan') : undefined;
     return (
       <>
-        <Pricing />
+        <Pricing autoPlan={urlPlan || undefined} />
         <ChatBot />
       </>
     );
+  }
+
+  if (isSubscriptionSuccessPage) {
+    return <SubscriptionSuccess />;
+  }
+
+  if (isSubscriptionCancelPage) {
+    return <SubscriptionCancel />;
   }
 
   if (isMentionsLegalesPage) {
@@ -179,22 +198,6 @@ function AppContent() {
     );
   }
 
-  if (isPartnerLandingPage) {
-    return <PartnerLanding />;
-  }
-
-  if (isPartnerApplyPage) {
-    return <PartnerApply />;
-  }
-
-  if (isPartnerLoginPage) {
-    return <PartnerLogin />;
-  }
-
-  if (isPartnerDashboardPage) {
-    return <PartnerDashboard />;
-  }
-
   useEffect(() => {
     if (isStudentDetailPage && user) {
       safeNavigate(pathname, 'student-detail-route');
@@ -213,14 +216,20 @@ function AppContent() {
     if (!selectedRole) {
       return (
         <>
-          <Landing onSelectRole={setSelectedRole} />
+          <Landing onSelectRole={(role, plan) => {
+            setSelectedRole(role);
+            if (plan) {
+              setSelectedPlan(plan);
+              localStorage.setItem('pending_plan', plan);
+            }
+          }} />
           <ChatBot />
         </>
       );
     }
     return (
       <>
-        <AuthPage role={selectedRole} onBack={() => setSelectedRole(null)} />
+        <AuthPage role={selectedRole} selectedPlan={selectedPlan} onBack={() => { setSelectedRole(null); setSelectedPlan(null); }} />
         <ChatBot />
       </>
     );
@@ -261,9 +270,13 @@ function AppContent() {
     );
   }
 
-  if (profile.role === 'affiliate') {
-    window.location.href = '/partner/dashboard';
-    return null;
+  if (pendingCheckoutPlan) {
+    return (
+      <>
+        <Pricing autoPlan={pendingCheckoutPlan} onDone={() => setPendingCheckoutPlan(null)} />
+        <ChatBot />
+      </>
+    );
   }
 
   if (profile.role === 'client') {
@@ -338,7 +351,7 @@ function AppContent() {
       case 'notifications':
         return <Notifications />;
       case 'pricing':
-        return <Pricing />;
+        return <Pricing autoPlan={undefined} />;
       default:
         return <Dashboard />;
     }
