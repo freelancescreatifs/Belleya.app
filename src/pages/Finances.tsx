@@ -533,18 +533,17 @@ export default function Finances() {
 
   return (
     <div className="p-3 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
-      <div className="mb-6 lg:mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Transactions</h1>
-            <p className="text-sm lg:text-base text-gray-600">Suivez vos recettes et dépenses</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Transactions</h1>
+            <p className="text-gray-600">Suivez vos recettes et dépenses</p>
           </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
-            <div className="flex items-center gap-1 sm:gap-2 bg-gray-50 rounded-lg border border-gray-200 p-1">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-gray-50 rounded-lg border border-gray-200 p-1">
               <button
                 onClick={() => setPeriodFilter('day')}
-                className={`px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                   periodFilter === 'day'
                     ? 'bg-belleya-100 text-belleya-600 border border-belleya-200'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
@@ -554,7 +553,7 @@ export default function Finances() {
               </button>
               <button
                 onClick={() => setPeriodFilter('month')}
-                className={`px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                   periodFilter === 'month'
                     ? 'bg-belleya-100 text-belleya-600 border border-belleya-200'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
@@ -564,7 +563,7 @@ export default function Finances() {
               </button>
               <button
                 onClick={() => setPeriodFilter('year')}
-                className={`px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                   periodFilter === 'year'
                     ? 'bg-belleya-100 text-belleya-600 border border-belleya-200'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
@@ -581,7 +580,7 @@ export default function Finances() {
               >
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <span className="text-sm font-medium text-gray-900 min-w-[100px] lg:min-w-[150px] text-center">
+              <span className="text-sm font-medium text-gray-900 min-w-[150px] text-center">
                 {getDisplayDate()}
               </span>
               <button
@@ -592,23 +591,20 @@ export default function Finances() {
                 <ChevronRight className="w-5 h-5 text-gray-600" />
               </button>
             </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowImportModal(true)}
-                className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-white border-2 border-belleya-500 text-belleya-500 rounded-lg hover:bg-belleya-50 transition-all shadow-sm"
-              >
-                <Upload className="w-5 h-5" />
-                <span className="hidden sm:inline">Importer</span>
-              </button>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-400 text-white rounded-lg hover:from-rose-600 hover:to-pink-500 transition-all shadow-lg hover:shadow-xl"
-              >
-                <Plus className="w-5 h-5" />
-                {activeTab === 'revenues' ? 'Nouvelle recette' : 'Nouvelle dépense'}
-              </button>
-            </div>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-belleya-500 text-belleya-500 rounded-lg hover:bg-belleya-50 transition-all shadow-sm"
+            >
+              <Upload className="w-5 h-5" />
+              Importer
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-400 text-white rounded-lg hover:from-rose-600 hover:to-pink-500 transition-all shadow-lg hover:shadow-xl"
+            >
+              <Plus className="w-5 h-5" />
+              {activeTab === 'revenues' ? 'Nouvelle recette' : 'Nouvelle dépense'}
+            </button>
           </div>
         </div>
       </div>
@@ -1257,14 +1253,6 @@ export default function Finances() {
           onImportComplete={loadData}
         />
       )}
-
-      <button
-        onClick={() => setShowAddModal(true)}
-        className="lg:hidden fixed right-4 bottom-24 z-40 w-14 h-14 bg-gradient-to-r from-rose-500 to-pink-400 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all active:scale-95"
-        aria-label={activeTab === 'revenues' ? 'Nouvelle recette' : 'Nouvelle dépense'}
-      >
-        <Plus className="w-6 h-6" />
-      </button>
     </div>
   );
 }
