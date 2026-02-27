@@ -4,11 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 
 interface AuthPageProps {
   role: 'client' | 'pro';
-  selectedPlan?: string | null;
   onBack: () => void;
 }
 
-export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) {
+export default function AuthPage({ role, onBack }: AuthPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +21,6 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
     e.preventDefault();
     setError('');
     setLoading(true);
-    if (selectedPlan) localStorage.setItem('pending_plan', selectedPlan);
 
     try {
       if (isSignUp) {
@@ -68,7 +66,6 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
   const handleGoogleSignIn = async () => {
     setError('');
     setLoading(true);
-    if (selectedPlan) localStorage.setItem('pending_plan', selectedPlan);
 
     try {
       await signInWithGoogle(role);

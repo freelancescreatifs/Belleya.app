@@ -199,13 +199,13 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
               .eq('id', content.company_id)
               .maybeSingle();
 
-            const { count: likesCount } = await supabase
+            const { data: stats } = await supabase
               .from('content_likes')
               .select('id', { count: 'exact', head: true })
               .eq('content_type', 'content_calendar')
               .eq('content_id', content.id);
 
-            const { count: commentsCount } = await supabase
+            const { data: commentStats } = await supabase
               .from('content_comments')
               .select('id', { count: 'exact', head: true })
               .eq('content_type', 'content_calendar')
@@ -222,15 +222,14 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
               media_url: mediaUrl,
               platform: content.platform || 'Feed',
               published_date: content.publication_date,
-              likes_count: likesCount || 0,
-              comments_count: commentsCount || 0,
+              likes_count: 0,
+              comments_count: 0,
               company_id: content.company_id,
               content_type: 'content_calendar',
               provider: {
                 company_name: providerData?.company_name || 'Professionnel',
                 photo_url: providerData?.profile_photo,
-                user_id: providerData?.user_id,
-                booking_slug: providerData?.booking_slug
+                user_id: providerData?.user_id
               }
             };
           })
@@ -361,18 +360,6 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
               .eq('id', content.company_id)
               .maybeSingle();
 
-            const { count: likesCount } = await supabase
-              .from('content_likes')
-              .select('id', { count: 'exact', head: true })
-              .eq('content_type', 'content_calendar')
-              .eq('content_id', content.id);
-
-            const { count: commentsCount } = await supabase
-              .from('content_comments')
-              .select('id', { count: 'exact', head: true })
-              .eq('content_type', 'content_calendar')
-              .eq('content_id', content.id);
-
             const mediaUrl = Array.isArray(content.media_urls) && content.media_urls.length > 0
               ? content.media_urls[0]
               : null;
@@ -384,15 +371,14 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
               media_url: mediaUrl,
               platform: content.platform || 'Feed',
               published_date: content.publication_date,
-              likes_count: likesCount || 0,
-              comments_count: commentsCount || 0,
+              likes_count: 0,
+              comments_count: 0,
               company_id: content.company_id,
               content_type: 'content_calendar',
               provider: {
                 company_name: providerData?.company_name || 'Professionnel',
                 photo_url: providerData?.profile_photo,
-                user_id: providerData?.user_id,
-                booking_slug: providerData?.booking_slug
+                user_id: providerData?.user_id
               }
             };
           })
@@ -532,7 +518,7 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
                   content={content}
                   provider={content.provider}
                   currentUserId={user?.id || ''}
-                  contentType={content.content_type}
+                  contentType="client_photo"
                 />
               ))}
             </div>

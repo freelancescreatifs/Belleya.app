@@ -1,7 +1,7 @@
 import { FileEdit, Camera, Scissors, CheckCircle, CalendarCheck, MessageSquare } from 'lucide-react';
 import { createElement } from 'react';
 
-export type ContentStatus = 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
+export type ContentStatus = 'idea' | 'to_produce' | 'to_shoot' | 'to_edit' | 'scheduled' | 'published';
 export type ContentType = 'post' | 'reel' | 'carrousel' | 'story' | 'video' | 'live';
 export type StepKey = 'date_script' | 'date_shooting' | 'date_editing' | 'date_scheduling';
 
@@ -85,8 +85,8 @@ export function getProductionSteps(content: ContentItem): ProductionStep[] {
   const allStepsConfig = [
     { key: 'date_script' as StepKey, date: content.date_script, label: 'Script', icon: createElement(FileEdit, { className: 'w-4 h-4' }), color: 'bg-blue-50 text-blue-700 border-blue-200' },
     { key: 'date_shooting' as StepKey, date: content.date_shooting, label: 'Tournage', icon: createElement(Camera, { className: 'w-4 h-4' }), color: 'bg-red-50 text-red-700 border-red-200' },
-    { key: 'date_editing' as StepKey, date: content.date_editing, label: 'Montage', icon: createElement(Scissors, { className: 'w-4 h-4' }), color: 'bg-teal-50 text-teal-700 border-teal-200' },
-    { key: 'date_scheduling' as StepKey, date: content.date_scheduling, label: 'Planifié', icon: createElement(CalendarCheck, { className: 'w-4 h-4' }), color: 'bg-amber-50 text-amber-700 border-amber-200' },
+    { key: 'date_editing' as StepKey, date: content.date_editing, label: 'Montage', icon: createElement(Scissors, { className: 'w-4 h-4' }), color: 'bg-purple-50 text-purple-700 border-purple-200' },
+    { key: 'date_scheduling' as StepKey, date: content.date_scheduling, label: 'Planifié', icon: createElement(CalendarCheck, { className: 'w-4 h-4' }), color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   ];
 
   const relevantStepKeys = getRelevantStepsForContentType(content.content_type);
@@ -176,18 +176,10 @@ export const stepIconsMap: Record<string, any> = {
 export const stepColorMap: Record<string, string> = {
   script: 'text-blue-600',
   shooting: 'text-red-600',
-  editing: 'text-teal-600',
+  editing: 'text-purple-600',
   subtitles: 'text-yellow-600',
   validation: 'text-green-600',
-  scheduling: 'text-amber-600'
-};
-
-export const stepBgColorMap: Record<string, string> = {
-  script: 'bg-blue-500',
-  shooting: 'bg-red-500',
-  editing: 'bg-teal-500',
-  scheduled: 'bg-amber-500',
-  published: 'bg-green-500',
+  scheduling: 'text-indigo-600'
 };
 
 export const stepLabelMap: Record<string, string> = {
@@ -339,9 +331,9 @@ export function calculateProductionStatus(content: ContentItem): ContentStatus {
   const relevantSteps = getRelevantStepsForContentType(content.content_type);
 
   const stepOrder: { key: StepKey; status: ContentStatus }[] = [
-    { key: 'date_script', status: 'script' },
-    { key: 'date_shooting', status: 'shooting' },
-    { key: 'date_editing', status: 'editing' },
+    { key: 'date_script', status: 'to_produce' },
+    { key: 'date_shooting', status: 'to_shoot' },
+    { key: 'date_editing', status: 'to_edit' },
     { key: 'date_scheduling', status: 'scheduled' }
   ];
 

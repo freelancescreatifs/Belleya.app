@@ -29,7 +29,6 @@ import {
   createReview,
   Review
 } from '../lib/socialHelpers';
-import DepositPayment from '../components/client/DepositPayment';
 
 interface PublicBookingProps {
   slug: string;
@@ -112,18 +111,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [bookingStep, setBookingStep] = useState<'service' | 'date' | 'time' | 'account' | 'deposit' | 'success'>('service');
+  const [bookingStep, setBookingStep] = useState<'service' | 'date' | 'time' | 'account' | 'success'>('service');
   const [selectedSupplements, setSelectedSupplements] = useState<string[]>([]);
   const [bookingNotes, setBookingNotes] = useState('');
-  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
-
-  const [depositSettings, setDepositSettings] = useState({
-    deposit_required: false,
-    deposit_amount: 0,
-    deposit_fee_payer: 'provider' as 'provider' | 'client',
-    stripe_available: false,
-    paypal_available: false,
-  });
 
   // Client info & auth state
   const [clientInfo, setClientInfo] = useState({
@@ -162,7 +152,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id, company_name, is_accepting_bookings, id, address, institute_photos, deposit_required, deposit_amount, deposit_fee_payer')
+        .select('user_id, company_name, is_accepting_bookings, id, address, institute_photos')
         .eq('booking_slug', slug)
         .maybeSingle();
 
@@ -194,25 +184,6 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         .from('content_likes')
         .select('id')
         .eq('content_type', 'client_photo');
-
-      if (companyData.deposit_required && companyData.deposit_amount) {
-        const { data: paymentAccounts } = await supabase
-          .from('provider_payment_accounts')
-          .select('provider, status, charges_enabled')
-          .eq('company_id', companyData.id)
-          .eq('status', 'active');
-
-        const stripeActive = paymentAccounts?.some(a => a.provider === 'stripe' && a.charges_enabled) ?? false;
-        const paypalActive = paymentAccounts?.some(a => a.provider === 'paypal' && a.charges_enabled) ?? false;
-
-        setDepositSettings({
-          deposit_required: true,
-          deposit_amount: companyData.deposit_amount,
-          deposit_fee_payer: companyData.deposit_fee_payer || 'provider',
-          stripe_available: stripeActive,
-          paypal_available: paypalActive,
-        });
-      }
 
       setProProfile({
         ...providerData,
@@ -478,13 +449,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         throw new Error(result.error || 'Erreur lors de la réservation');
       }
 
-      const hasPaymentMethod = depositSettings.stripe_available || depositSettings.paypal_available;
-      if (depositSettings.deposit_required && hasPaymentMethod && result.bookingId) {
-        setCreatedBookingId(result.bookingId);
-        setBookingStep('deposit');
-      } else {
-        setBookingStep('success');
-      }
+      setBookingStep('success');
     } catch (error) {
       console.error('Error submitting booking:', error);
       alert(error instanceof Error ? error.message : 'Erreur lors de la réservation. Veuillez réessayer.');
@@ -612,28 +577,6 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           >
             Retour à l'accueil
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (bookingStep === 'deposit' && createdBookingId && proProfile) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
-          <DepositPayment
-            bookingId={createdBookingId}
-            amount={depositSettings.deposit_amount}
-            companyName={proProfile.company_name}
-            serviceName={selectedService?.name || 'Service'}
-            clientEmail={clientInfo.email}
-            clientName={`${clientInfo.firstName} ${clientInfo.lastName}`.trim()}
-            stripeAvailable={depositSettings.stripe_available}
-            paypalAvailable={depositSettings.paypal_available}
-            feePayedByClient={depositSettings.deposit_fee_payer === 'client'}
-            onSuccess={() => setBookingStep('success')}
-            onCancel={() => setBookingStep('success')}
-          />
         </div>
       </div>
     );
