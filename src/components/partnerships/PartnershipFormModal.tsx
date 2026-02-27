@@ -37,7 +37,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
     company_name: '',
     logo_url: '',
     partnership_type: 'affiliation' as const,
-    commission_rate: '' as string | number,
+    commission_rate: 0,
     compensation_mode: 'percentage' as const,
     affiliate_link: '',
     promo_code: '',
@@ -45,7 +45,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
     start_date: new Date().toISOString().split('T')[0],
     end_date: '',
     conditions: '',
-    estimated_goal: '' as string | number,
+    estimated_goal: 0,
     last_action: '',
     next_action: '',
     promotion_frequency: '',
@@ -58,7 +58,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
         company_name: partnership.company_name,
         logo_url: partnership.logo_url || '',
         partnership_type: partnership.partnership_type,
-        commission_rate: partnership.commission_rate || '',
+        commission_rate: partnership.commission_rate,
         compensation_mode: partnership.compensation_mode,
         affiliate_link: partnership.affiliate_link || '',
         promo_code: partnership.promo_code || '',
@@ -66,7 +66,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
         start_date: partnership.start_date || new Date().toISOString().split('T')[0],
         end_date: partnership.end_date || '',
         conditions: partnership.conditions || '',
-        estimated_goal: partnership.estimated_goal || '',
+        estimated_goal: partnership.estimated_goal,
         last_action: partnership.last_action || '',
         next_action: partnership.next_action || '',
         promotion_frequency: partnership.promotion_frequency || '',
@@ -85,7 +85,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
 
       if (isBelleya) {
         data = {
-          estimated_goal: Number(form.estimated_goal) || 0,
+          estimated_goal: form.estimated_goal,
           notes: form.notes.trim() || null
         };
       } else {
@@ -94,7 +94,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
           company_name: form.company_name.trim(),
           logo_url: form.logo_url.trim() || null,
           partnership_type: form.partnership_type,
-          commission_rate: Number(form.commission_rate) || 0,
+          commission_rate: form.commission_rate,
           compensation_mode: form.compensation_mode,
           affiliate_link: form.affiliate_link.trim() || null,
           promo_code: form.promo_code.trim() || null,
@@ -102,7 +102,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
           start_date: form.start_date || null,
           end_date: form.end_date || null,
           conditions: form.conditions.trim() || null,
-          estimated_goal: Number(form.estimated_goal) || 0,
+          estimated_goal: form.estimated_goal,
           last_action: form.last_action.trim() || null,
           next_action: form.next_action.trim() || null,
           promotion_frequency: form.promotion_frequency.trim() || null,
@@ -248,13 +248,11 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
                     <input
                       type="number"
                       value={form.commission_rate}
-                      onChange={(e) => setForm({ ...form, commission_rate: e.target.value === '' ? '' : Number(e.target.value) })}
-                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => setForm({ ...form, commission_rate: Number(e.target.value) })}
                       required
                       min="0"
                       max="100"
                       step="0.1"
-                      placeholder="0"
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary"
                     />
                   </div>
@@ -337,8 +335,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
               <input
                 type="number"
                 value={form.estimated_goal}
-                onChange={(e) => setForm({ ...form, estimated_goal: e.target.value === '' ? '' : Number(e.target.value) })}
-                onFocus={(e) => e.target.select()}
+                onChange={(e) => setForm({ ...form, estimated_goal: Number(e.target.value) })}
                 min="0"
                 step="0.01"
                 placeholder="1000"
