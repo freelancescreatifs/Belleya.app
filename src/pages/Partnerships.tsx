@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, TrendingUp, Users, Percent, Clock, Star, UserCheck, ExternalLink } from 'lucide-react';
+import { Plus, Handshake, TrendingUp, Users, Percent, Clock, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { useIsAdmin } from '../hooks/useIsAdmin';
 import PartnershipCard from '../components/partnerships/PartnershipCard';
 import PartnershipDetailDrawer from '../components/partnerships/PartnershipDetailDrawer';
 import PartnershipFormModal from '../components/partnerships/PartnershipFormModal';
@@ -39,31 +38,10 @@ interface PartnershipSale {
   payment_status: 'pending' | 'paid';
 }
 
-interface ApprovedAffiliate {
-  id: string;
-  full_name: string;
-  email: string;
-  ref_code: string;
-  level: string;
-  status: string;
-  active_sub_count: number;
-  base_commission_rate: number;
-  created_at: string;
-}
-
-const LEVEL_LABELS: Record<string, { label: string; color: string }> = {
-  recrue: { label: 'Recrue', color: 'bg-gray-100 text-gray-700' },
-  closer: { label: 'Closer', color: 'bg-blue-100 text-blue-700' },
-  pro: { label: 'Pro', color: 'bg-amber-100 text-amber-700' },
-  elite: { label: 'Elite', color: 'bg-rose-100 text-rose-700' },
-};
-
 export default function Partnerships() {
   const { user } = useAuth();
-  const { isAdmin } = useIsAdmin();
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
   const [sales, setSales] = useState<PartnershipSale[]>([]);
-  const [approvedAffiliates, setApprovedAffiliates] = useState<ApprovedAffiliate[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPartnership, setSelectedPartnership] = useState<Partnership | null>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
@@ -75,29 +53,6 @@ export default function Partnerships() {
       loadData();
     }
   }, [user]);
-
-  useEffect(() => {
-    if (isAdmin) loadAffiliates();
-  }, [isAdmin]);
-
-  const loadAffiliates = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('affiliates')
-        .select('id, full_name, email, ref_code, level, status, active_sub_count, base_commission_rate, created_at')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error loading affiliates:', error);
-        return;
-      }
-
-      setApprovedAffiliates(data || []);
-    } catch (err) {
-      console.error('Error loading affiliates:', err);
-    }
-  };
 
   const loadData = async () => {
     if (!user) return;
@@ -227,7 +182,7 @@ export default function Partnerships() {
         <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Partenariats</h1>
-          <p className="text-gray-600 mt-1">Gerez et suivez vos partenariats strategiques</p>
+          <p className="text-gray-600 mt-1">Gérez et suivez vos partenariats stratégiques</p>
         </div>
         <button
           onClick={handleAddPartnership}
@@ -244,9 +199,9 @@ export default function Partnerships() {
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
               <TrendingUp className="w-5 h-5 text-belleya-bright" />
             </div>
-            <span className="text-sm font-medium text-gray-700">Revenus generes</span>
+            <span className="text-sm font-medium text-gray-700">Revenus générés</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{stats.totalRevenue.toFixed(2)} EUR</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.totalRevenue.toFixed(2)} €</p>
         </div>
 
         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200 shadow-sm">
@@ -256,13 +211,13 @@ export default function Partnerships() {
             </div>
             <span className="text-sm font-medium text-gray-700">Partenaires actifs</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{stats.activeCount + approvedAffiliates.length}</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.activeCount}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-rose-200 shadow-sm">
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-              <Percent className="w-5 h-5 text-rose-600" />
+              <Percent className="w-5 h-5 text-purple-600" />
             </div>
             <span className="text-sm font-medium text-gray-700">Commission moyenne</span>
           </div>
@@ -274,9 +229,9 @@ export default function Partnerships() {
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
               <Clock className="w-5 h-5 text-amber-600" />
             </div>
-            <span className="text-sm font-medium text-gray-700">A encaisser</span>
+            <span className="text-sm font-medium text-gray-700">À encaisser</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{stats.pendingRevenue.toFixed(2)} EUR</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.pendingRevenue.toFixed(2)} €</p>
         </div>
 
         <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-belleya-200 shadow-sm">
@@ -289,77 +244,6 @@ export default function Partnerships() {
           <p className="text-lg font-bold text-gray-900 truncate">{stats.topPartnership}</p>
         </div>
       </div>
-
-      {isAdmin && approvedAffiliates.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#efaa9a]/20 to-[#d9629b]/20 flex items-center justify-center">
-                <UserCheck className="w-5 h-5 text-[#d9629b]" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Affilies approuves</h3>
-                <p className="text-sm text-gray-500">{approvedAffiliates.length} partenaire{approvedAffiliates.length > 1 ? 's' : ''} actif{approvedAffiliates.length > 1 ? 's' : ''}</p>
-              </div>
-            </div>
-            <a
-              href="/partenaire"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-[#d9629b] hover:underline"
-            >
-              Programme partenaire
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Nom</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Email</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Code</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Niveau</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Abonnes</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Commission</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase hidden lg:table-cell">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {approvedAffiliates.map(aff => {
-                  const levelInfo = LEVEL_LABELS[aff.level] || LEVEL_LABELS.recrue;
-                  return (
-                    <tr key={aff.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#efaa9a] to-[#d9629b] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                            {(aff.full_name || 'P').charAt(0).toUpperCase()}
-                          </div>
-                          <span className="text-sm font-medium text-gray-900">{aff.full_name || '-'}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 hidden sm:table-cell">{aff.email || '-'}</td>
-                      <td className="px-6 py-4">
-                        <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">{aff.ref_code}</code>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${levelInfo.color}`}>
-                          {levelInfo.label}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 font-medium hidden md:table-cell">{aff.active_sub_count || 0}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 hidden md:table-cell">{((aff.base_commission_rate || 0.10) * 100).toFixed(0)}%</td>
-                      <td className="px-6 py-4 text-sm text-gray-500 hidden lg:table-cell">
-                        {new Date(aff.created_at).toLocaleDateString('fr-FR')}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <BelleyaRewardsCard />
@@ -382,7 +266,7 @@ export default function Partnerships() {
               <Plus className="w-6 h-6 text-gray-400 group-hover:text-belleya-500 transition-colors" />
             </div>
             <h3 className="text-base font-semibold text-gray-900 mb-1">Ajouter un partenariat</h3>
-            <p className="text-sm text-gray-600">Creez votre premier partenariat</p>
+            <p className="text-sm text-gray-600">Créez votre premier partenariat</p>
           </div>
         )}
       </div>
