@@ -684,30 +684,6 @@ export default function Clients() {
         if (customDataError) throw customDataError;
       }
 
-      if (formData.email) {
-        (async () => {
-          try {
-            const { data: company } = await supabase
-              .from('company_profiles')
-              .select('company_name, booking_slug')
-              .eq('user_id', user!.id)
-              .maybeSingle();
-
-            if (company) {
-              supabase.functions.invoke('send-welcome-email', {
-                body: {
-                  clients: [{ email: formData.email, firstName: formData.first_name }],
-                  providerName: company.company_name || 'Votre professionnel(le)',
-                  bookingSlug: company.booking_slug || null,
-                },
-              });
-            }
-          } catch (e) {
-            console.error('Welcome email failed (non-blocking):', e);
-          }
-        })();
-      }
-
       clientsCache.invalidate();
       loadClients();
     } catch (error) {

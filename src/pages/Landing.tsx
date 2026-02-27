@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import {
   Sparkles, Calendar, Globe, Users, Image, Scissors, TrendingUp,
   Target, Package, BarChart, CheckCircle, Heart, Star, Zap, Shield,
   Clock, Lock, MessageCircle, ArrowRight, MessageSquare, Brain, DollarSign,
-  BarChart3, AlertCircle, Search, Flame, Eye, Crown
+  BarChart3, AlertCircle, Search, Flame, Eye, Crown, Handshake
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AnimatedKeywords from '../components/landing/AnimatedKeywords';
@@ -14,16 +15,67 @@ import ComparisonSection from '../components/landing/ComparisonSection';
 import LanguageSwitcher from '../components/shared/LanguageSwitcher';
 
 interface LandingProps {
-  onSelectRole: (role: 'client' | 'pro', plan?: string) => void;
+  onSelectRole: (role: 'client' | 'pro') => void;
 }
 
 export default function Landing({ onSelectRole }: LandingProps) {
   const { t } = useTranslation();
+  const [partnershipSubmitting, setPartnershipSubmitting] = useState(false);
+  const [partnershipSuccess, setPartnershipSuccess] = useState(false);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handlePartnershipSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPartnershipSubmitting(true);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const payload = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string || undefined,
+      businessName: formData.get('businessName') as string || undefined,
+      profession: formData.get('profession') as string,
+      location: formData.get('location') as string || undefined,
+      instagram: formData.get('instagram') as string || undefined,
+      website: formData.get('website') as string || undefined,
+      message: formData.get('message') as string || undefined,
+    };
+
+    try {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-partnership-application`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send application');
+      }
+
+      setPartnershipSuccess(true);
+      form.reset();
+
+      setTimeout(() => {
+        setPartnershipSuccess(false);
+      }, 5000);
+    } catch (error) {
+      console.error('Error submitting partnership application:', error);
+      alert('Une erreur est survenue. Merci de réessayer.');
+    } finally {
+      setPartnershipSubmitting(false);
     }
   };
 
@@ -485,7 +537,6 @@ export default function Landing({ onSelectRole }: LandingProps) {
             {[
               {
                 name: "BELLEYA START",
-                planId: "start",
                 price: "29",
                 futurePrice: "39",
                 popular: false,
@@ -510,7 +561,6 @@ export default function Landing({ onSelectRole }: LandingProps) {
               },
               {
                 name: "BELLEYA STUDIO",
-                planId: "studio",
                 price: "39",
                 futurePrice: "49",
                 popular: true,
@@ -535,7 +585,6 @@ export default function Landing({ onSelectRole }: LandingProps) {
               },
               {
                 name: "BELLEYA EMPIRE",
-                planId: "empire",
                 price: "59",
                 futurePrice: "79",
                 popular: false,
@@ -574,7 +623,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     </div>
                   )}
                   {plan.isEmpire && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-belleya-bright text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-purple-600 text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                       <Crown className="w-3 h-3 md:w-4 md:h-4" />
                       Premium
                     </div>
@@ -585,7 +634,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                       <Icon className={`w-6 h-6 md:w-8 md:h-8 ${
                         plan.color === 'belleya-powder' ? 'text-belleya-powder' :
                         plan.color === 'amber' ? 'text-amber-600' :
-                        plan.isEmpire ? 'text-belleya-deep' :
+                        plan.isEmpire ? 'text-purple-600' :
                         'text-belleya-deep'
                       }`} />
                       <h3 className="text-lg md:text-2xl font-bold text-gray-900">{plan.name}</h3>
@@ -612,12 +661,12 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   </ul>
 
                   <button
-                    onClick={() => onSelectRole('pro', plan.planId)}
+                    onClick={() => onSelectRole('pro')}
                     className={`w-full py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all ${
                       plan.popular
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:scale-105'
                         : plan.isEmpire
-                        ? 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
+                        ? 'bg-gradient-to-r from-belleya-deep to-purple-600 text-white hover:shadow-lg hover:scale-105'
                         : 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
                     }`}
                   >
@@ -711,6 +760,182 @@ export default function Landing({ onSelectRole }: LandingProps) {
         </div>
       </section>
 
+      <section id="become-partner" className="py-20 md:py-32 bg-gradient-to-br from-belleya-50 via-white to-pink-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12 md:mb-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#efaa9a] to-[#d9629b] rounded-2xl mb-6 shadow-lg">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
+                Deviens partenaire Belleya
+              </h2>
+              <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                Tu es une pro de la beauté et tu veux rejoindre notre communauté ? Candidate maintenant !
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-10 border border-belleya-200">
+              {partnershipSuccess ? (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <CheckCircle className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                    Candidature envoyée avec succès !
+                  </h3>
+                  <p className="text-lg text-gray-600 mb-6">
+                    Merci pour ton intérêt ! Notre équipe va examiner ta candidature et te recontactera par email dans les 48h.
+                  </p>
+                  <button
+                    onClick={() => setPartnershipSuccess(false)}
+                    className="px-6 py-3 bg-gradient-to-r from-[#efaa9a] to-[#d9629b] text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              ) : (
+                <form id="partnership-form" onSubmit={handlePartnershipSubmit} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Nom complet *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      placeholder="Prénom Nom"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="ton@email.com"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Téléphone
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="+33 6 12 34 56 78"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Nom de l'entreprise
+                    </label>
+                    <input
+                      type="text"
+                      name="businessName"
+                      placeholder="Nom de ton salon/institut"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Profession *
+                    </label>
+                    <select
+                      name="profession"
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    >
+                      <option value="">Sélectionne ta profession</option>
+                      <option value="Nail Artist">Nail Artist</option>
+                      <option value="Esthéticienne">Esthéticienne</option>
+                      <option value="Tech Cils & Sourcils">Tech Cils & Sourcils</option>
+                      <option value="Coiffeuse">Coiffeuse</option>
+                      <option value="Maquilleuse">Maquilleuse</option>
+                      <option value="Masseuse">Masseuse</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Localisation
+                    </label>
+                    <input
+                      type="text"
+                      name="location"
+                      placeholder="Ville, Région"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Instagram
+                    </label>
+                    <input
+                      type="text"
+                      name="instagram"
+                      placeholder="@ton_instagram"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Site web
+                    </label>
+                    <input
+                      type="url"
+                      name="website"
+                      placeholder="https://ton-site.com"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Message (optionnel)
+                  </label>
+                  <textarea
+                    name="message"
+                    rows={4}
+                    placeholder="Parle-nous de ton activité et pourquoi tu veux devenir partenaire Belleya..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-belleya-primary transition-all resize-none"
+                  ></textarea>
+                </div>
+
+                <div className="bg-belleya-50 rounded-xl p-4 border border-belleya-200">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    <strong className="text-belleya-deep">Note :</strong> Toutes les candidatures sont examinées individuellement par notre équipe. Nous te recontacterons par email dans les 48h pour te donner une réponse.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={partnershipSubmitting}
+                  className="w-full py-4 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-[length:200%_auto] text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] animate-[shimmer_3s_linear_infinite] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {partnershipSubmitting ? 'Envoi en cours...' : 'Envoyer ma candidature'}
+                </button>
+              </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 bg-white border-t border-gray-200">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
@@ -735,6 +960,20 @@ export default function Landing({ onSelectRole }: LandingProps) {
               >
                 Tarifs
               </button>
+              <button
+                onClick={() => scrollToSection('become-partner')}
+                className="hover:text-[rgb(113,19,65)] transition-colors font-semibold"
+              >
+                Devenir partenaire
+              </button>
+              <a
+                href="/partenaire"
+                title="Rejoindre le programme d'affiliation Belleya"
+                className="hover:text-[rgb(113,19,65)] transition-colors flex items-center gap-1"
+              >
+                <Handshake className="w-4 h-4" />
+                Programme Partenaire
+              </a>
               <a
                 href="https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY?mode=gi_t"
                 target="_blank"
