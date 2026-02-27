@@ -33,7 +33,7 @@ type CalendarView = 'day' | 'week' | 'month';
 const STAGE_CONFIG = {
   script: { label: 'Script', icon: FileText, color: 'bg-blue-100 text-blue-700 border-blue-300' },
   shooting: { label: 'Tournage', icon: Video, color: 'bg-red-100 text-red-700 border-red-300' },
-  editing: { label: 'Montage', icon: Scissors, color: 'bg-teal-100 text-teal-700 border-teal-300' },
+  editing: { label: 'Montage', icon: Scissors, color: 'bg-purple-100 text-purple-700 border-purple-300' },
   subtitles: { label: 'Sous-titres', icon: Subtitles, color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
   validation: { label: 'Validation', icon: CheckCircle, color: 'bg-green-100 text-green-700 border-belleya-300' },
   scheduling: { label: 'Planifié', icon: Send, color: 'bg-orange-100 text-orange-700 border-orange-300' },

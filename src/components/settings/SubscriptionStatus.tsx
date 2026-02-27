@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Crown, Zap, Sparkles, Clock, ArrowRight, CheckCircle2, CreditCard, AlertTriangle } from 'lucide-react';
-import { getUserCompanyId, getSubscriptionStatus, getPlanName, getPlanPrice, initiateStripeCheckout, type SubscriptionStatus as SubscriptionStatusType } from '../../lib/subscriptionHelpers';
+import { Crown, Zap, Sparkles, Clock, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { getUserCompanyId, getSubscriptionStatus, getPlanName, getPlanPrice, type SubscriptionStatus as SubscriptionStatusType } from '../../lib/subscriptionHelpers';
 import { supabase } from '../../lib/supabase';
 
 export default function SubscriptionStatus() {
@@ -180,37 +180,14 @@ export default function SubscriptionStatus() {
           </div>
         )}
 
-        {status.subscriptionStatus === 'past_due' && (
-          <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 mb-1">Paiement en attente</p>
-              <p className="text-xs text-amber-700">
-                Votre dernier paiement a echoue. Veuillez mettre a jour vos informations de paiement.
-              </p>
-            </div>
-          </div>
-        )}
-
         <div className="mt-6 flex gap-3">
-          {(status.isTrial || status.subscriptionStatus === 'expired' || status.subscriptionStatus === 'past_due') && (
-            <button
-              onClick={() => window.location.href = '/pricing'}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-belleya-deep to-belleya-bright text-white px-4 py-3 rounded-lg hover:shadow-lg transition-all font-medium"
-            >
-              <CreditCard className="w-4 h-4" />
-              {status.isTrial ? 'Activer mon abonnement' : 'Mettre a jour le paiement'}
-            </button>
-          )}
-          {status.subscriptionStatus === 'active' && (
-            <button
-              onClick={() => window.location.href = '/pricing'}
-              className="flex-1 flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-3 rounded-lg hover:bg-slate-200 transition-colors font-medium"
-            >
-              Changer d'offre
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={() => window.location.href = '/pricing'}
+            className="flex-1 flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-3 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+          >
+            {status.isTrial ? 'Activer mon abonnement' : 'Changer d\'offre'}
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
