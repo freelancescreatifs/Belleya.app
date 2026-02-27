@@ -6,8 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
-const PLATFORM_COMMISSION_RATE = 0.015;
-
 const PAYPAL_API_BASE = Deno.env.get('PAYPAL_MODE') === 'live'
   ? 'https://api-m.paypal.com'
   : 'https://api-m.sandbox.paypal.com';
@@ -62,7 +60,7 @@ Deno.serve(async (req: Request) => {
         .from('bookings')
         .select(`
           *,
-          company:company_profiles!inner(id, company_name, deposit_amount, deposit_required, deposit_fee_payer),
+          company:company_profiles!inner(id, company_name, deposit_amount, deposit_required),
           service:services(name, price)
         `)
         .eq('id', bookingId)
@@ -99,15 +97,8 @@ Deno.serve(async (req: Request) => {
 
       const merchantId = paymentAccount.metadata?.merchant_id || paymentAccount.account_id;
 
-      const depositAmount = booking.company.deposit_amount || 20;
-      const feePayerIsClient = booking.company.deposit_fee_payer === 'client';
-      const commissionOnDeposit = depositAmount * PLATFORM_COMMISSION_RATE;
-
-      const chargedAmount = feePayerIsClient
-        ? (depositAmount + commissionOnDeposit).toFixed(2)
-        : depositAmount.toFixed(2);
-
-      const platformFee = commissionOnDeposit.toFixed(2);
+      const amount = (booking.company.deposit_amount || 20).toFixed(2);
+      const platformFee = (parseFloat(amount) * 0.05).toFixed(2);
 
       const accessToken = await getPayPalAccessToken();
 
@@ -121,11 +112,11 @@ Deno.serve(async (req: Request) => {
             soft_descriptor: booking.company.company_name.substring(0, 22),
             amount: {
               currency_code: 'EUR',
-              value: chargedAmount,
+              value: amount,
               breakdown: {
                 item_total: {
                   currency_code: 'EUR',
-                  value: chargedAmount,
+                  value: amount,
                 },
               },
             },
@@ -135,7 +126,7 @@ Deno.serve(async (req: Request) => {
                 description: `Acompte pour ${booking.service?.name || 'réservation'}`,
                 unit_amount: {
                   currency_code: 'EUR',
-                  value: chargedAmount,
+                  value: amount,
                 },
                 quantity: '1',
                 category: 'DIGITAL_GOODS',
@@ -193,18 +184,14 @@ Deno.serve(async (req: Request) => {
           client_id: booking.client_id,
           provider: 'paypal',
           payment_intent_id: order.id,
-          amount: depositAmount,
+          amount: parseFloat(amount),
           currency: 'EUR',
           status: 'pending',
-          platform_commission: commissionOnDeposit,
-          commission_rate: PLATFORM_COMMISSION_RATE,
           metadata: {
             client_email: clientEmail,
             client_name: clientName,
             service_name: booking.service?.name,
             order_id: order.id,
-            fee_payer: feePayerIsClient ? 'client' : 'provider',
-            charged_amount: parseFloat(chargedAmount),
           },
         });
 
@@ -222,10 +209,7 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({
           orderId: order.id,
           approveLink: approveLink,
-          amount: parseFloat(chargedAmount),
-          depositAmount,
-          commission: feePayerIsClient ? commissionOnDeposit : 0,
-          feePayerIsClient,
+          amount: amount,
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
