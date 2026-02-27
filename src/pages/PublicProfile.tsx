@@ -172,6 +172,7 @@ export default function PublicProfile() {
     cancellation_policy: '',
     deposit_required: false,
     deposit_amount: null as number | null,
+    deposit_fee_payer: 'provider' as 'provider' | 'client',
   });
 
   useEffect(() => {
@@ -255,6 +256,7 @@ export default function PublicProfile() {
           cancellation_policy: companyData.cancellation_policy || '',
           deposit_required: companyData.deposit_required ?? false,
           deposit_amount: companyData.deposit_amount ?? null,
+          deposit_fee_payer: companyData.deposit_fee_payer || 'provider',
         });
       } else {
         const { data: userProfile } = await supabase
@@ -481,6 +483,7 @@ export default function PublicProfile() {
         cancellation_policy: bookingSettings.cancellation_policy,
         deposit_required: bookingSettings.deposit_required,
         deposit_amount: bookingSettings.deposit_amount,
+        deposit_fee_payer: bookingSettings.deposit_fee_payer,
         updated_at: new Date().toISOString(),
       };
 

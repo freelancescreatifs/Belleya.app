@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import i18n from '../i18n';
@@ -6,7 +6,7 @@ import i18n from '../i18n';
 export interface UserProfile {
   id: string;
   user_id: string;
-  role: 'client' | 'pro' | 'admin' | 'affiliate';
+  role: 'client' | 'pro' | 'admin';
   first_name: string | null;
   last_name: string | null;
   phone: string | null;
@@ -34,11 +34,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const currentUserIdRef = useRef<string | null>(null);
+  const profileLoadingRef = useRef(false);
 
-  const loadProfile = async (userId: string) => {
+  const loadProfile = useCallback(async (userId: string) => {
+    if (profileLoadingRef.current) return;
+    profileLoadingRef.current = true;
+
     try {
-      console.log('[LoadProfile] 🔍 Loading profile for user:', userId);
-
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -46,73 +49,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (error) {
-        console.error('[LoadProfile] ❌ Error loading profile:');
-        console.error('[LoadProfile] Error message:', error.message);
-        console.error('[LoadProfile] Error details:', error.details);
-        console.error('[LoadProfile] Error hint:', error.hint);
-        console.error('[LoadProfile] Error code:', error.code);
-        console.error('[LoadProfile] Full error:', JSON.stringify(error, null, 2));
-
-        // Ne PAS bloquer : si le profil n'existe pas, on continue sans profil
-        // L'app peut gérer le cas "profil manquant" avec un onboarding
+        console.error('[LoadProfile] Error:', error.message);
         setProfile(null);
         return;
       }
 
       if (data) {
-        console.log('[LoadProfile] ✅ Profile loaded successfully');
-        console.log('[LoadProfile] Role:', data.role);
-        console.log('[LoadProfile] Name:', data.first_name, data.last_name);
-        console.log('[LoadProfile] Company ID:', data.company_id);
-
         if (data.preferred_language && data.preferred_language !== i18n.language) {
-          console.log('[LoadProfile] 🌐 Changing language to:', data.preferred_language);
           await i18n.changeLanguage(data.preferred_language);
         }
-
         setProfile(data);
       } else {
-        console.warn('[LoadProfile] ⚠️ No profile found for user:', userId);
-        console.warn('[LoadProfile] This is OK if user just signed up (triggers may still be running)');
-        console.warn('[LoadProfile] User can continue without profile, onboarding may be needed');
         setProfile(null);
       }
     } catch (err) {
-      console.error('[LoadProfile] ❌ Exception loading profile:', err);
-      console.error('[LoadProfile] Exception type:', typeof err);
-      console.error('[LoadProfile] Exception details:', err);
-
-      // Ne PAS bloquer : continuer sans profil
+      console.error('[LoadProfile] Exception loading profile:', err);
       setProfile(null);
+    } finally {
+      profileLoadingRef.current = false;
     }
-  };
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        currentUserIdRef.current = session.user.id;
         await loadProfile(session.user.id);
       } else {
+        currentUserIdRef.current = null;
         setProfile(null);
       }
       setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session);
+      if (event === 'SIGNED_OUT') {
+        currentUserIdRef.current = null;
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        return;
+      }
+
+      if (event === 'TOKEN_REFRESHED') {
+        setSession(session);
+        return;
+      }
+
+      const newUserId = session?.user?.id ?? null;
+
+      if (event === 'SIGNED_IN' && newUserId === currentUserIdRef.current) {
+        return;
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        loadProfile(session.user.id);
+        currentUserIdRef.current = session.user.id;
+        if (!profileLoadingRef.current) {
+          loadProfile(session.user.id);
+        }
       } else {
+        currentUserIdRef.current = null;
         setProfile(null);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [loadProfile]);
 
   const signUp = async (
     email: string,
