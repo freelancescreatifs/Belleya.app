@@ -285,7 +285,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
             <>
               <p className="text-sm text-gray-600">
                 Acceptez les paiements par carte bancaire avec Stripe Connect.
-                Commission plateforme : 1,5% + frais Stripe.
+                Commission plateforme : 5% + frais Stripe.
               </p>
               <button
                 onClick={handleConnectStripe}
@@ -477,9 +477,9 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
       <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
         <p className="text-sm text-blue-800">
           <strong>Frais de transaction :</strong><br />
-          • Stripe : 1,5% + 0,25€ par transaction + commission plateforme 1,5%<br />
-          • PayPal : 2,9% + 0,35€ par transaction + commission plateforme 1,5%<br />
-          Les frais de la plateforme (1,5%) peuvent être à la charge du prestataire ou du client selon vos paramètres.
+          • Stripe : 1,5% + 0,25€ par transaction + commission plateforme 5%<br />
+          • PayPal : 2,9% + 0,35€ par transaction + commission plateforme 5%<br />
+          Les frais de la plateforme sont prélevés automatiquement sur chaque transaction.
         </p>
       </div>
     </div>
