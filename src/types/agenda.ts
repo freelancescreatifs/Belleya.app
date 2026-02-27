@@ -87,24 +87,12 @@ export interface SocialMediaContent {
   platform: string[] | string;
   publication_date: string;
   publication_time?: string;
-  status: 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
+  status: 'idea' | 'to_shoot' | 'to_edit' | 'to_produce' | 'scheduled' | 'published';
   image_url?: string;
   caption?: string;
   hashtags?: string;
   editorial_pillar?: string;
   objective?: 'attirer' | 'éduquer' | 'convertir' | 'fidéliser';
-  script_checked?: boolean;
-  tournage_checked?: boolean;
-  montage_checked?: boolean;
-  planifie_checked?: boolean;
-  date_script?: string;
-  date_shooting?: string;
-  date_editing?: string;
-  date_scheduling?: string;
-  date_script_time?: string;
-  date_shooting_time?: string;
-  date_editing_time?: string;
-  date_scheduling_time?: string;
   created_at: string;
   updated_at: string;
 }

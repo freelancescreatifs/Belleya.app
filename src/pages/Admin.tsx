@@ -3,8 +3,8 @@ import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Hand
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
-import ToastContainer from '../components/shared/ToastContainer';
 import RewardsValidation from '../components/admin/RewardsValidation';
+import AffiliateApplications from '../components/admin/AffiliateApplications';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -62,7 +62,7 @@ interface PartnershipData {
 
 export default function Admin() {
   const { user } = useAuth();
-  const { toasts, showToast, dismissToast } = useToast();
+  const { addToast } = useToast();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<KPIStats>({
@@ -83,7 +83,7 @@ export default function Admin() {
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships' | 'rewards'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships' | 'rewards' | 'affiliates'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -93,11 +93,6 @@ export default function Admin() {
   const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([]);
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all');
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
-  const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [addingUser, setAddingUser] = useState(false);
-  const [newUserForm, setNewUserForm] = useState({ firstName: '', lastName: '', email: '', password: '', role: 'pro' as 'pro' | 'client' });
-  const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
-  const [updatingSubscription, setUpdatingSubscription] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -271,21 +266,10 @@ export default function Admin() {
         }));
       }
 
+      // Calculer les revenus d'acomptes pour la période sélectionnée
+      // Pour l'instant à 0 car pas de système de commission sur les acomptes
       const { start, end } = getDateRange();
-
-      const { data: paidPayments } = await supabase
-        .from('booking_payments')
-        .select('amount, platform_commission')
-        .eq('status', 'paid')
-        .gte('paid_at', start)
-        .lte('paid_at', end);
-
-      const depositRevenue = (paidPayments || []).reduce((sum, p) => {
-        const commission = p.platform_commission != null
-          ? Number(p.platform_commission)
-          : Number(p.amount) * 0.015;
-        return sum + commission;
-      }, 0);
+      const depositRevenue = 0;
 
       if (partnershipsResult.data) {
         const { data: salesData } = await supabase
@@ -320,15 +304,6 @@ export default function Admin() {
           depositRevenue
         }));
 
-        const emailLookup: Record<string, string> = {};
-        if (usersResult.data) {
-          usersResult.data.forEach((u: any) => {
-            if (u.user_id && u.email) {
-              emailLookup[u.user_id] = u.email;
-            }
-          });
-        }
-
         const partnershipsWithUserData = await Promise.all(
           partnershipsResult.data.map(async (p) => {
             const { data: userData } = await supabase
@@ -337,7 +312,11 @@ export default function Admin() {
               .eq('user_id', p.user_id)
               .maybeSingle();
 
-            const userEmail = emailLookup[p.user_id] || 'N/A';
+            let userEmail = 'N/A';
+            if (userData?.user_id) {
+              const authData = await supabase.auth.admin.getUserById(userData.user_id).catch(() => ({ data: { user: null } }));
+              userEmail = authData.data.user?.email || 'N/A';
+            }
 
             const userName = userData?.first_name && userData?.last_name
               ? `${userData.first_name} ${userData.last_name}`
@@ -405,42 +384,28 @@ export default function Admin() {
     }
   };
 
-  const handleConfirmDeleteUser = async () => {
-    if (!userToDelete) return;
+  const handleDeleteUser = async (user: UserData) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+      return;
+    }
 
-    const targetId = userToDelete.id;
-    const targetUserId = userToDelete.user_id;
-
-    setDeletingUserId(targetId);
+    setDeletingUserId(user.id);
 
     try {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) throw new Error('Session expired');
-
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`;
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ target_user_id: targetUserId }),
+      // Supprimer l'utilisateur via la fonction RPC sécurisée
+      const { data, error } = await supabase.rpc('admin_delete_user', {
+        target_user_id: user.user_id
       });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Erreur lors de la suppression');
+      if (error) throw error;
 
-      setUsers(prev => prev.filter(u => u.id !== targetId));
-      setDeletingUserId(null);
-      setUserToDelete(null);
-      showToast('success', 'Utilisateur supprimé avec succès');
+      addToast('Utilisateur supprimé avec succès', 'success');
       loadData();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting user:', error);
+      addToast('Erreur lors de la suppression de l\'utilisateur', 'error');
+    } finally {
       setDeletingUserId(null);
-      setUserToDelete(null);
-      showToast('error', error.message || 'Erreur lors de la suppression de l\'utilisateur');
     }
   };
 
@@ -458,129 +423,75 @@ export default function Admin() {
 
       if (error) throw error;
 
-      showToast('success', 'Informations client mises à jour avec succès');
+      addToast('Informations client mises à jour avec succès', 'success');
       setShowEditModal(false);
       setEditingUser(null);
       setEditingClientName({ firstName: '', lastName: '' });
-      setTimeout(() => loadData(), 100);
+      loadData();
     } catch (error) {
       console.error('Error updating client info:', error);
-      showToast('error', 'Erreur lors de la mise à jour');
+      addToast('Erreur lors de la mise à jour', 'error');
     }
   };
 
-  const handleInlineSubscriptionChange = async (targetUser: UserData, newPlanType: string) => {
-    if (!user) return;
-
-    if (!targetUser.company_id) {
-      showToast('error', 'Utilisateur sans profil entreprise');
-      return;
-    }
-
-    setUpdatingSubscription(targetUser.id);
+  const handleEditSubscription = async (newPlanType: string) => {
+    if (!editingUser || !user) return;
 
     try {
-      if (newPlanType === '') {
-        const { error } = await supabase
-          .from('subscriptions')
-          .update({
-            subscription_status: 'cancelled',
-            modified_by_admin_id: user.id,
-            admin_note: 'Abonnement annulé par admin',
-            updated_at: new Date().toISOString()
-          })
-          .eq('company_id', targetUser.company_id);
-
-        if (error) throw error;
-        showToast('success', 'Abonnement annulé');
-      } else {
-        const { error } = await supabase
-          .from('subscriptions')
-          .upsert({
-            company_id: targetUser.company_id,
-            plan_type: newPlanType,
-            subscription_status: 'active',
-            payment_provider: 'admin',
-            modified_by_admin_id: user.id,
-            admin_note: `Plan modifié par admin : ${newPlanType}`,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'company_id' });
-
-        if (error) throw error;
-        showToast('success', `Plan changé en ${newPlanType}`);
+      if (!editingUser.company_id) {
+        addToast('Erreur : utilisateur sans company_id', 'error');
+        return;
       }
 
-      setUsers(prev => prev.map(u => {
-        if (u.id !== targetUser.id) return u;
-        return {
-          ...u,
-          plan_type: newPlanType === '' ? null : newPlanType,
-          subscription_status: newPlanType === '' ? 'cancelled' : 'active'
-        };
-      }));
+      // Mettre à jour ou créer l'abonnement
+      const { error: subError } = await supabase
+        .from('subscriptions')
+        .upsert({
+          company_id: editingUser.company_id,
+          plan_type: newPlanType,
+          subscription_status: 'active',
+          trial_end_date: newPlanType === 'vip' ? null : undefined,
+          payment_provider: newPlanType === 'vip' ? 'admin' : undefined,
+          payment_provider_subscription_id: newPlanType === 'vip' ? 'admin_vip' : undefined,
+          monthly_price: newPlanType === 'vip' ? 0 : undefined,
+          modified_by_admin_id: user.id,
+          admin_note: `Plan modifié par admin : ${newPlanType}`,
+          updated_at: new Date().toISOString()
+        });
+
+      if (subError) throw subError;
+
+      addToast('Abonnement modifié avec succès', 'success');
+      setShowEditModal(false);
+      setEditingUser(null);
+      loadData();
     } catch (error) {
       console.error('Error updating subscription:', error);
-      showToast('error', 'Erreur lors de la modification');
-    } finally {
-      setUpdatingSubscription(null);
+      addToast('Erreur lors de la modification', 'error');
     }
   };
 
-  const handleAddUser = async () => {
-    if (!newUserForm.email || !newUserForm.password) {
-      showToast('error', 'Email et mot de passe requis');
-      return;
-    }
-    if (newUserForm.password.length < 6) {
-      showToast('error', 'Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-
-    setAddingUser(true);
+  const handleDeleteSubscription = async (user: UserData) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) return;
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-user`;
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) throw new Error('Session expired');
-
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
-          email: newUserForm.email,
-          password: newUserForm.password,
-          role: newUserForm.role,
-          firstName: newUserForm.firstName || null,
-          lastName: newUserForm.lastName || null,
-        }),
-      });
-
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Erreur lors de la création');
-
-      setShowAddUserModal(false);
-      setNewUserForm({ firstName: '', lastName: '', email: '', password: '', role: 'pro' });
-
-      if (newUserForm.role === 'pro' && !result.user?.company_id) {
-        showToast('error', 'Utilisateur créé mais profil entreprise manquant. Rechargez la page.');
-      } else {
-        showToast('success', 'Utilisateur créé avec succès');
+      if (!user.company_id) {
+        addToast('Erreur : utilisateur sans company_id', 'error');
+        return;
       }
-      setTimeout(() => loadData(), 500);
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      const msg = error.message || '';
-      if (msg.includes('already been registered') || msg.includes('already exists')) {
-        showToast('error', 'Cet email est déjà utilisé par un autre compte');
-      } else {
-        showToast('error', msg || 'Erreur lors de la création');
-      }
-    } finally {
-      setAddingUser(false);
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .delete()
+        .eq('company_id', user.company_id);
+
+      if (error) throw error;
+
+      addToast('Abonnement supprimé avec succès', 'success');
+      loadData();
+    } catch (error) {
+      console.error('Error deleting subscription:', error);
+      addToast('Erreur lors de la suppression', 'error');
     }
   };
 
@@ -724,6 +635,17 @@ export default function Admin() {
         >
           <Gift className="w-4 h-4 inline mr-1" />
           Avis & Récompenses
+        </button>
+        <button
+          onClick={() => setActiveTab('affiliates')}
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
+            activeTab === 'affiliates'
+              ? 'border-brand-500 text-brand-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <Handshake className="w-4 h-4 inline mr-1" />
+          Candidatures
         </button>
       </div>
 
@@ -928,7 +850,7 @@ export default function Admin() {
                   <span className="text-sm font-medium text-gray-700">Acomptes</span>
                 </div>
                 <p className="text-3xl font-bold text-gray-900">{stats.depositRevenue.toFixed(2)} €</p>
-                <p className="text-xs text-gray-600 mt-1">Commission plateforme (1,5%)</p>
+                <p className="text-xs text-gray-600 mt-1">Revenus des acomptes</p>
               </div>
 
               <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
@@ -995,12 +917,12 @@ export default function Admin() {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Nouveaux abonnés par mois</h3>
               <div className="space-y-3">
-                {monthlyStats.map((stat) => {
+                {monthlyStats.map((stat, index) => {
                   const maxUsers = Math.max(...monthlyStats.map(s => s.newUsers), 1);
                   const widthPercentage = (stat.newUsers / maxUsers) * 100;
 
                   return (
-                    <div key={stat.month} className="flex items-center gap-3">
+                    <div key={index} className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
                         <div
@@ -1020,12 +942,12 @@ export default function Admin() {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Revenus par mois</h3>
               <div className="space-y-3">
-                {monthlyStats.map((stat) => {
+                {monthlyStats.map((stat, index) => {
                   const maxRevenue = Math.max(...monthlyStats.map(s => s.revenue), 1);
                   const widthPercentage = (stat.revenue / maxRevenue) * 100;
 
                   return (
-                    <div key={stat.month} className="flex items-center gap-3">
+                    <div key={index} className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-600 w-12">{stat.month}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden">
                         <div
@@ -1076,13 +998,6 @@ export default function Admin() {
               <Download className="w-5 h-5" />
               Export CSV
             </button>
-            <button
-              onClick={() => setShowAddUserModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
-            >
-              <UserPlus className="w-5 h-5" />
-              Ajouter
-            </button>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -1124,28 +1039,10 @@ export default function Admin() {
                           </span>
                         ) : '—'}
                       </td>
-                      <td className="px-4 py-4 text-sm">
-                        <div className="relative group">
-                          <select
-                            value={user.subscription_status === 'cancelled' ? '' : (user.plan_type || '')}
-                            onChange={(e) => handleInlineSubscriptionChange(user, e.target.value)}
-                            disabled={!user.company_id || updatingSubscription === user.id}
-                            className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <option value="">---</option>
-                            <option value="start">Start</option>
-                            <option value="studio">Studio</option>
-                            <option value="empire">Empire</option>
-                            <option value="vip">VIP</option>
-                          </select>
-                          {!user.company_id && (
-                            <div className="absolute bottom-full left-0 mb-1 hidden group-hover:block z-10">
-                              <div className="bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
-                                Pas de profil entreprise
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {user.plan_type ? (
+                          <span className="font-medium capitalize">{user.plan_type}</span>
+                        ) : '—'}
                       </td>
                       <td className="px-4 py-4">
                         {user.subscription_status ? (
@@ -1196,20 +1093,39 @@ export default function Admin() {
                         {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('fr-FR') : '—'}
                       </td>
                       <td className="px-4 py-4">
-                        <button
-                          onClick={() => setUserToDelete(user)}
-                          disabled={deletingUserId === user.id}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Supprimer l'utilisateur"
-                        >
-                          <span className="flex items-center justify-center w-4 h-4">
-                            {deletingUserId === user.id ? (
-                              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 inline-block" />
-                            ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingUser(user);
+                              setShowEditModal(true);
+                            }}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Modifier l'abonnement"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          {user.plan_type && (
+                            <button
+                              onClick={() => handleDeleteSubscription(user)}
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                              title="Supprimer l'abonnement"
+                            >
                               <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteUser(user)}
+                            disabled={deletingUserId === user.id}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Supprimer l'utilisateur"
+                          >
+                            {deletingUserId === user.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                            ) : (
+                              <X className="w-4 h-4" />
                             )}
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1292,18 +1208,16 @@ export default function Admin() {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => setUserToDelete(client)}
+                            onClick={() => handleDeleteUser(client)}
                             disabled={deletingUserId === client.id}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Supprimer le client"
                           >
-                            <span className="flex items-center justify-center w-4 h-4">
-                              {deletingUserId === client.id ? (
-                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 inline-block" />
-                              ) : (
-                                <Trash2 className="w-4 h-4" />
-                              )}
-                            </span>
+                            {deletingUserId === client.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
                       </td>
@@ -1408,11 +1322,18 @@ export default function Admin() {
         <RewardsValidation />
       )}
 
+      {activeTab === 'affiliates' && (
+        <AffiliateApplications />
+      )}
+
+      {/* Modal de modification */}
       {showEditModal && editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Modifier le client</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                {editingUser.role === 'client' ? 'Modifier le client' : 'Modifier l\'abonnement'}
+              </h3>
               <button
                 onClick={() => {
                   setShowEditModal(false);
@@ -1428,191 +1349,129 @@ export default function Admin() {
             <div className="mb-6">
               <p className="text-sm text-gray-600 mb-1">Utilisateur</p>
               <p className="font-medium text-gray-900">{editingUser.email}</p>
+              <p className="text-sm text-gray-600">
+                {editingUser.first_name || editingUser.last_name
+                  ? `${editingUser.first_name || ''} ${editingUser.last_name || ''}`.trim()
+                  : ''}
+              </p>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
-                <input
-                  type="text"
-                  value={editingClientName.firstName}
-                  onChange={(e) => setEditingClientName({ ...editingClientName, firstName: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  placeholder="Prénom du client"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
-                <input
-                  type="text"
-                  value={editingClientName.lastName}
-                  onChange={(e) => setEditingClientName({ ...editingClientName, lastName: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  placeholder="Nom du client"
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleEditClientInfo}
-                className="flex-1 px-4 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
-              >
-                Enregistrer
-              </button>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingUser(null);
-                  setEditingClientName({ firstName: '', lastName: '' });
-                }}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showAddUserModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Nouvel utilisateur</h3>
-              <button
-                onClick={() => {
-                  setShowAddUserModal(false);
-                  setNewUserForm({ firstName: '', lastName: '', email: '', password: '', role: 'pro' });
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                  <input
-                    type="text"
-                    value={newUserForm.firstName}
-                    onChange={(e) => setNewUserForm({ ...newUserForm, firstName: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    placeholder="Prénom"
-                  />
+            {editingUser.role === 'client' ? (
+              <div className="mb-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                    <input
+                      type="text"
+                      value={editingClientName.firstName}
+                      onChange={(e) => setEditingClientName({ ...editingClientName, firstName: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                      placeholder="Prénom du client"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                    <input
+                      type="text"
+                      value={editingClientName.lastName}
+                      onChange={(e) => setEditingClientName({ ...editingClientName, lastName: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                      placeholder="Nom du client"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                  <input
-                    type="text"
-                    value={newUserForm.lastName}
-                    onChange={(e) => setNewUserForm({ ...newUserForm, lastName: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    placeholder="Nom"
-                  />
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={handleEditClientInfo}
+                    className="flex-1 px-4 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
+                  >
+                    Enregistrer
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditingUser(null);
+                      setEditingClientName({ firstName: '', lastName: '' });
+                    }}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Annuler
+                  </button>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={newUserForm.email}
-                  onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  placeholder="email@exemple.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-                <input
-                  type="password"
-                  value={newUserForm.password}
-                  onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  placeholder="Minimum 6 caractères"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
-                <select
-                  value={newUserForm.role}
-                  onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value as 'pro' | 'client' })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white"
+            ) : (
+              <>
+                <div className="mb-6">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Sélectionner un plan</p>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleEditSubscription('start')}
+                      className="w-full p-4 border-2 border-blue-200 hover:border-blue-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Star className="w-5 h-5 text-blue-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">Start</p>
+                          <p className="text-sm text-gray-600">Plan de démarrage</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleEditSubscription('studio')}
+                      className="w-full p-4 border-2 border-purple-200 hover:border-purple-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Star className="w-5 h-5 text-purple-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">Studio</p>
+                          <p className="text-sm text-gray-600">Plan intermédiaire</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleEditSubscription('empire')}
+                      className="w-full p-4 border-2 border-amber-200 hover:border-amber-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Crown className="w-5 h-5 text-amber-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">Empire</p>
+                          <p className="text-sm text-gray-600">Plan premium</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleEditSubscription('vip')}
+                      className="w-full p-4 border-2 border-rose-200 hover:border-rose-400 rounded-xl transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Crown className="w-5 h-5 text-rose-600" />
+                        <div>
+                          <p className="font-semibold text-gray-900">VIP</p>
+                          <p className="text-sm text-gray-600">Accès gratuit illimité</p>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingUser(null);
+                  }}
+                  className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <option value="pro">Pro</option>
-                  <option value="client">Client</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleAddUser}
-                disabled={addingUser}
-                className="flex-1 px-4 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <span className="w-4 h-4 flex items-center justify-center">
-                  {addingUser ? (
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block"></span>
-                  ) : (
-                    <UserPlus className="w-4 h-4" />
-                  )}
-                </span>
-                <span>{addingUser ? 'Création...' : 'Créer'}</span>
-              </button>
-              <button
-                onClick={() => {
-                  setShowAddUserModal(false);
-                  setNewUserForm({ firstName: '', lastName: '', email: '', password: '', role: 'pro' });
-                }}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Annuler
-              </button>
-            </div>
+                  Annuler
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
-
-      {userToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="w-7 h-7 text-red-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Supprimer cet utilisateur ?</h3>
-              <p className="text-sm text-gray-600 mb-1">Cette action est irréversible.</p>
-              <p className="text-sm font-medium text-gray-900 mb-6 break-all">{userToDelete.email}</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleConfirmDeleteUser}
-                disabled={deletingUserId === userToDelete.id}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <span className="flex items-center justify-center w-4 h-4">
-                  {deletingUserId === userToDelete.id ? (
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block" />
-                  ) : (
-                    <Trash2 className="w-4 h-4" />
-                  )}
-                </span>
-                Supprimer
-              </button>
-              <button
-                onClick={() => setUserToDelete(null)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
