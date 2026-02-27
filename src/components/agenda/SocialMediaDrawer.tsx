@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { X, Calendar, Image as ImageIcon, Instagram, Linkedin, Facebook, Youtube, Twitter, Hash, Target, Lightbulb } from 'lucide-react';
 import { SocialMediaContent } from '../../types/agenda';
+import ProductionStepsCheckboxes from '../content/ProductionStepsCheckboxes';
 
 interface SocialMediaDrawerProps {
   content: SocialMediaContent;
   onClose: () => void;
   onEdit: (contentId: string) => void;
+  onRefresh?: () => void;
 }
 
-export default function SocialMediaDrawer({ content, onClose, onEdit }: SocialMediaDrawerProps) {
+export default function SocialMediaDrawer({ content, onClose, onEdit, onRefresh }: SocialMediaDrawerProps) {
   function getPlatformIcon(platform: string) {
     switch (platform.toLowerCase()) {
       case 'instagram':
@@ -69,9 +71,9 @@ export default function SocialMediaDrawer({ content, onClose, onEdit }: SocialMe
       case 'script':
         return 'bg-orange-100 text-orange-800 border-orange-300';
       case 'shooting':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
+        return 'bg-red-100 text-red-800 border-red-300';
       case 'editing':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-300';
+        return 'bg-teal-100 text-teal-800 border-teal-300';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300';
     }
@@ -97,7 +99,9 @@ export default function SocialMediaDrawer({ content, onClose, onEdit }: SocialMe
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
       <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-xl overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-xl font-semibold text-gray-900">Publication programmée</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            {content.status === 'published' ? 'Publication postee' : content.status === 'scheduled' ? 'Publication programmee' : 'Contenu en production'}
+          </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -163,6 +167,31 @@ export default function SocialMediaDrawer({ content, onClose, onEdit }: SocialMe
               </span>
             )}
           </div>
+
+          {(content.date_script || content.date_shooting || content.date_editing || content.date_scheduling) && (
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <h4 className="font-medium text-gray-900 mb-3">Production</h4>
+              <ProductionStepsCheckboxes
+                contentId={content.id}
+                contentType={content.content_type}
+                scriptChecked={content.script_checked || false}
+                tournageChecked={content.tournage_checked || false}
+                montageChecked={content.montage_checked || false}
+                planifieChecked={content.planifie_checked || false}
+                dateScript={content.date_script}
+                dateScriptTime={content.date_script_time}
+                dateShooting={content.date_shooting}
+                dateShootingTime={content.date_shooting_time}
+                dateEditing={content.date_editing}
+                dateEditingTime={content.date_editing_time}
+                dateScheduling={content.date_scheduling}
+                dateSchedulingTime={content.date_scheduling_time}
+                onUpdate={onRefresh}
+                compact={true}
+                showDates={false}
+              />
+            </div>
+          )}
 
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
             <div className="flex items-center gap-2 text-gray-700 mb-1">

@@ -15,6 +15,7 @@ interface BookingSettingsData {
   cancellation_policy: string;
   deposit_required: boolean;
   deposit_amount: number | null;
+  deposit_fee_payer: 'provider' | 'client';
 }
 
 interface BookingSettingsProps {
@@ -232,20 +233,66 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
           </label>
 
           {settings.deposit_required && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Montant de l'acompte (€)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={settings.deposit_amount || ''}
-                onChange={(e) => onChange({ ...settings, deposit_amount: e.target.value ? parseFloat(e.target.value) : null })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
-                placeholder="Ex: 20.00"
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Montant de l'acompte (€)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={settings.deposit_amount || ''}
+                  onChange={(e) => onChange({ ...settings, deposit_amount: e.target.value ? parseFloat(e.target.value) : null })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  placeholder="Ex: 20.00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Qui paie les frais de transaction (1,5%) ?
+                  <InfoTooltip content="Frais de la plateforme Belleya sur chaque acompte. Vous pouvez choisir de les absorber ou de les facturer au client." />
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="deposit_fee_payer"
+                      checked={settings.deposit_fee_payer === 'provider'}
+                      onChange={() => onChange({ ...settings, deposit_fee_payer: 'provider' })}
+                      className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary mt-0.5"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">Je prends en charge les frais</span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Les 1,5% sont déduits de votre paiement. Le client paie uniquement l'acompte.
+                      </p>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="deposit_fee_payer"
+                      checked={settings.deposit_fee_payer === 'client'}
+                      onChange={() => onChange({ ...settings, deposit_fee_payer: 'client' })}
+                      className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary mt-0.5"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">Le client paie les frais</span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Le client paie l'acompte + 1,5% de frais de transaction.
+                        {settings.deposit_amount ? (
+                          <span className="block mt-1 text-gray-700 font-medium">
+                            Exemple : {settings.deposit_amount.toFixed(2)} € + {(settings.deposit_amount * 0.015).toFixed(2)} € de frais = {(settings.deposit_amount * 1.015).toFixed(2)} € total
+                          </span>
+                        ) : null}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
