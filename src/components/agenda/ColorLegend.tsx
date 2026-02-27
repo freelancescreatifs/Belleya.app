@@ -6,7 +6,7 @@ export default function ColorLegend() {
         <span className="text-gray-600 font-medium">RDV Pro</span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-purple-500 shadow-sm"></div>
+        <div className="w-3 h-3 rounded-full bg-rose-500 shadow-sm"></div>
         <span className="text-gray-600 font-medium">RDV Perso</span>
       </div>
       <div className="flex items-center gap-2">

@@ -10,6 +10,8 @@ interface DepositPaymentProps {
   clientName: string;
   stripeAvailable: boolean;
   paypalAvailable: boolean;
+  feePayedByClient: boolean;
+  commissionRate?: number;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -23,6 +25,8 @@ export default function DepositPayment({
   clientName,
   stripeAvailable,
   paypalAvailable,
+  feePayedByClient,
+  commissionRate = 0.015,
   onSuccess,
   onCancel,
 }: DepositPaymentProps) {
@@ -32,6 +36,9 @@ export default function DepositPayment({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const feeAmount = feePayedByClient ? amount * commissionRate : 0;
+  const totalAmount = amount + feeAmount;
 
   const handleStripePayment = async () => {
     setLoading(true);
@@ -55,7 +62,7 @@ export default function DepositPayment({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Échec du paiement');
+        throw new Error(errorData.error || 'Echec du paiement');
       }
 
       const { clientSecret } = await response.json();
@@ -78,7 +85,7 @@ export default function DepositPayment({
           setTimeout(() => onSuccess(), 1500);
         }
       } else {
-        throw new Error('Stripe n\'est pas chargé');
+        throw new Error('Stripe n\'est pas charge');
       }
     } catch (err: any) {
       console.error('Error processing Stripe payment:', err);
@@ -110,10 +117,10 @@ export default function DepositPayment({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Échec du paiement');
+        throw new Error(errorData.error || 'Echec du paiement');
       }
 
-      const { orderId, approveLink } = await response.json();
+      const { approveLink } = await response.json();
 
       if (approveLink) {
         window.location.href = approveLink;
@@ -141,8 +148,8 @@ export default function DepositPayment({
         <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
           <CheckCircle className="w-8 h-8 text-belleya-bright" />
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Paiement réussi !</h3>
-        <p className="text-gray-600">Votre rendez-vous est confirmé.</p>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Paiement reussi !</h3>
+        <p className="text-gray-600">Votre rendez-vous est confirme.</p>
       </div>
     );
   }
@@ -155,9 +162,28 @@ export default function DepositPayment({
         <p className="text-sm text-gray-500">{serviceName}</p>
       </div>
 
-      <div className="bg-gradient-to-br from-belleya-primary to-belleya-deep text-white rounded-xl p-6 text-center">
-        <p className="text-sm opacity-90 mb-1">Montant à payer</p>
-        <p className="text-4xl font-bold">{amount.toFixed(2)} €</p>
+      <div className="bg-gradient-to-br from-belleya-primary to-belleya-deep text-white rounded-xl p-6">
+        {feePayedByClient ? (
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm opacity-90">
+              <span>Acompte</span>
+              <span>{amount.toFixed(2)} EUR</span>
+            </div>
+            <div className="flex justify-between text-sm opacity-90">
+              <span>Frais de transaction ({(commissionRate * 100).toFixed(1)}%)</span>
+              <span>{feeAmount.toFixed(2)} EUR</span>
+            </div>
+            <div className="border-t border-white/30 pt-2 mt-2 flex justify-between items-center">
+              <span className="font-medium">Total</span>
+              <span className="text-3xl font-bold">{totalAmount.toFixed(2)} EUR</span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <p className="text-sm opacity-90 mb-1">Montant a payer</p>
+            <p className="text-4xl font-bold">{amount.toFixed(2)} EUR</p>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -176,7 +202,7 @@ export default function DepositPayment({
           <div>
             <p className="font-semibold text-amber-900">Paiement non disponible</p>
             <p className="text-sm text-amber-700">
-              Le prestataire n'a pas encore configuré les moyens de paiement.
+              Le prestataire n'a pas encore configure les moyens de paiement.
               Veuillez le contacter directement.
             </p>
           </div>
@@ -206,7 +232,7 @@ export default function DepositPayment({
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-gray-900">Carte bancaire</p>
-                  <p className="text-xs text-gray-500">Paiement sécurisé par Stripe</p>
+                  <p className="text-xs text-gray-500">Paiement securise par Stripe</p>
                 </div>
                 <CreditCard className="w-6 h-6 text-gray-400" />
               </button>
@@ -260,14 +286,14 @@ export default function DepositPayment({
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  Payer {amount.toFixed(2)} €
+                  Payer {(feePayedByClient ? totalAmount : amount).toFixed(2)} EUR
                 </>
               )}
             </button>
           </div>
 
           <p className="text-xs text-gray-500 text-center">
-            Paiement sécurisé • Vos données sont protégées
+            Paiement securise -- Vos donnees sont protegees
           </p>
         </>
       )}

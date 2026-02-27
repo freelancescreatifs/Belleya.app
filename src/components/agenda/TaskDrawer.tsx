@@ -3,6 +3,7 @@ import { X, Check, Calendar, Edit2, Trash2 } from 'lucide-react';
 import { CalendarTask } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import { formatDate, formatTime } from '../../lib/calendarHelpers';
+import { getStepLabel, getStepColor, stepBgColorMap } from '../../lib/productionStepsHelpers';
 import TaskForm from './TaskForm';
 
 interface TaskDrawerProps {
@@ -31,6 +32,27 @@ export default function TaskDrawer({ task, onClose, onUpdate, onDelete }: TaskDr
         .single();
 
       if (error) throw error;
+
+      if (task.production_step && task.tags) {
+        const contentMatch = typeof task.tags === 'string' ? task.tags.match(/content:([0-9a-f-]+)/) : null;
+        if (contentMatch) {
+          const contentId = contentMatch[1];
+          const checkboxMap: Record<string, string> = {
+            script: 'script_checked',
+            shooting: 'tournage_checked',
+            editing: 'montage_checked',
+            scheduling: 'planifie_checked',
+          };
+          const checkboxColumn = checkboxMap[task.production_step];
+          if (checkboxColumn) {
+            await supabase
+              .from('content_calendar')
+              .update({ [checkboxColumn]: true })
+              .eq('id', contentId);
+          }
+        }
+      }
+
       if (data) {
         onUpdate({ ...task, completed: true });
         onClose();
@@ -120,9 +142,16 @@ export default function TaskDrawer({ task, onClose, onUpdate, onDelete }: TaskDr
               <div className="space-y-6">
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">{task.title}</h3>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                    Tâche
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                      Tache
+                    </span>
+                    {task.production_step && (
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStepColor(task.production_step)} bg-gray-100`}>
+                        {getStepLabel(task.production_step)}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
               {task.description && (

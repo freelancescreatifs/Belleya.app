@@ -51,8 +51,8 @@ interface KanbanViewProps {
 
 const STATUS_COLUMNS = [
   { id: 'script', label: 'Script', icon: FileEdit, color: 'bg-orange-100' },
-  { id: 'shooting', label: 'Tournage', icon: Camera, color: 'bg-purple-100' },
-  { id: 'editing', label: 'Montage', icon: Scissors, color: 'bg-indigo-100', hiddenByDefault: true },
+  { id: 'shooting', label: 'Tournage', icon: Camera, color: 'bg-red-100' },
+  { id: 'editing', label: 'Montage', icon: Scissors, color: 'bg-teal-100', hiddenByDefault: true },
   { id: 'scheduled', label: 'Programmé', icon: CalendarCheck, color: 'bg-blue-100' },
   { id: 'published', label: 'Publié', icon: CheckCircle, color: 'bg-green-100' },
 ];
@@ -364,8 +364,8 @@ function KanbanCard({
     const colors: Record<string, string> = {
       'idea': 'bg-gray-100 text-gray-700',
       'script': 'bg-blue-100 text-blue-700',
-      'shooting': 'bg-purple-100 text-purple-700',
-      'editing': 'bg-indigo-100 text-indigo-700',
+      'shooting': 'bg-red-100 text-red-700',
+      'editing': 'bg-teal-100 text-teal-700',
       'scheduled': 'bg-blue-100 text-blue-700',
       'published': 'bg-green-100 text-green-700',
     };

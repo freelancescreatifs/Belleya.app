@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { CalendarView as ViewType, CalendarItem } from '../../types/agenda';
 import { getMonthDays, getWeekDays, isSameDay, getItemsForDay, formatTime, getEventColor, calculateOverlappingPositions } from '../../lib/calendarHelpers';
-import { getStepEmoji } from '../../lib/productionStepsHelpers';
-import { ExternalLink } from 'lucide-react';
+import { getStepEmoji, stepBgColorMap, stepLabelMap } from '../../lib/productionStepsHelpers';
+import { ExternalLink, CheckCircle } from 'lucide-react';
 
 interface CalendarViewProps {
   view: ViewType;
@@ -26,6 +26,53 @@ export default function CalendarView({ view, currentDate, items, onItemClick, on
   }
 
   return <DayView currentDate={currentDate} items={items} onItemClick={onItemClick} onTimeSlotDoubleClick={onTimeSlotDoubleClick} onEventDrop={onEventDrop} onEventResize={onEventResize} onDragComplete={onDragComplete} />;
+}
+
+function getSocialMediaStatus(item: CalendarItem): string | null {
+  if (item.type !== 'social_media') return null;
+  return (item.data as any).status || null;
+}
+
+function isSocialMediaPublished(item: CalendarItem): boolean {
+  return getSocialMediaStatus(item) === 'published';
+}
+
+function SocialStatusDot({ item, size = 'sm' }: { item: CalendarItem; size?: 'sm' | 'md' }) {
+  const status = getSocialMediaStatus(item);
+  if (!status) return null;
+
+  const dotSize = size === 'sm' ? 'w-2 h-2' : 'w-2.5 h-2.5';
+  const bgColor = stepBgColorMap[status] || 'bg-gray-400';
+
+  if (status === 'published') {
+    return <CheckCircle className={`${size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5'} text-green-300 flex-shrink-0`} />;
+  }
+
+  return (
+    <span className={`${dotSize} ${bgColor} rounded-full flex-shrink-0 inline-block`} title={stepLabelMap[status] || status} />
+  );
+}
+
+function SocialProgressDots({ item }: { item: CalendarItem }) {
+  if (item.type !== 'social_media') return null;
+  const data = item.data as any;
+  const checks = [
+    data.script_checked,
+    data.tournage_checked,
+    data.montage_checked,
+    data.planifie_checked,
+  ];
+
+  return (
+    <div className="flex items-center gap-0.5 ml-1">
+      {checks.map((checked: boolean, i: number) => (
+        <span
+          key={i}
+          className={`w-1.5 h-1.5 rounded-full ${checked ? 'bg-green-300' : 'bg-white/30'}`}
+        />
+      ))}
+    </div>
+  );
 }
 
 function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<CalendarViewProps, 'view' | 'onEventDrop' | 'onEventResize' | 'onTimeSlotDoubleClick' | 'onDragComplete'>) {
@@ -147,6 +194,7 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                 {dayItems.slice(0, 3).map((item) => {
                   const isCancelled = item.type === 'event' && (item.data as any).status === 'cancelled';
                   const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
+                  const isPublished = isSocialMediaPublished(item);
 
                   return (
                     <div
@@ -155,9 +203,10 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                         e.stopPropagation();
                         onItemClick(item);
                       }}
-                      className={`${getEventColor(item)} text-white rounded cursor-pointer hover:opacity-80 transition-all ${isCancelled ? 'line-through opacity-60' : ''}`}
+                      className={`${getEventColor(item)} text-white rounded cursor-pointer hover:opacity-80 transition-all ${isCancelled ? 'line-through opacity-60' : ''} ${isPublished ? 'opacity-50' : ''}`}
                     >
-                      <div className="flex items-start gap-1 px-2 py-1 text-xs">
+                      <div className="flex items-center gap-1 px-2 py-1 text-xs">
+                        <SocialStatusDot item={item} size="sm" />
                         <span className="flex-shrink-0">{formatTime(item.start)}</span>
                         <span className="line-clamp-2 flex-1">
                           {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
@@ -651,7 +700,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                           key={item.id}
                           className={`${getEventColor(item)} text-white overflow-hidden select-none rounded pointer-events-auto active:scale-95 transition-transform ${
                             isCancelled ? 'opacity-60 line-through' : ''
-                          } ${isDragging ? 'opacity-20' : ''}`}
+                          } ${isDragging ? 'opacity-20' : ''} ${isSocialMediaPublished(item) ? 'opacity-50' : ''}`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
@@ -850,7 +899,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                               : isGrabbed
                               ? 'scale-105 cursor-grabbing shadow-lg ring-2 ring-white/50 transition-transform duration-150 pointer-events-auto'
                               : 'cursor-grab hover:opacity-90 hover:shadow-md transition-all duration-200 pointer-events-auto'
-                          }`}
+                          } ${isSocialMediaPublished(item) && !isGhost ? 'opacity-50' : ''}`}
                           style={{
                             position: 'absolute',
                             top: `${top}px`,
@@ -899,10 +948,12 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                               {(() => {
                                 const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
                                 return (
-                                  <>
+                                  <span className="flex items-center gap-1">
+                                    <SocialStatusDot item={item} size="sm" />
                                     {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
                                     {item.title}
-                                  </>
+                                    <SocialProgressDots item={item} />
+                                  </span>
                                 );
                               })()}
                             </div>
@@ -1355,7 +1406,7 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                           : isGrabbed
                           ? 'scale-105 cursor-grabbing shadow-lg ring-2 ring-white/50 transition-transform duration-150 pointer-events-auto'
                           : 'cursor-grab hover:opacity-90 transition-all duration-200 hover:scale-102 pointer-events-auto'
-                      }`}
+                      } ${isSocialMediaPublished(item) && !isGhost ? 'opacity-50' : ''}`}
                       style={{
                         position: 'absolute',
                         top: `${top}px`,
@@ -1410,10 +1461,11 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                           {(() => {
                             const productionStep = item.type === 'task' ? (item.data as any).production_step : null;
                             return (
-                              <>
+                              <span className="flex items-center gap-1.5">
+                                <SocialStatusDot item={item} size="md" />
                                 {productionStep && <span className="mr-1">{getStepEmoji(productionStep)}</span>}
                                 {item.title}
-                              </>
+                              </span>
                             );
                           })()}
                         </div>
@@ -1430,8 +1482,9 @@ function DayView({ currentDate, items, onItemClick, onTimeSlotDoubleClick, onEve
                           </a>
                         )}
                       </div>
-                      <div className={`px-3 md:px-4 pb-2 text-sm opacity-90 mt-1 truncate ${isCancelled ? 'line-through' : ''}`}>
-                        {formatTime(start)} - {formatTime(end)}
+                      <div className={`px-3 md:px-4 pb-2 text-sm opacity-90 mt-1 flex items-center gap-2 ${isCancelled ? 'line-through' : ''}`}>
+                        <span className="truncate">{formatTime(start)} - {formatTime(end)}</span>
+                        <SocialProgressDots item={item} />
                       </div>
                       {!isGhost && (
                         <div
