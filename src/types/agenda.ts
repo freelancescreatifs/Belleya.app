@@ -35,6 +35,8 @@ export interface Event {
   service?: {
     id: string;
     name: string;
+    price?: number;
+    duration?: number;
   };
 }
 

@@ -146,7 +146,7 @@ export default function Agenda() {
         *,
         client:clients(id, first_name, last_name, is_fidele, is_vip),
         student:students(id, first_name, last_name),
-        service:services(id, name)
+        service:services(id, name, price, duration)
       `)
       .eq('user_id', user.id)
       .order('start_at');

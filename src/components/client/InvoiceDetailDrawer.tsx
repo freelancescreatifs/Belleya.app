@@ -47,12 +47,12 @@ export default function InvoiceDetailDrawer({
     const { error } = await deleteInvoice(invoiceId);
 
     if (error) {
-      showToast('Erreur lors de la suppression', 'error');
+      showToast('error', 'Erreur lors de la suppression');
       setDeleting(false);
       return;
     }
 
-    showToast('Récap supprimé avec succès', 'success');
+    showToast('success', 'Récap supprimé avec succès');
     onDeleted?.();
     onClose();
   };
@@ -203,7 +203,7 @@ export default function InvoiceDetailDrawer({
           invoice={invoice}
           onClose={() => setShowSendModal(false)}
           onSuccess={() => {
-            showToast('Récap envoyé', 'success');
+            showToast('success', 'Récap envoyé');
             loadInvoice();
           }}
         />

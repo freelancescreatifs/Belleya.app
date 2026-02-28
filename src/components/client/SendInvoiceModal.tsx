@@ -41,7 +41,7 @@ export default function SendInvoiceModal({
 
   const handleSend = async () => {
     if (!sendEmail && !sendSMS) {
-      showToast('Veuillez sélectionner au moins un canal d\'envoi', 'error');
+      showToast('error', 'Veuillez sélectionner au moins un canal d\'envoi');
       return;
     }
 
@@ -64,7 +64,7 @@ export default function SendInvoiceModal({
       const someSuccess = results.some(r => r.success);
 
       if (allSuccess) {
-        showToast('Récap envoyé avec succès', 'success');
+        showToast('success', 'Récap envoyé avec succès');
         onSuccess?.();
         onClose();
       } else if (someSuccess) {
@@ -72,16 +72,16 @@ export default function SendInvoiceModal({
           .filter(r => !r.success)
           .map(r => r.channel === 'email' ? 'Email' : 'SMS')
           .join(', ');
-        showToast(`Envoi partiel : échec pour ${failedChannels}`, 'warning');
+        showToast('warning', `Envoi partiel : échec pour ${failedChannels}`);
         onSuccess?.();
         onClose();
       } else {
         const errors = results.map(r => r.error).filter(Boolean).join(', ');
-        showToast(errors || 'Échec de l\'envoi', 'error');
+        showToast('error', errors || 'Échec de l\'envoi');
       }
     } catch (error) {
       console.error('Error sending invoice:', error);
-      showToast('Erreur lors de l\'envoi du récap', 'error');
+      showToast('error', 'Erreur lors de l\'envoi du récap');
     } finally {
       setLoading(false);
     }

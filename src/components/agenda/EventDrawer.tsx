@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit2, Trash2, Clock, User, FileText, Calendar, Receipt, Plus } from 'lucide-react';
+import { X, Edit2, Trash2, Clock, User, FileText, Calendar, Receipt, Plus, Send } from 'lucide-react';
 import { Event } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import EventForm from './EventForm';
@@ -7,6 +7,8 @@ import { formatDate, formatTime } from '../../lib/calendarHelpers';
 import { getInvoiceByAppointment } from '../../lib/invoiceHelpers';
 import InvoiceDetailDrawer from '../client/InvoiceDetailDrawer';
 import InvoiceForm from '../client/InvoiceForm';
+import SendReceiptModal from './SendReceiptModal';
+import { useToast } from '../../hooks/useToast';
 
 interface EventDrawerProps {
   event: Event;
@@ -27,10 +29,19 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
   const [showInvoiceForm, setShowInvoiceForm] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [clientDetails, setClientDetails] = useState<{
+    email: string | null;
+    phone: string | null;
+    first_name: string;
+    last_name: string;
+  } | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (event.type === 'pro' && event.client_id) {
       checkInvoice();
+      loadClientDetails();
     }
   }, [event.id]);
 
@@ -38,6 +49,18 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
     const { data } = await getInvoiceByAppointment(event.id);
     if (data) {
       setInvoiceId(data.id);
+    }
+  };
+
+  const loadClientDetails = async () => {
+    if (!event.client_id) return;
+    const { data } = await supabase
+      .from('clients')
+      .select('first_name, last_name, email, phone')
+      .eq('id', event.client_id)
+      .maybeSingle();
+    if (data) {
+      setClientDetails(data);
     }
   };
 
@@ -56,7 +79,7 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
       onClose();
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Erreur lors de la suppression');
+      showToast('error', 'Erreur lors de la suppression');
     } finally {
       setLoading(false);
     }
@@ -264,6 +287,18 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                       )}
                     </div>
                   )}
+
+                  {event.type === 'pro' && event.client_id && (
+                    <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                      <button
+                        onClick={() => setShowReceiptModal(true)}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                      >
+                        <Send className="w-4 h-4" />
+                        Envoyer le recu par email / SMS
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {event.type !== 'google' && event.type !== 'planity' && !event.id.startsWith('formation-') && (
@@ -365,6 +400,15 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
             setShowInvoiceDetail(false);
           }}
           isProvider={true}
+        />
+      )}
+
+      {showReceiptModal && clientDetails && (
+        <SendReceiptModal
+          event={event}
+          clientDetails={clientDetails}
+          onClose={() => setShowReceiptModal(false)}
+          onSuccess={() => setShowReceiptModal(false)}
         />
       )}
 
