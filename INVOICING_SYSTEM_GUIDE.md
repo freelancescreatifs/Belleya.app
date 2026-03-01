@@ -153,7 +153,7 @@ Dans le drawer de détail, bouton 🗑️ (rouge) pour supprimer.
 }
 ```
 
-**Statut** : ✅ Déployée - Prête à brancher avec un service d'email (SendGrid, Resend, etc.)
+**Statut** : ✅ Déployée - Intégrée avec Resend
 
 ### 2. `send-invoice-sms`
 
@@ -274,7 +274,7 @@ Drawer de détail avec :
 ## 🚀 Points d'extension futurs
 
 ### Court terme
-- [ ] Intégrer un service d'email (SendGrid/Resend) dans `send-invoice-email`
+- [x] Intégrer Resend dans `send-invoice-email`
 - [ ] Intégrer un service SMS (Twilio/Vonage) dans `send-invoice-sms`
 - [ ] Ajouter onglet "Mes reçus" dans l'espace client
 
