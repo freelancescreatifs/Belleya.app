@@ -587,12 +587,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Profil introuvable</h1>
           <p className="text-gray-600 mb-6">Ce lien de réservation n'existe pas ou n'est plus actif.</p>
-          <button
-            onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+          <a
+            href="/"
+            className="inline-block px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
           >
             Retour à l'accueil
-          </button>
+          </a>
         </div>
       </div>
     );
@@ -606,12 +606,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           <p className="text-gray-600 mb-6">
             {proProfile.company_name} n'accepte pas de réservations en ligne pour le moment.
           </p>
-          <button
-            onClick={() => window.location.href = '/'}
-            className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+          <a
+            href="/"
+            className="inline-block px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
           >
             Retour à l'accueil
-          </button>
+          </a>
         </div>
       </div>
     );
@@ -652,12 +652,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
               Votre demande de réservation a été transmise à {proProfile.company_name}. Vous recevrez une
               confirmation par email à {clientInfo.email}.
             </p>
-            <button
-              onClick={() => window.location.href = '/'}
-              className="w-full px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium"
+            <a
+              href="/"
+              className="block w-full px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-center"
             >
               Retour à l'accueil
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -669,13 +669,13 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       {/* Header Profile */}
       <div className="bg-gradient-to-r from-rose-400 to-pink-500 text-white">
         <div className="container mx-auto px-4 py-6">
-          <button
-            onClick={() => window.location.href = '/'}
-            className="flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors"
+          <a
+            href="/"
+            className="relative z-10 inline-flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Retour
-          </button>
+          </a>
 
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0">
