@@ -43,7 +43,7 @@ export default function FilterToggle({ activeFilters, onChange }: FilterTogglePr
               : 'text-gray-600 hover:text-gray-900 hover:bg-white'
           }`}
         >
-          RDV
+          RDV / Formations
         </button>
         <button
           onClick={() => toggleFilter('tasks')}
