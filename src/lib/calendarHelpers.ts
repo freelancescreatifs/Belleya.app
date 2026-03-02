@@ -6,7 +6,7 @@ export function getEventColor(item: CalendarItem): string {
   }
 
   if (item.type === 'social_media') {
-    return 'bg-pink-500';
+    return 'bg-belleya-500';
   }
 
   if (item.type === 'task') {
@@ -27,7 +27,7 @@ export function getEventColor(item: CalendarItem): string {
     return 'bg-blue-500';
   }
 
-  return 'bg-rose-500';
+  return 'bg-cyan-500';
 }
 
 export function getEventTextColor(item: CalendarItem): string {
