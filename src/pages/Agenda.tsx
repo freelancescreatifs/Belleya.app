@@ -337,24 +337,13 @@ export default function Agenda() {
     }
 
     if (activeFilters.has('events')) {
-      const filteredEvents = events.filter(e => e.type !== 'formation');
-      if (import.meta.env.DEV) {
-        console.log(`[Agenda] Showing ${filteredEvents.length} rendez-vous (excluded ${events.filter(e => e.type === 'formation').length} formations)`);
-      }
-
-      filteredEvents.forEach((event) => {
-        let color = 'bg-rose-500';
-        if (event.type === 'pro') {
-          color = 'bg-blue-500';
-        }
-
+      events.forEach((event) => {
         items.push({
           id: event.id,
           type: 'event',
           title: event.title,
           start: new Date(event.start_at),
           end: new Date(event.end_at),
-          color,
           data: event,
         });
       });
