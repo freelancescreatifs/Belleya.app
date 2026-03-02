@@ -6,7 +6,7 @@ export function getEventColor(item: CalendarItem): string {
   }
 
   if (item.type === 'social_media') {
-    return 'bg-belleya-500';
+    return 'bg-[rgb(240,62,151)]';
   }
 
   if (item.type === 'task') {
@@ -16,18 +16,18 @@ export function getEventColor(item: CalendarItem): string {
   const event = item.data as Event;
 
   if (event.status === 'cancelled') {
-    return 'bg-red-500';
+    return 'bg-[rgb(247,0,0)]';
   }
 
   if (event.type === 'formation') {
-    return 'bg-sky-400';
+    return 'bg-[rgb(174,56,248)]';
   }
 
   if (event.type === 'pro') {
     return 'bg-blue-500';
   }
 
-  return 'bg-cyan-500';
+  return 'bg-[rgb(6,182,212)]';
 }
 
 export function getEventTextColor(item: CalendarItem): string {

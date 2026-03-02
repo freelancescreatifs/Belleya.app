@@ -141,7 +141,7 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
   const getTypeBadge = (type: string) => {
     const styles = {
       pro: 'bg-blue-100 text-blue-800',
-      formation: 'bg-sky-100 text-sky-800',
+      formation: 'bg-[rgb(174,56,248)]/10 text-[rgb(174,56,248)]',
       personal: 'bg-cyan-100 text-cyan-800',
       google: 'bg-gray-100 text-gray-800',
       planity: 'bg-belleya-100 text-belleya-deep',

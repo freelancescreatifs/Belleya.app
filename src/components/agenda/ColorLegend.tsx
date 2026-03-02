@@ -6,15 +6,15 @@ export default function ColorLegend() {
         <span className="text-gray-600 font-medium">RDV Pro</span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-cyan-500 shadow-sm"></div>
+        <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: 'rgb(6,182,212)' }}></div>
         <span className="text-gray-600 font-medium">RDV Perso</span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-sky-400 shadow-sm"></div>
+        <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: 'rgb(174,56,248)' }}></div>
         <span className="text-gray-600 font-medium">Formation</span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
+        <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: 'rgb(247,0,0)' }}></div>
         <span className="text-gray-600 font-medium">RDV Annulé</span>
       </div>
       <div className="flex items-center gap-2">
@@ -22,7 +22,7 @@ export default function ColorLegend() {
         <span className="text-gray-600 font-medium">Tâches</span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-belleya-500 shadow-sm"></div>
+        <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: 'rgb(240,62,151)' }}></div>
         <span className="text-gray-600 font-medium">Réseaux sociaux</span>
       </div>
     </div>
