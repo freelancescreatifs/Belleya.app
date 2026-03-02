@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit2, Trash2, Clock, User, FileText, Calendar, Receipt, Plus, Send } from 'lucide-react';
+import { X, CreditCard as Edit2, Trash2, Clock, User, FileText, Calendar, Receipt, Plus, Send } from 'lucide-react';
 import { Event } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import EventForm from './EventForm';
