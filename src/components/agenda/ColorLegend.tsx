@@ -11,7 +11,7 @@ export default function ColorLegend() {
       </div>
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: 'rgb(174,56,248)' }}></div>
-        <span className="text-gray-600 font-medium">Formation</span>
+        <span className="text-gray-600 font-medium">RDV Formation</span>
       </div>
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: 'rgb(247,0,0)' }}></div>
