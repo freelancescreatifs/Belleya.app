@@ -313,7 +313,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   const getAvailableTimeSlots = (date: Date): TimeSlot[] => {
     if (!selectedService) return [];
-    return generateTimeSlots(date, selectedService.duration, weeklyAvailability, events);
+    return generateTimeSlots(date, calculateTotalDuration(), weeklyAvailability, events);
   };
 
   const calculateServicePrice = (service: Service): { original: number; discounted: number | null } => {
