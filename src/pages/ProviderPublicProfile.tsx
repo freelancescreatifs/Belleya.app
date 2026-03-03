@@ -517,6 +517,7 @@ export default function ProviderPublicProfile() {
                   selectedTime,
                 }}
                 providerId={profile.userId}
+                companyId={profile.companyId}
               />
             )}
 

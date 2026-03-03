@@ -24,12 +24,14 @@ interface AuthGateProps {
   onAuthenticated: (userId: string, clientId: string) => void;
   bookingContext: BookingContext;
   providerId: string;
+  companyId?: string;
 }
 
 export default function AuthGate({
   onAuthenticated,
   bookingContext,
   providerId,
+  companyId,
 }: AuthGateProps) {
   const { user, signIn, signUp } = useAuth();
   const [hasAccount, setHasAccount] = useState(false);
@@ -83,17 +85,20 @@ export default function AuthGate({
     if (clientData) {
       onAuthenticated(data.user.id, clientData.id);
     } else {
+      const insertPayload: any = {
+        user_id: providerId,
+        client_user_id: data.user.id,
+        first_name: formData.firstName || 'Client',
+        last_name: formData.lastName || '',
+        email: formData.email,
+        phone: formData.phone || null,
+        source: 'public_booking',
+      };
+      if (companyId) insertPayload.company_id = companyId;
+
       const { data: newClient, error: createError } = await supabase
         .from('clients')
-        .insert({
-          user_id: providerId,
-          client_user_id: data.user.id,
-          first_name: formData.firstName || 'Client',
-          last_name: formData.lastName || '',
-          email: formData.email,
-          phone: formData.phone || null,
-          source: 'public_booking',
-        })
+        .insert(insertPayload)
         .select()
         .single();
 
@@ -131,17 +136,20 @@ export default function AuthGate({
       console.error('Error creating profile:', profileError);
     }
 
+    const signUpPayload: any = {
+      user_id: providerId,
+      client_user_id: userId,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      phone: formData.phone || null,
+      source: 'public_booking',
+    };
+    if (companyId) signUpPayload.company_id = companyId;
+
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
-      .insert({
-        user_id: providerId,
-        client_user_id: userId,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        phone: formData.phone || null,
-        source: 'public_booking',
-      })
+      .insert(signUpPayload)
       .select()
       .single();
 

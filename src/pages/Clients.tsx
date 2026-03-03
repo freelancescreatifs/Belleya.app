@@ -10,6 +10,8 @@ import CreateRevenueModal from '../components/client/CreateRevenueModal';
 import ImportClientsModal from '../components/client/ImportClientsModal';
 import { getClientTag } from '../lib/clientTagHelpers';
 import { clientsCache, type ClientMinimal } from '../lib/clientsCache';
+import { useToast } from '../hooks/useToast';
+import ToastContainer from '../components/shared/ToastContainer';
 
 interface Client extends ClientMinimal {
   status?: 'regular' | 'vip' | 'at_risk';
@@ -59,6 +61,7 @@ const PAGE_SIZE = 30;
 
 export default function Clients() {
   const { user, profile } = useAuth();
+  const { toasts, showToast, dismissToast } = useToast();
   const [clients, setClients] = useState<Client[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -643,11 +646,17 @@ export default function Clients() {
   };
 
   const handleAddClient = async (formData: any, customData: Record<string, string>) => {
+    if (!profile?.company_id) {
+      showToast('error', 'Veuillez compléter votre profil entreprise avant d\'ajouter des clientes.');
+      throw new Error('company_id manquant');
+    }
+
     try {
       const { data: newClient, error: clientError } = await supabase
         .from('clients')
         .insert({
           user_id: user!.id,
+          company_id: profile.company_id,
           first_name: formData.first_name,
           last_name: formData.last_name,
           phone: formData.phone || null,
@@ -709,6 +718,7 @@ export default function Clients() {
       }
 
       clientsCache.invalidate();
+      showToast('success', 'Cliente ajoutée avec succès');
       loadClients();
     } catch (error) {
       console.error('Error adding client:', error);
@@ -764,6 +774,7 @@ export default function Clients() {
       }
 
       clientsCache.invalidate();
+      showToast('success', 'Cliente modifiée avec succès');
       setEditingClient(null);
       loadClients();
     } catch (error) {
@@ -1257,6 +1268,8 @@ export default function Clients() {
           onImportComplete={loadClients}
         />
       )}
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

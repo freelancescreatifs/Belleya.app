@@ -31,7 +31,7 @@ const FIELD_MAPPINGS = {
 };
 
 export default function ImportClientsModal({ onClose, onImportComplete }: ImportClientsModalProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [step, setStep] = useState<'upload' | 'mapping' | 'preview' | 'importing' | 'complete'>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
@@ -124,7 +124,7 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
   const [emailsSent, setEmailsSent] = useState(0);
 
   const handleImport = async () => {
-    if (!user) return;
+    if (!user || !profile?.company_id) return;
 
     setStep('importing');
     const clients = getMappedClients();
@@ -158,6 +158,7 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
           .from('clients')
           .insert({
             user_id: user.id,
+            company_id: profile.company_id,
             first_name: client.first_name || 'N/A',
             last_name: client.last_name || 'N/A',
             email: client.email || null,

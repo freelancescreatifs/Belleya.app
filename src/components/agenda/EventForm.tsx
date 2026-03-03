@@ -26,7 +26,7 @@ interface Service {
 }
 
 export default function EventForm({ event, initialDate, onSave, onCancel, existingEvents }: EventFormProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [showClientForm, setShowClientForm] = useState(false);
@@ -218,9 +218,14 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
       throw new Error('Utilisateur non connecté');
     }
 
+    if (!profile?.company_id) {
+      throw new Error('Veuillez compléter votre profil entreprise avant d\'ajouter des clientes.');
+    }
+
     try {
       const newClient = {
         user_id: user.id,
+        company_id: profile.company_id,
         first_name: clientData.first_name,
         last_name: clientData.last_name,
         phone: clientData.phone || null,

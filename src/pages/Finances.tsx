@@ -60,7 +60,7 @@ interface Student {
 }
 
 export default function Finances() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<'revenues' | 'expenses'>('revenues');
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -244,11 +244,17 @@ export default function Finances() {
       return;
     }
 
+    if (!profile?.company_id) {
+      alert('Veuillez compléter votre profil entreprise avant d\'ajouter des clientes.');
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('clients')
         .insert({
           user_id: user.id,
+          company_id: profile.company_id,
           first_name: quickClientForm.first_name,
           last_name: quickClientForm.last_name,
           phone: quickClientForm.phone || null,
