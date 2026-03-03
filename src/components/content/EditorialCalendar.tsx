@@ -253,9 +253,9 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
       case 'script':
         return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'shooting':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-rose-100 text-rose-800 border-rose-200';
       case 'editing':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+        return 'bg-teal-100 text-teal-800 border-teal-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -434,7 +434,6 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
 
   function getProductionStepsWithRealStatus(content: ContentItem) {
-    // Si aucune date de production n'est définie, ne pas afficher d'étapes
     const hasProductionDates = !!(
       content.date_script ||
       content.date_shooting ||
@@ -446,32 +445,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
       return [];
     }
 
-    const allSteps = getProductionSteps(content);
-
-    // Une étape est complétée si sa date existe dans content_calendar
-    return allSteps.map(step => {
-      let isCompleted = false;
-
-      switch (step.key) {
-        case 'date_script':
-          isCompleted = !!content.date_script;
-          break;
-        case 'date_shooting':
-          isCompleted = !!content.date_shooting;
-          break;
-        case 'date_editing':
-          isCompleted = !!content.date_editing;
-          break;
-        case 'date_scheduling':
-          isCompleted = !!content.date_scheduling;
-          break;
-      }
-
-      return {
-        ...step,
-        isCompleted
-      };
-    });
+    return getProductionSteps(content);
   }
 
   function renderDayView() {
@@ -957,11 +931,16 @@ function DraggableContent({
     >
       <div className="flex items-start gap-1 flex-col">
         <div className="flex items-center gap-1 w-full">
-          <span className={`p-0.5 rounded flex-shrink-0 ${
-            content.is_published ? 'bg-green-100' : 'bg-gray-100'
-          }`}>
-            {content.is_published ? <CheckCircle className="w-3 h-3 text-green-700" /> : <Calendar className="w-3 h-3 text-gray-700" />}
-          </span>
+          <PublishedStatusTag
+            scriptChecked={content.script_checked || false}
+            tournageChecked={content.tournage_checked || false}
+            montageChecked={content.montage_checked || false}
+            planifieChecked={content.planifie_checked || false}
+            publicationDate={content.publication_date}
+            publicationTime={content.publication_time}
+            contentType={content.content_type}
+            className="!px-1 !py-0.5 !text-[10px] !gap-0.5"
+          />
           <div className="flex gap-0.5 flex-shrink-0">
             {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
               <span key={platform} className={`px-1 py-0.5 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(platform)}`}>
@@ -1097,14 +1076,15 @@ function DraggableWeekContent({
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border ${
-              content.is_published
-                ? 'bg-green-50 text-green-700 border-belaya-300'
-                : 'bg-gray-50 text-gray-700 border-gray-300'
-            }`}>
-              {content.is_published ? <CheckCircle className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}
-              {content.is_published ? 'Publié' : 'Non publié'}
-            </span>
+            <PublishedStatusTag
+              scriptChecked={content.script_checked || false}
+              tournageChecked={content.tournage_checked || false}
+              montageChecked={content.montage_checked || false}
+              planifieChecked={content.planifie_checked || false}
+              publicationDate={content.publication_date}
+              publicationTime={content.publication_time}
+              contentType={content.content_type}
+            />
             <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
               {getTypeIcon(content.content_type)}
               {content.content_type}
@@ -1221,6 +1201,7 @@ function ContentCard({
           planifieChecked={content.planifie_checked || false}
           publicationDate={content.publication_date}
           publicationTime={content.publication_time}
+          contentType={content.content_type}
         />
         <span className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
           {getTypeIcon(content.content_type)}
@@ -1241,7 +1222,7 @@ function ContentCard({
             <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-300 ${
-                  nextStepInfo?.isOverdue ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                  nextStepInfo?.isOverdue ? 'bg-red-500' : 'bg-gradient-to-r from-belaya-powder to-belaya-bright'
                 }`}
                 style={{ width: `${progressPercent}%` }}
               />
