@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Calendar, Clock, Image as ImageIcon, Upload, Sparkles, Info, Link as LinkIcon, Trash2, Wand2, FileText, Video, Scissors, CheckCircle, Send, FileEdit, AlertTriangle, Plus, X, Check } from 'lucide-react';
+import { Save, Calendar, Clock, Image as ImageIcon, Upload, Sparkles, Info, Link as LinkIcon, Trash2, Wand2, FileText, Video, Scissors, CheckCircle, Send, File as FileEdit, AlertTriangle, Plus, X, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { normalizeTime } from '../../lib/timeHelpers';
