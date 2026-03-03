@@ -46,6 +46,10 @@ async function callContentAI(
   const session = await supabase.auth.getSession();
   const token = session.data.session?.access_token;
 
+  if (!token) {
+    throw new Error('Session expirée, veuillez vous reconnecter.');
+  }
+
   const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
@@ -671,9 +675,9 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
                         <option value="attirer">Attirer</option>
-                        <option value="eduquer">Eduquer</option>
+                        <option value="éduquer">Éduquer</option>
                         <option value="convertir">Convertir</option>
-                        <option value="fideliser">Fideliser</option>
+                        <option value="fidéliser">Fidéliser</option>
                       </select>
                     </div>
                     <div>
@@ -809,9 +813,9 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
                         <option value="attirer">Attirer</option>
-                        <option value="eduquer">Eduquer</option>
+                        <option value="éduquer">Éduquer</option>
                         <option value="convertir">Convertir</option>
-                        <option value="fideliser">Fideliser</option>
+                        <option value="fidéliser">Fidéliser</option>
                       </select>
                     </div>
                     <div>
