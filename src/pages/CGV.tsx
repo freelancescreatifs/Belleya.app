@@ -99,7 +99,7 @@ export default function CGV() {
                 </p>
                 <p>
                   <strong>4.3 Suspension :</strong> Belaya se réserve le droit de suspendre ou résilier un compte en cas
-                  de non-paiement, d'utilisation frauduleuse ou de violation des conditions d'utilisation.
+                  de non-paiement, d'utilisation frauduleuse ou de violation des conditions d\'utilisation.
                 </p>
               </div>
             </section>
@@ -213,7 +213,7 @@ export default function CGV() {
               </p>
               <ul className="list-none space-y-2 ml-4">
                 <li><strong>Email :</strong> contact@belaya.fr</li>
-                <li><strong>WhatsApp :</strong> <a href="https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY?mode=gi_t" target="_blank" rel="noopener noreferrer" className="text-belaya-primary hover:underline">Rejoindre notre groupe</a></li>
+                <li><strong>WhatsApp :</strong> <a href="https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY?mode=gi_t" target=\"_blank" rel="noopener noreferrer\" className="text-belaya-primary hover:underline">Rejoindre notre groupe</a></li>
               </ul>
             </section>
           </div>

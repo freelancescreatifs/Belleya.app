@@ -1,4 +1,4 @@
-import { TrendingUp, Calendar, AlertCircle, CheckCircle, Clock, Edit, Sparkles } from 'lucide-react';
+import { TrendingUp, Calendar, AlertCircle, CheckCircle, Clock, CreditCard as Edit, Sparkles } from 'lucide-react';
 
 interface Partnership {
   id: string;

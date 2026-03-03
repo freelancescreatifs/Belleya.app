@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Edit2, Save, X, Image as ImageIcon, Calendar, Target, Filter, Instagram, Linkedin, Facebook, Youtube, Twitter, Sparkles, AlertCircle, ChevronDown, Trash2 } from 'lucide-react';
+import { CreditCard as Edit2, Save, X, Image as ImageIcon, Calendar, Target, Filter, Instagram, Linkedin, Facebook, Youtube, Twitter, Sparkles, AlertCircle, ChevronDown, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import PublishDateGuardModal from './PublishDateGuardModal';

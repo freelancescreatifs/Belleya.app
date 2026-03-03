@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Clock, Euro, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Clock, Euro, CreditCard as Edit2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { type ServiceType } from '../../lib/serviceTypeHelpers';

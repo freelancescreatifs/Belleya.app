@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Upload, Trash2, Link as LinkIcon, Plus, Edit3 } from 'lucide-react';
+import { X, Upload, Trash2, Link as LinkIcon, Plus, CreditCard as Edit3 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 type Category = 'social_media' | 'salon' | 'service';

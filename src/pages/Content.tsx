@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Lightbulb, Calendar, Grid, AlertCircle, X, Kanban, ListFilter, Layers, Table, BarChart3, Clapperboard, Instagram } from 'lucide-react';
+import { Plus, Lightbulb, Calendar, Grid2x2 as Grid, AlertCircle, X, Kanban, ListFilter, Layers, Table, BarChart3, Clapperboard, Instagram } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useMenuPreferences } from '../lib/useMenuPreferences';

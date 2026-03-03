@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Edit, Trash2, Upload, Download, FileText, Plus, X, Mail } from 'lucide-react';
+import { ArrowLeft, CreditCard as Edit, Trash2, Upload, Download, FileText, Plus, X, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { StudentWithDetails, TrainingProgram, StudentTraining, StudentDocument, DocumentStage, DocumentType } from '../types/training';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { GraduationCap, BookOpen, CheckCircle, Clock, AlertTriangle, Plus, Search, Filter, Settings, ArrowLeft, Edit2, Trash2 } from 'lucide-react';
+import { GraduationCap, BookOpen, CheckCircle, Clock, AlertTriangle, Plus, Search, Filter, Settings, ArrowLeft, CreditCard as Edit2, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { StudentWithDetails, TrainingDashboardStats, StudentStatus } from '../types/training';

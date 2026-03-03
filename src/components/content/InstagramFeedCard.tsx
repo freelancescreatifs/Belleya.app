@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Play, Edit2, Eye, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, CreditCard as Edit2, Eye, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 

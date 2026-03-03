@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Plus, Search, User, Phone, Mail, Instagram, Star, Pencil, X, Calendar, Scissors, Trash2, Archive, ArchiveRestore, TrendingUp, Users, AlertCircle, DollarSign, UserPlus, Info, Upload, Loader2, Edit, XCircle, PackageX } from 'lucide-react';
+import { Plus, Search, User, Phone, Mail, Instagram, Star, Pencil, X, Calendar, Scissors, Trash2, Archive, ArchiveRestore, TrendingUp, Users, AlertCircle, DollarSign, UserPlus, Info, Upload, Loader2, CreditCard as Edit, XCircle, PackageX } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ClientDetailDrawer from '../components/client/ClientDetailDrawer';

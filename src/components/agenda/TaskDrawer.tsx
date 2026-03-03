@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Check, Calendar, Edit2, Trash2 } from 'lucide-react';
+import { X, Check, Calendar, CreditCard as Edit2, Trash2 } from 'lucide-react';
 import { CalendarTask } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import { formatDate, formatTime } from '../../lib/calendarHelpers';
