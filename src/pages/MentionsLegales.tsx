@@ -62,7 +62,17 @@ export default function MentionsLegales() {
               <div className="space-y-2">
                 <p><strong>Hébergeur :</strong> Supabase Inc.</p>
                 <p><strong>Adresse :</strong> 970 Toa Payoh North, #07-04, Singapore 318992</p>
-                <p><strong>Site web :</strong> <a href="https://supabase.com" target=\"_blank" rel="noopener noreferrer\" className="text-belaya-primary hover:underline">supabase.com</a></p>
+                <p>
+                  <strong>Site web :</strong>{' '}
+                  <a
+                    href="https://supabase.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-belaya-primary hover:underline"
+                  >
+                    supabase.com
+                  </a>
+                </p>
               </div>
             </section>
 
