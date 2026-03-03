@@ -9,10 +9,13 @@ import SocialMediaSettings from '../components/settings/SocialMediaSettings';
 import LanguageSettings from '../components/settings/LanguageSettings';
 import SubscriptionStatus from '../components/settings/SubscriptionStatus';
 import GoogleCalendarIntegration from '../components/settings/GoogleCalendarIntegration';
+import { useSubscription } from '../hooks/useSubscription';
+import UpgradeOverlay from '../components/shared/UpgradeOverlay';
 
 export default function Settings() {
   const { user, refreshProfile } = useAuth();
   const { t } = useTranslation();
+  const { canAccess } = useSubscription();
   const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language' | 'subscription' | 'integrations'>(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('tab') === 'integrations' || params.get('google_connected') || params.get('google_error')) {
@@ -124,7 +127,13 @@ export default function Settings() {
           )}
 
           {activeTab === 'profitability' && user && (
-            <ProfitabilityCalculator userId={user.id} />
+            canAccess('profitability') ? (
+              <ProfitabilityCalculator userId={user.id} />
+            ) : (
+              <UpgradeOverlay requiredPlan="studio">
+                <ProfitabilityCalculator userId={user.id} />
+              </UpgradeOverlay>
+            )
           )}
 
           {activeTab === 'tabs' && user && (

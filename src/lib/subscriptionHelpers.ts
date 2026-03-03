@@ -138,6 +138,51 @@ export function getPlanPrice(planType: string): { current: number; future: numbe
   return prices[planType] || { current: 0, future: 0 };
 }
 
+export type PlanTier = 'start' | 'studio' | 'empire' | 'vip' | 'trial' | null;
+
+const featuresByPlan: Record<string, string[]> = {
+  start: [
+    'dashboard', 'agenda', 'clients', 'services', 'finances',
+    'tasks', 'goals', 'content', 'public-profile', 'inspiration',
+  ],
+  studio: [
+    'dashboard', 'agenda', 'clients', 'services', 'finances',
+    'tasks', 'goals', 'content', 'public-profile', 'inspiration',
+    'training', 'stock', 'marketing', 'partnerships', 'profitability',
+  ],
+  empire: [
+    'dashboard', 'agenda', 'clients', 'services', 'finances',
+    'tasks', 'goals', 'content', 'public-profile', 'inspiration',
+    'training', 'stock', 'marketing', 'partnerships', 'profitability',
+  ],
+  vip: [
+    'dashboard', 'agenda', 'clients', 'services', 'finances',
+    'tasks', 'goals', 'content', 'public-profile', 'inspiration',
+    'training', 'stock', 'marketing', 'partnerships', 'profitability',
+  ],
+};
+
+export function getAccessibleFeatures(planType: PlanTier, isTrial: boolean): string[] {
+  if (isTrial) {
+    return featuresByPlan['empire'];
+  }
+  if (!planType || !featuresByPlan[planType]) {
+    return featuresByPlan['start'];
+  }
+  return featuresByPlan[planType];
+}
+
+export function isFeatureAccessible(featureId: string, planType: PlanTier, isTrial: boolean): boolean {
+  const features = getAccessibleFeatures(planType, isTrial);
+  return features.includes(featureId);
+}
+
+export function getRequiredPlanForFeature(featureId: string): PlanTier {
+  if (featuresByPlan['start'].includes(featureId)) return 'start';
+  if (featuresByPlan['studio'].includes(featureId)) return 'studio';
+  return 'empire';
+}
+
 export function getPlanName(planType: string): string {
   const names: Record<string, string> = {
     start: 'Belaya Start',

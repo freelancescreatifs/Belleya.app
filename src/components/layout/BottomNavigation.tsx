@@ -18,11 +18,13 @@ import {
   Settings,
   Shield,
   LogOut,
+  Lock,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useMenuPreferences } from '../../lib/useMenuPreferences';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSubscription } from '../../hooks/useSubscription';
 
 interface BottomNavigationProps {
   currentPage: string;
@@ -54,6 +56,7 @@ const moreTabs = [
 export default function BottomNavigation({ currentPage, onPageChange }: BottomNavigationProps) {
   const { user } = useAuth();
   const { menuVisibility } = useMenuPreferences(user?.id);
+  const { canAccess, isActive: subscriptionActive } = useSubscription();
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   const visibleMainTabs = mainTabs.filter(tab => menuVisibility[tab.id as keyof typeof menuVisibility] !== false);
@@ -154,6 +157,27 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
                 {visibleMoreTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = currentPage === tab.id;
+                  const hasAccess = !subscriptionActive || canAccess(tab.id);
+                  const locked = subscriptionActive && !hasAccess;
+
+                  if (locked) {
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setShowMoreMenu(false);
+                          window.location.href = '/pricing';
+                        }}
+                        className="relative flex flex-col items-center justify-center p-4 rounded-2xl transition-all bg-gray-50 text-gray-400"
+                      >
+                        <Icon className="w-7 h-7 mb-2 stroke-2 opacity-40" />
+                        <span className="text-xs text-center leading-tight font-medium opacity-60">
+                          {tab.label}
+                        </span>
+                        <Lock className="absolute top-2 right-2 w-3.5 h-3.5 text-gray-400" />
+                      </button>
+                    );
+                  }
 
                   return (
                     <button

@@ -19,6 +19,8 @@ import {
   Eye,
   Menu,
   X,
+  Lock,
+  Crown,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +29,8 @@ import { supabase } from '../../lib/supabase';
 import { prefetchClients } from '../../lib/clientsCache';
 import { useMenuPreferences } from '../../lib/useMenuPreferences';
 import { useIsAdmin } from '../../hooks/useIsAdmin';
+import { useSubscription } from '../../hooks/useSubscription';
+import { getPlanName } from '../../lib/subscriptionHelpers';
 import NotificationCenter from '../dashboard/NotificationCenter';
 
 interface SidebarProps {
@@ -45,6 +49,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
   const prefetchTimeoutRef = useRef<NodeJS.Timeout>();
   const hasPrefetchedRef = useRef(false);
   const { menuVisibility } = useMenuPreferences(user?.id);
+  const { canAccess, getRequiredPlan, isActive } = useSubscription();
 
   const mobileOpen = onMobileToggle !== undefined ? isMobileOpen : internalMobileOpen;
   const setMobileOpen = onMobileToggle !== undefined ? onMobileToggle : setInternalMobileOpen;
@@ -104,6 +109,10 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
     }
   };
 
+  const handleLockedClick = () => {
+    window.location.href = '/pricing';
+  };
+
   return (
     <>
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
@@ -125,7 +134,25 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
             .filter((item) => menuVisibility[item.id as keyof typeof menuVisibility] !== false)
             .map((item) => {
               const Icon = item.icon;
-              const isActive = currentPage === item.id;
+              const isActivePage = currentPage === item.id;
+              const hasAccess = !isActive || canAccess(item.id);
+              const locked = isActive && !hasAccess;
+
+              if (locked) {
+                const requiredPlan = getRequiredPlan(item.id);
+                return (
+                  <button
+                    key={item.id}
+                    onClick={handleLockedClick}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-gray-400 hover:bg-gray-50 group relative"
+                    title={`Disponible avec ${requiredPlan ? getPlanName(requiredPlan) : 'une offre superieure'}`}
+                  >
+                    <Icon className="w-5 h-5 opacity-50" />
+                    <span className="text-sm flex-1 text-left opacity-60">{item.label}</span>
+                    <Lock className="w-4 h-4 text-gray-400 group-hover:text-belaya-deep transition-colors" />
+                  </button>
+                );
+              }
 
               return (
                 <button
@@ -134,7 +161,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
                   onMouseEnter={item.id === 'clients' ? handleMouseEnterClients : undefined}
                   onMouseLeave={item.id === 'clients' ? handleMouseLeaveClients : undefined}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive
+                    isActivePage
                       ? 'bg-gradient-main text-white font-medium shadow-md'
                       : 'text-gray-600 hover:bg-gradient-soft hover:text-belaya-deep'
                   }`}

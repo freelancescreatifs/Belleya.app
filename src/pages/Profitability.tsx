@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Calculator, TrendingUp, AlertCircle } from 'lucide-react';
+import { useSubscription } from '../hooks/useSubscription';
+import UpgradeOverlay from '../components/shared/UpgradeOverlay';
 
 export default function Profitability() {
+  const { canAccess } = useSubscription();
+  const hasAccess = canAccess('profitability');
   const [formData, setFormData] = useState({
     serviceName: '',
     materialCost: '',
@@ -43,7 +47,7 @@ export default function Profitability() {
     });
   };
 
-  return (
+  const content = (
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Calculateur de rentabilité</h1>
@@ -357,4 +361,14 @@ export default function Profitability() {
       </div>
     </div>
   );
+
+  if (!hasAccess) {
+    return (
+      <UpgradeOverlay requiredPlan="studio">
+        {content}
+      </UpgradeOverlay>
+    );
+  }
+
+  return content;
 }
