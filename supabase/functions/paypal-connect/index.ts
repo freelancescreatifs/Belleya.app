@@ -102,7 +102,7 @@ Deno.serve(async (req: Request) => {
         partner_config_override: {
           partner_logo_url: `${req.headers.get('origin')}/logo.png`,
           return_url: returnUrl,
-          return_url_description: 'Retour vers Belleya',
+          return_url_description: 'Retour vers Belaya',
           action_renewal_url: returnUrl,
         },
       };

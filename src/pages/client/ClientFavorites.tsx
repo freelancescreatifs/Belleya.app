@@ -87,7 +87,7 @@ export default function ClientFavorites() {
       <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
         <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 pt-12 pb-8">
           <div className="flex items-center gap-3 mb-2">
-            <img src="/belleyaa.png" alt="Belaya" className="h-24 w-auto" />
+            <img src="/belaya-logo.png" alt="Belaya" className="h-24 w-auto" />
           </div>
           <h1 className="text-2xl font-bold text-white">Mes favoris</h1>
         </div>
@@ -102,7 +102,7 @@ export default function ClientFavorites() {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
       <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 pt-12 pb-8">
         <div className="flex items-center gap-3 mb-2">
-          <img src="/belleyaa.png" alt="Belaya" className="h-24 w-auto" />
+          <img src="/belaya-logo.png" alt="Belaya" className="h-24 w-auto" />
         </div>
         <h1 className="text-2xl font-bold text-white">Mes favoris</h1>
         {providers.length > 0 && (

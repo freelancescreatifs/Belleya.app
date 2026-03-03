@@ -68,8 +68,6 @@ export default function BelayaRewardsCard() {
   const status = getMainStatus();
   const StatusIcon = status.icon;
 
-  console.log('[BelayaRewardsCard] Rendering - loading:', loading, 'companyProfile:', companyProfile?.id, 'submissions:', submissions.length);
-
   if (loading) {
     return (
       <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">

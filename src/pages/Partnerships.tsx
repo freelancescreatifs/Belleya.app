@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import PartnershipCard from '../components/partnerships/PartnershipCard';
 import PartnershipDetailDrawer from '../components/partnerships/PartnershipDetailDrawer';
 import PartnershipFormModal from '../components/partnerships/PartnershipFormModal';
-import BelayaRewardsCard from '../components/partnerships/BelleyaRewardsCard';
+import BelayaRewardsCard from '../components/partnerships/BelayaRewardsCard';
 
 interface Partnership {
   id: string;

@@ -439,7 +439,7 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
       <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 pt-12 pb-8">
         <div className="flex items-center gap-3 mb-2">
-          <img src="/belleyaa.png" alt="Belaya" className="h-24 w-auto" />
+          <img src="/belaya-logo.png" alt="Belaya" className="h-24 w-auto" />
         </div>
         <p className="text-white text-lg">
           Bonjour {profile?.first_name || 'cliente'} !
