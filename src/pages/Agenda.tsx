@@ -419,7 +419,7 @@ export default function Agenda() {
           title: content.enriched_title || content.title,
           start,
           end,
-          color: 'bg-belleya-500',
+          color: 'bg-belaya-500',
           data: content,
         });
       });
@@ -809,7 +809,7 @@ export default function Agenda() {
                 setSelectedDate(new Date());
                 setShowEventForm(true);
               }}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-belaya-primary to-[#f06bb4] text-white rounded-lg hover:from-belaya-deep hover:to-belaya-primary transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="hidden xs:inline">Nouveau rendez-vous</span>

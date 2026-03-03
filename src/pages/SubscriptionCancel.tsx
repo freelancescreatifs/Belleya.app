@@ -21,7 +21,7 @@ export default function SubscriptionCancel() {
           <div className="space-y-3">
             <button
               onClick={() => { window.location.href = '/pricing'; }}
-              className="w-full bg-gradient-to-r from-belleya-deep to-belleya-bright text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+              className="w-full bg-gradient-to-r from-belaya-deep to-belaya-bright text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
             >
               Revoir les offres
             </button>

@@ -645,7 +645,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-belleya-bright" />
+              <Check className="w-8 h-8 text-belaya-bright" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Réservation envoyée</h2>
             <p className="text-gray-600 mb-8">

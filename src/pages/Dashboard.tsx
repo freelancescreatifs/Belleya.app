@@ -953,7 +953,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       )}
 
       {!companyProfile && (
-        <div className="mt-8 bg-gradient-to-br from-belleya-50 to-belleya-100 rounded-2xl p-6 border border-belleya-100">
+        <div className="mt-8 bg-gradient-to-br from-belaya-50 to-belaya-100 rounded-2xl p-6 border border-belaya-100">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Complétez votre profil d'entreprise</h2>
           <p className="text-gray-700 mb-4">
             Pour bénéficier d'alertes personnalisées, de calculs de charges et de conseils adaptés à votre statut,
@@ -961,7 +961,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </p>
           <button
             onClick={() => window.location.href = '#settings'}
-            className="inline-block px-4 py-2 bg-[#E51E8F] text-white rounded-lg hover:bg-belleya-deep transition-colors"
+            className="inline-block px-4 py-2 bg-[#E51E8F] text-white rounded-lg hover:bg-belaya-deep transition-colors"
           >
             Aller aux paramètres
           </button>

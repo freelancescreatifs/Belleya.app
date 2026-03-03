@@ -240,14 +240,14 @@ export default function Stock() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-belleya-500 text-belleya-500 rounded-lg hover:bg-belleya-50 transition-all shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-belaya-500 text-belaya-500 rounded-lg hover:bg-belaya-50 transition-all shadow-sm"
           >
             <Upload className="w-5 h-5" />
             Importer
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-belaya-primary to-[#f06bb4] text-white rounded-lg hover:from-belaya-deep hover:to-belaya-primary transition-all shadow-lg hover:shadow-xl"
           >
             <Plus className="w-5 h-5" />
             Nouvel article
@@ -314,7 +314,7 @@ export default function Stock() {
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             filter === 'all'
-              ? 'bg-belleya-500 text-white'
+              ? 'bg-belaya-500 text-white'
               : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -324,7 +324,7 @@ export default function Stock() {
           onClick={() => setFilter('sufficient')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             filter === 'sufficient'
-              ? 'bg-belleya-500 text-white'
+              ? 'bg-belaya-500 text-white'
               : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -334,7 +334,7 @@ export default function Stock() {
           onClick={() => setFilter('to_restock')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             filter === 'to_restock'
-              ? 'bg-belleya-500 text-white'
+              ? 'bg-belaya-500 text-white'
               : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -398,7 +398,7 @@ export default function Stock() {
                   href={item.supplier_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-belleya-primary hover:text-belleya-deep font-medium"
+                  className="text-sm text-belaya-primary hover:text-belaya-deep font-medium"
                 >
                   Voir fournisseur →
                 </a>
@@ -422,7 +422,7 @@ export default function Stock() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -433,7 +433,7 @@ export default function Stock() {
                   type="text"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="Ex: Gels, Vernis, Capsules..."
                   required
                 />
@@ -461,7 +461,7 @@ export default function Stock() {
                       setFormData({ ...formData, quantity: value });
                     }}
                     placeholder="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -486,7 +486,7 @@ export default function Stock() {
                       setFormData({ ...formData, minimum_quantity: value });
                     }}
                     placeholder="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -510,7 +510,7 @@ export default function Stock() {
                     setFormData({ ...formData, unit_price: value });
                   }}
                   placeholder="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -521,7 +521,7 @@ export default function Stock() {
                   type="url"
                   value={formData.supplier_link}
                   onChange={(e) => setFormData({ ...formData, supplier_link: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="https://"
                 />
               </div>
@@ -569,7 +569,7 @@ export default function Stock() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -580,7 +580,7 @@ export default function Stock() {
                   type="text"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="Ex: Gels, Vernis, Capsules..."
                   required
                 />
@@ -608,7 +608,7 @@ export default function Stock() {
                       setFormData({ ...formData, quantity: value });
                     }}
                     placeholder="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -633,7 +633,7 @@ export default function Stock() {
                       setFormData({ ...formData, minimum_quantity: value });
                     }}
                     placeholder="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -657,7 +657,7 @@ export default function Stock() {
                     setFormData({ ...formData, unit_price: value });
                   }}
                   placeholder="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -668,7 +668,7 @@ export default function Stock() {
                   type="url"
                   value={formData.supplier_link}
                   onChange={(e) => setFormData({ ...formData, supplier_link: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="https://"
                 />
               </div>

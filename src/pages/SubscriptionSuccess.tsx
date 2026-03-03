@@ -32,13 +32,13 @@ export default function SubscriptionSuccess() {
           </h1>
 
           <p className="text-slate-600 mb-8">
-            Merci pour votre confiance. Votre abonnement Belleya est maintenant actif.
+            Merci pour votre confiance. Votre abonnement Belaya est maintenant actif.
             Profitez de toutes les fonctionnalites !
           </p>
 
           <button
             onClick={() => { window.location.href = '/'; }}
-            className="w-full bg-gradient-to-r from-belleya-deep to-belleya-bright text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-belaya-deep to-belaya-bright text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
           >
             Aller au tableau de bord
             <ArrowRight className="w-5 h-5" />

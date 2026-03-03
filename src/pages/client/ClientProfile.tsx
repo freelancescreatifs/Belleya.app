@@ -190,7 +190,7 @@ export default function ClientProfile() {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
       <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 pt-12 pb-8">
         <div className="flex items-center gap-3 mb-4">
-          <img src="/belleyaa.png" alt="BelleYa" className="h-24 w-auto" />
+          <img src="/belleyaa.png" alt="Belaya" className="h-24 w-auto" />
         </div>
         <div className="flex flex-col items-center">
           {profile?.photo_url ? (

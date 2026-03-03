@@ -254,7 +254,7 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
         <div className="text-red-600 font-medium">{error}</div>
         <button
           onClick={() => loadData(true)}
-          className="px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+          className="px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors"
         >
           Réessayer
         </button>
@@ -356,7 +356,7 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
           <h2 className="text-xl font-bold text-gray-900">Formations</h2>
           <button
             onClick={() => setShowAddTraining(true)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors"
           >
             <Plus className="w-4 h-4" />
             Ajouter
@@ -426,7 +426,7 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
                   {stage === 'during' && 'Pendant la formation'}
                   {stage === 'after' && 'Après la formation'}
                 </h3>
-                <label className="flex items-center gap-2 px-3 py-1.5 text-sm bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors cursor-pointer">
+                <label className="flex items-center gap-2 px-3 py-1.5 text-sm bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors cursor-pointer">
                   <Upload className="w-4 h-4" />
                   {uploading ? 'Upload...' : 'Uploader'}
                   <input
@@ -553,7 +553,7 @@ function EmailModal({ student, documents, selectedDocuments, onToggleDocument, o
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -565,7 +565,7 @@ function EmailModal({ student, documents, selectedDocuments, onToggleDocument, o
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent resize-none"
             />
           </div>
 
@@ -584,7 +584,7 @@ function EmailModal({ student, documents, selectedDocuments, onToggleDocument, o
                       type="checkbox"
                       checked={selectedDocuments.has(doc.id)}
                       onChange={() => onToggleDocument(doc.id)}
-                      className="w-4 h-4 text-belleya-500 border-gray-300 rounded focus:ring-belleya-primary"
+                      className="w-4 h-4 text-belaya-500 border-gray-300 rounded focus:ring-belaya-primary"
                     />
                     <FileText className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-700 flex-1">

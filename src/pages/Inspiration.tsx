@@ -166,7 +166,7 @@ export default function Inspiration() {
             onClick={() => setActiveTab('social_media')}
             className={`flex-1 min-w-[120px] px-4 md:px-6 py-3 md:py-4 font-medium border-b-2 transition-colors flex items-center justify-center gap-2 text-sm md:text-base ${
               activeTab === 'social_media'
-                ? 'border-belleya-500 text-belleya-primary bg-belleya-50'
+                ? 'border-belaya-500 text-belaya-primary bg-belaya-50'
                 : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
@@ -178,7 +178,7 @@ export default function Inspiration() {
             onClick={() => setActiveTab('salon')}
             className={`flex-1 min-w-[120px] px-4 md:px-6 py-3 md:py-4 font-medium border-b-2 transition-colors flex items-center justify-center gap-2 text-sm md:text-base ${
               activeTab === 'salon'
-                ? 'border-belleya-500 text-belleya-primary bg-belleya-50'
+                ? 'border-belaya-500 text-belaya-primary bg-belaya-50'
                 : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
@@ -189,7 +189,7 @@ export default function Inspiration() {
             onClick={() => setActiveTab('service')}
             className={`flex-1 min-w-[120px] px-4 md:px-6 py-3 md:py-4 font-medium border-b-2 transition-colors flex items-center justify-center gap-2 text-sm md:text-base ${
               activeTab === 'service'
-                ? 'border-belleya-500 text-belleya-primary bg-belleya-50'
+                ? 'border-belaya-500 text-belaya-primary bg-belaya-50'
                 : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
@@ -210,7 +210,7 @@ export default function Inspiration() {
             </div>
             <button
               onClick={() => setShowCreateGroup(true)}
-              className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap flex-shrink-0"
+              className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-belaya-primary to-[#f06bb4] text-white rounded-lg hover:from-belaya-deep hover:to-belaya-primary transition-all shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap flex-shrink-0"
             >
               <Plus className="w-4 h-4 md:w-5 md:h-5" />
               <span className="hidden sm:inline">Nouveau groupe</span>
@@ -220,7 +220,7 @@ export default function Inspiration() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belleya-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belaya-500 mx-auto"></div>
             </div>
           ) : groups.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -241,7 +241,7 @@ export default function Inspiration() {
               <p className="text-xs md:text-sm mt-1">{getEmptyStateText(activeTab)}</p>
               <button
                 onClick={() => setShowCreateGroup(true)}
-                className="mt-4 md:mt-6 inline-flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl text-sm md:text-base"
+                className="mt-4 md:mt-6 inline-flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-belaya-primary to-[#f06bb4] text-white rounded-lg hover:from-belaya-deep hover:to-belaya-primary transition-all shadow-lg hover:shadow-xl text-sm md:text-base"
               >
                 <Plus className="w-4 h-4 md:w-5 md:h-5" />
                 Créer mon premier groupe

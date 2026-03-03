@@ -355,11 +355,11 @@ export default function Content() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-belleya-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-belaya-50">
       <div className="p-3 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-belleya-primary bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-belaya-primary bg-clip-text text-transparent">
               Contenu & Réseaux Sociaux
             </h1>
             <p className="text-gray-600 mt-2">
@@ -369,7 +369,7 @@ export default function Content() {
           <div className="flex gap-3 flex-wrap">
             <button
               onClick={() => openContentForm({ mode: 'create' })}
-              className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-orange-500 to-belleya-primary text-white rounded-xl hover:from-orange-600 hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
+              className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-orange-500 to-belaya-primary text-white rounded-xl hover:from-orange-600 hover:to-belaya-primary transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               <Plus className="w-5 h-5" />
               <span className="hidden sm:inline">Nouveau contenu</span>

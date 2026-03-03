@@ -803,7 +803,7 @@ export default function Clients() {
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border-2 border-belleya-primary text-belleya-primary rounded-lg hover:bg-belleya-50 transition-all shadow-sm text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border-2 border-belaya-primary text-belaya-primary rounded-lg hover:bg-belaya-50 transition-all shadow-sm text-sm sm:text-base"
           >
             <Upload className="w-4 sm:w-5 h-4 sm:h-5" />
             <span className="hidden sm:inline">Importer</span>
@@ -811,7 +811,7 @@ export default function Clients() {
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-belaya-primary to-[#f06bb4] text-white rounded-lg hover:from-belaya-deep hover:to-belaya-primary transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
           >
             <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
             <span className="hidden sm:inline">Nouvelle cliente</span>
@@ -823,7 +823,7 @@ export default function Clients() {
       <div className="mb-6 sm:mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-full">
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <Users className="w-6 h-6 text-belleya-primary" />
+            <Users className="w-6 h-6 text-belaya-primary" />
             <InfoTooltip content="Total des clientes actives (non archivées, non bannies)" />
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{totalClientsCount}</p>
@@ -832,7 +832,7 @@ export default function Clients() {
 
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <UserPlus className="w-6 h-6 text-belleya-vivid" />
+            <UserPlus className="w-6 h-6 text-belaya-vivid" />
             <InfoTooltip content="Nouvelles clientes inscrites dans les 30 derniers jours" />
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{globalStats.newClients}</p>
@@ -874,7 +874,7 @@ export default function Clients() {
             onClick={() => setClientFilter('new')}
             className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
               clientFilter === 'new'
-                ? 'bg-belleya-vivid text-white'
+                ? 'bg-belaya-vivid text-white'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -922,7 +922,7 @@ export default function Clients() {
               placeholder="Rechercher une cliente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
         </div>
@@ -969,7 +969,7 @@ export default function Clients() {
                     setClientToArchive(client);
                     setShowArchiveModal(true);
                   }}
-                  className="p-2 text-gray-400 hover:text-belleya-bright hover:bg-green-50 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-belaya-bright hover:bg-green-50 rounded-lg transition-colors"
                   title="Désarchiver"
                 >
                   <ArchiveRestore className="w-4 h-4" />
@@ -982,11 +982,11 @@ export default function Clients() {
                   <img
                     src={client.photo_url}
                     alt={`${client.first_name} ${client.last_name}`}
-                    className="w-12 h-12 object-cover rounded-full border-2 border-belleya-100"
+                    className="w-12 h-12 object-cover rounded-full border-2 border-belaya-100"
                   />
                 ) : (
-                  <div className="w-12 h-12 bg-gradient-to-br from-belleya-100 to-belleya-50 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-belleya-primary" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-belaya-100 to-belaya-50 rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 text-belaya-primary" />
                   </div>
                 )}
                 <div>
@@ -1034,7 +1034,7 @@ export default function Clients() {
           <button
             onClick={loadMoreClients}
             disabled={loadingMore}
-            className="px-6 py-3 bg-white border-2 border-belleya-primary text-belleya-primary rounded-lg hover:bg-belleya-50 transition-all shadow-sm font-medium flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-3 bg-white border-2 border-belaya-primary text-belaya-primary rounded-lg hover:bg-belaya-50 transition-all shadow-sm font-medium flex items-center gap-2 disabled:opacity-50"
           >
             {loadingMore ? (
               <>
@@ -1161,7 +1161,7 @@ export default function Clients() {
                 clientToArchive.is_archived ? 'bg-green-100' : 'bg-orange-100'
               }`}>
                 {clientToArchive.is_archived ? (
-                  <ArchiveRestore className="w-6 h-6 text-belleya-bright" />
+                  <ArchiveRestore className="w-6 h-6 text-belaya-bright" />
                 ) : (
                   <Archive className="w-6 h-6 text-orange-600" />
                 )}
@@ -1196,7 +1196,7 @@ export default function Clients() {
                 onClick={handleArchiveClient}
                 className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors ${
                   clientToArchive.is_archived
-                    ? 'bg-belleya-vivid hover:bg-belleya-bright'
+                    ? 'bg-belaya-vivid hover:bg-belaya-bright'
                     : 'bg-orange-500 hover:bg-orange-600'
                 }`}
               >

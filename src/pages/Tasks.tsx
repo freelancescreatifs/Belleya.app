@@ -1221,7 +1221,7 @@ export default function Tasks() {
       todo: { label: 'À faire', color: 'bg-slate-100 text-slate-700 border border-slate-300' },
       in_progress: { label: 'En cours', color: 'bg-blue-100 text-blue-700 border border-blue-300' },
       on_hold: { label: 'Suspendu', color: 'bg-amber-100 text-amber-700 border border-amber-300' },
-      completed: { label: 'Terminé', color: 'bg-emerald-100 text-emerald-700 border border-belleya-300' },
+      completed: { label: 'Terminé', color: 'bg-emerald-100 text-emerald-700 border border-belaya-300' },
     };
     return badges[status] || badges.todo;
   };
@@ -1474,7 +1474,7 @@ export default function Tasks() {
           onClick={() => setActiveTab('status')}
           className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base whitespace-nowrap ${
             activeTab === 'status'
-              ? 'bg-belleya-500 text-white'
+              ? 'bg-belaya-500 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -1485,7 +1485,7 @@ export default function Tasks() {
           onClick={() => setActiveTab('date')}
           className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base whitespace-nowrap ${
             activeTab === 'date'
-              ? 'bg-belleya-500 text-white'
+              ? 'bg-belaya-500 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -1496,7 +1496,7 @@ export default function Tasks() {
           onClick={() => setActiveTab('projects')}
           className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base whitespace-nowrap ${
             activeTab === 'projects'
-              ? 'bg-belleya-500 text-white'
+              ? 'bg-belaya-500 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -1530,7 +1530,7 @@ export default function Tasks() {
                         }}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                           isSelected
-                            ? 'bg-belleya-500 text-white shadow-md'
+                            ? 'bg-belaya-500 text-white shadow-md'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
@@ -1606,7 +1606,7 @@ export default function Tasks() {
                     }}
                     className={`px-4 py-2 text-sm rounded-lg transition-colors ${
                       timeFilter === 'day'
-                        ? 'bg-belleya-500 text-white'
+                        ? 'bg-belaya-500 text-white'
                         : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                   >
@@ -1619,7 +1619,7 @@ export default function Tasks() {
                     }}
                     className={`px-4 py-2 text-sm rounded-lg transition-colors ${
                       timeFilter === 'week'
-                        ? 'bg-belleya-500 text-white'
+                        ? 'bg-belaya-500 text-white'
                         : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                   >
@@ -1632,7 +1632,7 @@ export default function Tasks() {
                     }}
                     className={`px-4 py-2 text-sm rounded-lg transition-colors ${
                       timeFilter === 'year'
-                        ? 'bg-belleya-500 text-white'
+                        ? 'bg-belaya-500 text-white'
                         : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                   >
@@ -1759,7 +1759,7 @@ export default function Tasks() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleQuickAddTask(column.id)}
-                          className="flex-1 bg-belleya-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-belleya-primary transition-colors"
+                          className="flex-1 bg-belaya-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-belaya-primary transition-colors"
                         >
                           Ajouter
                         </button>
@@ -1777,7 +1777,7 @@ export default function Tasks() {
                   ) : (
                     <button
                       onClick={() => setShowAddTaskForColumn(column.id)}
-                      className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/50 hover:bg-white text-gray-600 rounded-lg transition-all text-sm border-2 border-dashed border-gray-300 hover:border-belleya-400"
+                      className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/50 hover:bg-white text-gray-600 rounded-lg transition-all text-sm border-2 border-dashed border-gray-300 hover:border-belaya-400"
                     >
                       <Plus className="w-4 h-4" />
                       Ajouter une tâche
@@ -1813,7 +1813,7 @@ export default function Tasks() {
               }}
               className="flex items-center gap-2 px-6 py-3 hover:bg-gray-50 rounded-xl transition-colors group"
             >
-              <Calendar className="w-5 h-5 text-gray-500 group-hover:text-belleya-500" />
+              <Calendar className="w-5 h-5 text-gray-500 group-hover:text-belaya-500" />
               <h2 className="text-2xl font-bold text-gray-900">
                 {selectedDate.getDate()} {formatMonthYear(selectedDate)}
               </h2>
@@ -1851,7 +1851,7 @@ export default function Tasks() {
                   >
                     <span className="text-xs font-medium mb-1">{DAYS_SHORT[index]}</span>
                     <span className={`text-2xl font-bold mb-2 ${
-                      isToday && !isSelected ? 'text-belleya-400' : ''
+                      isToday && !isSelected ? 'text-belaya-400' : ''
                     }`}>
                       {day.getDate()}
                     </span>
@@ -1859,7 +1859,7 @@ export default function Tasks() {
                       {dayIcons.slice(0, 3).map((icon, iconIndex) => {
                         const iconColor = icon.category === 'admin' ? 'bg-blue-400' :
                                         icon.category === 'stock' ? 'bg-purple-400' :
-                                        icon.category === 'content' ? 'bg-belleya-500' :
+                                        icon.category === 'content' ? 'bg-belaya-500' :
                                         'bg-gray-400';
                         return (
                           <div
@@ -1944,7 +1944,7 @@ export default function Tasks() {
                 onClick={() => setProjectStatusFilter('completed')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   projectStatusFilter === 'completed'
-                    ? 'bg-belleya-vivid text-white'
+                    ? 'bg-belaya-vivid text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -2025,7 +2025,7 @@ export default function Tasks() {
                 <select
                   value={tempMonth}
                   onChange={(e) => setTempMonth(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-lg"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-lg"
                 >
                   <option value={0}>Janvier</option>
                   <option value={1}>Février</option>
@@ -2049,7 +2049,7 @@ export default function Tasks() {
                 <select
                   value={tempYear}
                   onChange={(e) => setTempYear(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-lg"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-lg"
                 >
                   {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
                     <option key={year} value={year}>{year}</option>
@@ -2064,7 +2064,7 @@ export default function Tasks() {
                   setCurrentMonday(getMonday(newDate));
                   setShowMonthYearSelector(false);
                 }}
-                className="w-full bg-belleya-500 text-white px-6 py-3 rounded-lg hover:bg-belleya-primary transition-colors font-medium"
+                className="w-full bg-belaya-500 text-white px-6 py-3 rounded-lg hover:bg-belaya-primary transition-colors font-medium"
               >
                 Aller à cette date
               </button>
@@ -2095,7 +2095,7 @@ export default function Tasks() {
                   type="text"
                   value={projectFormData.name}
                   onChange={(e) => setProjectFormData({ ...projectFormData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -2107,7 +2107,7 @@ export default function Tasks() {
                 <select
                   value={projectFormData.status}
                   onChange={(e) => setProjectFormData({ ...projectFormData, status: e.target.value as 'todo' | 'in_progress' | 'on_hold' | 'completed' })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 >
                   <option value="todo">À faire</option>
@@ -2125,7 +2125,7 @@ export default function Tasks() {
                   value={projectFormData.description}
                   onChange={(e) => setProjectFormData({ ...projectFormData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 />
               </div>
 
@@ -2149,7 +2149,7 @@ export default function Tasks() {
                     </button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-belleya-500 transition-colors bg-gray-50">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-belaya-500 transition-colors bg-gray-50">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <Image className="w-8 h-8 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-500">
@@ -2216,20 +2216,20 @@ export default function Tasks() {
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                     placeholder="Titre de la tâche"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                   />
                   <div className="flex gap-2">
                     <input
                       type="date"
                       value={newTaskDate}
                       onChange={(e) => setNewTaskDate(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                     />
                     <input
                       type="time"
                       value={newTaskTime}
                       onChange={(e) => setNewTaskTime(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                     />
                   </div>
                   <button
@@ -2301,7 +2301,7 @@ export default function Tasks() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -2334,7 +2334,7 @@ export default function Tasks() {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="admin">Administratif</option>
                   <option value="stock">Stock</option>
@@ -2351,7 +2351,7 @@ export default function Tasks() {
                   onChange={(e) =>
                     setFormData({ ...formData, is_recurring: e.target.checked })
                   }
-                  className="w-4 h-4 text-belleya-primary border-gray-300 rounded focus:ring-belleya-primary"
+                  className="w-4 h-4 text-belaya-primary border-gray-300 rounded focus:ring-belaya-primary"
                 />
                 <label htmlFor="recurring" className="text-sm font-medium text-gray-700">
                   Tâche récurrente
@@ -2368,7 +2368,7 @@ export default function Tasks() {
                     onChange={(e) =>
                       setFormData({ ...formData, recurrence_pattern: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   >
                     <option value="">Sélectionner</option>
                     <option value="daily">Quotidienne</option>
@@ -2385,7 +2385,7 @@ export default function Tasks() {
                 <select
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="low">🥶 Basse</option>
                   <option value="medium">😌 Moyenne</option>
@@ -2403,7 +2403,7 @@ export default function Tasks() {
                     type="date"
                     value={formData.start_date}
                     onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -2414,7 +2414,7 @@ export default function Tasks() {
                     type="date"
                     value={formData.end_date}
                     onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
               </div>
@@ -2428,7 +2428,7 @@ export default function Tasks() {
                     type="time"
                     value={formData.start_time}
                     onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -2439,7 +2439,7 @@ export default function Tasks() {
                     type="time"
                     value={formData.end_time}
                     onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
               </div>
@@ -2451,7 +2451,7 @@ export default function Tasks() {
                 <select
                   value={formData.collaborator_id}
                   onChange={(e) => setFormData({ ...formData, collaborator_id: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="">Moi-même</option>
                   {collaborators.map((collab) => (
@@ -2510,7 +2510,7 @@ export default function Tasks() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -2543,7 +2543,7 @@ export default function Tasks() {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="admin">Administratif</option>
                   <option value="stock">Stock</option>
@@ -2560,7 +2560,7 @@ export default function Tasks() {
                   onChange={(e) =>
                     setFormData({ ...formData, is_recurring: e.target.checked })
                   }
-                  className="w-4 h-4 text-belleya-primary border-gray-300 rounded focus:ring-belleya-primary"
+                  className="w-4 h-4 text-belaya-primary border-gray-300 rounded focus:ring-belaya-primary"
                 />
                 <label htmlFor="recurring-edit" className="text-sm font-medium text-gray-700">
                   Tâche récurrente
@@ -2577,7 +2577,7 @@ export default function Tasks() {
                     onChange={(e) =>
                       setFormData({ ...formData, recurrence_pattern: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   >
                     <option value="">Sélectionner</option>
                     <option value="daily">Quotidienne</option>
@@ -2594,7 +2594,7 @@ export default function Tasks() {
                 <select
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="low">🥶 Basse</option>
                   <option value="medium">😌 Moyenne</option>
@@ -2612,7 +2612,7 @@ export default function Tasks() {
                     type="date"
                     value={formData.start_date}
                     onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -2623,7 +2623,7 @@ export default function Tasks() {
                     type="date"
                     value={formData.end_date}
                     onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
               </div>
@@ -2637,7 +2637,7 @@ export default function Tasks() {
                     type="time"
                     value={formData.start_time}
                     onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -2648,7 +2648,7 @@ export default function Tasks() {
                     type="time"
                     value={formData.end_time}
                     onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
               </div>
@@ -2660,7 +2660,7 @@ export default function Tasks() {
                 <select
                   value={formData.collaborator_id}
                   onChange={(e) => setFormData({ ...formData, collaborator_id: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="">Moi-même</option>
                   {collaborators.map((collab) => (
@@ -2714,7 +2714,7 @@ export default function Tasks() {
                       onChange={(e) =>
                         setNewCollaborator({ ...newCollaborator, name: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                       required
                     />
                   </div>
@@ -2728,7 +2728,7 @@ export default function Tasks() {
                       onChange={(e) =>
                         setNewCollaborator({ ...newCollaborator, email: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -2779,7 +2779,7 @@ export default function Tasks() {
               <div className="font-bold text-xl mb-1">Bravo ! Projet terminé</div>
               <div className="text-green-100 text-sm">{completedProjectNotification.name}</div>
             </div>
-            <div className="bg-white text-belleya-bright px-4 py-2 rounded-full font-bold text-sm">
+            <div className="bg-white text-belaya-bright px-4 py-2 rounded-full font-bold text-sm">
               Terminé
             </div>
           </div>
@@ -2978,7 +2978,7 @@ function TaskCard({
             </button>
             <button
               onClick={() => onStatusChange(task.id, 'completed')}
-              className={`flex-1 bg-belleya-vivid text-white rounded-lg hover:bg-belleya-bright transition-all ${
+              className={`flex-1 bg-belaya-vivid text-white rounded-lg hover:bg-belaya-bright transition-all ${
                 compactMode ? 'text-[10px] px-2 py-1.5' : 'text-xs px-3 py-2'
               }`}
             >
@@ -3108,7 +3108,7 @@ function RecurringCategoryCard({
                   type="checkbox"
                   checked={task.completed}
                   onChange={() => onToggleTask(task.id, task.completed)}
-                  className={`text-belleya-primary border-2 border-white rounded focus:ring-2 focus:ring-belleya-primary cursor-pointer transition-all ${
+                  className={`text-belaya-primary border-2 border-white rounded focus:ring-2 focus:ring-belaya-primary cursor-pointer transition-all ${
                     compactMode ? 'w-4 h-4' : 'w-5 h-5'
                   }`}
                 />

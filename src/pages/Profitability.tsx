@@ -56,7 +56,7 @@ export default function Profitability() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center">
-              <Calculator className="w-5 h-5 text-belleya-primary" />
+              <Calculator className="w-5 h-5 text-belaya-primary" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900">Analyse de prestation</h2>
           </div>
@@ -70,7 +70,7 @@ export default function Profitability() {
                 type="text"
                 value={formData.serviceName}
                 onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 placeholder="Ex: Pose complète gel"
                 required
               />
@@ -96,7 +96,7 @@ export default function Profitability() {
                     }
                     setFormData({ ...formData, materialCost: value });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="0"
                   required
                 />
@@ -120,7 +120,7 @@ export default function Profitability() {
                     }
                     setFormData({ ...formData, consumablesCost: value });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="0"
                   required
                 />
@@ -143,7 +143,7 @@ export default function Profitability() {
                     setFormData({ ...formData, durationMinutes: value });
                   }
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 placeholder="120"
                 required
               />
@@ -168,7 +168,7 @@ export default function Profitability() {
                   }
                   setFormData({ ...formData, desiredHourlyRate: value });
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 placeholder="30"
                 required
               />
@@ -193,7 +193,7 @@ export default function Profitability() {
                   }
                   setFormData({ ...formData, estimatedCharges: value });
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 placeholder="5"
                 required
               />
@@ -218,7 +218,7 @@ export default function Profitability() {
                   }
                   setFormData({ ...formData, currentPrice: value });
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 placeholder="60"
                 required
               />
@@ -246,13 +246,13 @@ export default function Profitability() {
               <div
                 className={`p-4 rounded-xl border-2 ${
                   result.isProfitable
-                    ? 'bg-green-50 border-belleya-200'
+                    ? 'bg-green-50 border-belaya-200'
                     : 'bg-red-50 border-red-200'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   {result.isProfitable ? (
-                    <div className="w-8 h-8 bg-belleya-vivid rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-belaya-vivid rounded-full flex items-center justify-center">
                       <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                   ) : (
@@ -285,9 +285,9 @@ export default function Profitability() {
                   <p className="text-2xl font-bold text-gray-900">{result.totalCost.toFixed(2)} €</p>
                 </div>
 
-                <div className="p-4 bg-belleya-50 rounded-lg">
+                <div className="p-4 bg-belaya-50 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">Prix minimum recommandé</p>
-                  <p className="text-2xl font-bold text-belleya-primary">
+                  <p className="text-2xl font-bold text-belaya-primary">
                     {result.minimumPrice.toFixed(2)} €
                   </p>
                   <p className="text-xs text-gray-600 mt-1">
@@ -332,7 +332,7 @@ export default function Profitability() {
         </div>
       </div>
 
-      <div className="mt-8 bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 border border-belleya-100">
+      <div className="mt-8 bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 border border-belaya-100">
         <h3 className="font-semibold text-gray-900 mb-3">
           Comprendre le calcul de rentabilité
         </h3>

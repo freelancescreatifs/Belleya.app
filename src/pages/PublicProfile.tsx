@@ -896,7 +896,7 @@ export default function PublicProfile() {
                     setNameError(null);
                   }}
                   placeholder="Nom de votre salon / institut"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent ${
                     nameError ? 'border-red-300' : 'border-gray-300'
                   }`}
                   required
@@ -948,7 +948,7 @@ export default function PublicProfile() {
                         className="hidden"
                         disabled={uploadingPhoto}
                       />
-                      <div className="px-4 py-2 bg-belleya-primary text-white rounded-lg hover:bg-belleya-700 flex items-center gap-2">
+                      <div className="px-4 py-2 bg-belaya-primary text-white rounded-lg hover:bg-belaya-700 flex items-center gap-2">
                         {uploadingPhoto ? (
                           <>
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -975,7 +975,7 @@ export default function PublicProfile() {
                     rows={4}
                     maxLength={500}
                     placeholder="Presentez-vous et partagez votre passion..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     {(profileData.bio || '').length}/500 caracteres
@@ -991,7 +991,7 @@ export default function PublicProfile() {
                     value={profileData.instagram_url || ''}
                     onChange={(e) => setProfileData({ ...profileData, instagram_url: e.target.value })}
                     placeholder="https://instagram.com/votre_compte"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
 
@@ -1044,7 +1044,7 @@ export default function PublicProfile() {
                     className="hidden"
                     disabled={uploadingInstitute}
                   />
-                  <div className="px-3 py-1 text-sm bg-belleya-primary text-white rounded hover:bg-belleya-700 flex items-center gap-1">
+                  <div className="px-3 py-1 text-sm bg-belaya-primary text-white rounded hover:bg-belaya-700 flex items-center gap-1">
                     {uploadingInstitute ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -1085,7 +1085,7 @@ export default function PublicProfile() {
                 <h3 className="text-lg font-bold text-gray-900">Diplomes</h3>
                 <button
                   onClick={addDiploma}
-                  className="px-3 py-1 text-sm bg-belleya-primary text-white rounded hover:bg-belleya-700 flex items-center gap-1"
+                  className="px-3 py-1 text-sm bg-belaya-primary text-white rounded hover:bg-belaya-700 flex items-center gap-1"
                 >
                   <Plus className="w-4 h-4" />
                   Ajouter
@@ -1100,14 +1100,14 @@ export default function PublicProfile() {
                       value={diploma.name}
                       onChange={(e) => updateDiploma(diploma.id, 'name', e.target.value)}
                       placeholder="Nom du diplome"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     />
                     <input
                       type="text"
                       value={diploma.year || ''}
                       onChange={(e) => updateDiploma(diploma.id, 'year', e.target.value)}
                       placeholder="Annee"
-                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     />
                     <button
                       onClick={() => removeDiploma(diploma.id)}
@@ -1141,7 +1141,7 @@ export default function PublicProfile() {
                   <input
                     type="text"
                     placeholder="Nouvelle condition..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
                         addCondition((e.target as HTMLInputElement).value);
@@ -1155,7 +1155,7 @@ export default function PublicProfile() {
                       addCondition(input.value);
                       input.value = '';
                     }}
-                    className="px-4 py-2 bg-belleya-primary text-white rounded-lg hover:bg-belleya-700 flex items-center gap-2"
+                    className="px-4 py-2 bg-belaya-primary text-white rounded-lg hover:bg-belaya-700 flex items-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -1167,9 +1167,9 @@ export default function PublicProfile() {
 
           {/* RIGHT: Live Preview */}
           <div className="lg:sticky lg:top-8 lg:h-fit">
-            <div className="bg-white rounded-xl shadow-lg border-2 border-belleya-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-rose-100 to-pink-100 p-3 flex items-center gap-2 border-b border-belleya-200">
-                <Eye className="w-5 h-5 text-belleya-primary" />
+            <div className="bg-white rounded-xl shadow-lg border-2 border-belaya-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-rose-100 to-pink-100 p-3 flex items-center gap-2 border-b border-belaya-200">
+                <Eye className="w-5 h-5 text-belaya-primary" />
                 <span className="font-semibold text-gray-900">Apercu en temps reel</span>
               </div>
 
@@ -1215,7 +1215,7 @@ export default function PublicProfile() {
                       </div>
 
                       {profileData.bio && (
-                        <p className="text-belleya-50 text-sm mb-3">{profileData.bio}</p>
+                        <p className="text-belaya-50 text-sm mb-3">{profileData.bio}</p>
                       )}
 
                       {profileData.instagram_url && (
@@ -1231,7 +1231,7 @@ export default function PublicProfile() {
                       )}
 
                       {profileData.address && (
-                        <div className="flex items-start gap-1 mt-2 text-xs text-belleya-100">
+                        <div className="flex items-start gap-1 mt-2 text-xs text-belaya-100">
                           <MapPin className="w-3 h-3 mt-0.5" />
                           <span>{profileData.address}</span>
                         </div>
@@ -1244,7 +1244,7 @@ export default function PublicProfile() {
                 {profileData.latitude && profileData.longitude && (
                   <div className="p-4 bg-white border-b border-gray-200">
                     <div className="flex items-center gap-2 mb-3">
-                      <MapPin className="w-4 h-4 text-belleya-primary" />
+                      <MapPin className="w-4 h-4 text-belaya-primary" />
                       <h4 className="font-bold text-gray-900 text-sm">Localisation</h4>
                     </div>
                     <div className="rounded-xl overflow-hidden border-2 border-gray-200 shadow-md" style={{ height: '250px' }}>
@@ -1267,13 +1267,13 @@ export default function PublicProfile() {
                           icon={L.divIcon({
                             html: `
                               <div class="relative transform transition-transform hover:scale-110">
-                                <div class="w-12 h-12 rounded-full border-3 border-white shadow-lg overflow-hidden ring-2 ring-belleya-primary bg-white">
+                                <div class="w-12 h-12 rounded-full border-3 border-white shadow-lg overflow-hidden ring-2 ring-belaya-primary bg-white">
                                   ${profileData.profile_photo
                                     ? `<img src="${profileData.profile_photo}" alt="${companyName}" class="w-full h-full object-cover" />`
                                     : `<div class="w-full h-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white font-bold text-lg">${companyName.charAt(0)}</div>`
                                   }
                                 </div>
-                                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-belleya-primary border-2 border-white rounded-full"></div>
+                                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-belaya-primary border-2 border-white rounded-full"></div>
                               </div>
                             `,
                             className: 'custom-provider-marker',
@@ -1373,7 +1373,7 @@ export default function PublicProfile() {
                                     </div>
                                   ) : (
                                     <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
-                                      <Scissors className="w-8 h-8 text-belleya-300" />
+                                      <Scissors className="w-8 h-8 text-belaya-300" />
                                     </div>
                                   )}
                                   <div className="flex-1 p-3 min-w-0">
@@ -1399,7 +1399,7 @@ export default function PublicProfile() {
                                             {service.price} €
                                           </div>
                                         )}
-                                        <span className="font-bold text-belleya-primary text-sm whitespace-nowrap">
+                                        <span className="font-bold text-belaya-primary text-sm whitespace-nowrap">
                                           {service.special_offer && service.offer_type ? (
                                             service.offer_type === 'percentage'
                                               ? (service.price * (1 - parseFloat(service.special_offer) / 100)).toFixed(2)
@@ -1418,7 +1418,7 @@ export default function PublicProfile() {
                                               <span className="text-gray-600">+ {supplement.name}</span>
                                               <div className="flex items-center gap-2">
                                                 <span className="text-gray-500">{supplement.duration_minutes} min</span>
-                                                <span className="font-semibold text-belleya-primary">+{supplement.price} €</span>
+                                                <span className="font-semibold text-belaya-primary">+{supplement.price} €</span>
                                               </div>
                                             </div>
                                           ))}
@@ -1477,7 +1477,7 @@ export default function PublicProfile() {
                             className="hidden"
                             disabled={uploadingGallery}
                           />
-                          <div className="w-full py-3 border-2 border-dashed border-belleya-300 rounded-xl text-belleya-primary font-medium hover:bg-belleya-50 transition-all flex items-center justify-center gap-2">
+                          <div className="w-full py-3 border-2 border-dashed border-belaya-300 rounded-xl text-belaya-primary font-medium hover:bg-belaya-50 transition-all flex items-center justify-center gap-2">
                             <Upload className="w-4 h-4" />
                             Ajouter une photo/video
                           </div>
@@ -1580,7 +1580,7 @@ export default function PublicProfile() {
                               </button>
                               <button
                                 onClick={() => shareReviewOnSocial(review)}
-                                className="px-2 py-1.5 text-xs font-medium bg-belleya-100 text-belleya-deep rounded-lg hover:bg-belleya-200 transition-colors"
+                                className="px-2 py-1.5 text-xs font-medium bg-belaya-100 text-belaya-deep rounded-lg hover:bg-belaya-200 transition-colors"
                               >
                                 <Share2 className="w-3 h-3 inline mr-1" />
                               </button>
@@ -1627,7 +1627,7 @@ export default function PublicProfile() {
                 <select
                   value={selectedGalleryCategory}
                   onChange={(e) => setSelectedGalleryCategory(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 >
                   <option value="">Sélectionner une catégorie</option>
@@ -1646,7 +1646,7 @@ export default function PublicProfile() {
                 <select
                   value={selectedGalleryClient}
                   onChange={(e) => setSelectedGalleryClient(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="">Aucune cliente</option>
                   {clients.map((client) => (

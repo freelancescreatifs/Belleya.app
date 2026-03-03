@@ -427,7 +427,7 @@ export default function Goals() {
     { id: 'not_started' as TabStatus, label: 'Pas commencé', icon: Clock, color: 'text-gray-600' },
     { id: 'in_progress' as TabStatus, label: 'En cours', icon: PlayCircle, color: 'text-blue-600' },
     { id: 'on_hold' as TabStatus, label: 'Suspendu', icon: PauseCircle, color: 'text-orange-600' },
-    { id: 'achieved' as TabStatus, label: 'Atteint', icon: CheckCircle2, color: 'text-belleya-bright' },
+    { id: 'achieved' as TabStatus, label: 'Atteint', icon: CheckCircle2, color: 'text-belaya-bright' },
   ];
 
   if (loading) {
@@ -497,7 +497,7 @@ export default function Goals() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-belleya-primary to-[#f06bb4] text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all shadow-lg hover:shadow-xl w-full sm:w-auto text-sm sm:text-base"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-belaya-primary to-[#f06bb4] text-white rounded-lg hover:from-belaya-deep hover:to-belaya-primary transition-all shadow-lg hover:shadow-xl w-full sm:w-auto text-sm sm:text-base"
         >
           <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="hidden xs:inline">Nouvel objectif</span>
@@ -625,7 +625,7 @@ export default function Goals() {
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 >
                   <option value="content">Contenu</option>
@@ -645,7 +645,7 @@ export default function Goals() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="Ex: Créer 40 posts Instagram"
                   required
                 />
@@ -659,7 +659,7 @@ export default function Goals() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 />
               </div>
 
@@ -707,7 +707,7 @@ export default function Goals() {
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 >
                   <option value="content">Contenu</option>
@@ -727,7 +727,7 @@ export default function Goals() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -740,7 +740,7 @@ export default function Goals() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 />
               </div>
 
@@ -800,7 +800,7 @@ export default function Goals() {
                   onChange={(e) =>
                     setSubgoalFormData({ ...subgoalFormData, title: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="Ex: Créer 5 posts semaine 1"
                   required
                 />
@@ -817,7 +817,7 @@ export default function Goals() {
                     onChange={(e) =>
                       setSubgoalFormData({ ...subgoalFormData, start_date: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -832,7 +832,7 @@ export default function Goals() {
                     onChange={(e) =>
                       setSubgoalFormData({ ...subgoalFormData, end_date: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -888,7 +888,7 @@ export default function Goals() {
                   onChange={(e) =>
                     setSubgoalFormData({ ...subgoalFormData, title: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -904,7 +904,7 @@ export default function Goals() {
                     onChange={(e) =>
                       setSubgoalFormData({ ...subgoalFormData, start_date: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -919,7 +919,7 @@ export default function Goals() {
                     onChange={(e) =>
                       setSubgoalFormData({ ...subgoalFormData, end_date: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>

@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import PartnershipCard from '../components/partnerships/PartnershipCard';
 import PartnershipDetailDrawer from '../components/partnerships/PartnershipDetailDrawer';
 import PartnershipFormModal from '../components/partnerships/PartnershipFormModal';
-import BelleyaRewardsCard from '../components/partnerships/BelleyaRewardsCard';
+import BelayaRewardsCard from '../components/partnerships/BelleyaRewardsCard';
 
 interface Partnership {
   id: string;
@@ -76,27 +76,27 @@ export default function Partnerships() {
 
       const partnershipsData = partnershipsResult.data || [];
 
-      const hasBelleya = partnershipsData.some(p => p.is_default && p.company_name === 'Belleya');
+      const hasBelaya = partnershipsData.some(p => p.is_default && p.company_name === 'Belaya');
 
-      if (!hasBelleya) {
+      if (!hasBelaya) {
         const { error: insertError } = await supabase
           .from('partnerships')
           .insert({
             user_id: user.id,
-            company_name: 'Belleya',
+            company_name: 'Belaya',
             partnership_type: 'affiliation',
             commission_rate: 25,
             compensation_mode: 'recurring',
             status: 'active',
             start_date: new Date().toISOString().split('T')[0],
-            conditions: 'Programme officiel Belleya - Commission mensuelle sur chaque vente HT. 25% par défaut, 30% si impliqué dans le service client.',
+            conditions: 'Programme officiel Belaya - Commission mensuelle sur chaque vente HT. 25% par défaut, 30% si impliqué dans le service client.',
             is_default: true,
             is_client_support_involved: false,
-            notes: 'Partenariat officiel Belleya avec commission récurrente mensuelle.'
+            notes: 'Partenariat officiel Belaya avec commission récurrente mensuelle.'
           });
 
         if (insertError) {
-          console.error('Error creating Belleya partnership:', insertError);
+          console.error('Error creating Belaya partnership:', insertError);
         } else {
           const { data: refreshedData } = await supabase
             .from('partnerships')
@@ -194,10 +194,10 @@ export default function Partnerships() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belleya-200 shadow-sm">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belaya-200 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-              <TrendingUp className="w-5 h-5 text-belleya-bright" />
+              <TrendingUp className="w-5 h-5 text-belaya-bright" />
             </div>
             <span className="text-sm font-medium text-gray-700">Revenus générés</span>
           </div>
@@ -234,10 +234,10 @@ export default function Partnerships() {
           <p className="text-2xl font-bold text-gray-900">{stats.pendingRevenue.toFixed(2)} €</p>
         </div>
 
-        <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-belleya-200 shadow-sm">
+        <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-belaya-200 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-              <Star className="w-5 h-5 text-belleya-primary" />
+              <Star className="w-5 h-5 text-belaya-primary" />
             </div>
             <span className="text-sm font-medium text-gray-700">Plus rentable</span>
           </div>
@@ -246,7 +246,7 @@ export default function Partnerships() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <BelleyaRewardsCard />
+        <BelayaRewardsCard />
 
         {partnerships.map((partnership) => (
           <PartnershipCard
@@ -259,11 +259,11 @@ export default function Partnerships() {
         ))}
 
         {partnerships.length === 0 && (
-          <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-8 text-center flex flex-col items-center justify-center hover:border-belleya-300 hover:bg-gray-50 transition-all cursor-pointer group"
+          <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-8 text-center flex flex-col items-center justify-center hover:border-belaya-300 hover:bg-gray-50 transition-all cursor-pointer group"
             onClick={handleAddPartnership}
           >
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-belleya-50 transition-colors">
-              <Plus className="w-6 h-6 text-gray-400 group-hover:text-belleya-500 transition-colors" />
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-belaya-50 transition-colors">
+              <Plus className="w-6 h-6 text-gray-400 group-hover:text-belaya-500 transition-colors" />
             </div>
             <h3 className="text-base font-semibold text-gray-900 mb-1">Ajouter un partenariat</h3>
             <p className="text-sm text-gray-600">Créez votre premier partenariat</p>

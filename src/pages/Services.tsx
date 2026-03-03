@@ -545,7 +545,7 @@ export default function Services() {
                 onClick={() => setServiceTypeFilter('all')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   serviceTypeFilter === 'all'
-                    ? 'bg-belleya-500 text-white'
+                    ? 'bg-belaya-500 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -557,7 +557,7 @@ export default function Services() {
                   onClick={() => setServiceTypeFilter(type.value)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     serviceTypeFilter === type.value
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -572,7 +572,7 @@ export default function Services() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="all">Tous</option>
                   {(allCategories || []).map(cat => (
@@ -590,7 +590,7 @@ export default function Services() {
                     value={serviceNameFilter}
                     onChange={(e) => setServiceNameFilter(e.target.value)}
                     placeholder="Nom du service..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
               </div>
@@ -930,7 +930,7 @@ export default function Services() {
                                 price: ''
                               }]);
                             }}
-                            className="text-sm text-belleya-primary hover:text-belleya-deep font-medium flex items-center gap-1"
+                            className="text-sm text-belaya-primary hover:text-belaya-deep font-medium flex items-center gap-1"
                           >
                             <Plus className="w-4 h-4" />
                             Ajouter un supplément
@@ -966,7 +966,7 @@ export default function Services() {
                                       setTempSupplements(updated);
                                     }}
                                     placeholder="Ex: Baby Boomer"
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                                   />
                                 </div>
                                 <div className={formData.service_type === 'prestation' ? 'grid grid-cols-2 gap-3' : ''}>
@@ -992,7 +992,7 @@ export default function Services() {
                                           setTempSupplements(updated);
                                         }}
                                         onFocus={(e) => e.target.select()}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                                       />
                                     </div>
                                   )}
@@ -1020,7 +1020,7 @@ export default function Services() {
                                         setTempSupplements(updated);
                                       }}
                                       onFocus={(e) => e.target.select()}
-                                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                                     />
                                   </div>
                                 </div>
@@ -1118,9 +1118,9 @@ export default function Services() {
                         value="active"
                         checked={formData.status === 'active'}
                         onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                        className="w-4 h-4 text-belleya-bright border-gray-300 focus:ring-green-500"
+                        className="w-4 h-4 text-belaya-bright border-gray-300 focus:ring-green-500"
                       />
-                      <CheckCircle className="w-5 h-5 text-belleya-bright" />
+                      <CheckCircle className="w-5 h-5 text-belaya-bright" />
                       <div className="flex-1">
                         <span className="text-sm font-medium text-gray-900">Actif</span>
                         <p className="text-xs text-gray-500">Service visible partout</p>

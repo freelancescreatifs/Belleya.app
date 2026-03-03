@@ -546,7 +546,7 @@ export default function Finances() {
                 onClick={() => setPeriodFilter('day')}
                 className={`px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                   periodFilter === 'day'
-                    ? 'bg-belleya-100 text-belleya-600 border border-belleya-200'
+                    ? 'bg-belaya-100 text-belaya-600 border border-belaya-200'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -556,7 +556,7 @@ export default function Finances() {
                 onClick={() => setPeriodFilter('month')}
                 className={`px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                   periodFilter === 'month'
-                    ? 'bg-belleya-100 text-belleya-600 border border-belleya-200'
+                    ? 'bg-belaya-100 text-belaya-600 border border-belaya-200'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -566,7 +566,7 @@ export default function Finances() {
                 onClick={() => setPeriodFilter('year')}
                 className={`px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                   periodFilter === 'year'
-                    ? 'bg-belleya-100 text-belleya-600 border border-belleya-200'
+                    ? 'bg-belaya-100 text-belaya-600 border border-belaya-200'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -596,7 +596,7 @@ export default function Finances() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowImportModal(true)}
-                className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-white border-2 border-belleya-500 text-belleya-500 rounded-lg hover:bg-belleya-50 transition-all shadow-sm"
+                className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-white border-2 border-belaya-500 text-belaya-500 rounded-lg hover:bg-belaya-50 transition-all shadow-sm"
               >
                 <Upload className="w-5 h-5" />
                 <span className="hidden sm:inline">Importer</span>
@@ -617,7 +617,7 @@ export default function Finances() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-belleya-bright" />
+              <TrendingUp className="w-5 h-5 text-belaya-bright" />
             </div>
             <p className="text-sm text-gray-600">
               {paymentFilter === 'all' && serviceTypeFilter === 'all' ? 'Total Recettes' : 'Recettes filtrées'}
@@ -687,7 +687,7 @@ export default function Finances() {
                   onClick={() => setServiceTypeFilter('all')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     serviceTypeFilter === 'all'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -697,7 +697,7 @@ export default function Finances() {
                   onClick={() => setServiceTypeFilter('prestation')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     serviceTypeFilter === 'prestation'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -707,7 +707,7 @@ export default function Finances() {
                   onClick={() => setServiceTypeFilter('formation')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     serviceTypeFilter === 'formation'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -717,7 +717,7 @@ export default function Finances() {
                   onClick={() => setServiceTypeFilter('digital_sale')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     serviceTypeFilter === 'digital_sale'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -727,7 +727,7 @@ export default function Finances() {
                   onClick={() => setServiceTypeFilter('commission')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     serviceTypeFilter === 'commission'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -737,7 +737,7 @@ export default function Finances() {
                   onClick={() => setServiceTypeFilter('other')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     serviceTypeFilter === 'other'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -751,7 +751,7 @@ export default function Finances() {
                   onClick={() => setPaymentFilter('all')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     paymentFilter === 'all'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -761,7 +761,7 @@ export default function Finances() {
                   onClick={() => setPaymentFilter('card')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     paymentFilter === 'card'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -771,7 +771,7 @@ export default function Finances() {
                   onClick={() => setPaymentFilter('cash')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     paymentFilter === 'cash'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -781,7 +781,7 @@ export default function Finances() {
                   onClick={() => setPaymentFilter('transfer')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     paymentFilter === 'transfer'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -791,7 +791,7 @@ export default function Finances() {
                   onClick={() => setPaymentFilter('other')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     paymentFilter === 'other'
-                      ? 'bg-belleya-500 text-white'
+                      ? 'bg-belaya-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -832,7 +832,7 @@ export default function Finances() {
                             {paymentMethodEmojis[revenue.payment_method] || '💰'} {paymentMethodLabels[revenue.payment_method] || revenue.payment_method}
                           </span>
                           {client && (
-                            <span className="px-3 py-1 bg-belleya-50 text-belleya-deep text-xs rounded-lg font-medium flex items-center gap-1">
+                            <span className="px-3 py-1 bg-belaya-50 text-belaya-deep text-xs rounded-lg font-medium flex items-center gap-1">
                               <UserIcon className="w-3 h-3" />
                               {client.first_name} {client.last_name}
                             </span>
@@ -857,7 +857,7 @@ export default function Finances() {
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <p className="text-lg font-semibold text-belleya-bright">
+                        <p className="text-lg font-semibold text-belaya-bright">
                           +{revenue.amount} €
                         </p>
                         <button
@@ -954,7 +954,7 @@ export default function Finances() {
                       type="date"
                       value={expenseForm.date}
                       onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                       required
                     />
                   </div>
@@ -965,7 +965,7 @@ export default function Finances() {
                       step="0.01"
                       value={expenseForm.amount}
                       onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                       required
                     />
                   </div>
@@ -976,7 +976,7 @@ export default function Finances() {
                   <select
                     value={expenseForm.category}
                     onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   >
                     <option value="consumables">Consommables</option>
                     <option value="equipment">Matériel</option>
@@ -993,7 +993,7 @@ export default function Finances() {
                     type="text"
                     value={expenseForm.description}
                     onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -1004,7 +1004,7 @@ export default function Finances() {
                     type="text"
                     value={expenseForm.supplier}
                     onChange={(e) => setExpenseForm({ ...expenseForm, supplier: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
 
@@ -1043,7 +1043,7 @@ export default function Finances() {
                       type="date"
                       value={expenseForm.date}
                       onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                       required
                     />
                   </div>
@@ -1054,7 +1054,7 @@ export default function Finances() {
                       step="0.01"
                       value={expenseForm.amount}
                       onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                       required
                     />
                   </div>
@@ -1065,7 +1065,7 @@ export default function Finances() {
                   <select
                     value={expenseForm.category}
                     onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   >
                     <option value="consumables">Consommables</option>
                     <option value="equipment">Matériel</option>
@@ -1082,7 +1082,7 @@ export default function Finances() {
                     type="text"
                     value={expenseForm.description}
                     onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     required
                   />
                 </div>
@@ -1093,7 +1093,7 @@ export default function Finances() {
                     type="text"
                     value={expenseForm.supplier}
                     onChange={(e) => setExpenseForm({ ...expenseForm, supplier: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
 
@@ -1190,7 +1190,7 @@ export default function Finances() {
                     required
                     value={quickClientForm.first_name}
                     onChange={(e) => setQuickClientForm({ ...quickClientForm, first_name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -1202,7 +1202,7 @@ export default function Finances() {
                     required
                     value={quickClientForm.last_name}
                     onChange={(e) => setQuickClientForm({ ...quickClientForm, last_name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   />
                 </div>
               </div>
@@ -1215,7 +1215,7 @@ export default function Finances() {
                   type="tel"
                   value={quickClientForm.phone}
                   onChange={(e) => setQuickClientForm({ ...quickClientForm, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 />
               </div>
 
@@ -1227,7 +1227,7 @@ export default function Finances() {
                   type="email"
                   value={quickClientForm.email}
                   onChange={(e) => setQuickClientForm({ ...quickClientForm, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 />
               </div>
 
@@ -1241,7 +1241,7 @@ export default function Finances() {
                 <button
                   onClick={handleQuickCreateClient}
                   disabled={!quickClientForm.first_name || !quickClientForm.last_name}
-                  className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Créer
                 </button>

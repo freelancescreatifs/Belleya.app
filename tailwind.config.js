@@ -7,7 +7,7 @@ export default {
         'xs': '375px',
       },
       colors: {
-        'belleya': {
+        'belaya': {
           'powder': '#eea09e',
           'medium': '#d17488',
           'bright': '#db58a2',

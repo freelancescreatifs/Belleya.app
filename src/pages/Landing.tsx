@@ -64,7 +64,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   <div className="w-full h-44 md:h-56 mx-auto mb-3 md:mb-4 group-hover:scale-105 transition-transform overflow-hidden rounded-2xl md:rounded-3xl shadow-lg">
                     <img
                       src="/4f818305-0d16-45fa-a026-0e08a8ca914a-1.png"
-                      alt="Cliente Belleya"
+                      alt="Cliente Belaya"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -113,7 +113,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   <div className="w-full h-44 md:h-56 mx-auto mb-3 md:mb-4 group-hover:scale-105 transition-transform overflow-hidden rounded-2xl md:rounded-3xl shadow-lg">
                     <img
                       src="/prestataire.jpeg"
-                      alt="Professionnelle Belleya"
+                      alt="Professionnelle Belaya"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -183,7 +183,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="group relative bg-white/60 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-belleya-100/50 hover:border-belleya-200 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(239,170,154,0.12)] hover:-translate-y-1"
+                  className="group relative bg-white/60 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-belaya-100/50 hover:border-belaya-200 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(239,170,154,0.12)] hover:-translate-y-1"
                   style={{
                     animation: `fadeInUp 0.6s ease-out ${i * 0.1}s both`
                   }}
@@ -207,7 +207,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
             <div className="relative mb-16 md:mb-20">
               <div className="absolute inset-0 bg-gradient-to-r from-rose-100/50 via-pink-100/50 to-rose-100/50 rounded-2xl md:rounded-3xl blur-2xl"></div>
-              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl md:rounded-3xl p-6 md:p-12 lg:p-16 border border-belleya-200/50 shadow-[0_8px_30px_rgb(239,170,154,0.15)]">
+              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl md:rounded-3xl p-6 md:p-12 lg:p-16 border border-belaya-200/50 shadow-[0_8px_30px_rgb(239,170,154,0.15)]">
                 <div className="max-w-3xl mx-auto text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-rose-100 to-pink-100 mb-6 md:mb-8 shadow-lg">
                     <Flame className="w-6 h-6 md:w-8 md:h-8 text-[#d9629b]" />
@@ -221,7 +221,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     {t('landing.reality.realProblem.subtitle')}
                   </p>
 
-                  <div className="inline-block px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full border border-belleya-200/50">
+                  <div className="inline-block px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full border border-belaya-200/50">
                     <p className="text-base md:text-lg font-bold text-gray-900">
                       {t('landing.reality.realProblem.conclusion')}
                     </p>
@@ -242,7 +242,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 }}
               >
                 <div className="max-w-4xl mx-auto">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-xl md:rounded-2xl p-6 md:p-8 mb-8 md:mb-10 shadow-lg border border-belleya-100/50">
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl md:rounded-2xl p-6 md:p-8 mb-8 md:mb-10 shadow-lg border border-belaya-100/50">
                     <p className="text-xl md:text-2xl lg:text-3xl font-bold text-center mb-6 md:mb-8 text-gray-900">
                       {t('landing.solution.youAre')} <span className="bg-gradient-to-r from-[#efaa9a] to-[#d9629b] bg-clip-text text-transparent">{t('landing.solution.realPro')}</span>.
                       <br />
@@ -256,7 +256,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                         { icon: Eye, textKey: 'visibility' },
                         { icon: Heart, textKey: 'serenity' }
                       ].map((item, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-belleya-50/50 transition-colors">
+                        <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-belaya-50/50 transition-colors">
                           <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-[#efaa9a] to-[#d9629b] rounded-full flex items-center justify-center shadow-md flex-shrink-0">
                             <item.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                           </div>
@@ -348,7 +348,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="group relative bg-white/70 backdrop-blur-sm rounded-xl md:rounded-2xl p-5 md:p-8 border border-belleya-100/50 hover:border-belleya-200/80 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(239,170,154,0.15)] hover:-translate-y-1"
+                className="group relative bg-white/70 backdrop-blur-sm rounded-xl md:rounded-2xl p-5 md:p-8 border border-belaya-100/50 hover:border-belaya-200/80 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(239,170,154,0.15)] hover:-translate-y-1"
                 style={{
                   animation: `fadeInUp 0.6s ease-out ${i * 0.08}s both`
                 }}
@@ -393,7 +393,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               Conçu pour toi, pro de la beauté
             </h2>
             <p className="text-base md:text-xl text-gray-600 px-4">
-              Quel que soit ton univers, Belleya s'adapte
+              Quel que soit ton univers, Belaya s'adapte
             </p>
           </div>
 
@@ -442,7 +442,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               {
                 icon: TrendingUp,
                 title: "Grandit avec toi",
-                description: "Auto-entrepreneur ou salon : Belleya s'adapte."
+                description: "Auto-entrepreneur ou salon : Belaya s'adapte."
               },
               {
                 icon: Users,
@@ -470,12 +470,12 @@ export default function Landing({ onSelectRole }: LandingProps) {
               Augmentation dans 30 jours
             </div>
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 px-4">
-              Les Offres Belleya
+              Les Offres Belaya
             </h2>
             <p className="text-base md:text-xl text-gray-600 mb-4 md:mb-6">
               Choisis l'offre qui correspond à ton ambition
             </p>
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-belleya-bright to-belleya-vivid text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium shadow-lg text-xs md:text-base">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-belaya-bright to-belaya-vivid text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium shadow-lg text-xs md:text-base">
               <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
               14 jours gratuits - accès complet - sans engagement
             </div>
@@ -484,14 +484,14 @@ export default function Landing({ onSelectRole }: LandingProps) {
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-8">
             {[
               {
-                name: "BELLEYA START",
+                name: "BELAYA START",
                 planId: "start",
                 price: "29",
                 futurePrice: "39",
                 popular: false,
                 description: "Pour les indépendantes qui veulent structurer leur activité et arrêter de tout gérer à la main.",
                 icon: Sparkles,
-                color: "belleya-powder",
+                color: "belaya-powder",
                 features: [
                   "Gestion des objectifs",
                   "Gestion des tâches",
@@ -504,12 +504,12 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   "Boîte à idées IA",
                   "Suivi des paiements",
                   "Calculateur de rentabilité",
-                  "Partenariat officiel Belleya",
+                  "Partenariat officiel Belaya",
                   "Support WhatsApp 48h"
                 ]
               },
               {
-                name: "BELLEYA STUDIO",
+                name: "BELAYA STUDIO",
                 planId: "studio",
                 price: "39",
                 futurePrice: "49",
@@ -526,15 +526,15 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   "Gestion des stocks",
                   "Marketing automatique",
                   "Emails anniversaires & relances",
-                  "Partenariat officiel Belleya",
-                  "Visibilité plateforme Belleya",
+                  "Partenariat officiel Belaya",
+                  "Visibilité plateforme Belaya",
                   "Calcul charges & cotisations",
                   "Exports comptables",
                   "Support WhatsApp 24h"
                 ]
               },
               {
-                name: "BELLEYA EMPIRE",
+                name: "BELAYA EMPIRE",
                 planId: "empire",
                 price: "59",
                 futurePrice: "79",
@@ -542,14 +542,14 @@ export default function Landing({ onSelectRole }: LandingProps) {
                 isEmpire: true,
                 description: "Pour celles qui veulent automatiser et générer des revenus récurrents.",
                 icon: Crown,
-                color: "belleya-deep",
+                color: "belaya-deep",
                 features: [
                   "Tout Studio inclus +",
                   "Marketing automatisé avancé",
                   "Campagnes SMS + Email",
                   "Optimisation conversion",
                   "Rappels intelligents",
-                  "Partenariat officiel Belleya",
+                  "Partenariat officiel Belaya",
                   "Gestion des Revenus d'affiliation de vos partenaires",
                   "Mise en avant premium",
                   "Visibilité renforcée client",
@@ -563,7 +563,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   key={i}
                   className={`relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col ${
                     plan.popular ? 'border-2 border-amber-400 md:transform md:scale-105 mt-6' :
-                    plan.isEmpire ? 'border-2 border-belleya-deep mt-6' :
+                    plan.isEmpire ? 'border-2 border-belaya-deep mt-6' :
                     'border border-gray-200'
                   }`}
                 >
@@ -574,7 +574,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     </div>
                   )}
                   {plan.isEmpire && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belleya-deep to-belleya-bright text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-medium flex items-center gap-1 shadow-lg whitespace-nowrap">
                       <Crown className="w-3 h-3 md:w-4 md:h-4" />
                       Premium
                     </div>
@@ -583,10 +583,10 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   <div>
                     <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
                       <Icon className={`w-6 h-6 md:w-8 md:h-8 ${
-                        plan.color === 'belleya-powder' ? 'text-belleya-powder' :
+                        plan.color === 'belaya-powder' ? 'text-belaya-powder' :
                         plan.color === 'amber' ? 'text-amber-600' :
-                        plan.isEmpire ? 'text-belleya-deep' :
-                        'text-belleya-deep'
+                        plan.isEmpire ? 'text-belaya-deep' :
+                        'text-belaya-deep'
                       }`} />
                       <h3 className="text-lg md:text-2xl font-bold text-gray-900">{plan.name}</h3>
                     </div>
@@ -605,7 +605,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
                   <ul className="space-y-2 mb-6 md:mb-8 flex-1">
                     {plan.features.map((feature, j) => (
                       <li key={j} className="flex items-start gap-2 text-gray-700 text-xs md:text-sm">
-                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-belleya-vivid flex-shrink-0 mt-0.5" />
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-belaya-vivid flex-shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -617,8 +617,8 @@ export default function Landing({ onSelectRole }: LandingProps) {
                       plan.popular
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:scale-105'
                         : plan.isEmpire
-                        ? 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
-                        : 'bg-gradient-to-r from-belleya-deep to-belleya-bright text-white hover:shadow-lg hover:scale-105'
+                        ? 'bg-gradient-to-r from-belaya-deep to-belaya-bright text-white hover:shadow-lg hover:scale-105'
+                        : 'bg-gradient-to-r from-belaya-deep to-belaya-bright text-white hover:shadow-lg hover:scale-105'
                     }`}
                   >
                     Commencer gratuitement
@@ -656,7 +656,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               {
                 icon: Zap,
                 title: "Zéro prise de tête",
-                description: "Si tu sais utiliser Insta, tu sais utiliser Belleya."
+                description: "Si tu sais utiliser Insta, tu sais utiliser Belaya."
               },
               {
                 icon: Shield,
@@ -693,7 +693,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               Prête à reprendre le contrôle ?
             </h2>
             <p className="text-base md:text-xl lg:text-2xl mb-8 md:mb-10 opacity-95">
-              Rejoins les pros beauté qui pilotent leur activité avec Belleya.
+              Rejoins les pros beauté qui pilotent leur activité avec Belaya.
             </p>
 
             <button
@@ -717,7 +717,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             <div className="flex items-center gap-3">
               <img
                 src="/logo.png"
-                alt="Belleya"
+                alt="Belaya"
                 className="h-12 w-auto"
               />
             </div>
@@ -760,7 +760,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             </div>
 
             <p className="text-gray-500 text-sm">
-              © 2026 Belleya. Tous droits réservés.
+              © 2026 Belaya. Tous droits réservés.
             </p>
           </div>
         </div>
