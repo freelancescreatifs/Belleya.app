@@ -1,4 +1,4 @@
-import { Clock, Bell, MessageSquare, CreditCard } from 'lucide-react';
+import { Clock, Bell, CreditCard } from 'lucide-react';
 import InfoTooltip from '../shared/InfoTooltip';
 import PaymentProviderSetup from './PaymentProviderSetup';
 
@@ -154,56 +154,6 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               </p>
             </div>
           </label>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-belaya-primary" />
-          Messages personnalisés
-        </h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Message d'accueil
-              <InfoTooltip content="Message affiché sur votre page de réservation" />
-            </label>
-            <textarea
-              rows={3}
-              value={settings.welcome_message}
-              onChange={(e) => onChange({ ...settings, welcome_message: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-              placeholder="Ex: Bienvenue dans mon espace beauté ! Je suis ravie de vous accueillir..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Instructions de réservation
-              <InfoTooltip content="Instructions spéciales pour vos clientes (adresse, parking, etc.)" />
-            </label>
-            <textarea
-              rows={3}
-              value={settings.booking_instructions}
-              onChange={(e) => onChange({ ...settings, booking_instructions: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-              placeholder="Ex: Merci de sonner à l'interphone. Parking disponible devant l'institut..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Politique d'annulation
-              <InfoTooltip content="Conditions d'annulation et de report des rendez-vous" />
-            </label>
-            <textarea
-              rows={3}
-              value={settings.cancellation_policy}
-              onChange={(e) => onChange({ ...settings, cancellation_policy: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-              placeholder="Ex: Annulation gratuite jusqu'à 24h avant le RDV. En cas d'annulation tardive, l'acompte sera conservé..."
-            />
-          </div>
         </div>
       </div>
 

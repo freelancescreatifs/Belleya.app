@@ -23,6 +23,11 @@ export interface PublicProfileData {
   depositRequired: boolean;
   depositAmount: number | null;
   institutePhotos: Array<{ id: string; url: string; order: number }>;
+  diplomas: Array<{ id: string; name: string; year?: string }>;
+  conditions: Array<{ id: string; text: string }>;
+  welcomeMessage: string;
+  bookingInstructions: string;
+  cancellationPolicy: string;
 }
 
 export function usePublicProfile(slug: string) {
@@ -124,6 +129,11 @@ export function usePublicProfile(slug: string) {
         depositRequired: companyData.deposit_required ?? false,
         depositAmount: companyData.deposit_amount,
         institutePhotos: Array.isArray(companyData.institute_photos) ? companyData.institute_photos : [],
+        diplomas: Array.isArray(companyData.diplomas) ? companyData.diplomas : [],
+        conditions: Array.isArray(companyData.conditions) ? companyData.conditions : [],
+        welcomeMessage: companyData.welcome_message || '',
+        bookingInstructions: companyData.booking_instructions || '',
+        cancellationPolicy: companyData.cancellation_policy || '',
       });
     } catch (err: any) {
       console.error('Error loading profile:', err);

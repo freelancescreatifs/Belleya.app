@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Save, Upload, X, Plus, Trash2, MapPin, Instagram, Heart, Star, Sparkles, AlertCircle, Image as ImageIcon, Scissors, Clock, ChevronDown, ChevronUp, Share2, Check, CreditCard } from 'lucide-react';
+import { Eye, Save, Upload, X, Plus, Trash2, MapPin, Instagram, Heart, Star, Sparkles, AlertCircle, Image as ImageIcon, Scissors, Clock, ChevronDown, ChevronUp, Share2, Check, CreditCard, MessageSquare, Building2, Calendar, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { GeocodeResult } from '../lib/geocodingHelpers';
@@ -8,6 +8,8 @@ import { SERVICE_CATEGORIES } from '../lib/categoryHelpers';
 import AddressInput from '../components/settings/AddressInput';
 import CompactWeeklySchedule from '../components/settings/CompactWeeklySchedule';
 import BookingSettings from '../components/settings/BookingSettings';
+import InstituteTabContent from '../components/public-profile/InstituteTabContent';
+import InfoTooltip from '../components/shared/InfoTooltip';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -133,7 +135,8 @@ export default function PublicProfile() {
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
-  const [previewTab, setPreviewTab] = useState<'services' | 'gallery' | 'reviews'>('services');
+  const [previewTab, setPreviewTab] = useState<'services' | 'gallery' | 'reviews' | 'institute'>('services');
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['presentation']));
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showGalleryUploadModal, setShowGalleryUploadModal] = useState(false);
   const [pendingGalleryFile, setPendingGalleryFile] = useState<File | null>(null);
@@ -878,291 +881,414 @@ export default function PublicProfile() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* LEFT: Edit Form */}
-          <div className="space-y-6">
-            {/* Company Name */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Informations de base</h3>
+          {/* LEFT: Edit Form - Collapsible Accordion Sections */}
+          <div className="space-y-4">
+            {/* SECTION 1: Presentation de l'institut */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setExpandedSections(prev => {
+                  const next = new Set(prev);
+                  next.has('presentation') ? next.delete('presentation') : next.add('presentation');
+                  return next;
+                })}
+                className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-bold text-gray-900">Presentation de l'institut</h3>
+                    <p className="text-sm text-gray-500">Informations de base, photos & description</p>
+                  </div>
+                </div>
+                {expandedSections.has('presentation') ? (
+                  <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom de l'entreprise <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={companyName}
-                  onChange={(e) => {
-                    setCompanyName(e.target.value);
-                    setNameError(null);
-                  }}
-                  placeholder="Nom de votre salon / institut"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent ${
-                    nameError ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Champ obligatoire
-                </p>
+              <div className={`transition-all duration-300 overflow-hidden ${expandedSections.has('presentation') ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-5 pb-5 space-y-6 border-t border-gray-100">
+                  <div className="pt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nom de l'entreprise <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => {
+                        setCompanyName(e.target.value);
+                        setNameError(null);
+                      }}
+                      placeholder="Nom de votre salon / institut"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent ${
+                        nameError ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Champ obligatoire</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Photo de profil</label>
+                    <div className="flex items-center gap-4">
+                      {profileData.profile_photo ? (
+                        <div className="relative">
+                          <img
+                            src={profileData.profile_photo}
+                            alt="Photo de profil"
+                            className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                          />
+                          <button
+                            onClick={() => setProfileData({ ...profileData, profile_photo: null })}
+                            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                          <Sparkles className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) uploadProfilePhoto(file);
+                          }}
+                          className="hidden"
+                          disabled={uploadingPhoto}
+                        />
+                        <div className="px-4 py-2 bg-belaya-primary text-white rounded-lg hover:bg-belaya-700 flex items-center gap-2">
+                          {uploadingPhoto ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              Upload...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4" />
+                              Telecharger
+                            </>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Biographie</label>
+                    <textarea
+                      value={profileData.bio || ''}
+                      onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                      rows={4}
+                      maxLength={500}
+                      placeholder="Presentez-vous et partagez votre passion..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{(profileData.bio || '').length}/500 caracteres</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Instagram (URL complete)</label>
+                    <input
+                      type="url"
+                      value={profileData.instagram_url || ''}
+                      onChange={(e) => setProfileData({ ...profileData, instagram_url: e.target.value })}
+                      placeholder="https://instagram.com/votre_compte"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                    />
+                  </div>
+
+                  <AddressInput
+                    value={profileData.address || ''}
+                    onChange={(address) => setProfileData({ ...profileData, address })}
+                    onGeocode={handleAddressGeocode}
+                    currentLocation={
+                      profileData.latitude && profileData.longitude
+                        ? { latitude: profileData.latitude, longitude: profileData.longitude }
+                        : null
+                    }
+                    profilePhoto={profileData.profile_photo}
+                    error={addressError}
+                    onErrorChange={setAddressError}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Profile Photo & Bio */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Photo & Presentation</h3>
+            {/* SECTION 2: Parametres de reservation */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setExpandedSections(prev => {
+                  const next = new Set(prev);
+                  next.has('booking') ? next.delete('booking') : next.add('booking');
+                  return next;
+                })}
+                className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-bold text-gray-900">Parametres de reservation</h3>
+                    <p className="text-sm text-gray-500">Horaires, disponibilites, acompte & paiement</p>
+                  </div>
+                </div>
+                {expandedSections.has('booking') ? (
+                  <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Photo de profil
-                  </label>
-                  <div className="flex items-center gap-4">
-                    {profileData.profile_photo ? (
-                      <div className="relative">
-                        <img
-                          src={profileData.profile_photo}
-                          alt="Photo de profil"
-                          className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+              <div className={`transition-all duration-300 overflow-hidden ${expandedSections.has('booking') ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-5 pb-5 space-y-6 border-t border-gray-100">
+                  <div className="pt-4">
+                    <h4 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-belaya-primary" />
+                      Horaires & Disponibilites
+                    </h4>
+                    <CompactWeeklySchedule
+                      availability={weeklyAvailability}
+                      onChange={setWeeklyAvailability}
+                    />
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-4">
+                    <BookingSettings
+                      settings={bookingSettings}
+                      onChange={setBookingSettings}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 3: Informations de l'institut */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setExpandedSections(prev => {
+                  const next = new Set(prev);
+                  next.has('institute') ? next.delete('institute') : next.add('institute');
+                  return next;
+                })}
+                className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <Info className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-bold text-gray-900">Informations de l'institut</h3>
+                    <p className="text-sm text-gray-500">Photos, messages, certificats & conditions</p>
+                  </div>
+                </div>
+                {expandedSections.has('institute') ? (
+                  <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+
+              <div className={`transition-all duration-300 overflow-hidden ${expandedSections.has('institute') ? 'max-h-[8000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-5 pb-5 space-y-6 border-t border-gray-100">
+                  {/* Institute Photos */}
+                  <div className="pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4 text-belaya-primary" />
+                        Photos de l'institut
+                      </h4>
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) uploadInstitutePhoto(file);
+                          }}
+                          className="hidden"
+                          disabled={uploadingInstitute}
+                        />
+                        <div className="px-3 py-1 text-sm bg-belaya-primary text-white rounded hover:bg-belaya-700 flex items-center gap-1">
+                          {uploadingInstitute ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              Upload...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4" />
+                              Ajouter
+                            </>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {profileData.institute_photos.map((photo) => (
+                        <div key={photo.id} className="relative group">
+                          <img
+                            src={photo.url}
+                            alt="Photo institut"
+                            className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          />
+                          <button
+                            onClick={() => removeInstitutePhoto(photo.id)}
+                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom Messages */}
+                  <div className="border-t border-gray-100 pt-4">
+                    <h4 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-belaya-primary" />
+                      Messages personnalises
+                    </h4>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Message d'accueil
+                          <InfoTooltip content="Message affiche sur votre page de reservation" />
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={bookingSettings.welcome_message}
+                          onChange={(e) => setBookingSettings({ ...bookingSettings, welcome_message: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                          placeholder="Ex: Bienvenue dans mon espace beaute ! Je suis ravie de vous accueillir..."
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Instructions de reservation
+                          <InfoTooltip content="Instructions speciales pour vos clientes (adresse, parking, etc.)" />
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={bookingSettings.booking_instructions}
+                          onChange={(e) => setBookingSettings({ ...bookingSettings, booking_instructions: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                          placeholder="Ex: Merci de sonner a l'interphone. Parking disponible devant l'institut..."
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Politique d'annulation
+                          <InfoTooltip content="Conditions d'annulation et de report des rendez-vous" />
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={bookingSettings.cancellation_policy}
+                          onChange={(e) => setBookingSettings({ ...bookingSettings, cancellation_policy: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                          placeholder="Ex: Annulation gratuite jusqu'a 24h avant le RDV. En cas d'annulation tardive, l'acompte sera conserve..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Diplomas */}
+                  <div className="border-t border-gray-100 pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                        <Star className="w-4 h-4 text-amber-500" />
+                        Diplomes & Certificats
+                      </h4>
+                      <button
+                        onClick={addDiploma}
+                        className="px-3 py-1 text-sm bg-belaya-primary text-white rounded hover:bg-belaya-700 flex items-center gap-1"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Ajouter
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {profileData.diplomas.map((diploma) => (
+                        <div key={diploma.id} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={diploma.name}
+                            onChange={(e) => updateDiploma(diploma.id, 'name', e.target.value)}
+                            placeholder="Nom du diplome"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                          />
+                          <input
+                            type="text"
+                            value={diploma.year || ''}
+                            onChange={(e) => updateDiploma(diploma.id, 'year', e.target.value)}
+                            placeholder="Annee"
+                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                          />
+                          <button
+                            onClick={() => removeDiploma(diploma.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Conditions */}
+                  <div className="border-t border-gray-100 pt-4">
+                    <h4 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-gray-500" />
+                      Conditions generales
+                    </h4>
+                    <div className="space-y-3">
+                      {profileData.conditions.map((condition) => (
+                        <div key={condition.id} className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <p className="flex-1 text-sm text-gray-700">{condition.text}</p>
+                          <button
+                            onClick={() => removeCondition(condition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Nouvelle condition..."
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              addCondition((e.target as HTMLInputElement).value);
+                              (e.target as HTMLInputElement).value = '';
+                            }
+                          }}
                         />
                         <button
-                          onClick={() => setProfileData({ ...profileData, profile_photo: null })}
-                          className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                          onClick={(e) => {
+                            const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                            addCondition(input.value);
+                            input.value = '';
+                          }}
+                          className="px-4 py-2 bg-belaya-primary text-white rounded-lg hover:bg-belaya-700 flex items-center gap-2"
                         >
-                          <X className="w-4 h-4" />
+                          <Plus className="w-4 h-4" />
                         </button>
                       </div>
-                    ) : (
-                      <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
-                        <Sparkles className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) uploadProfilePhoto(file);
-                        }}
-                        className="hidden"
-                        disabled={uploadingPhoto}
-                      />
-                      <div className="px-4 py-2 bg-belaya-primary text-white rounded-lg hover:bg-belaya-700 flex items-center gap-2">
-                        {uploadingPhoto ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Upload...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4" />
-                            Telecharger
-                          </>
-                        )}
-                      </div>
-                    </label>
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Biographie
-                  </label>
-                  <textarea
-                    value={profileData.bio || ''}
-                    onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                    rows={4}
-                    maxLength={500}
-                    placeholder="Presentez-vous et partagez votre passion..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {(profileData.bio || '').length}/500 caracteres
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Instagram (URL complete)
-                  </label>
-                  <input
-                    type="url"
-                    value={profileData.instagram_url || ''}
-                    onChange={(e) => setProfileData({ ...profileData, instagram_url: e.target.value })}
-                    placeholder="https://instagram.com/votre_compte"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-                  />
-                </div>
-
-                <AddressInput
-                  value={profileData.address || ''}
-                  onChange={(address) => setProfileData({ ...profileData, address })}
-                  onGeocode={handleAddressGeocode}
-                  currentLocation={
-                    profileData.latitude && profileData.longitude
-                      ? { latitude: profileData.latitude, longitude: profileData.longitude }
-                      : null
-                  }
-                  profilePhoto={profileData.profile_photo}
-                  error={addressError}
-                  onErrorChange={setAddressError}
-                />
               </div>
             </div>
-
-            {/* Horaires d'ouverture - Vue compacte */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Horaires & Disponibilités</h3>
-              <CompactWeeklySchedule
-                availability={weeklyAvailability}
-                onChange={setWeeklyAvailability}
-              />
-            </div>
-
-            {/* Paramètres de réservation */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-6">Paramètres de réservation</h3>
-              <BookingSettings
-                settings={bookingSettings}
-                onChange={setBookingSettings}
-              />
-            </div>
-
-            {/* Institute Photos */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Photos de l'institut</h3>
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) uploadInstitutePhoto(file);
-                    }}
-                    className="hidden"
-                    disabled={uploadingInstitute}
-                  />
-                  <div className="px-3 py-1 text-sm bg-belaya-primary text-white rounded hover:bg-belaya-700 flex items-center gap-1">
-                    {uploadingInstitute ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Upload...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" />
-                        Ajouter
-                      </>
-                    )}
-                  </div>
-                </label>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                {profileData.institute_photos.map((photo) => (
-                  <div key={photo.id} className="relative group">
-                    <img
-                      src={photo.url}
-                      alt="Photo institut"
-                      className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                    />
-                    <button
-                      onClick={() => removeInstitutePhoto(photo.id)}
-                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Diplomas */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Diplomes</h3>
-                <button
-                  onClick={addDiploma}
-                  className="px-3 py-1 text-sm bg-belaya-primary text-white rounded hover:bg-belaya-700 flex items-center gap-1"
-                >
-                  <Plus className="w-4 h-4" />
-                  Ajouter
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                {profileData.diplomas.map((diploma) => (
-                  <div key={diploma.id} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={diploma.name}
-                      onChange={(e) => updateDiploma(diploma.id, 'name', e.target.value)}
-                      placeholder="Nom du diplome"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-                    />
-                    <input
-                      type="text"
-                      value={diploma.year || ''}
-                      onChange={(e) => updateDiploma(diploma.id, 'year', e.target.value)}
-                      placeholder="Annee"
-                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-                    />
-                    <button
-                      onClick={() => removeDiploma(diploma.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Conditions */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Conditions</h3>
-
-              <div className="space-y-3">
-                {profileData.conditions.map((condition) => (
-                  <div key={condition.id} className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="flex-1 text-sm text-gray-700">{condition.text}</p>
-                    <button
-                      onClick={() => removeCondition(condition.id)}
-                      className="p-1 text-red-600 hover:bg-red-50 rounded"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Nouvelle condition..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        addCondition((e.target as HTMLInputElement).value);
-                        (e.target as HTMLInputElement).value = '';
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={(e) => {
-                      const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
-                      addCondition(input.value);
-                      input.value = '';
-                    }}
-                    className="px-4 py-2 bg-belaya-primary text-white rounded-lg hover:bg-belaya-700 flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
           </div>
 
           {/* RIGHT: Live Preview */}
@@ -1330,6 +1456,20 @@ export default function PublicProfile() {
                         <span>Avis</span>
                       </div>
                     </button>
+
+                    <button
+                      onClick={() => setPreviewTab('institute')}
+                      className={`flex-1 py-3 px-4 font-semibold transition-all ${
+                        previewTab === 'institute'
+                          ? 'text-[#C43586] border-b-2 border-[#C43586]'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <ImageIcon className="w-4 h-4" />
+                        <span>Institut</span>
+                      </div>
+                    </button>
                   </div>
                 </div>
 
@@ -1337,25 +1477,6 @@ export default function PublicProfile() {
                 <div className="p-4 space-y-4">
                   {previewTab === 'services' && (
                     <div className="space-y-4">
-                      {/* Institute Photos */}
-                      {profileData.institute_photos.length > 0 && (
-                        <div>
-                          <h4 className="font-bold text-gray-900 mb-2 text-sm">Photos de l'institut</h4>
-                          <div className="grid grid-cols-3 gap-2">
-                            {profileData.institute_photos.slice(0, 6).map((photo) => (
-                              <img
-                                key={photo.id}
-                                src={photo.url}
-                                alt="Institut"
-                                className="w-full aspect-square object-cover rounded-lg"
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-
-                      {/* Services */}
                       {services.filter(s => s.status === 'active').length > 0 && (
                         <div>
                           <h4 className="font-bold text-gray-900 mb-2 text-sm">Mes services</h4>
@@ -1433,33 +1554,6 @@ export default function PublicProfile() {
                         </div>
                       )}
 
-                      {/* Diplomas */}
-                      {profileData.diplomas.length > 0 && (
-                        <div>
-                          <h4 className="font-bold text-gray-900 mb-2 text-sm">Diplomes</h4>
-                          <div className="space-y-1">
-                            {profileData.diplomas.map((diploma) => (
-                              <div key={diploma.id} className="text-sm text-gray-700">
-                                {diploma.name} {diploma.year && `(${diploma.year})`}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Conditions */}
-                      {profileData.conditions.length > 0 && (
-                        <div>
-                          <h4 className="font-bold text-gray-900 mb-2 text-sm">Conditions</h4>
-                          <div className="space-y-1">
-                            {profileData.conditions.map((condition) => (
-                              <div key={condition.id} className="text-sm text-gray-600">
-                                • {condition.text}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
 
@@ -1589,6 +1683,18 @@ export default function PublicProfile() {
                         ))
                       )}
                     </div>
+                  )}
+
+                  {previewTab === 'institute' && (
+                    <InstituteTabContent
+                      institutePhotos={profileData.institute_photos}
+                      diplomas={profileData.diplomas}
+                      conditions={profileData.conditions}
+                      welcomeMessage={bookingSettings.welcome_message}
+                      bookingInstructions={bookingSettings.booking_instructions}
+                      cancellationPolicy={bookingSettings.cancellation_policy}
+                      compact
+                    />
                   )}
                 </div>
               </div>

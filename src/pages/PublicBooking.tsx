@@ -30,6 +30,7 @@ import {
   Review
 } from '../lib/socialHelpers';
 import DepositPayment from '../components/client/DepositPayment';
+import InstituteTabContent from '../components/public-profile/InstituteTabContent';
 
 interface PublicBookingProps {
   slug: string;
@@ -51,6 +52,11 @@ interface ProProfile {
   likesCount: number;
   photosCount: number;
   institute_photos: Array<{ id: string; url: string; order: number }>;
+  diplomas: Array<{ id: string; name: string; year?: string }>;
+  conditions: Array<{ id: string; text: string }>;
+  welcome_message: string;
+  booking_instructions: string;
+  cancellation_policy: string;
 }
 
 interface Supplement {
@@ -162,7 +168,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id, company_name, is_accepting_bookings, id, address, institute_photos, deposit_required, deposit_amount, deposit_fee_payer')
+        .select('user_id, company_name, is_accepting_bookings, id, address, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy, deposit_required, deposit_amount, deposit_fee_payer')
         .eq('booking_slug', slug)
         .maybeSingle();
 
@@ -222,6 +228,11 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         likesCount: likesData?.length || 0,
         photosCount: photosCount || 0,
         institute_photos: Array.isArray(companyData.institute_photos) ? companyData.institute_photos : [],
+        diplomas: Array.isArray(companyData.diplomas) ? companyData.diplomas : [],
+        conditions: Array.isArray(companyData.conditions) ? companyData.conditions : [],
+        welcome_message: companyData.welcome_message || '',
+        booking_instructions: companyData.booking_instructions || '',
+        cancellation_policy: companyData.cancellation_policy || '',
       });
     } catch (error) {
       console.error('Error:', error);
@@ -1285,25 +1296,14 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
         {activeTab === 'institute' && (
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            {proProfile.institute_photos.length === 0 ? (
-              <div className="text-center py-12">
-                <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Aucune photo de l'institut</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {proProfile.institute_photos.map((photo) => (
-                  <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden">
-                    <img
-                      src={photo.url}
-                      alt="Institut"
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+            <InstituteTabContent
+              institutePhotos={proProfile.institute_photos}
+              diplomas={proProfile.diplomas}
+              conditions={proProfile.conditions}
+              welcomeMessage={proProfile.welcome_message}
+              bookingInstructions={proProfile.booking_instructions}
+              cancellationPolicy={proProfile.cancellation_policy}
+            />
           </div>
         )}
 

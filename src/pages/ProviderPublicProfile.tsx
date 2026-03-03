@@ -8,6 +8,7 @@ import ServiceCard from '../components/public-profile/ServiceCard';
 import TimeSlotPicker from '../components/public-profile/TimeSlotPicker';
 import BookingSummary from '../components/public-profile/BookingSummary';
 import AuthGate from '../components/public-profile/AuthGate';
+import InstituteTabContent from '../components/public-profile/InstituteTabContent';
 
 interface Service {
   id: string;
@@ -457,27 +458,14 @@ export default function ProviderPublicProfile() {
           )}
 
           {activeTab === 'institute' && (
-            <div>
-              {profile.institutePhotos.length === 0 ? (
-                <div className="text-center py-12">
-                  <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-600">Aucune photo de l'institut</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {profile.institutePhotos.map((photo) => (
-                    <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden">
-                      <img
-                        src={photo.url}
-                        alt="Institut"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <InstituteTabContent
+              institutePhotos={profile.institutePhotos}
+              diplomas={profile.diplomas}
+              conditions={profile.conditions}
+              welcomeMessage={profile.welcomeMessage}
+              bookingInstructions={profile.bookingInstructions}
+              cancellationPolicy={profile.cancellationPolicy}
+            />
           )}
         </div>
       </div>
