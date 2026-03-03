@@ -51,7 +51,7 @@ export default function BeforeAfterSection() {
           </div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite] leading-tight">
-            Votre vie professionnelle :<br className="hidden sm:block" /><span className="sm:hidden"> </span>AVANT / APRÈS Belleya
+            Votre vie professionnelle :<br className="hidden sm:block" /><span className="sm:hidden"> </span>AVANT / APRÈS Belaya
           </h2>
           <p className="text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Passez du chaos à la sérénité en quelques clics
@@ -137,7 +137,7 @@ export default function BeforeAfterSection() {
             <div className="absolute inset-0 bg-gradient-to-r from-rose-100/30 via-pink-100/30 to-rose-100/30 rounded-2xl md:rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-[#efaa9a]/10 via-[#d9629b]/10 to-[#efaa9a]/10 rounded-2xl md:rounded-3xl blur-xl animate-[morph_8s_ease-in-out_infinite]"></div>
 
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl md:rounded-3xl p-5 md:p-8 lg:p-10 border border-belleya-200/50 shadow-[0_8px_40px_rgba(239,170,154,0.12)] group-hover:shadow-[0_12px_60px_rgba(217,98,155,0.2)] transition-all duration-500">
+            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl md:rounded-3xl p-5 md:p-8 lg:p-10 border border-belaya-200/50 shadow-[0_8px_40px_rgba(239,170,154,0.12)] group-hover:shadow-[0_12px_60px_rgba(217,98,155,0.2)] transition-all duration-500">
               <div className="relative inline-block mb-3 md:mb-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#efaa9a] to-[#d9629b] rounded-xl md:rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
                 <div className="relative w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-[#efaa9a] to-[#d9629b] rounded-xl md:rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:scale-110 transition-transform duration-500">
@@ -146,7 +146,7 @@ export default function BeforeAfterSection() {
               </div>
 
               <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-gray-700 leading-relaxed mb-2">
-                <span className="font-bold bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">Belleya</span> n'est pas un simple logiciel.
+                <span className="font-bold bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">Belaya</span> n'est pas un simple logiciel.
               </p>
               <p className="text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 leading-relaxed">
                 C'est votre alliée pour reprendre le contrôle et retrouver votre sérénité.

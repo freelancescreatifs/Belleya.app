@@ -31,7 +31,7 @@ export default function SocialMediaDrawer({ content, onClose, onEdit, onRefresh 
   function getPlatformColor(platform: string) {
     switch (platform.toLowerCase()) {
       case 'instagram':
-        return 'bg-belleya-100 text-belleya-deep border-belleya-100';
+        return 'bg-belaya-100 text-belaya-deep border-belaya-100';
       case 'linkedin':
         return 'bg-blue-100 text-blue-700 border-blue-300';
       case 'facebook':
@@ -65,7 +65,7 @@ export default function SocialMediaDrawer({ content, onClose, onEdit, onRefresh 
   function getStatusColor(status: string) {
     switch (status) {
       case 'published':
-        return 'bg-green-100 text-green-800 border-belleya-300';
+        return 'bg-green-100 text-green-800 border-belaya-300';
       case 'scheduled':
         return 'bg-blue-100 text-blue-800 border-blue-300';
       case 'script':
@@ -220,7 +220,7 @@ export default function SocialMediaDrawer({ content, onClose, onEdit, onRefresh 
 
           <button
             onClick={() => onEdit(content.id)}
-            className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-belleya-100 text-white rounded-xl hover:from-orange-600 hover:to-belleya-primary transition-all font-medium"
+            className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-belaya-100 text-white rounded-xl hover:from-orange-600 hover:to-belaya-primary transition-all font-medium"
           >
             Modifier la publication
           </button>

@@ -9,7 +9,7 @@ import {
 import MissionOneModal from './MissionOneModal';
 import MissionTwoModal from './MissionTwoModal';
 
-export default function BelleyaRewardsCard() {
+export default function BelayaRewardsCard() {
   const { user, companyProfile } = useAuth();
   const [submissions, setSubmissions] = useState<RewardSubmission[]>([]);
   const [freeMonths, setFreeMonths] = useState(0);
@@ -68,7 +68,7 @@ export default function BelleyaRewardsCard() {
   const status = getMainStatus();
   const StatusIcon = status.icon;
 
-  console.log('[BelleyaRewardsCard] Rendering - loading:', loading, 'companyProfile:', companyProfile?.id, 'submissions:', submissions.length);
+  console.log('[BelayaRewardsCard] Rendering - loading:', loading, 'companyProfile:', companyProfile?.id, 'submissions:', submissions.length);
 
   if (loading) {
     return (
@@ -88,11 +88,11 @@ export default function BelleyaRewardsCard() {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center border border-belleya-200">
-                  <span className="text-xl font-bold text-belleya-primary">B</span>
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center border border-belaya-200">
+                  <span className="text-xl font-bold text-belaya-primary">B</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Programme Belleya</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Programme Belaya</h3>
                   <p className="text-sm text-gray-600">Jusqu'à 2 mois gratuits</p>
                 </div>
               </div>
@@ -110,7 +110,7 @@ export default function BelleyaRewardsCard() {
                   <Gift className="w-5 h-5 text-pink-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-gray-700">
                     <strong className="text-gray-900">Comment ça marche ?</strong>
-                    <p className="mt-1">Soutenez Belleya sur Instagram et gagnez des mois gratuits !</p>
+                    <p className="mt-1">Soutenez Belaya sur Instagram et gagnez des mois gratuits !</p>
                   </div>
                 </div>
                 {freeMonths > 0 && (
@@ -152,7 +152,7 @@ export default function BelleyaRewardsCard() {
                 <ul className="text-sm text-gray-600 mb-4 space-y-1">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                    S'abonner à @belleya.app
+                    S'abonner à @belaya.app
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -222,7 +222,7 @@ export default function BelleyaRewardsCard() {
                 <ul className="text-sm text-gray-600 mb-4 space-y-1">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                    Publier une vidéo avec tag @belleya.app
+                    Publier une vidéo avec tag @belaya.app
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -293,15 +293,15 @@ export default function BelleyaRewardsCard() {
     <>
       <div
         onClick={() => setShowDetail(true)}
-        className="bg-white rounded-xl border-2 border-belleya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+        className="bg-white rounded-xl border-2 border-belaya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
       >
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belleya-200 flex-shrink-0">
-            <span className="text-2xl font-bold text-belleya-primary">B</span>
+          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belaya-200 flex-shrink-0">
+            <span className="text-2xl font-bold text-belaya-primary">B</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-xl font-bold text-gray-900">Belleya</h3>
+              <h3 className="text-xl font-bold text-gray-900">Belaya</h3>
               <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-semibold rounded-full">
                 <Sparkles className="w-3 h-3" />
                 Officiel
@@ -333,11 +333,11 @@ export default function BelleyaRewardsCard() {
 
           <div className="flex items-center justify-between py-2 border-t border-gray-100">
             <span className="text-sm text-gray-600">Récompense</span>
-            <span className="text-sm font-semibold text-belleya-bright">Jusqu'à 2 mois</span>
+            <span className="text-sm font-semibold text-belaya-bright">Jusqu'à 2 mois</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-center text-sm text-belleya-600 font-medium group-hover:text-belleya-700 transition-colors">
+        <div className="flex items-center justify-center text-sm text-belaya-600 font-medium group-hover:text-belaya-700 transition-colors">
           <span>Voir les missions</span>
           <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
         </div>

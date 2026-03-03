@@ -59,5 +59,5 @@ export async function updateBookingSlug(
 }
 
 export function getBookingUrl(slug: string): string {
-  return `https://belleya.app/book/${slug}`;
+  return `https://belaya.app/book/${slug}`;
 }

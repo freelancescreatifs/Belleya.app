@@ -58,7 +58,7 @@ export default function MarketingHistory({ userId }: MarketingHistoryProps) {
     switch (status) {
       case 'sent':
       case 'delivered':
-        return <CheckCircle className="w-4 h-4 text-belleya-bright" />;
+        return <CheckCircle className="w-4 h-4 text-belaya-bright" />;
       case 'failed':
         return <XCircle className="w-4 h-4 text-red-600" />;
       case 'clicked':
@@ -146,7 +146,7 @@ export default function MarketingHistory({ userId }: MarketingHistoryProps) {
                 </td>
                 <td className="px-4 py-3">
                   {send.channel === 'sms' ? (
-                    <div className="flex items-center gap-2 text-belleya-bright">
+                    <div className="flex items-center gap-2 text-belaya-bright">
                       <MessageSquare className="w-4 h-4" />
                       <span className="text-sm">SMS</span>
                     </div>

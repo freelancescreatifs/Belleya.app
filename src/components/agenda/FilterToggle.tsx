@@ -59,7 +59,7 @@ export default function FilterToggle({ activeFilters, onChange }: FilterTogglePr
           onClick={() => toggleFilter('social_media')}
           className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
             activeFilters.has('social_media')
-              ? 'bg-belleya-500 text-white shadow-sm'
+              ? 'bg-belaya-500 text-white shadow-sm'
               : 'text-gray-600 hover:text-gray-900 hover:bg-white'
           }`}
         >

@@ -247,7 +247,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   function getStatusColor(status: string) {
     switch (status) {
       case 'published':
-        return 'bg-green-100 text-green-800 border-belleya-200';
+        return 'bg-green-100 text-green-800 border-belaya-200';
       case 'scheduled':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'script':
@@ -416,7 +416,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
   function getPlatformColor(platform: string) {
     switch (platform.toLowerCase()) {
       case 'instagram':
-        return 'bg-belleya-100 text-belleya-deep border-belleya-100';
+        return 'bg-belaya-100 text-belaya-deep border-belaya-100';
       case 'linkedin':
         return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'facebook':
@@ -559,7 +559,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
 
     return (
       <div className="space-y-3">
-        <div className="text-center py-4 bg-gradient-to-r from-orange-50 to-belleya-50 rounded-xl">
+        <div className="text-center py-4 bg-gradient-to-r from-orange-50 to-belaya-50 rounded-xl">
           <h3 className="text-lg font-bold text-gray-900">
             {currentDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </h3>
@@ -571,7 +571,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
             <p className="text-gray-600 mb-4">Aucun contenu prévu ce jour</p>
             <button
               onClick={() => handleCreate(formatDateToLocal(currentDate))}
-              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-belleya-primary text-white rounded-lg hover:from-orange-600 hover:to-belleya-primary transition-all"
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-belaya-primary text-white rounded-lg hover:from-orange-600 hover:to-belaya-primary transition-all"
             >
               Créer une publication
             </button>
@@ -681,7 +681,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
                     <span className="text-sm text-gray-600">{dayContents.length} contenu(s)</span>
                     <button
                       onClick={() => handleCreate(dateStr)}
-                      className="p-2 bg-gradient-to-r from-orange-500 to-belleya-primary text-white rounded-lg hover:from-orange-600 hover:to-belleya-primary transition-all"
+                      className="p-2 bg-gradient-to-r from-orange-500 to-belaya-primary text-white rounded-lg hover:from-orange-600 hover:to-belaya-primary transition-all"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -803,7 +803,7 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
         </div>
         <button
           onClick={() => handleCreate()}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-belleya-primary text-white rounded-xl hover:from-orange-600 hover:to-belleya-primary transition-all"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-belaya-primary text-white rounded-xl hover:from-orange-600 hover:to-belaya-primary transition-all"
         >
           <Plus className="w-4 h-4" />
           Nouveau contenu
@@ -1099,7 +1099,7 @@ function DraggableWeekContent({
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border ${
               content.is_published
-                ? 'bg-green-50 text-green-700 border-belleya-300'
+                ? 'bg-green-50 text-green-700 border-belaya-300'
                 : 'bg-gray-50 text-gray-700 border-gray-300'
             }`}>
               {content.is_published ? <CheckCircle className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}

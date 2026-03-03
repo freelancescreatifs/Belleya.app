@@ -108,7 +108,7 @@ export default function TimelineView({
                       </div>
                     )}
                     {duration && (
-                      <div className="text-xs text-belleya-primary font-semibold mt-2 bg-white px-2 py-1 rounded-full">
+                      <div className="text-xs text-belaya-primary font-semibold mt-2 bg-white px-2 py-1 rounded-full">
                         {duration.display}
                       </div>
                     )}

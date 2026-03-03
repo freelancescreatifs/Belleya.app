@@ -28,7 +28,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
     <div className="space-y-8">
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-belleya-primary" />
+          <Clock className="w-5 h-5 text-belaya-primary" />
           Paramètres de réservation
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -44,7 +44,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               step="15"
               value={settings.default_appointment_duration}
               onChange={(e) => onChange({ ...settings, default_appointment_duration: parseInt(e.target.value) || 60 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -59,7 +59,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               max="168"
               value={settings.advance_booking_hours}
               onChange={(e) => onChange({ ...settings, advance_booking_hours: parseInt(e.target.value) || 0 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -75,7 +75,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               step="5"
               value={settings.buffer_time_minutes}
               onChange={(e) => onChange({ ...settings, buffer_time_minutes: parseInt(e.target.value) || 0 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -90,7 +90,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               placeholder="Illimité"
               value={settings.max_bookings_per_day || ''}
               onChange={(e) => onChange({ ...settings, max_bookings_per_day: e.target.value ? parseInt(e.target.value) : null })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
 
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Bell className="w-5 h-5 text-belleya-primary" />
+          <Bell className="w-5 h-5 text-belaya-primary" />
           Notifications et automatisation
         </h3>
         <div className="space-y-4">
@@ -107,7 +107,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               type="checkbox"
               checked={settings.auto_accept_bookings}
               onChange={(e) => onChange({ ...settings, auto_accept_bookings: e.target.checked })}
-              className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary rounded mt-1"
+              className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary rounded mt-1"
             />
             <div>
               <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               type="checkbox"
               checked={settings.email_notifications}
               onChange={(e) => onChange({ ...settings, email_notifications: e.target.checked })}
-              className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary rounded mt-1"
+              className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary rounded mt-1"
             />
             <div>
               <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               type="checkbox"
               checked={settings.sms_notifications}
               onChange={(e) => onChange({ ...settings, sms_notifications: e.target.checked })}
-              className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary rounded mt-1"
+              className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary rounded mt-1"
             />
             <div>
               <div className="flex items-center gap-2">
@@ -159,7 +159,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
 
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-belleya-primary" />
+          <MessageSquare className="w-5 h-5 text-belaya-primary" />
           Messages personnalisés
         </h3>
         <div className="space-y-4">
@@ -172,7 +172,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               rows={3}
               value={settings.welcome_message}
               onChange={(e) => onChange({ ...settings, welcome_message: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               placeholder="Ex: Bienvenue dans mon espace beauté ! Je suis ravie de vous accueillir..."
             />
           </div>
@@ -186,7 +186,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               rows={3}
               value={settings.booking_instructions}
               onChange={(e) => onChange({ ...settings, booking_instructions: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               placeholder="Ex: Merci de sonner à l'interphone. Parking disponible devant l'institut..."
             />
           </div>
@@ -200,7 +200,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               rows={3}
               value={settings.cancellation_policy}
               onChange={(e) => onChange({ ...settings, cancellation_policy: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               placeholder="Ex: Annulation gratuite jusqu'à 24h avant le RDV. En cas d'annulation tardive, l'acompte sera conservé..."
             />
           </div>
@@ -209,7 +209,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
 
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <CreditCard className="w-5 h-5 text-belleya-primary" />
+          <CreditCard className="w-5 h-5 text-belaya-primary" />
           Acompte
         </h3>
         <div className="space-y-4">
@@ -218,7 +218,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               type="checkbox"
               checked={settings.deposit_required}
               onChange={(e) => onChange({ ...settings, deposit_required: e.target.checked })}
-              className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary rounded mt-1"
+              className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary rounded mt-1"
             />
             <div>
               <div className="flex items-center gap-2">
@@ -244,7 +244,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
                   step="0.01"
                   value={settings.deposit_amount || ''}
                   onChange={(e) => onChange({ ...settings, deposit_amount: e.target.value ? parseFloat(e.target.value) : null })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   placeholder="Ex: 20.00"
                 />
               </div>
@@ -252,7 +252,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Qui paie les frais de transaction (1,5%) ?
-                  <InfoTooltip content="Frais de la plateforme Belleya sur chaque acompte. Vous pouvez choisir de les absorber ou de les facturer au client." />
+                  <InfoTooltip content="Frais de la plateforme Belaya sur chaque acompte. Vous pouvez choisir de les absorber ou de les facturer au client." />
                 </label>
                 <div className="space-y-2">
                   <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
@@ -261,7 +261,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
                       name="deposit_fee_payer"
                       checked={settings.deposit_fee_payer === 'provider'}
                       onChange={() => onChange({ ...settings, deposit_fee_payer: 'provider' })}
-                      className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary mt-0.5"
+                      className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary mt-0.5"
                     />
                     <div>
                       <span className="text-sm font-medium text-gray-900">Je prends en charge les frais</span>
@@ -276,7 +276,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
                       name="deposit_fee_payer"
                       checked={settings.deposit_fee_payer === 'client'}
                       onChange={() => onChange({ ...settings, deposit_fee_payer: 'client' })}
-                      className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary mt-0.5"
+                      className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary mt-0.5"
                     />
                     <div>
                       <span className="text-sm font-medium text-gray-900">Le client paie les frais</span>
@@ -300,7 +300,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
       {settings.deposit_required && (
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-belleya-primary" />
+            <CreditCard className="w-5 h-5 text-belaya-primary" />
             Paiement en ligne
           </h3>
           <PaymentProviderSetup depositRequired={settings.deposit_required} />

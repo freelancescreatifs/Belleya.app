@@ -57,7 +57,7 @@ export default function SubscriptionStatus() {
         <p className="text-slate-600 mb-4">Aucun abonnement actif</p>
         <button
           onClick={() => window.location.href = '/pricing'}
-          className="bg-belleya-vivid text-white px-4 py-2 rounded-lg hover:bg-belleya-bright transition-colors"
+          className="bg-belaya-vivid text-white px-4 py-2 rounded-lg hover:bg-belaya-bright transition-colors"
         >
           Choisir une offre
         </button>
@@ -68,7 +68,7 @@ export default function SubscriptionStatus() {
   const getPlanIcon = () => {
     switch (status.planType) {
       case 'start':
-        return <Sparkles className="w-6 h-6 text-belleya-bright" />;
+        return <Sparkles className="w-6 h-6 text-belaya-bright" />;
       case 'studio':
         return <Zap className="w-6 h-6 text-amber-600" />;
       case 'empire':
@@ -81,7 +81,7 @@ export default function SubscriptionStatus() {
   const getPlanColor = () => {
     switch (status.planType) {
       case 'start':
-        return 'from-belleya-bright to-teal-500';
+        return 'from-belaya-bright to-teal-500';
       case 'studio':
         return 'from-amber-500 to-orange-500';
       case 'empire':
@@ -131,8 +131,8 @@ export default function SubscriptionStatus() {
             <div className="flex items-center gap-2">
               {status.isActive ? (
                 <>
-                  <CheckCircle2 className="w-5 h-5 text-belleya-vivid" />
-                  <span className="font-medium text-belleya-bright">
+                  <CheckCircle2 className="w-5 h-5 text-belaya-vivid" />
+                  <span className="font-medium text-belaya-bright">
                     {status.isTrial ? 'Essai gratuit actif' : 'Actif'}
                   </span>
                 </>
@@ -169,7 +169,7 @@ export default function SubscriptionStatus() {
         </div>
 
         {status.isTrial && (
-          <div className="mt-6 bg-emerald-50 border border-belleya-200 rounded-lg p-4">
+          <div className="mt-6 bg-emerald-50 border border-belaya-200 rounded-lg p-4">
             <p className="text-sm text-emerald-800 mb-3">
               Votre essai gratuit expire le {new Date(subscriptionData.trial_end_date).toLocaleDateString('fr-FR')}.
               Profitez de toutes les fonctionnalités sans engagement.
@@ -196,7 +196,7 @@ export default function SubscriptionStatus() {
           {(status.isTrial || status.subscriptionStatus === 'expired' || status.subscriptionStatus === 'past_due') && (
             <button
               onClick={() => window.location.href = '/pricing'}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-belleya-deep to-belleya-bright text-white px-4 py-3 rounded-lg hover:shadow-lg transition-all font-medium"
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white px-4 py-3 rounded-lg hover:shadow-lg transition-all font-medium"
             >
               <CreditCard className="w-4 h-4" />
               {status.isTrial ? 'Activer mon abonnement' : 'Mettre a jour le paiement'}

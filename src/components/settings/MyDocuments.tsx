@@ -146,7 +146,7 @@ export default function MyDocuments() {
         </div>
         <button
           onClick={() => setShowUploadModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors"
         >
           <Upload className="w-4 h-4" />
           Ajouter un document
@@ -233,7 +233,7 @@ export default function MyDocuments() {
                 <select
                   value={uploadForm.category}
                   onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value as UserDocument['category'] })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   {CATEGORIES.map(cat => (
                     <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -248,7 +248,7 @@ export default function MyDocuments() {
                 <input
                   type="file"
                   onChange={(e) => setUploadForm({ ...uploadForm, file: e.target.files?.[0] || null })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -264,7 +264,7 @@ export default function MyDocuments() {
                   value={uploadForm.notes}
                   onChange={(e) => setUploadForm({ ...uploadForm, notes: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent resize-none"
                   placeholder="Description ou notes sur ce document..."
                 />
               </div>
@@ -279,7 +279,7 @@ export default function MyDocuments() {
                 <button
                   onClick={handleUpload}
                   disabled={!uploadForm.file || uploading}
-                  className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {uploading ? 'Upload...' : 'Ajouter'}
                 </button>

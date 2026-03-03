@@ -477,7 +477,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         <div className="flex gap-2">
           <button
             onClick={() => handleToProduce(idea.id)}
-            className="flex-1 px-3 py-1.5 bg-gradient-to-r from-belleya-bright to-belleya-bright text-white rounded-lg hover:from-belleya-deep hover:to-belleya-deep transition-all text-xs font-medium flex items-center justify-center gap-1.5"
+            className="flex-1 px-3 py-1.5 bg-gradient-to-r from-belaya-bright to-belaya-bright text-white rounded-lg hover:from-belaya-deep hover:to-belaya-deep transition-all text-xs font-medium flex items-center justify-center gap-1.5"
           >
             <Calendar className="w-3.5 h-3.5" />
             À produire
@@ -871,7 +871,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
             </button>
             <button
               onClick={confirmProduction}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-belleya-bright to-belleya-bright text-white rounded-lg hover:from-belleya-deep hover:to-belleya-deep transition-all font-medium"
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-belaya-bright to-belaya-bright text-white rounded-lg hover:from-belaya-deep hover:to-belaya-deep transition-all font-medium"
             >
               Confirmer
             </button>

@@ -30,14 +30,14 @@ export default function ToastNotification({ toast, onDismiss }: ToastNotificatio
   };
 
   const styles = {
-    success: 'bg-belleya-50 border-belleya-200 text-belleya-800',
+    success: 'bg-belaya-50 border-belaya-200 text-belaya-800',
     error: 'bg-red-50 border-red-200 text-red-800',
     info: 'bg-brand-50 border-brand-200 text-brand-800',
     warning: 'bg-amber-50 border-amber-200 text-amber-800',
   };
 
   const iconStyles = {
-    success: 'text-belleya-vivid',
+    success: 'text-belaya-vivid',
     error: 'text-red-600',
     info: 'text-brand-600',
     warning: 'text-amber-600',

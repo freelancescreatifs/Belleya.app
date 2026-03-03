@@ -152,7 +152,7 @@ export default function SubprojectManager({
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <Layers className="w-5 h-5 text-belleya-500" />
+          <Layers className="w-5 h-5 text-belaya-500" />
           Sous-projets
         </h3>
         {!showAddForm && (
@@ -176,7 +176,7 @@ export default function SubprojectManager({
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               placeholder="Ex: Design, Développement, Marketing..."
               required
             />

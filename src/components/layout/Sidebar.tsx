@@ -136,7 +136,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     isActive
                       ? 'bg-gradient-main text-white font-medium shadow-md'
-                      : 'text-gray-600 hover:bg-gradient-soft hover:text-belleya-deep'
+                      : 'text-gray-600 hover:bg-gradient-soft hover:text-belaya-deep'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -154,7 +154,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
               currentPage === 'admin'
                 ? 'bg-gradient-main text-white font-medium shadow-md'
-                : 'text-gray-600 hover:bg-gradient-soft hover:text-belleya-deep'
+                : 'text-gray-600 hover:bg-gradient-soft hover:text-belaya-deep'
             }`}
           >
             <Shield className="w-5 h-5" />
@@ -166,7 +166,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
             currentPage === 'settings'
               ? 'bg-gradient-main text-white font-medium shadow-md'
-              : 'text-gray-600 hover:bg-gradient-soft hover:text-belleya-deep'
+              : 'text-gray-600 hover:bg-gradient-soft hover:text-belaya-deep'
           }`}
         >
           <SettingsIcon className="w-5 h-5" />

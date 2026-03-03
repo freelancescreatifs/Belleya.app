@@ -277,8 +277,8 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
         <div className="flex-1 overflow-y-auto p-5 md:p-7 lg:p-8">
           {!showAddForm ? (
             <>
-              <div className="mb-6 bg-belleya-50 border border-belleya-200 rounded-lg p-4 flex items-start gap-3">
-                <LinkIcon className="w-5 h-5 text-belleya-deep flex-shrink-0 mt-0.5" />
+              <div className="mb-6 bg-belaya-50 border border-belaya-200 rounded-lg p-4 flex items-start gap-3">
+                <LinkIcon className="w-5 h-5 text-belaya-deep flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-700 leading-relaxed mb-2">
                     <span className="font-semibold">Fonctionnement type Pinterest :</span>
@@ -302,12 +302,12 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                 onDrop={handleFilesDrop}
                 className={`mb-8 border-2 border-dashed rounded-xl p-6 md:p-8 transition-all ${
                   dragOver
-                    ? 'border-belleya-500 bg-belleya-50'
+                    ? 'border-belaya-500 bg-belaya-50'
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
               <label className="flex flex-col items-center justify-center cursor-pointer">
-                <Upload className={`w-10 h-10 md:w-12 md:h-12 mb-3 ${dragOver ? 'text-belleya-500' : 'text-gray-400'}`} />
+                <Upload className={`w-10 h-10 md:w-12 md:h-12 mb-3 ${dragOver ? 'text-belaya-500' : 'text-gray-400'}`} />
                 <span className="text-sm font-medium text-gray-700 mb-1 text-center">
                   Glisser-déposer ou cliquer pour ajouter des photos
                 </span>
@@ -367,7 +367,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
                             {hasLink ? (
-                              <span className="flex items-center gap-1 text-belleya-deep">
+                              <span className="flex items-center gap-1 text-belaya-deep">
                                 <LinkIcon className="w-3 h-3" />
                                 Lien ajouté
                               </span>
@@ -398,7 +398,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                                     newForms[i] = { ...newForms[i], link_url: e.target.value };
                                     setPhotoFormsData(newForms);
                                   }}
-                                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                                   placeholder={placeholders.link}
                                 />
                               </div>
@@ -417,7 +417,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                                   newForms[i] = { ...newForms[i], description: e.target.value };
                                   setPhotoFormsData(newForms);
                                 }}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                                 rows={2}
                                 placeholder={placeholders.description}
                               />
@@ -437,7 +437,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                                   newForms[i] = { ...newForms[i], service_type: e.target.value };
                                   setPhotoFormsData(newForms);
                                 }}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                                 placeholder={placeholders.service}
                               />
                             </div>
@@ -465,7 +465,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                 <button
                   onClick={handleUpload}
                   disabled={uploading}
-                  className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors disabled:opacity-50 text-sm font-medium"
+                  className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors disabled:opacity-50 text-sm font-medium"
                 >
                   {uploading ? 'Ajout...' : 'Ajouter'}
                 </button>
@@ -475,7 +475,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belleya-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belaya-500 mx-auto"></div>
             </div>
           ) : photos.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
@@ -501,7 +501,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
 
                     {photo.link_url && (
                       <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md">
-                        <LinkIcon className="w-3 h-3 text-belleya-deep" />
+                        <LinkIcon className="w-3 h-3 text-belaya-deep" />
                       </div>
                     )}
                   </div>
@@ -544,7 +544,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                   {(photo.description || photo.service_type) && (
                     <div className="mt-2">
                       {photo.service_type && (
-                        <span className="inline-block px-2 py-0.5 bg-belleya-100 text-belleya-deep text-xs rounded-full mb-1">
+                        <span className="inline-block px-2 py-0.5 bg-belaya-100 text-belaya-deep text-xs rounded-full mb-1">
                           {photo.service_type}
                         </span>
                       )}
@@ -604,7 +604,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                       type="url"
                       value={editFormData.link_url}
                       onChange={(e) => setEditFormData({ ...editFormData, link_url: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                       placeholder={placeholders.link}
                     />
                   </div>
@@ -619,7 +619,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                   <textarea
                     value={editFormData.description}
                     onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                     rows={2}
                     placeholder={placeholders.description}
                   />
@@ -635,7 +635,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                     type="text"
                     value={editFormData.service_type}
                     onChange={(e) => setEditFormData({ ...editFormData, service_type: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                     placeholder={placeholders.service}
                   />
                 </div>
@@ -656,7 +656,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
               <button
                 onClick={handleUpdatePhoto}
                 disabled={updating}
-                className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors disabled:opacity-50 text-sm font-medium"
+                className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors disabled:opacity-50 text-sm font-medium"
               >
                 {updating ? 'Mise à jour...' : 'Enregistrer'}
               </button>

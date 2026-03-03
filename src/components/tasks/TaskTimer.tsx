@@ -158,7 +158,7 @@ export default function TaskTimer({ taskId, plannedDuration, taskTitle }: TaskTi
     return (
       <button
         onClick={handleStart}
-        className="inline-flex items-center gap-1 px-2 py-1 text-belleya-bright hover:text-emerald-700 hover:bg-emerald-50 rounded transition-all text-xs"
+        className="inline-flex items-center gap-1 px-2 py-1 text-belaya-bright hover:text-emerald-700 hover:bg-emerald-50 rounded transition-all text-xs"
         title={`Démarrer le timer (${plannedDuration} min)`}
       >
         <Timer className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ export default function TaskTimer({ taskId, plannedDuration, taskTitle }: TaskTi
           <div
             className={`h-2 rounded-full transition-all ${
               timerState.isRunning
-                ? 'bg-gradient-to-r from-belleya-bright to-teal-500'
+                ? 'bg-gradient-to-r from-belaya-bright to-teal-500'
                 : 'bg-gray-400'
             }`}
             style={{ width: `${percentage}%` }}
@@ -201,7 +201,7 @@ export default function TaskTimer({ taskId, plannedDuration, taskTitle }: TaskTi
         {!timerState.isRunning && !timerState.isPaused && (
           <button
             onClick={handleStart}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-belleya-bright to-teal-500 text-white rounded-lg hover:from-belleya-deep hover:to-teal-600 transition-all text-sm font-medium"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-belaya-bright to-teal-500 text-white rounded-lg hover:from-belaya-deep hover:to-teal-600 transition-all text-sm font-medium"
           >
             <Play className="w-4 h-4" />
             Démarrer
@@ -221,7 +221,7 @@ export default function TaskTimer({ taskId, plannedDuration, taskTitle }: TaskTi
         {timerState.isPaused && (
           <button
             onClick={handleResume}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-belleya-bright to-teal-500 text-white rounded-lg hover:from-belleya-deep hover:to-teal-600 transition-all text-sm font-medium"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-belaya-bright to-teal-500 text-white rounded-lg hover:from-belaya-deep hover:to-teal-600 transition-all text-sm font-medium"
           >
             <Play className="w-4 h-4" />
             Reprendre

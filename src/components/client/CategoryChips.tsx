@@ -44,7 +44,7 @@ export default function CategoryChips({
                 onClick={() => onSelectCategory(category)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm whitespace-nowrap ${
                   isSelected
-                    ? 'bg-gradient-to-r from-belleya-powder to-belleya-bright text-white shadow-md scale-105'
+                    ? 'bg-gradient-to-r from-belaya-powder to-belaya-bright text-white shadow-md scale-105'
                     : 'bg-white text-gray-700 hover:shadow-md hover:scale-105 border-2 border-brand-100'
                 }`}
               >

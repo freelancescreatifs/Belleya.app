@@ -37,15 +37,15 @@ export default function MarketingStats({
       label: 'Anniversaires 30j',
       value: upcomingBirthdays,
       icon: Cake,
-      color: 'text-belleya-primary',
-      bgColor: 'bg-belleya-50',
+      color: 'text-belaya-primary',
+      bgColor: 'bg-belaya-50',
       tooltip: 'Clientes dont l\'anniversaire est dans les 30 prochains jours (le calcul se fait sur le jour et le mois, l\'année est ignorée).'
     },
     {
       label: 'Taux de retour',
       value: `${returnRate}%`,
       icon: TrendingUp,
-      color: 'text-belleya-bright',
+      color: 'text-belaya-bright',
       bgColor: 'bg-green-50',
       tooltip: 'Estimation basée sur le ratio de clientes actives vs inactives. Une cliente est considérée active si elle n\'est pas en retard de plus de 90 jours.'
     },

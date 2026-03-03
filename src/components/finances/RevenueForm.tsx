@@ -505,7 +505,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
             <select
               value={formData.service_type}
               onChange={(e) => handleServiceTypeChange(e.target.value as ServiceType)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             >
               {SERVICE_TYPES.map(type => (
                 <option key={type.value} value={type.value}>{type.label}</option>
@@ -526,7 +526,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
                 value={formData.service_id}
                 onChange={(e) => handleServiceSelect(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               >
                 <option value="">Sélectionner...</option>
                 {filteredServices.map(service => (
@@ -549,7 +549,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
                 value={formData.service_name}
                 onChange={(e) => setFormData({ ...formData, service_name: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               />
             </div>
           )}
@@ -579,7 +579,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
                       setStudentSearch(studentName);
                     });
                   }}
-                  className="w-full px-4 py-2 text-left bg-belleya-50 hover:bg-belleya-100 text-belleya-primary font-medium flex items-center gap-2 rounded-lg border border-belleya-200"
+                  className="w-full px-4 py-2 text-left bg-belaya-50 hover:bg-belaya-100 text-belaya-primary font-medium flex items-center gap-2 rounded-lg border border-belaya-200"
                 >
                   <Plus className="w-4 h-4" />
                   Créer un nouvel élève
@@ -598,7 +598,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
                 <button
                   type="button"
                   onClick={onCreateClient}
-                  className="w-full px-4 py-2 text-left bg-belleya-50 hover:bg-belleya-100 text-belleya-primary font-medium flex items-center gap-2 rounded-lg border border-belleya-200"
+                  className="w-full px-4 py-2 text-left bg-belaya-50 hover:bg-belaya-100 text-belaya-primary font-medium flex items-center gap-2 rounded-lg border border-belaya-200"
                 >
                   <Plus className="w-4 h-4" />
                   Créer une nouvelle cliente
@@ -629,7 +629,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
                   }
                 }}
                 required={formData.service_type === 'commission'}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               >
                 <option value="">Sélectionner un partenariat...</option>
                 {partnerships.map(partnership => (
@@ -653,7 +653,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -669,7 +669,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
               onFocus={(e) => e.target.select()}
               required
               placeholder="0.00"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -695,7 +695,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
                           });
                         }
                       }}
-                      className="w-4 h-4 text-belleya-primary border-gray-300 rounded"
+                      className="w-4 h-4 text-belaya-primary border-gray-300 rounded"
                     />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">{supplement.name}</p>
@@ -742,7 +742,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
                   }}
                   className={`p-3 rounded-lg border-2 transition-all ${
                     formData.payment_method === method.value
-                      ? 'border-belleya-500 bg-belleya-50'
+                      ? 'border-belaya-500 bg-belaya-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -762,7 +762,7 @@ export default function RevenueForm({ onClose, onSuccess, onCreateClient, onCrea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={2}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 

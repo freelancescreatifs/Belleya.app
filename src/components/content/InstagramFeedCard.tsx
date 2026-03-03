@@ -95,7 +95,7 @@ export default function InstagramFeedCard({ content, onEdit, onPreview, onDelete
       {...(isPublished ? {} : listeners)}
       className={`bg-white overflow-hidden group relative transition-all ${
         isPublished
-          ? 'cursor-not-allowed opacity-70 border-2 border-belleya-200'
+          ? 'cursor-not-allowed opacity-70 border-2 border-belaya-200'
           : isDragging
           ? 'ring-4 ring-orange-400 shadow-2xl scale-105 z-50 cursor-move'
           : 'hover:ring-2 hover:ring-orange-200 cursor-move'

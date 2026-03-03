@@ -32,7 +32,7 @@ export default function ProductionProgressBar({ dates, status, contentType = 'po
   const completedSteps = getCompletedStepsCount(content);
 
   const getBarColor = () => {
-    if (status === 'published' || progress === 100) return 'bg-belleya-vivid';
+    if (status === 'published' || progress === 100) return 'bg-belaya-vivid';
     if (nextStep?.isOverdue) return 'bg-red-500';
     if (nextStep?.isToday) return 'bg-orange-500';
     return 'bg-blue-500';
@@ -78,7 +78,7 @@ export default function ProductionProgressBar({ dates, status, contentType = 'po
       )}
 
       {!nextStep && progress === 100 && (
-        <div className="flex items-center gap-1.5 text-xs text-belleya-bright">
+        <div className="flex items-center gap-1.5 text-xs text-belaya-bright">
           <Calendar className="w-3 h-3" />
           <span className="font-medium">Production terminée</span>
         </div>

@@ -193,7 +193,7 @@ export default function ShareDrawer({
           <div className="px-6 mb-4">
             <button
               onClick={handleNativeShare}
-              className="w-full flex items-center justify-center gap-3 py-3.5 bg-gradient-to-r from-brand-600 to-belleya-bright text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              className="w-full flex items-center justify-center gap-3 py-3.5 bg-gradient-to-r from-brand-600 to-belaya-bright text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
             >
               <Share2 className="w-5 h-5" />
               <span>Partager via...</span>

@@ -239,7 +239,7 @@ export default function BookingNotifications() {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Bell className="w-5 h-5 text-belleya-500" />
+          <Bell className="w-5 h-5 text-belaya-500" />
           <h2 className="text-lg font-semibold text-gray-900">Nouvelles réservations</h2>
         </div>
         <p className="text-gray-600">Chargement...</p>
@@ -254,7 +254,7 @@ export default function BookingNotifications() {
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
       <div className="flex items-center gap-2 mb-4">
-        <Bell className="w-5 h-5 text-belleya-500" />
+        <Bell className="w-5 h-5 text-belaya-500" />
         <h2 className="text-lg font-semibold text-gray-900">
           Nouvelles réservations ({notifications.length})
         </h2>
@@ -267,7 +267,7 @@ export default function BookingNotifications() {
           return (
             <div
               key={notification.id}
-              className="border border-belleya-200 rounded-lg p-4 bg-belleya-50"
+              className="border border-belaya-200 rounded-lg p-4 bg-belaya-50"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -315,7 +315,7 @@ export default function BookingNotifications() {
                 <button
                   onClick={() => notification.booking_id && handleAcceptBooking(notification.id, notification.booking_id)}
                   disabled={processing === notification.booking_id}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-belleya-vivid text-white rounded-lg hover:bg-belleya-bright transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-belaya-vivid text-white rounded-lg hover:bg-belaya-bright transition-colors disabled:opacity-50"
                 >
                   <Check className="w-4 h-4" />
                   {processing === notification.booking_id ? 'En cours...' : 'Accepter'}

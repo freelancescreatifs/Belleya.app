@@ -97,7 +97,7 @@ export default function CreateGroupModal({ companyId, category, onClose, onCreat
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm md:text-base"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm md:text-base"
               placeholder={placeholders.name}
               autoFocus
               required
@@ -111,7 +111,7 @@ export default function CreateGroupModal({ companyId, category, onClose, onCreat
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm md:text-base"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm md:text-base"
               rows={3}
               placeholder={placeholders.description}
             />
@@ -128,7 +128,7 @@ export default function CreateGroupModal({ companyId, category, onClose, onCreat
             <button
               type="submit"
               disabled={creating || !name.trim()}
-              className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors disabled:opacity-50 text-sm md:text-base font-medium"
+              className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors disabled:opacity-50 text-sm md:text-base font-medium"
             >
               {creating ? 'Création...' : 'Créer'}
             </button>

@@ -70,7 +70,7 @@ export default function LanguageSettings({ userId, currentLanguage }: LanguageSe
             disabled={saving}
             className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
               selectedLanguage === lang.code
-                ? 'border-belleya-500 bg-belleya-50'
+                ? 'border-belaya-500 bg-belaya-50'
                 : 'border-gray-200 hover:border-gray-300 bg-white'
             } ${saving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
@@ -83,7 +83,7 @@ export default function LanguageSettings({ userId, currentLanguage }: LanguageSe
             </div>
 
             {selectedLanguage === lang.code && (
-              <div className="w-6 h-6 rounded-full bg-belleya-500 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-belaya-500 flex items-center justify-center">
                 <Check className="w-4 h-4 text-white" />
               </div>
             )}

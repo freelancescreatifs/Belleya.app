@@ -199,7 +199,7 @@ export default function ClientReminderList({
                     {client.first_name} {client.last_name}
                   </div>
                   {client.days_until_birthday !== null && client.days_until_birthday <= 30 && (
-                    <div className="text-xs text-belleya-primary">
+                    <div className="text-xs text-belaya-primary">
                       🎂 Anniversaire dans {client.days_until_birthday}j
                     </div>
                   )}
@@ -244,7 +244,7 @@ export default function ClientReminderList({
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
                     {client.phone && (
-                      <MessageSquare className="w-4 h-4 text-belleya-bright" />
+                      <MessageSquare className="w-4 h-4 text-belaya-bright" />
                     )}
                     {client.email && (
                       <Mail className="w-4 h-4 text-blue-600" />

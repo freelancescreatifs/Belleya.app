@@ -327,10 +327,10 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {profile.booking_slug && (
-        <div className="bg-gradient-to-r from-rose-50 to-pink-50 border border-belleya-200 rounded-xl p-6">
+        <div className="bg-gradient-to-r from-rose-50 to-pink-50 border border-belaya-200 rounded-xl p-6">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-white rounded-lg shadow-sm">
-              <Link2 className="w-6 h-6 text-belleya-primary" />
+              <Link2 className="w-6 h-6 text-belaya-primary" />
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Votre lien de réservation</h3>
@@ -338,21 +338,21 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                 Partagez ce lien avec vos clientes pour qu'elles puissent prendre rendez-vous directement
               </p>
               <div className="flex items-center gap-2">
-                <div className="flex-1 bg-white border border-belleya-300 rounded-lg px-4 py-3">
-                  <p className="text-belleya-primary font-mono text-sm break-all">
+                <div className="flex-1 bg-white border border-belaya-300 rounded-lg px-4 py-3">
+                  <p className="text-belaya-primary font-mono text-sm break-all">
                     {getBookingUrl(profile.booking_slug)}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={copyBookingUrl}
-                  className="p-3 bg-white rounded-lg hover:bg-belleya-100 transition-colors border border-belleya-300 shadow-sm"
+                  className="p-3 bg-white rounded-lg hover:bg-belaya-100 transition-colors border border-belaya-300 shadow-sm"
                   title="Copier le lien"
                 >
                   {copiedBookingUrl ? (
-                    <Check className="w-5 h-5 text-belleya-bright" />
+                    <Check className="w-5 h-5 text-belaya-bright" />
                   ) : (
-                    <Copy className="w-5 h-5 text-belleya-primary" />
+                    <Copy className="w-5 h-5 text-belaya-primary" />
                   )}
                 </button>
               </div>
@@ -373,7 +373,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
               required
               value={profile.company_name}
               onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               placeholder="Ma Belle Entreprise"
             />
           </div>
@@ -401,7 +401,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                         additional_professions: e.target.value !== 'multi_metiers' ? [] : profile.additional_professions,
                       });
                     }}
-                    className="w-4 h-4 text-belleya-primary border-gray-300 focus:ring-belleya-primary"
+                    className="w-4 h-4 text-belaya-primary border-gray-300 focus:ring-belaya-primary"
                   />
                   <span className="text-sm text-gray-700">{profession.label}</span>
                 </label>
@@ -440,7 +440,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                           });
                         }
                       }}
-                      className="w-4 h-4 text-belleya-primary border-gray-300 rounded focus:ring-belleya-primary"
+                      className="w-4 h-4 text-belaya-primary border-gray-300 rounded focus:ring-belaya-primary"
                     />
                     <span className="text-sm text-gray-700">{profession.label}</span>
                   </label>
@@ -461,7 +461,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
               required
               value={profile.creation_date}
               onChange={(e) => setProfile({ ...profile, creation_date: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -473,7 +473,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
               type="text"
               value={profile.country}
               onChange={(e) => setProfile({ ...profile, country: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
         </div>
@@ -495,8 +495,8 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
               key={option.value}
               className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
                 profile.legal_status === option.value
-                  ? 'border-belleya-500 bg-belleya-50'
-                  : 'border-gray-200 hover:border-belleya-200'
+                  ? 'border-belaya-500 bg-belaya-50'
+                  : 'border-gray-200 hover:border-belaya-200'
               }`}
             >
               <input
@@ -505,7 +505,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                 value={option.value}
                 checked={profile.legal_status === option.value}
                 onChange={(e) => handleLegalStatusChange(e.target.value as LegalStatus)}
-                className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary"
+                className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary"
                 required
               />
               <span className="ml-3 text-gray-900 font-medium">{option.label}</span>
@@ -523,7 +523,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
               required
               value={profile.other_legal_status_label}
               onChange={(e) => setProfile({ ...profile, other_legal_status_label: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               placeholder="Ex: SARL, SAS..."
             />
           </div>
@@ -544,7 +544,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                   required
                   value={profile.taxation_regime}
                   onChange={(e) => setProfile({ ...profile, taxation_regime: e.target.value as TaxationRegime })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="">Sélectionner...</option>
                   {getTaxationRegimeOptions().map((option) => (
@@ -573,7 +573,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                 required
                 value={profile.tax_category}
                 onChange={(e) => setProfile({ ...profile, tax_category: e.target.value as TaxCategory })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               >
                 <option value="">Sélectionner...</option>
                 {getTaxCategoryOptions().map((option) => (
@@ -606,7 +606,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                 required
                 value={profile.vat_mode}
                 onChange={(e) => setProfile({ ...profile, vat_mode: e.target.value as VatMode })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               >
                 <option value="">Sélectionner...</option>
                 {getVatModeOptions().map((option) => (
@@ -623,7 +623,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                   type="checkbox"
                   checked={profile.acre}
                   onChange={(e) => setProfile({ ...profile, acre: e.target.checked })}
-                  className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary rounded mt-1"
+                  className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary rounded mt-1"
                 />
                 <div>
                   <div className="flex items-center gap-2">
@@ -642,7 +642,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
                     type="checkbox"
                     checked={profile.versement_liberatoire}
                     onChange={(e) => setProfile({ ...profile, versement_liberatoire: e.target.checked })}
-                    className="w-4 h-4 text-belleya-500 focus:ring-belleya-primary rounded mt-1"
+                    className="w-4 h-4 text-belaya-500 focus:ring-belaya-primary rounded mt-1"
                   />
                   <div>
                     <div className="flex items-center gap-2">

@@ -53,7 +53,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             )}
             <button
               onClick={this.handleReload}
-              className="w-full px-6 py-3 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors font-medium"
+              className="w-full px-6 py-3 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors font-medium"
             >
               Recharger la page
             </button>

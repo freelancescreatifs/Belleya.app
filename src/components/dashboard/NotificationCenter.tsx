@@ -238,9 +238,9 @@ export default function NotificationCenter({ compact = true }: NotificationCente
       case 'comment_received':
         return <MessageCircle className="w-5 h-5 text-purple-500" />;
       case 'new_follower':
-        return <Users className="w-5 h-5 text-belleya-500" />;
+        return <Users className="w-5 h-5 text-belaya-500" />;
       case 'new_like':
-        return <Heart className="w-5 h-5 text-belleya-primary" />;
+        return <Heart className="w-5 h-5 text-belaya-primary" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
@@ -261,7 +261,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
   const renderNotificationActions = (notification: Notification) => {
     if (notification.is_acted) {
       return (
-        <div className="flex items-center gap-1 text-xs text-belleya-bright mt-2">
+        <div className="flex items-center gap-1 text-xs text-belaya-bright mt-2">
           <CheckCircle className="w-3 h-3" />
           Traitée
         </div>
@@ -279,7 +279,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                 e.stopPropagation();
                 handleAcceptAppointment(notification.id, notification.entity_id!);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-belleya-vivid text-white rounded-lg text-xs font-medium hover:bg-belleya-bright transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-belaya-vivid text-white rounded-lg text-xs font-medium hover:bg-belaya-bright transition-colors"
             >
               <Check className="w-3 h-3" />
               Accepter
@@ -317,7 +317,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                 e.stopPropagation();
                 handleValidateReview(notification.id, notification.entity_id!);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-belleya-vivid text-white rounded-lg text-xs font-medium hover:bg-belleya-bright transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-belaya-vivid text-white rounded-lg text-xs font-medium hover:bg-belaya-bright transition-colors"
             >
               <Check className="w-3 h-3" />
               Approuver
@@ -344,7 +344,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                 e.stopPropagation();
                 handleApproveComment(notification.id, notification.entity_id!);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-belleya-vivid text-white rounded-lg text-xs font-medium hover:bg-belleya-bright transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-belaya-vivid text-white rounded-lg text-xs font-medium hover:bg-belaya-bright transition-colors"
             >
               <Check className="w-3 h-3" />
               Approuver
@@ -394,7 +394,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-xs text-belleya-primary hover:text-belleya-deep font-medium"
+                    className="text-xs text-belaya-primary hover:text-belaya-deep font-medium"
                   >
                     Tout marquer comme lu
                   </button>
@@ -404,7 +404,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
               <div className="overflow-y-auto flex-1">
                 {loading ? (
                   <div className="p-8 text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-belleya-500 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-belaya-500 mx-auto"></div>
                   </div>
                 ) : notifications.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">
@@ -456,7 +456,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
                       setShowDropdown(false);
                       window.location.href = '/notifications';
                     }}
-                    className="w-full text-center text-sm text-belleya-primary hover:text-belleya-deep font-medium"
+                    className="w-full text-center text-sm text-belaya-primary hover:text-belaya-deep font-medium"
                   >
                     Voir toutes les notifications
                   </button>
@@ -476,7 +476,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
         {unreadCount > 0 && (
           <button
             onClick={markAllAsRead}
-            className="text-sm text-belleya-primary hover:text-belleya-deep font-medium"
+            className="text-sm text-belaya-primary hover:text-belaya-deep font-medium"
           >
             Tout marquer comme lu
           </button>
@@ -485,7 +485,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
 
       {loading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belleya-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belaya-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement...</p>
         </div>
       ) : notifications.length === 0 ? (

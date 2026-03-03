@@ -60,7 +60,7 @@ export default function SubprojectSelector({
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
       >
         <option value="">Aucun sous-projet</option>
         {subprojects.map((subproject) => (

@@ -35,28 +35,28 @@ export default function CountdownTimer() {
 
   return (
     <div className="flex items-center justify-center gap-3 md:gap-4 text-sm md:text-base">
-      <Clock className="w-4 h-4 md:w-5 md:h-5 text-belleya-deep animate-pulse flex-shrink-0" />
+      <Clock className="w-4 h-4 md:w-5 md:h-5 text-belaya-deep animate-pulse flex-shrink-0" />
       <span className="text-gray-700 font-medium">
-        Offre limitée : <span className="font-bold text-belleya-deep">14 jours gratuits</span>
+        Offre limitée : <span className="font-bold text-belaya-deep">14 jours gratuits</span>
       </span>
       <span className="hidden sm:inline text-gray-400">|</span>
       <div className="flex items-center gap-1.5 md:gap-2">
         <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-1 shadow-sm">
-          <span className="text-lg md:text-xl font-bold text-belleya-deep">
+          <span className="text-lg md:text-xl font-bold text-belaya-deep">
             {formatNumber(timeLeft.hours)}
           </span>
           <span className="text-xs text-gray-500">h</span>
         </div>
-        <span className="text-belleya-medium font-bold">:</span>
+        <span className="text-belaya-medium font-bold">:</span>
         <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-1 shadow-sm">
-          <span className="text-lg md:text-xl font-bold text-belleya-deep">
+          <span className="text-lg md:text-xl font-bold text-belaya-deep">
             {formatNumber(timeLeft.minutes)}
           </span>
           <span className="text-xs text-gray-500">m</span>
         </div>
-        <span className="text-belleya-medium font-bold">:</span>
+        <span className="text-belaya-medium font-bold">:</span>
         <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-1 shadow-sm">
-          <span className="text-lg md:text-xl font-bold text-belleya-deep">
+          <span className="text-lg md:text-xl font-bold text-belaya-deep">
             {formatNumber(timeLeft.seconds)}
           </span>
           <span className="text-xs text-gray-500">s</span>

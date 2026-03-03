@@ -234,7 +234,7 @@ export default function ProjectCard({
       case 'on_hold':
         return { label: 'En suspend', color: 'bg-orange-500' };
       case 'completed':
-        return { label: 'Terminé', color: 'bg-belleya-vivid' };
+        return { label: 'Terminé', color: 'bg-belaya-vivid' };
       default:
         return { label: status, color: 'bg-gray-500' };
     }
@@ -291,7 +291,7 @@ export default function ProjectCard({
                 value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full text-xl font-bold text-gray-900 border-b-2 border-belleya-500 focus:outline-none"
+                className="w-full text-xl font-bold text-gray-900 border-b-2 border-belaya-500 focus:outline-none"
                 placeholder="Nom du projet"
               />
             ) : (
@@ -306,7 +306,7 @@ export default function ProjectCard({
                 onClick={handleToggleSuspend}
                 className={`p-2 rounded-lg transition-colors ${
                   project.status === 'on_hold'
-                    ? 'text-belleya-bright hover:text-green-700 hover:bg-green-50'
+                    ? 'text-belaya-bright hover:text-green-700 hover:bg-green-50'
                     : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
                 }`}
                 title={project.status === 'on_hold' ? 'Reprendre' : 'Mettre en suspend'}
@@ -341,7 +341,7 @@ export default function ProjectCard({
               value={editForm.description}
               onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
               onClick={(e) => e.stopPropagation()}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent resize-none"
               rows={3}
               placeholder="Description du projet (optionnel)"
             />
@@ -352,7 +352,7 @@ export default function ProjectCard({
                   fileInputRef.current?.click();
                 }}
                 disabled={uploadingImage}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-belleya-500 hover:text-belleya-500 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-belaya-500 hover:text-belaya-500 transition-colors"
               >
                 <Upload className="w-4 h-4" />
                 {uploadingImage ? 'Upload en cours...' : 'Ajouter une image'}
@@ -515,8 +515,8 @@ export default function ProjectCard({
                         }}
                         className={`flex-shrink-0 w-5 h-5 border-2 rounded transition-all ${
                           task.completed
-                            ? 'bg-belleya-vivid border-belleya-500'
-                            : 'border-gray-300 hover:border-belleya-400'
+                            ? 'bg-belaya-vivid border-belaya-500'
+                            : 'border-gray-300 hover:border-belaya-400'
                         } flex items-center justify-center`}
                       >
                         {task.completed && <Check className="w-3.5 h-3.5 text-white" />}

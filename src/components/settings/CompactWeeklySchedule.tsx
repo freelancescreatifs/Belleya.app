@@ -51,7 +51,7 @@ export default function CompactWeeklySchedule({ availability, onChange }: Compac
       <div className="bg-gray-50 rounded-lg p-6 space-y-3">
         <div className="flex items-center justify-between mb-4">
           <h4 className="font-medium text-gray-900 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-belleya-primary" />
+            <Clock className="w-5 h-5 text-belaya-primary" />
             Horaires d'ouverture
           </h4>
         </div>
@@ -82,7 +82,7 @@ export default function CompactWeeklySchedule({ availability, onChange }: Compac
         <button
           type="button"
           onClick={() => setShowDetailedView(true)}
-          className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 text-sm text-belleya-primary hover:bg-belleya-primary/10 rounded-lg transition-colors"
+          className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 text-sm text-belaya-primary hover:bg-belaya-primary/10 rounded-lg transition-colors"
         >
           <Clock className="w-4 h-4" />
           Gérer les créneaux détaillés
@@ -105,7 +105,7 @@ export default function CompactWeeklySchedule({ availability, onChange }: Compac
           <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Clock className="w-6 h-6 text-belleya-primary" />
+                <Clock className="w-6 h-6 text-belaya-primary" />
                 Gestion détaillée des créneaux
               </h3>
               <button
@@ -133,7 +133,7 @@ export default function CompactWeeklySchedule({ availability, onChange }: Compac
             <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
               <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-belleya-vivid rounded"></div>
+                  <div className="w-4 h-4 bg-belaya-vivid rounded"></div>
                   <span className="text-gray-600">Disponible</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ export default function CompactWeeklySchedule({ availability, onChange }: Compac
 
               <button
                 onClick={() => setShowDetailedView(false)}
-                className="px-6 py-2 bg-belleya-primary text-white rounded-lg hover:bg-belleya-deep transition-colors"
+                className="px-6 py-2 bg-belaya-primary text-white rounded-lg hover:bg-belaya-deep transition-colors"
               >
                 Fermer
               </button>

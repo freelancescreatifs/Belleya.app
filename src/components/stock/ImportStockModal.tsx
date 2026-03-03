@@ -213,14 +213,14 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
                 </p>
                 <button
                   onClick={downloadTemplate}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm text-belleya-primary hover:bg-belleya-50 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm text-belaya-primary hover:bg-belaya-50 rounded-lg transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Télécharger un modèle CSV
                 </button>
               </div>
 
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-belleya-400 transition-colors">
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-belaya-400 transition-colors">
                 <input
                   type="file"
                   accept=".csv,.xls,.xlsx"
@@ -280,7 +280,7 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
                       <select
                         value={columnMapping[field] || ''}
                         onChange={(e) => setColumnMapping({ ...columnMapping, [field]: e.target.value })}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                       >
                         <option value="">-- Non mappé --</option>
                         {headers.map(header => (
@@ -310,7 +310,7 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
                 </button>
                 <button
                   onClick={() => setStep('preview')}
-                  className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+                  className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors"
                 >
                   Aperçu
                 </button>
@@ -364,7 +364,7 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
                 </button>
                 <button
                   onClick={handleImport}
-                  className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+                  className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors"
                 >
                   Importer
                 </button>
@@ -374,7 +374,7 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
 
           {step === 'importing' && (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-belleya-500 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-belaya-500 mx-auto mb-4"></div>
               <p className="text-lg font-medium text-gray-900 mb-2">Import en cours...</p>
               <p className="text-sm text-gray-600">Ceci peut prendre quelques minutes</p>
             </div>
@@ -383,7 +383,7 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
           {step === 'complete' && (
             <div className="space-y-6">
               <div className="text-center py-8">
-                <CheckCircle className="w-16 h-16 text-belleya-vivid mx-auto mb-4" />
+                <CheckCircle className="w-16 h-16 text-belaya-vivid mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Import terminé !</h3>
               </div>
 
@@ -410,7 +410,7 @@ export default function ImportStockModal({ onClose, onImportComplete }: ImportSt
 
               <button
                 onClick={handleComplete}
-                className="w-full px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors"
+                className="w-full px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors"
               >
                 Terminer
               </button>

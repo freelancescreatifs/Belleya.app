@@ -84,7 +84,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
       <div className="w-full max-w-md">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-belleya-primary mb-6 transition-colors"
+          className="flex items-center gap-2 text-gray-600 hover:text-belaya-primary mb-6 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           Retour
@@ -94,7 +94,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
           <div className="flex justify-center mb-6">
             <img
               src="/logo.png"
-              alt="Belleya"
+              alt="Belaya"
               className="h-16 w-auto"
             />
           </div>
@@ -108,14 +108,14 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-belleya-200/30">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-belaya-200/30">
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => setIsSignUp(false)}
               className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                 !isSignUp
                   ? 'bg-gradient-auth text-white shadow-lg'
-                  : 'bg-gradient-to-r from-belleya-50 to-belleya-100 text-belleya-deep hover:shadow-md'
+                  : 'bg-gradient-to-r from-belaya-50 to-belaya-100 text-belaya-deep hover:shadow-md'
               }`}
             >
               Connexion
@@ -125,7 +125,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
               className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                 isSignUp
                   ? 'bg-gradient-auth text-white shadow-lg'
-                  : 'bg-gradient-to-r from-belleya-50 to-belleya-100 text-belleya-deep hover:shadow-md'
+                  : 'bg-gradient-to-r from-belaya-50 to-belaya-100 text-belaya-deep hover:shadow-md'
               }`}
             >
               Inscription
@@ -143,7 +143,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belaya-primary focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -155,7 +155,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belaya-primary focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -170,7 +170,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belaya-primary focus:border-transparent transition-all"
                 required
               />
             </div>
@@ -183,7 +183,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belleya-primary focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-belaya-primary focus:border-transparent transition-all"
                 required
                 minLength={6}
               />
@@ -198,7 +198,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-belleya-deep text-white py-3 rounded-xl font-semibold hover:shadow-xl hover:bg-[#a82d70] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-[1.02]"
+              className="w-full bg-belaya-deep text-white py-3 rounded-xl font-semibold hover:shadow-xl hover:bg-[#a82d70] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-[1.02]"
             >
               {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
             </button>
@@ -216,7 +216,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 hover:border-belleya-300 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 hover:border-belaya-300 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path

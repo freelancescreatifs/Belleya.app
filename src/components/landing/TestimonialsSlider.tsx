@@ -6,7 +6,7 @@ const testimonials = [
     profession: "Prothésiste ongulaire",
     instagram: "@sophie_nailart",
     image: "/3f444bf0-6b58-4ab1-bc0e-8e22de6bb900.png",
-    text: "Belleya a transformé ma gestion quotidienne. Plus de stress, tout est organisé et mes clientes adorent réserver en ligne.",
+    text: "Belaya a transformé ma gestion quotidienne. Plus de stress, tout est organisé et mes clientes adorent réserver en ligne.",
     rating: 5
   },
   {
@@ -30,7 +30,7 @@ const testimonials = [
     profession: "Nail artist",
     instagram: "@lea_nails",
     image: "/3f444bf0-6b58-4ab1-bc0e-8e22de6bb900.png",
-    text: "Mes finances sont enfin claires, mes objectifs suivis, et mes clientes fidélisées. Belleya c'est le game changer.",
+    text: "Mes finances sont enfin claires, mes objectifs suivis, et mes clientes fidélisées. Belaya c'est le game changer.",
     rating: 5
   },
   {
@@ -46,7 +46,7 @@ const testimonials = [
     profession: "Esthéticienne",
     instagram: "@chloe_skincare",
     image: "/e4879098-e7c4-443a-a046-54f40bb7fd64.png",
-    text: "Simple, efficace, et pensé pour nous. J'ai enfin une vision claire de mon business. Merci Belleya.",
+    text: "Simple, efficace, et pensé pour nous. J'ai enfin une vision claire de mon business. Merci Belaya.",
     rating: 5
   }
 ];
@@ -55,7 +55,7 @@ export default function TestimonialsSlider() {
   return (
     <div className="w-full overflow-hidden py-12 bg-gradient-to-b from-white to-rose-50/30">
       <div className="mb-12 text-center">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-belleya-powder via-belleya-bright to-belleya-deep bg-clip-text text-transparent">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-belaya-powder via-belaya-bright to-belaya-deep bg-clip-text text-transparent">
           Elles ont testé, elles adorent
         </h2>
         <p className="text-lg text-gray-600">
@@ -85,7 +85,7 @@ export default function TestimonialsSlider() {
                     href={`https://instagram.com/${testimonial.instagram.replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-belleya-bright hover:text-belleya-deep transition-colors"
+                    className="flex items-center gap-1 text-xs text-belaya-bright hover:text-belaya-deep transition-colors"
                   >
                     <Instagram className="w-3 h-3" />
                     {testimonial.instagram}
@@ -95,7 +95,7 @@ export default function TestimonialsSlider() {
 
               <div className="flex gap-1 mb-3">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-belleya-vivid text-belleya-vivid" />
+                  <Star key={i} className="w-4 h-4 fill-belaya-vivid text-belaya-vivid" />
                 ))}
               </div>
 
@@ -127,7 +127,7 @@ export default function TestimonialsSlider() {
                     href={`https://instagram.com/${testimonial.instagram.replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-belleya-bright hover:text-belleya-deep transition-colors"
+                    className="flex items-center gap-1 text-xs text-belaya-bright hover:text-belaya-deep transition-colors"
                   >
                     <Instagram className="w-3 h-3" />
                     {testimonial.instagram}
@@ -137,7 +137,7 @@ export default function TestimonialsSlider() {
 
               <div className="flex gap-1 mb-3">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-belleya-vivid text-belleya-vivid" />
+                  <Star key={i} className="w-4 h-4 fill-belaya-vivid text-belaya-vivid" />
                 ))}
               </div>
 

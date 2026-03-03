@@ -78,7 +78,7 @@ export default function MarketingDebug({ debugInfo }: MarketingDebugProps) {
               </div>
               <div>
                 <div className="text-gray-600">Relançables</div>
-                <div className="text-lg font-semibold text-belleya-bright">
+                <div className="text-lg font-semibold text-belaya-bright">
                   {debugInfo.clients_remindable}
                 </div>
               </div>

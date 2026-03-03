@@ -334,7 +334,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
         <select
           value={formData.type}
           onChange={(e) => setFormData({ ...formData, type: e.target.value as EventType, serviceId: '' })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
           disabled={event?.type === 'google' || event?.type === 'planity'}
         >
           <option value="pro">Prestation</option>
@@ -351,7 +351,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
           <select
             value={formData.serviceId}
             onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             required
           >
             <option value="">Sélectionner une formation</option>
@@ -372,7 +372,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
           <select
             value={formData.serviceId}
             onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             required
           >
             <option value="">Sélectionner un service</option>
@@ -394,7 +394,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
             type="text"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             required
           />
         </div>
@@ -416,7 +416,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
               console.log('[Agenda] openCreateStudent modal', { component: 'StudentForm', source: 'Agenda', isModal: true });
               setShowStudentForm(true);
             }}
-            className="w-full mt-2 px-4 py-2 text-left bg-belleya-50 hover:bg-belleya-100 text-belleya-primary font-medium flex items-center gap-2 rounded-lg border border-belleya-200 transition-colors"
+            className="w-full mt-2 px-4 py-2 text-left bg-belaya-50 hover:bg-belaya-100 text-belaya-primary font-medium flex items-center gap-2 rounded-lg border border-belaya-200 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Créer un nouvel élève
@@ -440,7 +440,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
               console.log('[Agenda] openCreateClient modal', { component: 'ClientForm', source: 'Agenda', isModal: true });
               setShowClientForm(true);
             }}
-            className="w-full mt-2 px-4 py-2 text-left bg-belleya-50 hover:bg-belleya-100 text-belleya-primary font-medium flex items-center gap-2 rounded-lg border border-belleya-200 transition-colors"
+            className="w-full mt-2 px-4 py-2 text-left bg-belaya-50 hover:bg-belaya-100 text-belaya-primary font-medium flex items-center gap-2 rounded-lg border border-belaya-200 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Créer une nouvelle cliente
@@ -457,7 +457,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
             type="date"
             value={formData.startDate}
             onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             required
           />
         </div>
@@ -469,7 +469,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
             type="time"
             value={formData.startTime}
             onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             required
           />
         </div>
@@ -484,7 +484,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
             type="date"
             value={formData.endDate}
             onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             required
           />
         </div>
@@ -496,7 +496,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
             type="time"
             value={formData.endTime}
             onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             required
           />
         </div>
@@ -511,7 +511,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
             type="text"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             placeholder={formData.type === 'formation' ? "Titre personnalisé de la formation" : "Titre personnalisé du rendez-vous"}
           />
         </div>
@@ -524,7 +524,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
           rows={3}
           placeholder="Notes ou remarques"
         />
@@ -537,7 +537,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
         <select
           value={formData.status}
           onChange={(e) => setFormData({ ...formData, status: e.target.value as EventStatus })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
         >
           <option value="confirmed">Confirmé</option>
           <option value="pending">En attente</option>
@@ -556,7 +556,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors disabled:opacity-50"
+          className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors disabled:opacity-50"
         >
           {loading ? 'Enregistrement...' : event ? 'Modifier' : 'Créer'}
         </button>

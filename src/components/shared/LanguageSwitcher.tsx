@@ -84,7 +84,7 @@ export default function LanguageSwitcher({ variant = 'landing' }: LanguageSwitch
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
               className={`w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors ${
-                lang.code === currentLanguage.code ? 'bg-belleya-50 text-belleya-900' : 'text-gray-700'
+                lang.code === currentLanguage.code ? 'bg-belaya-50 text-belaya-900' : 'text-gray-700'
               }`}
             >
               <span className="text-lg">{lang.flag}</span>

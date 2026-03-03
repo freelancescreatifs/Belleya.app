@@ -43,12 +43,12 @@ export default function ClientLayout({ currentPage, onPageChange, children }: Cl
               >
                 <Icon
                   className={`w-6 h-6 ${
-                    isActive ? 'text-belleya-primary' : 'text-gray-400'
+                    isActive ? 'text-belaya-primary' : 'text-gray-400'
                   }`}
                 />
                 <span
                   className={`text-xs font-medium ${
-                    isActive ? 'text-belleya-primary' : 'text-gray-500'
+                    isActive ? 'text-belaya-primary' : 'text-gray-500'
                   }`}
                 >
                   {item.label}

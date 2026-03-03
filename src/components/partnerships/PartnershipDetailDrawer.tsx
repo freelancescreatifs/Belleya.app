@@ -191,7 +191,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
               <img src={partnership.logo_url} alt={partnership.company_name} className="w-10 h-10 rounded-lg object-cover" />
             ) : (
               <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center">
-                <span className="text-lg font-bold text-belleya-primary">{partnership.company_name.charAt(0)}</span>
+                <span className="text-lg font-bold text-belaya-primary">{partnership.company_name.charAt(0)}</span>
               </div>
             )}
             <div>
@@ -244,7 +244,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
 
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-belleya-500" />
+              <FileText className="w-5 h-5 text-belaya-500" />
               Données clés
             </h3>
 
@@ -269,7 +269,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                     onClick={handleToggleClientSupport}
                     disabled={isUpdating}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      partnership.is_client_support_involved ? 'bg-belleya-vivid' : 'bg-gray-300'
+                      partnership.is_client_support_involved ? 'bg-belaya-vivid' : 'bg-gray-300'
                     } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <span
@@ -325,9 +325,9 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-belleya-200 p-6 shadow-sm">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-belaya-200 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-belleya-bright" />
+              <TrendingUp className="w-5 h-5 text-belaya-bright" />
               Performance
             </h3>
 
@@ -344,7 +344,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
 
               <div>
                 <p className="text-sm text-gray-700 mb-1">Commission gagnée</p>
-                <p className="text-2xl font-bold text-belleya-bright">{totalRevenue.toFixed(2)} €</p>
+                <p className="text-2xl font-bold text-belaya-bright">{totalRevenue.toFixed(2)} €</p>
               </div>
 
               <div>
@@ -366,7 +366,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
 
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-belleya-500" />
+              <Activity className="w-5 h-5 text-belaya-500" />
               Suivi & actions
             </h3>
 
@@ -404,12 +404,12 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-belleya-500" />
+                <TrendingUp className="w-5 h-5 text-belaya-500" />
                 Ventes ({sales.length})
               </h3>
               <button
                 onClick={() => setShowAddSale(!showAddSale)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-belleya-50 text-belleya-primary rounded-lg hover:bg-belleya-100 transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-1.5 bg-belaya-50 text-belaya-primary rounded-lg hover:bg-belaya-100 transition-colors text-sm font-medium"
               >
                 <Plus className="w-4 h-4" />
                 Ajouter
@@ -426,7 +426,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                       type="date"
                       value={saleForm.sale_date}
                       onChange={(e) => setSaleForm({ ...saleForm, sale_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500 text-sm"
                     />
                   </div>
 
@@ -440,7 +440,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                       min="0"
                       step="0.01"
                       placeholder="0.00"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500 text-sm"
                     />
                   </div>
 
@@ -459,7 +459,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                       min="0"
                       step="0.01"
                       placeholder={((Number(saleForm.sale_amount) || 0) * effectiveCommissionRate / 100).toFixed(2)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500 text-sm"
                     />
                   </div>
 
@@ -469,14 +469,14 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                       value={saleForm.notes}
                       onChange={(e) => setSaleForm({ ...saleForm, notes: e.target.value })}
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm resize-none"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500 text-sm resize-none"
                     />
                   </div>
 
                   <div className="flex gap-2">
                     <button
                       onClick={handleAddSale}
-                      className="flex-1 px-4 py-2 bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary transition-colors text-sm font-medium"
+                      className="flex-1 px-4 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary transition-colors text-sm font-medium"
                     >
                       Enregistrer
                     </button>
@@ -518,7 +518,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
                       </div>
                       <div className="flex items-center gap-4 text-xs text-gray-600">
                         <span>Vente: {sale.sale_amount.toFixed(2)} €</span>
-                        <span className="font-semibold text-belleya-bright">
+                        <span className="font-semibold text-belaya-bright">
                           Commission: {sale.commission_earned.toFixed(2)} €
                         </span>
                       </div>

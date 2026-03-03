@@ -98,7 +98,7 @@ export default function AddressInput({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Adresse
           {geocodingStatus === 'success' && (
-            <span className="ml-2 inline-flex items-center gap-1 text-belleya-bright text-xs">
+            <span className="ml-2 inline-flex items-center gap-1 text-belaya-bright text-xs">
               <MapPin className="w-3 h-3" />
               Géolocalisée
             </span>
@@ -116,11 +116,11 @@ export default function AddressInput({
             }}
             rows={3}
             placeholder="Paris&#10;75011 Paris&#10;123 Rue de la République, 75001 Paris"
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent ${
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent ${
               error
                 ? 'border-red-300'
                 : geocodingStatus === 'success'
-                ? 'border-belleya-300'
+                ? 'border-belaya-300'
                 : 'border-gray-300'
             }`}
           />
@@ -133,7 +133,7 @@ export default function AddressInput({
               </div>
             )}
             {geocodingStatus === 'success' && !geocoding && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-green-50 border border-belleya-200 rounded text-xs text-green-700">
+              <div className="flex items-center gap-1 px-2 py-1 bg-green-50 border border-belaya-200 rounded text-xs text-green-700">
                 <Check className="w-3 h-3" />
                 OK
               </div>

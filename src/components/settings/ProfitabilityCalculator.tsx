@@ -189,7 +189,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-belleya-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-belaya-500"></div>
       </div>
     );
   }
@@ -212,10 +212,10 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-br from-rose-50 to-purple-50 rounded-xl p-6 border border-belleya-100">
+      <div className="bg-gradient-to-br from-rose-50 to-purple-50 rounded-xl p-6 border border-belaya-100">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-            <Calculator className="w-6 h-6 text-belleya-primary" />
+            <Calculator className="w-6 h-6 text-belaya-primary" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Calculateur de rentabilité</h2>
@@ -230,7 +230,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-belleya-500" />
+              <TrendingUp className="w-5 h-5 text-belaya-500" />
               Informations prestation
             </h3>
 
@@ -245,7 +245,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                   value={serviceName}
                   onChange={(e) => setServiceName(e.target.value)}
                   placeholder="Ex: Pose complète gel"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500"
                 />
               </div>
 
@@ -260,7 +260,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                   onChange={(e) => setDurationMinutes(Number(e.target.value))}
                   min="0"
                   placeholder="120"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500"
                 />
               </div>
 
@@ -277,7 +277,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                     min="0"
                     step="0.5"
                     placeholder="30"
-                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500"
+                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">€/h</span>
                 </div>
@@ -296,7 +296,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                     min="0"
                     step="0.5"
                     placeholder="60"
-                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500"
+                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">€</span>
                 </div>
@@ -309,7 +309,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
               <h3 className="font-semibold text-gray-900">Consommables</h3>
               <button
                 onClick={addConsumable}
-                className="flex items-center gap-2 px-3 py-1.5 bg-belleya-50 text-belleya-primary rounded-lg hover:bg-belleya-100 transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-1.5 bg-belaya-50 text-belaya-primary rounded-lg hover:bg-belaya-100 transition-colors text-sm font-medium"
               >
                 <Plus className="w-4 h-4" />
                 Ajouter
@@ -341,7 +341,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                       value={consumable.name}
                       onChange={(e) => updateConsumable(consumable.id, 'name', e.target.value)}
                       placeholder="Ex: Gel UV"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500 text-sm"
                     />
                   </div>
 
@@ -359,7 +359,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                           min="0"
                           step="0.5"
                           placeholder="30"
-                          className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
+                          className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500 text-sm"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">€</span>
                       </div>
@@ -376,7 +376,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                         onChange={(e) => updateConsumable(consumable.id, 'usesPerUnit', Number(e.target.value))}
                         min="1"
                         placeholder="20"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500 text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500 text-sm"
                       />
                     </div>
                   </div>
@@ -417,7 +417,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                     min="0"
                     step="0.5"
                     placeholder="0"
-                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500"
+                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">€</span>
                 </div>
@@ -436,7 +436,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                     min="0"
                     step="0.5"
                     placeholder="0"
-                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-belleya-500"
+                    className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">€</span>
                 </div>
@@ -486,12 +486,12 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
           </div>
 
           <div className={`rounded-xl border-2 p-6 shadow-lg ${
-            results.status === 'profitable' ? 'bg-green-50 border-belleya-300' :
+            results.status === 'profitable' ? 'bg-green-50 border-belaya-300' :
             results.status === 'limit' ? 'bg-amber-50 border-amber-300' :
             'bg-red-50 border-red-300'
           }`}>
             <div className="flex items-center gap-3 mb-4">
-              {results.status === 'profitable' && <CheckCircle className="w-6 h-6 text-belleya-bright" />}
+              {results.status === 'profitable' && <CheckCircle className="w-6 h-6 text-belaya-bright" />}
               {results.status === 'limit' && <AlertTriangle className="w-6 h-6 text-amber-600" />}
               {results.status === 'unprofitable' && <AlertCircle className="w-6 h-6 text-red-600" />}
               <h3 className={`text-lg font-bold ${
@@ -528,7 +528,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                   <InfoTooltip content="Prix actuel - Coût total (ce qu'il vous reste réellement)" />
                 </div>
                 <p className={`text-2xl font-bold ${
-                  results.margin >= 0 ? 'text-belleya-bright' : 'text-red-600'
+                  results.margin >= 0 ? 'text-belaya-bright' : 'text-red-600'
                 }`}>
                   {results.margin.toFixed(2)} €
                 </p>
@@ -540,7 +540,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
                   <InfoTooltip content="Marge divisée par le temps de travail (votre rémunération nette par heure)" />
                 </div>
                 <p className={`text-2xl font-bold ${
-                  results.actualHourlyRate >= desiredHourlyRate ? 'text-belleya-bright' : 'text-red-600'
+                  results.actualHourlyRate >= desiredHourlyRate ? 'text-belaya-bright' : 'text-red-600'
                 }`}>
                   {results.actualHourlyRate.toFixed(2)} €/h
                 </p>

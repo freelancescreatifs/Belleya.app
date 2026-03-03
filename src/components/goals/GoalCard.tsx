@@ -64,7 +64,7 @@ export default function GoalCard({
       content: 'from-purple-400 to-brand-100',
       business: 'from-blue-400 to-cyan-600',
       loyalty: 'from-amber-400 to-orange-600',
-      financial: 'from-pink-400 to-belleya-deep',
+      financial: 'from-pink-400 to-belaya-deep',
       clients: 'from-blue-400 to-cyan-600',
       personal: 'from-orange-400 to-red-600',
     };
@@ -185,7 +185,7 @@ export default function GoalCard({
             onClick={handleToggleSuspend}
             className={`p-2 rounded-lg transition-colors ${
               goal.status === 'on_hold'
-                ? 'text-belleya-bright hover:text-belleya-deep hover:bg-pink-50'
+                ? 'text-belaya-bright hover:text-belaya-deep hover:bg-pink-50'
                 : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
             }`}
             title={goal.status === 'on_hold' ? 'Reprendre' : 'Mettre en suspend'}
@@ -236,8 +236,8 @@ export default function GoalCard({
       </div>
 
       {isCompleted && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-pink-50 to-rose-50 border border-belleya-200 rounded-lg animate-bounce-subtle">
-          <div className="flex items-center gap-2 text-belleya-bright">
+        <div className="mb-4 p-3 bg-gradient-to-r from-pink-50 to-rose-50 border border-belaya-200 rounded-lg animate-bounce-subtle">
+          <div className="flex items-center gap-2 text-belaya-bright">
             <Sparkles className="w-5 h-5 animate-pulse" />
             <span className="font-semibold">Bravo ! Objectif atteint</span>
             <Sparkles className="w-5 h-5 animate-pulse" />
@@ -276,7 +276,7 @@ export default function GoalCard({
           <div className="mt-4 pt-4 border-t border-gray-200">
             <button
               onClick={() => setShowSubgoals(!showSubgoals)}
-              className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 hover:text-belleya-primary transition-colors mb-3"
+              className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 hover:text-belaya-primary transition-colors mb-3"
             >
               <span>Sous-objectifs ({totalSubgoals})</span>
               {showSubgoals ? (
@@ -304,7 +304,7 @@ export default function GoalCard({
 
       <button
         onClick={() => onAddSubgoal(goal.id)}
-        className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-belleya-primary hover:text-belleya-deep hover:bg-belleya-50 rounded-lg transition-colors font-medium"
+        className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-belaya-primary hover:text-belaya-deep hover:bg-belaya-50 rounded-lg transition-colors font-medium"
       >
         <Plus className="w-4 h-4" />
         Ajouter un sous-objectif

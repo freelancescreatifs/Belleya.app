@@ -189,7 +189,7 @@ export default function InfoTooltip({ content }: InfoTooltipProps) {
           if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
           setIsVisible(!isVisible);
         }}
-        className="text-gray-400 hover:text-belleya-500 transition-colors inline-flex items-center"
+        className="text-gray-400 hover:text-belaya-500 transition-colors inline-flex items-center"
         aria-label="Plus d'informations"
       >
         <Info className="w-4 h-4" />

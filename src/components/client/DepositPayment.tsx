@@ -146,7 +146,7 @@ export default function DepositPayment({
     return (
       <div className="text-center py-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-          <CheckCircle className="w-8 h-8 text-belleya-bright" />
+          <CheckCircle className="w-8 h-8 text-belaya-bright" />
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">Paiement reussi !</h3>
         <p className="text-gray-600">Votre rendez-vous est confirme.</p>
@@ -162,7 +162,7 @@ export default function DepositPayment({
         <p className="text-sm text-gray-500">{serviceName}</p>
       </div>
 
-      <div className="bg-gradient-to-br from-belleya-primary to-belleya-deep text-white rounded-xl p-6">
+      <div className="bg-gradient-to-br from-belaya-primary to-belaya-deep text-white rounded-xl p-6">
         {feePayedByClient ? (
           <div className="space-y-2">
             <div className="flex justify-between text-sm opacity-90">
@@ -276,7 +276,7 @@ export default function DepositPayment({
             <button
               onClick={handlePayment}
               disabled={!selectedMethod || loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-belleya-primary to-belleya-deep text-white rounded-lg hover:from-belleya-deep hover:to-belleya-primary transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-belaya-primary to-belaya-deep text-white rounded-lg hover:from-belaya-deep hover:to-belaya-primary transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

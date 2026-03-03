@@ -224,7 +224,7 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
               className="w-10 h-10 rounded-full object-cover"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-belleya-deep flex items-center justify-center text-white font-semibold">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-belaya-deep flex items-center justify-center text-white font-semibold">
               {provider.company_name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -271,7 +271,7 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
 
           <button
             onClick={() => setShowShareDrawer(true)}
-            className="flex items-center gap-2 text-gray-700 hover:text-belleya-bright transition-colors ml-auto"
+            className="flex items-center gap-2 text-gray-700 hover:text-belaya-bright transition-colors ml-auto"
           >
             <Share2 className="w-6 h-6" />
           </button>
@@ -333,7 +333,7 @@ export default function ContentFeedCard({ content, provider, currentUserId, cont
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {comments.map((comment) => (
                 <div key={comment.id} className="flex items-start gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-belleya-deep flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-belaya-deep flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                     {comment.user_name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2">

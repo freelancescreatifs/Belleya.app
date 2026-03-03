@@ -110,8 +110,8 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
               <div className="text-sm text-purple-800">
                 <strong>Instructions :</strong>
                 <ol className="list-decimal ml-4 mt-2 space-y-1">
-                  <li>Créez une vidéo avis sur Belleya (format Reel/Story recommandé)</li>
-                  <li>Mentionnez @belleya.app dans votre publication</li>
+                  <li>Créez une vidéo avis sur Belaya (format Reel/Story recommandé)</li>
+                  <li>Mentionnez @belaya.app dans votre publication</li>
                   <li>Partagez votre expérience authentique avec l'application</li>
                   <li>Téléchargez votre vidéo ou fournissez le lien Instagram</li>
                 </ol>
@@ -241,7 +241,7 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
                   </span>
                 </div>
                 <p className="text-sm text-yellow-800">
-                  J'autorise Belleya à réutiliser cette vidéo à des fins commerciales et/ou sur la landing page.
+                  J'autorise Belaya à réutiliser cette vidéo à des fins commerciales et/ou sur la landing page.
                   Cette autorisation est nécessaire pour valider la mission et recevoir le mois gratuit.
                 </p>
               </div>

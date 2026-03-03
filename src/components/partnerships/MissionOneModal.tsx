@@ -109,7 +109,7 @@ export default function MissionOneModal({ onClose, onSuccess }: MissionOneModalP
               <div className="text-sm text-blue-800">
                 <strong>Instructions :</strong>
                 <ol className="list-decimal ml-4 mt-2 space-y-1">
-                  <li>Abonnez-vous à <a href="https://www.instagram.com/belleya.app/" target="_blank" rel="noopener noreferrer" className="underline">@belleya.app</a></li>
+                  <li>Abonnez-vous à <a href="https://www.instagram.com/belaya.app/" target="_blank" rel="noopener noreferrer" className="underline">@belaya.app</a></li>
                   <li>Laissez un commentaire détaillé (minimum 100 caractères) sur un de nos posts</li>
                   <li>Faites une capture d'écran montrant votre abonnement et votre photo de profil</li>
                   <li>Remplissez le formulaire ci-dessous</li>
@@ -176,7 +176,7 @@ export default function MissionOneModal({ onClose, onSuccess }: MissionOneModalP
               Capture d'écran de preuve *
             </label>
             <p className="text-xs text-gray-500 mb-2">
-              La capture doit montrer : votre abonnement à @belleya.app + votre photo de profil visible
+              La capture doit montrer : votre abonnement à @belaya.app + votre photo de profil visible
             </p>
 
             <input

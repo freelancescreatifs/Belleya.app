@@ -464,21 +464,21 @@ export const knowledgeBase: KnowledgeTopic[] = [
   },
   {
     id: 'mobile-app',
-    title: 'Utiliser Belleya sur mobile',
+    title: 'Utiliser Belaya sur mobile',
     keywords: ['mobile', 'téléphone', 'smartphone', 'app', 'application', 'installer'],
     intent: 'use_mobile_app',
-    summary: 'Belleya fonctionne parfaitement sur mobile et peut s\'installer comme une app.',
+    summary: 'Belaya fonctionne parfaitement sur mobile et peut s\'installer comme une app.',
     steps: [
-      'Ouvrez Belleya dans votre navigateur mobile (Safari ou Chrome)',
+      'Ouvrez Belaya dans votre navigateur mobile (Safari ou Chrome)',
       'Sur iOS (Safari) :',
       '  - Appuyez sur le bouton "Partager" (carré avec flèche)',
       '  - Descendez et appuyez sur "Sur l\'écran d\'accueil"',
-      '  - Nommez l\'app "Belleya" et appuyez sur "Ajouter"',
+      '  - Nommez l\'app "Belaya" et appuyez sur "Ajouter"',
       'Sur Android (Chrome) :',
       '  - Appuyez sur le menu (3 points) en haut à droite',
       '  - Sélectionnez "Ajouter à l\'écran d\'accueil"',
       '  - Confirmez en appuyant sur "Ajouter"',
-      'L\'icône Belleya apparaît sur votre écran d\'accueil',
+      'L\'icône Belaya apparaît sur votre écran d\'accueil',
       'Lancez l\'app comme n\'importe quelle autre application'
     ],
     uiPaths: [

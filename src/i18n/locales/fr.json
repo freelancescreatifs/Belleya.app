@@ -1,7 +1,7 @@
 {
   "landing": {
     "header": {
-      "altText": "Belleya - Beauty is my priority"
+      "altText": "Belaya - Beauty is my priority"
     },
     "roles": {
       "client": {
@@ -25,7 +25,7 @@
         },
         "cta": "Démarrer gratuitement"
       },
-      "terms": "En utilisant Belleya, vous acceptez nos conditions d'utilisation"
+      "terms": "En utilisant Belaya, vous acceptez nos conditions d'utilisation"
     },
     "reality": {
       "title": "Ta réalité aujourd'hui",
@@ -73,8 +73,8 @@
         "visibility": "Visibilité",
         "serenity": "Sérénité"
       },
-      "conclusion": "Tu mérites Belleya.",
-      "cta": "Découvrir Belleya"
+      "conclusion": "Tu mérites Belaya.",
+      "cta": "Découvrir Belaya"
     },
     "features": {
       "title": "Tout ton business au même endroit",
@@ -112,7 +112,7 @@
         },
         "booking": {
           "title": "Réserve en ligne 24/7",
-          "subtitle": "Ta page Belleya unique",
+          "subtitle": "Ta page Belaya unique",
           "desc": "Tes clientes réservent H24. Tu valides quand tu veux."
         },
         "stock": {

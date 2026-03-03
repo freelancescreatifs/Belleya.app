@@ -119,7 +119,7 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                 <span
                   className={`text-sm font-medium flex items-center justify-center ${
                     isToday
-                      ? 'bg-belleya-500 text-white w-7 h-7 rounded-full'
+                      ? 'bg-belaya-500 text-white w-7 h-7 rounded-full'
                       : isCurrentMonth
                       ? 'text-gray-900 w-7 h-7'
                       : 'text-gray-400 w-7 h-7'
@@ -181,7 +181,7 @@ function MonthView({ currentDate, items, onItemClick, onDayClick }: Omit<Calenda
                 <span
                   className={`text-sm font-medium ${
                     isToday
-                      ? 'bg-belleya-500 text-white w-6 h-6 flex items-center justify-center rounded-full'
+                      ? 'bg-belaya-500 text-white w-6 h-6 flex items-center justify-center rounded-full'
                       : isCurrentMonth
                       ? 'text-gray-900'
                       : 'text-gray-400'
@@ -571,7 +571,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                 key={day.toISOString()}
                 onClick={() => onDayClick(day)}
                 className={`py-2 px-0.5 text-center cursor-pointer active:bg-gray-100 transition-colors ${
-                  isToday ? 'bg-belleya-50' : ''
+                  isToday ? 'bg-belaya-50' : ''
                 }`}
               >
                 <div className="text-[9px] text-gray-500 font-medium uppercase">
@@ -580,7 +580,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                 <div
                   className={`text-sm font-semibold mt-0.5 ${
                     isToday
-                      ? 'bg-belleya-500 text-white w-6 h-6 flex items-center justify-center rounded-full mx-auto'
+                      ? 'bg-belaya-500 text-white w-6 h-6 flex items-center justify-center rounded-full mx-auto'
                       : 'text-gray-900'
                   }`}
                 >
@@ -626,7 +626,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
                 <div
                   key={day.toISOString()}
                   className={`border-r border-gray-100 last:border-r-0 relative transition-colors ${
-                    isToday ? 'bg-belleya-50/20' : ''
+                    isToday ? 'bg-belaya-50/20' : ''
                   } ${
                     dragState.dragStarted && dragState.hoveredDayIndex === dayIndex
                       ? 'bg-blue-50/50 ring-2 ring-inset ring-blue-300'
@@ -758,7 +758,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
               key={day.toISOString()}
               onClick={() => onDayClick(day)}
               className={`py-3 px-2 text-center border-r border-gray-200 last:border-r-0 cursor-pointer hover:bg-gray-50 transition-colors ${
-                isToday ? 'bg-belleya-50/40' : ''
+                isToday ? 'bg-belaya-50/40' : ''
               }`}
             >
               <div className="text-xs text-gray-500 font-medium uppercase">
@@ -766,7 +766,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
               </div>
               <div
                 className={`text-lg font-semibold mt-1 ${
-                  isToday ? 'text-belleya-600' : 'text-gray-900'
+                  isToday ? 'text-belaya-600' : 'text-gray-900'
                 }`}
               >
                 {day.getDate()}
@@ -793,7 +793,7 @@ function WeekView({ currentDate, items, onItemClick, onDayClick, onTimeSlotDoubl
               <div
                 key={day.toISOString()}
                 className={`border-r border-gray-200 last:border-r-0 relative transition-all duration-200 ${
-                  isToday ? 'bg-belleya-50/10' : ''
+                  isToday ? 'bg-belaya-50/10' : ''
                 } ${
                   dragState.dragStarted && dragState.hoveredDayIndex === dayIndex
                     ? 'bg-blue-50/70 ring-2 ring-inset ring-blue-400'

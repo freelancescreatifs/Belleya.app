@@ -242,7 +242,7 @@ export default function ClientSelector({ value, onChange, className = '', placeh
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-left flex items-center justify-between ${className}`}
+        className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-left flex items-center justify-between ${className}`}
       >
         <span className={selectedClient ? 'text-gray-900' : 'text-gray-500'}>
           {selectedClient ? selectedClient.name : placeholder}
@@ -260,7 +260,7 @@ export default function ClientSelector({ value, onChange, className = '', placeh
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher..."
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                 autoFocus
               />
             </div>
@@ -283,8 +283,8 @@ export default function ClientSelector({ value, onChange, className = '', placeh
                         key={client.id}
                         type="button"
                         onClick={() => handleSelectClient(client)}
-                        className={`w-full px-3 py-2 text-left hover:bg-belleya-50 transition-colors ${
-                          value === client.id ? 'bg-belleya-100 text-belleya-deep font-medium' : 'text-gray-900'
+                        className={`w-full px-3 py-2 text-left hover:bg-belaya-50 transition-colors ${
+                          value === client.id ? 'bg-belaya-100 text-belaya-deep font-medium' : 'text-gray-900'
                         }`}
                       >
                         {client.name}
@@ -311,8 +311,8 @@ export default function ClientSelector({ value, onChange, className = '', placeh
                             key={client.id}
                             type="button"
                             onClick={() => handleSelectClient(client)}
-                            className={`w-full px-3 py-2 text-left hover:bg-belleya-50 transition-colors ${
-                              value === client.id ? 'bg-belleya-100 text-belleya-deep font-medium' : 'text-gray-900'
+                            className={`w-full px-3 py-2 text-left hover:bg-belaya-50 transition-colors ${
+                              value === client.id ? 'bg-belaya-100 text-belaya-deep font-medium' : 'text-gray-900'
                             }`}
                           >
                             {client.name}
@@ -326,7 +326,7 @@ export default function ClientSelector({ value, onChange, className = '', placeh
                         type="button"
                         onClick={loadMoreClients}
                         disabled={loadingMore}
-                        className="w-full px-3 py-3 text-sm text-belleya-primary hover:bg-belleya-50 transition-colors border-t border-gray-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full px-3 py-3 text-sm text-belaya-primary hover:bg-belaya-50 transition-colors border-t border-gray-200 flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         {loadingMore ? (
                           <>

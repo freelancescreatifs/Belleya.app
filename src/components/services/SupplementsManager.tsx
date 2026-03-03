@@ -150,7 +150,7 @@ export default function SupplementsManager({ serviceId, serviceType = 'prestatio
         <button
           type="button"
           onClick={() => setShowForm(!showForm)}
-          className="text-sm text-belleya-primary hover:text-belleya-deep font-medium flex items-center gap-1"
+          className="text-sm text-belaya-primary hover:text-belaya-deep font-medium flex items-center gap-1"
         >
           <Plus className="w-4 h-4" />
           Ajouter
@@ -166,7 +166,7 @@ export default function SupplementsManager({ serviceId, serviceType = 'prestatio
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: Baby Boomer"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             />
           </div>
 
@@ -190,7 +190,7 @@ export default function SupplementsManager({ serviceId, serviceType = 'prestatio
                   }}
                   onFocus={(e) => e.target.select()}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 />
               </div>
             )}
@@ -216,7 +216,7 @@ export default function SupplementsManager({ serviceId, serviceType = 'prestatio
                 }}
                 onFocus={(e) => e.target.select()}
                 placeholder="0"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function SupplementsManager({ serviceId, serviceType = 'prestatio
               type="button"
               onClick={handleSubmit}
               disabled={!formData.name || !formData.price}
-              className="flex-1 px-3 py-2 text-sm bg-belleya-500 text-white rounded-lg hover:bg-belleya-primary disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex-1 px-3 py-2 text-sm bg-belaya-500 text-white rounded-lg hover:bg-belaya-primary disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {editingId ? 'Modifier' : 'Ajouter'}
             </button>

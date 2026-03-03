@@ -255,7 +255,7 @@ export default function ActivityTypesManager() {
             onChange={(e) => setNewActivity(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleAddActivity()}
             placeholder="Nouvelle activité..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
           />
           <button
             onClick={handleAddActivity}
@@ -367,7 +367,7 @@ export default function ActivityTypesManager() {
                   value={fieldForm.field_name}
                   onChange={(e) => setFieldForm({ ...fieldForm, field_name: e.target.value })}
                   placeholder="Ex: Type de peau, Longueur cheveux..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                   required
                 />
               </div>
@@ -379,7 +379,7 @@ export default function ActivityTypesManager() {
                 <select
                   value={fieldForm.field_type}
                   onChange={(e) => setFieldForm({ ...fieldForm, field_type: e.target.value as any })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                 >
                   <option value="text">Texte</option>
                   <option value="select">Liste déroulante</option>
@@ -413,7 +413,7 @@ export default function ActivityTypesManager() {
                       onChange={(e) => setNewOption(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleAddOption()}
                       placeholder="Nouvelle option..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
                     />
                     <button
                       onClick={handleAddOption}
@@ -431,7 +431,7 @@ export default function ActivityTypesManager() {
                     type="checkbox"
                     checked={fieldForm.is_required}
                     onChange={(e) => setFieldForm({ ...fieldForm, is_required: e.target.checked })}
-                    className="w-4 h-4 text-belleya-primary border-gray-300 rounded focus:ring-belleya-primary"
+                    className="w-4 h-4 text-belaya-primary border-gray-300 rounded focus:ring-belaya-primary"
                   />
                   <span className="text-sm text-gray-700">Champ obligatoire</span>
                 </label>

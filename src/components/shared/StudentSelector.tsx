@@ -274,7 +274,7 @@ export default function StudentSelector({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-left flex items-center justify-between ${className}`}
+        className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-left flex items-center justify-between ${className}`}
       >
         <span className={selectedStudent ? 'text-gray-900' : 'text-gray-500'}>
           {selectedStudent ? selectedStudent.name : placeholder}
@@ -292,7 +292,7 @@ export default function StudentSelector({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher..."
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent text-sm"
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent text-sm"
                 autoFocus
               />
             </div>
@@ -302,7 +302,7 @@ export default function StudentSelector({
             <button
               type="button"
               onClick={handleCreateNew}
-              className="w-full px-3 py-3 text-left hover:bg-belleya-50 transition-colors border-b border-gray-200 flex items-center gap-2 text-belleya-primary font-medium"
+              className="w-full px-3 py-3 text-left hover:bg-belaya-50 transition-colors border-b border-gray-200 flex items-center gap-2 text-belaya-primary font-medium"
             >
               <UserPlus className="w-4 h-4" />
               Créer un nouvel élève
@@ -326,8 +326,8 @@ export default function StudentSelector({
                         key={student.id}
                         type="button"
                         onClick={() => handleSelectStudent(student)}
-                        className={`w-full px-3 py-2 text-left hover:bg-belleya-50 transition-colors ${
-                          value === student.id ? 'bg-belleya-100 text-belleya-deep font-medium' : 'text-gray-900'
+                        className={`w-full px-3 py-2 text-left hover:bg-belaya-50 transition-colors ${
+                          value === student.id ? 'bg-belaya-100 text-belaya-deep font-medium' : 'text-gray-900'
                         }`}
                       >
                         {student.name}
@@ -354,8 +354,8 @@ export default function StudentSelector({
                             key={student.id}
                             type="button"
                             onClick={() => handleSelectStudent(student)}
-                            className={`w-full px-3 py-2 text-left hover:bg-belleya-50 transition-colors ${
-                              value === student.id ? 'bg-belleya-100 text-belleya-deep font-medium' : 'text-gray-900'
+                            className={`w-full px-3 py-2 text-left hover:bg-belaya-50 transition-colors ${
+                              value === student.id ? 'bg-belaya-100 text-belaya-deep font-medium' : 'text-gray-900'
                             }`}
                           >
                             {student.name}
@@ -369,7 +369,7 @@ export default function StudentSelector({
                         type="button"
                         onClick={loadMoreStudents}
                         disabled={loadingMore}
-                        className="w-full px-3 py-3 text-sm text-belleya-primary hover:bg-belleya-50 transition-colors border-t border-gray-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full px-3 py-3 text-sm text-belaya-primary hover:bg-belaya-50 transition-colors border-t border-gray-200 flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         {loadingMore ? (
                           <>

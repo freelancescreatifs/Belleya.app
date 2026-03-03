@@ -163,7 +163,7 @@ export default function WeeklySchedule({ availability, onChange }: WeeklySchedul
                       onClick={() => toggleSlot(key, index)}
                       className={`px-2 py-2 text-xs rounded transition-colors ${
                         slot.available
-                          ? 'bg-green-100 text-green-800 border border-belleya-300 hover:bg-green-200'
+                          ? 'bg-green-100 text-green-800 border border-belaya-300 hover:bg-green-200'
                           : 'bg-gray-100 text-gray-500 border border-gray-300 hover:bg-gray-200'
                       }`}
                     >
@@ -182,7 +182,7 @@ export default function WeeklySchedule({ availability, onChange }: WeeklySchedul
       </div>
 
       <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="flex-shrink-0 w-3 h-3 bg-belleya-vivid rounded mt-1"></div>
+        <div className="flex-shrink-0 w-3 h-3 bg-belaya-vivid rounded mt-1"></div>
         <div className="text-sm">
           <p className="font-medium text-gray-900">Disponible</p>
           <p className="text-gray-600">Les créneaux en vert sont disponibles pour les réservations</p>

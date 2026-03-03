@@ -72,7 +72,7 @@ export default function ProjectSelector({
             <select
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent appearance-none"
+              className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent appearance-none"
             >
               <option value="">Aucun projet</option>
               <optgroup label="Projets en cours">
@@ -98,14 +98,14 @@ export default function ProjectSelector({
           <button
             type="button"
             onClick={() => setShowCreateForm(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-belleya-500 hover:text-belleya-500 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-belaya-500 hover:text-belaya-500 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Créer un nouveau projet
           </button>
         </>
       ) : (
-        <div className="border-2 border-belleya-500 rounded-lg p-4 space-y-3">
+        <div className="border-2 border-belaya-500 rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-semibold text-gray-900">
               Nouveau projet
@@ -132,7 +132,7 @@ export default function ProjectSelector({
               }
             }}
             placeholder="Nom du projet"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belleya-primary focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
             autoFocus
           />
           <div className="flex gap-2">

@@ -97,7 +97,7 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
                 onClick={() => handleTabClick(tab.id)}
                 className={`flex flex-col items-center justify-center flex-1 h-full px-1 transition-colors ${
                   isActive
-                    ? 'text-belleya-primary'
+                    ? 'text-belaya-primary'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -114,7 +114,7 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
             onClick={() => handleTabClick('more')}
             className={`flex flex-col items-center justify-center flex-1 h-full px-1 transition-colors ${
               isMoreTabActive && !isMainTabActive
-                ? 'text-belleya-primary'
+                ? 'text-belaya-primary'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -162,7 +162,7 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
                       className={`flex flex-col items-center justify-center p-4 rounded-2xl transition-all ${
                         isActive
                           ? 'bg-gradient-main text-white shadow-md'
-                          : 'bg-gradient-soft text-belleya-deep hover:shadow-sm'
+                          : 'bg-gradient-soft text-belaya-deep hover:shadow-sm'
                       }`}
                     >
                       <Icon className={`w-7 h-7 mb-2 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />

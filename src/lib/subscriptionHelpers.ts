@@ -140,9 +140,9 @@ export function getPlanPrice(planType: string): { current: number; future: numbe
 
 export function getPlanName(planType: string): string {
   const names: Record<string, string> = {
-    start: 'Belleya Start',
-    studio: 'Belleya Studio',
-    empire: 'Belleya Empire'
+    start: 'Belaya Start',
+    studio: 'Belaya Studio',
+    empire: 'Belaya Empire'
   };
 
   return names[planType] || planType;

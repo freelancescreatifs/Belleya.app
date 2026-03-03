@@ -28,7 +28,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
-      lookupLocalStorage: 'belleya_language'
+      lookupLocalStorage: 'belaya_language'
     }
   });
 

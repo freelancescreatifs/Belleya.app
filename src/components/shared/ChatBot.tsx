@@ -20,7 +20,7 @@ interface Message {
 }
 
 const WHATSAPP_LINK = 'https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY?mode=gi_t';
-const STORAGE_KEY = 'belleya-support-chat-history';
+const STORAGE_KEY = 'belaya-support-chat-history';
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,7 +52,7 @@ export default function ChatBot() {
 
   const initializeChat = () => {
     addBotMessage(
-      'Bonjour ! Je suis votre assistant Belleya. Je peux vous aider avec toutes les fonctionnalités de l\'application.\n\nChoisissez une action rapide ci-dessous ou posez-moi votre question.',
+      'Bonjour ! Je suis votre assistant Belaya. Je peux vous aider avec toutes les fonctionnalités de l\'application.\n\nChoisissez une action rapide ci-dessous ou posez-moi votre question.',
       undefined,
       false,
       true
@@ -173,7 +173,7 @@ export default function ChatBot() {
             );
           } else {
             addBotMessage(
-              'Je n\'ai pas d\'information précise sur ce sujet dans ma base de connaissances Belleya.\n\nPour une aide personnalisée, je vous recommande de contacter notre support.',
+              'Je n\'ai pas d\'information précise sur ce sujet dans ma base de connaissances Belaya.\n\nPour une aide personnalisée, je vous recommande de contacter notre support.',
               undefined,
               true
             );
@@ -258,7 +258,7 @@ export default function ChatBot() {
                     style={{ touchAction: 'manipulation' }}
                   >
                     {copiedIndex === `${topic.id}-path-${idx}` ? (
-                      <Check className="w-3 h-3 text-belleya-bright" />
+                      <Check className="w-3 h-3 text-belaya-bright" />
                     ) : (
                       <Copy className="w-3 h-3 text-purple-600" />
                     )}
@@ -350,7 +350,7 @@ export default function ChatBot() {
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-base">Support Belleya</h3>
+                  <h3 className="font-bold text-base">Support Belaya</h3>
                   <p className="text-xs text-white/90">Assistance opérationnelle 24/7</p>
                 </div>
               </div>
@@ -399,7 +399,7 @@ export default function ChatBot() {
                       href={WHATSAPP_LINK}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-3 flex items-center justify-center gap-2 bg-belleya-vivid hover:bg-belleya-bright text-white px-4 py-3 rounded-xl font-semibold text-sm transition-colors shadow-lg hover:shadow-xl"
+                      className="mt-3 flex items-center justify-center gap-2 bg-belaya-vivid hover:bg-belaya-bright text-white px-4 py-3 rounded-xl font-semibold text-sm transition-colors shadow-lg hover:shadow-xl"
                       style={{ touchAction: 'manipulation' }}
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -480,7 +480,7 @@ export default function ChatBot() {
                 Nouvelle conversation
               </button>
               <span className="text-[10px] text-gray-400">
-                Propulsé par l'IA Belleya
+                Propulsé par l'IA Belaya
               </span>
             </div>
           </div>
