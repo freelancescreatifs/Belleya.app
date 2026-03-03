@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, CreditCard as Edit, Trash2, Upload, Download, FileText, Plus, X, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../hooks/useToast';
+import ToastContainer from '../components/shared/ToastContainer';
 import type { StudentWithDetails, TrainingProgram, StudentTraining, StudentDocument, DocumentStage, DocumentType } from '../types/training';
 import { DOCUMENT_TYPES_BY_STAGE } from '../types/training';
 import { calculateStudentStatus, getStatusLabel, getStatusColor } from '../lib/studentHelpers';
@@ -14,7 +16,8 @@ interface StudentDetailProps {
 export default function StudentDetail({ onPageChange }: StudentDetailProps) {
   const pathname = window.location.pathname;
   const id = pathname.split('/').pop();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const { toasts, showToast, dismissToast } = useToast();
   const [student, setStudent] = useState<StudentWithDetails | null>(null);
   const [programs, setPrograms] = useState<TrainingProgram[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,12 +29,26 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
+  const [companyName, setCompanyName] = useState('');
 
   useEffect(() => {
     if (profile?.company_id && id) {
       loadData(true);
     }
   }, [profile?.company_id, id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      supabase
+        .from('company_profiles')
+        .select('company_name')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.company_name) setCompanyName(data.company_name);
+        });
+    }
+  }, [user?.id]);
 
   async function loadData(isInitialLoad: boolean = false) {
     if (!profile?.company_id || !id) {
@@ -216,25 +233,47 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
   }
 
   async function handleSendEmail(subject: string, message: string) {
+    if (!student?.email) return;
     setSendingEmail(true);
     try {
-      const docsList = Array.from(selectedDocuments).map(id => {
-        const doc = student?.documents?.find(d => d.id === id);
-        return doc ? `- ${doc.file_path.split('/').pop()}` : '';
-      }).filter(Boolean).join('\n');
+      const attachments = Array.from(selectedDocuments)
+        .map(id => {
+          const doc = student?.documents?.find(d => d.id === id);
+          if (!doc) return null;
+          return {
+            name: doc.file_path.split('/').pop() || 'document',
+            url: doc.file_path,
+          };
+        })
+        .filter(Boolean);
 
-      alert(
-        `Email prêt à envoyer à: ${student?.email}\n\n` +
-        `Sujet: ${subject}\n\n` +
-        `Message: ${message}\n\n` +
-        `Documents joints (${selectedDocuments.size}):\n${docsList || 'Aucun'}\n\n` +
-        `Fonctionnalité d'envoi en cours de développement.`
-      );
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-student-email`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: student.email,
+          subject,
+          message,
+          studentName: `${student.first_name} ${student.last_name}`,
+          providerName: companyName || 'Votre formatrice',
+          attachments,
+        }),
+      });
 
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Échec de l\'envoi');
+      }
+
+      showToast('success', 'Email envoyé avec succès');
       setShowEmailModal(false);
     } catch (error) {
       console.error('Error sending email:', error);
-      alert('Erreur lors de l\'envoi de l\'email');
+      showToast('error', 'Erreur lors de l\'envoi de l\'email');
     } finally {
       setSendingEmail(false);
     }
@@ -501,6 +540,8 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
           sending={sendingEmail}
         />
       )}
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

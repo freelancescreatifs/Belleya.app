@@ -60,6 +60,7 @@ export interface StudentDocument {
   document_type: DocumentType;
   document_stage: DocumentStage;
   file_path: string;
+  custom_name?: string;
   uploaded_at: string;
   created_at: string;
   updated_at: string;
