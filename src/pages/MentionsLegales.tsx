@@ -27,7 +27,7 @@ export default function MentionsLegales() {
               Mentions Légales
             </h1>
             <p className="text-gray-600 text-sm">
-              Dernière mise à jour : Février 2026
+              Dernière mise à jour : Mars 2026
             </p>
           </div>
 
@@ -38,11 +38,11 @@ export default function MentionsLegales() {
               </h2>
               <div className="space-y-2">
                 <p><strong>Nom de la société :</strong> Belaya</p>
-                <p><strong>Forme juridique :</strong> [À compléter]</p>
-                <p><strong>Siège social :</strong> [Adresse à compléter]</p>
-                <p><strong>SIRET :</strong> [Numéro à compléter]</p>
-                <p><strong>Email :</strong> contact@belaya.fr</p>
-                <p><strong>Téléphone :</strong> [Numéro à compléter]</p>
+                <p><strong>Forme juridique :</strong> Auto-entreprise</p>
+                <p><strong>Siège social :</strong> Asnières-sur-Seine</p>
+                <p><strong>SIRET :</strong> [Numéro SIRET]</p>
+                <p><strong>Email :</strong> contact@belaya.app</p>
+                <p><strong>Téléphone :</strong> 07 66 52 13 05</p>
               </div>
             </section>
 
@@ -51,7 +51,7 @@ export default function MentionsLegales() {
                 2. Directeur de publication
               </h2>
               <p>
-                Le directeur de la publication est : [Nom du directeur]
+                Le directeur de la publication est : Sabrina Benaceur
               </p>
             </section>
 
@@ -88,10 +88,10 @@ export default function MentionsLegales() {
                 vous disposez d'un droit d'accès, de rectification, de suppression et d'opposition des données vous concernant.
               </p>
               <p className="mb-3">
-                Pour exercer ces droits, vous pouvez nous contacter à l'adresse : contact@belaya.fr
+                Pour exercer ces droits, vous pouvez nous contacter à l'adresse : support@belaya.app
               </p>
               <p>
-                Les données collectées sont destinées à l'usage exclusif de Belaya et ne seront en aucun cas cédées à des tiers
+                Les données collectées sont destinées à l'usage exclusif de Belleya et ne seront en aucun cas cédées à des tiers
                 sans votre consentement préalable.
               </p>
             </section>
@@ -131,8 +131,8 @@ export default function MentionsLegales() {
           <div className="mt-10 pt-6 border-t border-gray-200">
             <p className="text-center text-gray-600">
               Pour toute question concernant ces mentions légales, contactez-nous à{' '}
-              <a href="mailto:contact@belaya.fr" className="text-belaya-primary hover:underline">
-                contact@belaya.fr
+              <a href="mailto:support@belaya.app" className="text-belaya-primary hover:underline">
+                support@belaya.app
               </a>
             </p>
           </div>
