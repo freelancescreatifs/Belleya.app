@@ -280,20 +280,19 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const loadEvents = async () => {
     if (!proProfile) return;
 
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
     const { data, error } = await supabase
       .from('events')
-      .select('start, end, type')
+      .select('start_at, end_at, type')
       .eq('user_id', proProfile.user_id)
-      .gte('start', new Date().toISOString())
-      .order('start');
+      .gte('start_at', new Date().toISOString())
+      .lte('start_at', threeMonthsFromNow.toISOString())
+      .order('start_at');
 
     if (!error && data) {
-      const formattedEvents = data.map(event => ({
-        start_at: event.start,
-        end_at: event.end,
-        type: event.type
-      }));
-      setEvents(formattedEvents as Event[]);
+      setEvents(data as Event[]);
     }
   };
 
