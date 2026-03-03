@@ -96,32 +96,22 @@ export function getProductionSteps(content: ContentItem): ProductionStep[] {
   for (const step of stepsConfig) {
     const isCompleted = completedStepKeys.includes(step.key);
 
-    if (step.date) {
-      const stepDate = new Date(step.date);
-      const todayDate = new Date(today);
-      const diffTime = stepDate.getTime() - todayDate.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (!step.date) continue;
 
-      steps.push({
-        ...step,
-        stepDate: step.date,
-        diffDays,
-        isOverdue: !isCompleted && diffDays < 0,
-        isToday: !isCompleted && diffDays === 0,
-        isPast: isCompleted || diffDays < 0,
-        isCompleted
-      });
-    } else {
-      steps.push({
-        ...step,
-        stepDate: undefined,
-        diffDays: 999,
-        isOverdue: false,
-        isToday: false,
-        isPast: isCompleted,
-        isCompleted
-      });
-    }
+    const stepDate = new Date(step.date);
+    const todayDate = new Date(today);
+    const diffTime = stepDate.getTime() - todayDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    steps.push({
+      ...step,
+      stepDate: step.date,
+      diffDays,
+      isOverdue: !isCompleted && diffDays < 0,
+      isToday: !isCompleted && diffDays === 0,
+      isPast: isCompleted || diffDays < 0,
+      isCompleted
+    });
   }
 
   return steps.sort((a, b) => {

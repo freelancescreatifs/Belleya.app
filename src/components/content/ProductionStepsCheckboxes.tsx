@@ -1,4 +1,4 @@
-import { FileText, Video, Scissors, Calendar, CheckCircle, AlertTriangle } from 'lucide-react';
+import { FileText, Video, Scissors, Calendar, CheckCircle, Square } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useState, useEffect } from 'react';
 import { calculateProductionStatus, ContentItem } from '../../lib/productionStepsHelpers';
@@ -231,7 +231,7 @@ export default function ProductionStepsCheckboxes({
                 flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium
                 transition-all duration-200
                 ${isChecked
-                  ? 'bg-green-100 text-green-700 border border-belaya-300'
+                  ? 'bg-green-100 text-green-700 border border-green-300'
                   : isLate
                   ? 'bg-red-50 text-red-700 border border-red-300'
                   : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
@@ -240,9 +240,9 @@ export default function ProductionStepsCheckboxes({
               `}
             >
               {isChecked ? (
-                <CheckCircle className="w-3 h-3" />
+                <CheckCircle className="w-3 h-3 text-green-500" />
               ) : isLate ? (
-                <AlertTriangle className="w-3 h-3" />
+                <Square className="w-3 h-3" />
               ) : (
                 <Icon className="w-3 h-3" />
               )}
@@ -274,7 +274,7 @@ export default function ProductionStepsCheckboxes({
                 flex items-center gap-2 px-3 py-2 rounded-lg font-medium
                 transition-all duration-200 flex-1
                 ${isChecked
-                  ? 'bg-green-50 text-green-700 border-2 border-belaya-300'
+                  ? 'bg-green-50 text-green-700 border-2 border-green-300'
                   : isLate
                   ? 'bg-red-50 text-red-700 border-2 border-red-300'
                   : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400'
@@ -283,9 +283,9 @@ export default function ProductionStepsCheckboxes({
               `}
             >
               {isChecked ? (
-                <CheckCircle className="w-4 h-4 text-belaya-bright" />
+                <CheckCircle className="w-4 h-4 text-green-500" />
               ) : isLate ? (
-                <AlertTriangle className="w-4 h-4 text-red-600" />
+                <Square className="w-4 h-4 text-red-600" />
               ) : (
                 <div className="w-4 h-4 border-2 border-gray-400 rounded" />
               )}

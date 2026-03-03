@@ -12,11 +12,13 @@ interface PublishedStatusTagProps {
   className?: string;
 }
 
+const BRAND_TAG_COLOR = 'bg-belaya-50 text-belaya-700 border border-belaya-300';
+
 const STEP_CONFIG: Record<string, { label: string; icon: typeof FileText; color: string }> = {
-  script: { label: 'A Scripter', icon: FileText, color: 'bg-orange-50 text-orange-700 border border-orange-300' },
-  shooting: { label: 'A Tourner', icon: Video, color: 'bg-rose-50 text-rose-700 border border-rose-300' },
-  editing: { label: 'A Monter', icon: Scissors, color: 'bg-teal-50 text-teal-700 border border-teal-300' },
-  scheduling: { label: 'A Planifier', icon: Calendar, color: 'bg-blue-50 text-blue-700 border border-blue-300' },
+  script: { label: 'A Scripter', icon: FileText, color: BRAND_TAG_COLOR },
+  shooting: { label: 'A Tourner', icon: Video, color: BRAND_TAG_COLOR },
+  editing: { label: 'A Monter', icon: Scissors, color: BRAND_TAG_COLOR },
+  scheduling: { label: 'A Planifier', icon: Calendar, color: BRAND_TAG_COLOR },
 };
 
 function getRelevantSteps(contentType: string): string[] {
@@ -93,9 +95,9 @@ export default function PublishedStatusTag({
 
   if (isPublished) {
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-belaya-100 text-belaya-700 border border-belaya-300 ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-300 ${className}`}>
         <CheckCircle className="w-3 h-3" />
-        Publie
+        Publi{'\u00e9'}
       </span>
     );
   }
@@ -116,9 +118,9 @@ export default function PublishedStatusTag({
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200 ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-300 ${className}`}>
       <Clock className="w-3 h-3" />
-      Non publie
+      Non publi{'\u00e9'}
     </span>
   );
 }
