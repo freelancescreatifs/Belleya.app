@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake } from 'lucide-react';
+import { X, CreditCard as Edit, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getClientTag } from '../../lib/clientTagHelpers';

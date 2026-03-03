@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, Calendar, Lightbulb, FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Hash, Instagram, Linkedin, Facebook, Youtube, Twitter, Camera, Scissors } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Lightbulb, File as FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Hash, Instagram, Linkedin, Facebook, Youtube, Twitter, Camera, Scissors } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
