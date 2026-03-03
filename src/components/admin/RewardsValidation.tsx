@@ -42,7 +42,7 @@ export default function RewardsValidation() {
             .from('company_profiles')
             .select('company_name, user_id')
             .eq('id', submission.provider_id)
-            .single();
+            .maybeSingle();
 
           let email = '';
           if (companyData?.user_id) {

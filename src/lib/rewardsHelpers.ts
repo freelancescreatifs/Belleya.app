@@ -241,7 +241,7 @@ export async function getFreeMonthsBalance(providerId: string): Promise<number> 
     .from('company_profiles')
     .select('free_months_balance')
     .eq('id', providerId)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data?.free_months_balance || 0;

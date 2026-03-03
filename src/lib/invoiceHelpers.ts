@@ -100,9 +100,10 @@ export async function getInvoiceById(invoiceId: string): Promise<InvoiceWithDeta
         appointment:events(id, start_time, end_time)
       `)
       .eq('id', invoiceId)
-      .single();
+      .maybeSingle();
 
     if (invoiceError) throw invoiceError;
+    if (!invoice) throw new Error('Invoice not found');
 
     const { data: items, error: itemsError } = await supabase
       .from('invoice_items')
@@ -276,7 +277,7 @@ export async function sendInvoiceEmail(
       .from('company_profiles')
       .select('company_name')
       .eq('user_id', invoice.provider_id)
-      .single();
+      .maybeSingle();
 
     const providerName = profile?.company_name || 'Votre prestataire';
     const appointmentDate = invoice.appointment
@@ -375,7 +376,7 @@ export async function sendInvoiceSMS(
       .from('company_profiles')
       .select('company_name')
       .eq('user_id', invoice.provider_id)
-      .single();
+      .maybeSingle();
 
     const providerName = profile?.company_name || 'Votre prestataire';
     const appointmentDate = invoice.appointment

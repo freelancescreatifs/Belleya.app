@@ -62,9 +62,10 @@ export default function Goals() {
       .from('goals')
       .select('status')
       .eq('id', parentGoalId)
-      .single();
+      .maybeSingle();
 
     if (parentError) throw parentError;
+    if (!parentGoalData) return;
 
     if (parentGoalData.status !== 'on_hold') {
       const { data: allSubgoals, error: subgoalsError } = await supabase

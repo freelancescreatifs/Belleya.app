@@ -136,7 +136,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         .from('user_profiles')
         .select('company_id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileData?.company_id) {
         const { data: subscriptionData } = await supabase

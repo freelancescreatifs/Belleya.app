@@ -46,7 +46,7 @@ export default function Inspiration() {
       .from('user_profiles')
       .select('company_id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (data?.company_id) {
       setCompanyId(data.company_id);
