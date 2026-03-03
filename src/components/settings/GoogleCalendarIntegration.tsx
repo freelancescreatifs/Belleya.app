@@ -30,7 +30,7 @@ export default function GoogleCalendarIntegration() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('google_connected') === 'true') {
       showToast('success', 'Google Calendar connecte avec succes !');
-      window.history.replaceState({}, '', window.location.pathname);
+      window.history.replaceState({}, '', '/');
       loadIntegration();
     }
     if (params.get('google_error')) {
@@ -43,7 +43,7 @@ export default function GoogleCalendarIntegration() {
         internal_error: 'Erreur interne. Veuillez reessayer.',
       };
       showToast('error', messages[errorCode || ''] || 'Erreur de connexion Google Calendar');
-      window.history.replaceState({}, '', window.location.pathname);
+      window.history.replaceState({}, '', '/');
     }
   }, []);
 

@@ -125,6 +125,7 @@ function AppContent() {
   const isProviderProfilePage = pathname.startsWith('/provider/');
   const isPublicProfilePage = pathname.startsWith('/profile/');
   const isStudentDetailPage = pathname.startsWith('/training/students/');
+  const isSettingsRedirect = pathname === '/settings';
   const isPricingPage = pathname === '/pricing';
   const isSubscriptionSuccessPage = pathname === '/subscription-success';
   const isSubscriptionCancelPage = pathname === '/subscription-cancel';
@@ -203,6 +204,12 @@ function AppContent() {
       safeNavigate(pathname, 'student-detail-route');
     }
   }, [pathname, isStudentDetailPage, user]);
+
+  useEffect(() => {
+    if (isSettingsRedirect && user && profile) {
+      safeNavigate('settings', 'settings-redirect');
+    }
+  }, [isSettingsRedirect, user, profile]);
 
   if (loading) {
     return (
