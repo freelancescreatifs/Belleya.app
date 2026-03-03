@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Lightbulb, Sparkles, Plus, X, Bell } from 'lucide-react';
+import { Calendar, Lightbulb, Sparkles, Plus, X, Bell, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
 
 interface Event {
   id: string;
@@ -19,11 +20,13 @@ interface EventsCalendarProps {
 
 export default function EventsCalendar({ onContentAdded }: EventsCalendarProps) {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear] = useState(new Date().getFullYear());
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addingId, setAddingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -73,38 +76,47 @@ export default function EventsCalendar({ onContentAdded }: EventsCalendarProps) 
     return Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  async function handleAddToCalendar(event: Event, suggestion: { title: string; type: string }) {
+  async function handleAddToCalendar(event: Event, suggestion: { title: string; type: string }, index: number) {
     if (!user) return;
 
+    const uniqueId = `${event.id}-${index}`;
+    setAddingId(uniqueId);
+
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const { data: companyData } = await supabase
+        .from('company_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       const { error } = await supabase
         .from('content_calendar')
         .insert([{
           user_id: user.id,
+          company_id: companyData?.id || null,
           title: suggestion.title,
           description: `Contenu pour ${event.title}`,
           content_type: suggestion.type,
-          platform: 'instagram',
-          publication_date: today,
+          platform: ['instagram'],
+          publication_date: event.date,
           publication_time: '12:00',
           status: 'script',
           notes: `Événement: ${event.title}\nThème: ${event.theme}\nDate événement: ${event.date}`,
-          feed_order: 0,
-          image_url: ''
+          feed_order: 0
         }]);
 
       if (error) throw error;
 
-      alert(`L'idée "${suggestion.title}" a été ajoutée au calendrier pour aujourd'hui !`);
+      showToast('success', `"${suggestion.title}" ajouté au calendrier !`);
 
       if (onContentAdded) {
         onContentAdded();
       }
     } catch (error) {
       console.error('Error adding to calendar:', error);
-      alert('Erreur lors de l\'ajout au calendrier');
+      showToast('error', 'Erreur lors de l\'ajout au calendrier');
+    } finally {
+      setAddingId(null);
     }
   }
 
@@ -228,24 +240,33 @@ export default function EventsCalendar({ onContentAdded }: EventsCalendarProps) 
                         <h4 className="text-sm font-semibold text-gray-900">Idées de contenu</h4>
                       </div>
                       <div className="space-y-2">
-                        {event.suggestions.map((suggestion, index) => (
-                          <div key={index} className="flex items-center justify-between gap-2 p-2 bg-white rounded-lg">
-                            <div className="flex items-center gap-2 flex-1">
-                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full flex-shrink-0"></div>
-                              <span className="text-sm text-gray-700">{suggestion.title}</span>
-                              <span className="px-2 py-0.5 bg-purple-100 rounded-full text-xs text-purple-700 flex-shrink-0">
-                                {suggestion.type}
-                              </span>
+                        {event.suggestions.map((suggestion, index) => {
+                          const uniqueId = `${event.id}-${index}`;
+                          const isAdding = addingId === uniqueId;
+                          return (
+                            <div key={index} className="flex items-center justify-between gap-2 p-2 bg-white rounded-lg">
+                              <div className="flex items-center gap-2 flex-1">
+                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                <span className="text-sm text-gray-700">{suggestion.title}</span>
+                                <span className="px-2 py-0.5 bg-blue-100 rounded-full text-xs text-blue-700 flex-shrink-0">
+                                  {suggestion.type}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => handleAddToCalendar(event, suggestion, index)}
+                                disabled={isAdding}
+                                className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all text-xs font-medium flex-shrink-0 disabled:opacity-50"
+                              >
+                                {isAdding ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Plus className="w-3 h-3" />
+                                )}
+                                {isAdding ? '...' : 'Ajouter'}
+                              </button>
                             </div>
-                            <button
-                              onClick={() => handleAddToCalendar(event, suggestion)}
-                              className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all text-xs font-medium flex-shrink-0"
-                            >
-                              <Plus className="w-3 h-3" />
-                              Ajouter
-                            </button>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Lightbulb, Sparkles } from 'lucide-react';
+import { Calendar, Lightbulb, Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
 
 interface Marronnier {
   id: string;
@@ -15,10 +16,12 @@ interface Marronnier {
 
 export default function MarronniersCalendar() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [marronniers, setMarronniers] = useState<Marronnier[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear] = useState(new Date().getFullYear());
+  const [addingId, setAddingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -65,35 +68,47 @@ export default function MarronniersCalendar() {
         }]);
 
       if (error) throw error;
-      alert('Alerte créée avec succès !');
+      showToast('success', 'Alerte créée avec succès !');
     } catch (error) {
       console.error('Error creating alert:', error);
-      alert('Erreur lors de la création de l\'alerte');
+      showToast('error', 'Erreur lors de la création de l\'alerte');
     }
   }
 
-  async function handleAddToCalendar(marronnier: Marronnier, suggestion: { title: string; type: string }) {
+  async function handleAddToCalendar(marronnier: Marronnier, suggestion: { title: string; type: string }, index: number) {
     if (!user) return;
 
+    const uniqueId = `${marronnier.id}-${index}`;
+    setAddingId(uniqueId);
+
     try {
+      const { data: companyData } = await supabase
+        .from('company_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
       const { error } = await supabase
         .from('content_calendar')
         .insert([{
           user_id: user.id,
+          company_id: companyData?.id || null,
           title: suggestion.title,
           description: `${marronnier.title} - ${marronnier.theme}`,
           content_type: suggestion.type,
-          platform: 'instagram',
+          platform: ['instagram'],
           publication_date: marronnier.date,
-          status: 'idea',
+          status: 'script',
           notes: `Marronnier : ${marronnier.title}`
         }]);
 
       if (error) throw error;
-      alert('Ajouté au calendrier éditorial !');
+      showToast('success', 'Ajouté au calendrier éditorial !');
     } catch (error) {
       console.error('Error adding to calendar:', error);
-      alert('Erreur lors de l\'ajout au calendrier');
+      showToast('error', 'Erreur lors de l\'ajout au calendrier');
+    } finally {
+      setAddingId(null);
     }
   }
 
@@ -201,7 +216,10 @@ export default function MarronniersCalendar() {
                           <span className="text-sm font-semibold text-gray-900">Idées de contenu</span>
                         </div>
                         <div className="space-y-2">
-                          {marronnier.suggestions.map((suggestion, index) => (
+                          {marronnier.suggestions.map((suggestion, index) => {
+                          const uniqueId = `${marronnier.id}-${index}`;
+                          const isAdding = addingId === uniqueId;
+                          return (
                             <div key={index} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-colors">
                               <div className="flex items-center gap-3">
                                 <span className="text-sm text-gray-700">{suggestion.title}</span>
@@ -210,13 +228,18 @@ export default function MarronniersCalendar() {
                                 </span>
                               </div>
                               <button
-                                onClick={() => handleAddToCalendar(marronnier, suggestion)}
-                                className="px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all text-xs font-medium"
+                                onClick={() => handleAddToCalendar(marronnier, suggestion, index)}
+                                disabled={isAdding}
+                                className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all text-xs font-medium disabled:opacity-50"
                               >
-                                Ajouter
+                                {isAdding ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : null}
+                                {isAdding ? '...' : 'Ajouter'}
                               </button>
                             </div>
-                          ))}
+                          );
+                        })}
                         </div>
                       </div>
                     )}
