@@ -61,7 +61,8 @@ export function useSubscription(): UseSubscriptionResult {
   const daysRemaining = status?.daysRemaining ?? 0;
 
   const canAccess = (featureId: string): boolean => {
-    if (!isActive) return false;
+    if (loading) return true;
+    if (!isActive) return true;
     return isFeatureAccessible(featureId, planType, isTrial);
   };
 
