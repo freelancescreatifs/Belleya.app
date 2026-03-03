@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Sparkles, Calendar, Target, Zap, Loader, Plus, Trash2, Star, StarOff } from 'lucide-react';
+import { X, Sparkles, Calendar, Target, Loader, Trash2, Star, StarOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { generateContentIdeas } from '../../lib/contentAIGenerator';
-import { getProfessionLabel, type ProfessionKey } from '../../lib/professionHelpers';
+import { type ProfessionKey } from '../../lib/professionHelpers';
 
 interface SavedIdea {
   id: string;
@@ -32,14 +31,47 @@ interface IdeasGeneratorProps {
   onIdeaSaved: (ideaId: string) => void;
 }
 
+async function callContentAI(
+  mode: 'ideas' | 'produce',
+  params: {
+    title?: string;
+    content_type: string;
+    platform: string;
+    objective: string;
+    editorial_pillar?: string;
+    profession: string;
+  }
+) {
+  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-content-script`;
+  const session = await supabase.auth.getSession();
+  const token = session.data.session?.access_token;
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ mode, ...params }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorProps) {
   const { user } = useAuth();
   const [profession, setProfession] = useState<ProfessionKey | null>(null);
-  const [professionLabel, setProfessionLabel] = useState('');
   const [pillars, setPillars] = useState<EditorialPillar[]>([]);
   const [savedIdeas, setSavedIdeas] = useState<SavedIdea[]>([]);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [producing, setProducing] = useState(false);
   const [activeTab, setActiveTab] = useState<'manual' | 'ai' | 'saved'>('manual');
   const [manualIdea, setManualIdea] = useState({
     title: '',
@@ -82,7 +114,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
       if (data?.primary_profession) {
         setProfession(data.primary_profession as ProfessionKey);
-        setProfessionLabel(getProfessionLabel(data.primary_profession as ProfessionKey));
       }
     } catch (error) {
       console.error('Error loading profession:', error);
@@ -184,14 +215,14 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       if (error) {
         console.error('Error creating manual idea:', error);
         setErrorMessage(`Erreur: ${error.message}`);
-        alert(`Erreur lors de la création: ${error.message}`);
+        alert(`Erreur lors de la creation: ${error.message}`);
         return;
       }
 
       if (!data || data.length === 0) {
         console.error('No data returned after insert');
-        setErrorMessage('Aucune donnée retournée');
-        alert('Erreur: Aucune donnée retournée');
+        setErrorMessage('Aucune donnee retournee');
+        alert('Erreur: Aucune donnee retournee');
         return;
       }
 
@@ -207,7 +238,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         editorial_pillar: ''
       });
 
-      alert('Idée créée avec succès !');
+      alert('Idee creee avec succes !');
     } catch (error: any) {
       console.error('Exception creating manual idea:', error);
       const errorMsg = error?.message || 'Erreur inconnue';
@@ -220,13 +251,13 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
   async function handleGenerateAI() {
     if (!user) {
-      alert('Vous devez être connecté');
+      alert('Vous devez etre connecte');
       return;
     }
 
     if (!profession) {
-      setErrorMessage('Veuillez d\'abord configurer votre profession dans les paramètres');
-      alert('Veuillez d\'abord configurer votre profession dans les paramètres');
+      setErrorMessage('Veuillez d\'abord configurer votre profession dans les parametres');
+      alert('Veuillez d\'abord configurer votre profession dans les parametres');
       return;
     }
 
@@ -240,34 +271,36 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         .eq('user_id', user.id)
         .maybeSingle();
 
-      const ideas = generateContentIdeas(
-        profession,
-        aiIdea.content_type,
-        aiIdea.platform,
-        aiIdea.objective,
-        aiIdea.editorial_pillar,
-        aiIdea.title.trim() || undefined
-      );
+      const aiResponse = await callContentAI('ideas', {
+        title: aiIdea.title.trim() || undefined,
+        content_type: aiIdea.content_type,
+        platform: aiIdea.platform,
+        objective: aiIdea.objective,
+        editorial_pillar: aiIdea.editorial_pillar || undefined,
+        profession: profession,
+      });
+
+      const ideas = Array.isArray(aiResponse) ? aiResponse : [];
 
       if (ideas.length === 0) {
-        alert('Aucune idée générée. Essayez avec d\'autres paramètres.');
+        alert('Aucune idee generee. Essayez avec d\'autres parametres.');
         return;
       }
 
-      const insertData = ideas.map(idea => ({
+      const insertData = ideas.map((idea: any) => ({
         user_id: user.id,
         company_id: companyData?.id || null,
-        title: idea.title,
+        title: idea.title || 'Idee sans titre',
         description: idea.description || '',
-        content_type: idea.content_type,
-        platform: Array.isArray(idea.platform) ? idea.platform : [idea.platform],
+        content_type: aiIdea.content_type,
+        platform: [aiIdea.platform],
         publication_date: null,
         publication_time: null,
         status: 'script' as const,
         source: 'ai' as const,
-        objective: idea.objective,
+        objective: aiIdea.objective,
         editorial_pillar: aiIdea.editorial_pillar || null,
-        notes: `Angle: ${idea.angle}`,
+        notes: idea.angle ? `Angle: ${idea.angle}` : '',
         is_saved: false,
         feed_order: 0,
         image_url: ''
@@ -281,13 +314,13 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       if (error) {
         console.error('Error generating AI ideas:', error);
         setErrorMessage(`Erreur: ${error.message}`);
-        alert(`Erreur lors de la génération: ${error.message}`);
+        alert(`Erreur lors de la generation: ${error.message}`);
         return;
       }
 
       if (!data || data.length === 0) {
         console.error('No data returned after AI insert');
-        alert('Erreur: Aucune donnée retournée');
+        alert('Erreur: Aucune donnee retournee');
         return;
       }
 
@@ -304,7 +337,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         editorial_pillar: ''
       });
 
-      alert(`${ideas.length} idées générées avec succès !`);
+      alert(`${ideas.length} idees generees avec succes !`);
     } catch (error: any) {
       console.error('Exception generating AI ideas:', error);
       const errorMsg = error?.message || 'Erreur inconnue';
@@ -339,7 +372,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   }
 
   async function handleDelete(ideaId: string) {
-    if (!confirm('Supprimer cette idée ?')) return;
+    if (!confirm('Supprimer cette idee ?')) return;
 
     try {
       const deletedIdea = savedIdeas.find(idea => idea.id === ideaId);
@@ -374,39 +407,64 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   }
 
   async function confirmProduction() {
-    if (!user || !selectedIdea) return;
+    if (!user || !selectedIdea || producing) return;
+
+    setProducing(true);
 
     try {
-      const movedIdea = savedIdeas.find(idea => idea.id === selectedIdea.id);
-      setSavedIdeas(prev => prev.filter(idea => idea.id !== selectedIdea.id));
+      let generatedScript = '';
+      if (profession) {
+        try {
+          const platforms = Array.isArray(selectedIdea.platform)
+            ? selectedIdea.platform[0]
+            : selectedIdea.platform;
 
-      const updateData = {
+          const scriptResult = await callContentAI('produce', {
+            title: selectedIdea.title,
+            content_type: selectedIdea.content_type,
+            platform: platforms || 'instagram',
+            objective: selectedIdea.objective || 'attirer',
+            editorial_pillar: selectedIdea.editorial_pillar || undefined,
+            profession: profession,
+          });
+
+          generatedScript = scriptResult?.script || '';
+        } catch (aiError) {
+          console.error('AI script generation failed, proceeding without script:', aiError);
+        }
+      }
+
+      const updateData: Record<string, any> = {
         status: 'script',
         publication_date: productionDate,
         publication_time: productionTime,
         date_script: productionDate,
-        date_script_time: productionTime
+        date_script_time: productionTime,
       };
+
+      if (generatedScript) {
+        updateData.description = generatedScript;
+      }
 
       const { error } = await supabase
         .from('content_calendar')
         .update(updateData)
         .eq('id', selectedIdea.id);
 
-      if (error) {
-        if (movedIdea) {
-          setSavedIdeas(prev => [movedIdea, ...prev]);
-        }
-        throw error;
-      }
+      if (error) throw error;
+
+      await loadSavedIdeas();
 
       setShowProductionModal(false);
       setSelectedIdea(null);
-      alert('Idée ajoutée à la production !');
+      alert('Idee ajoutee a la production !');
       onIdeaSaved(selectedIdea.id);
     } catch (error) {
       console.error('Error converting to production:', error);
       alert('Erreur lors de la conversion');
+      await loadSavedIdeas();
+    } finally {
+      setProducing(false);
     }
   }
 
@@ -417,7 +475,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       'story': 'Story',
       'post': 'Post Classique',
       'live': 'Live',
-      'video': 'Vidéo'
+      'video': 'Video'
     };
     return formatMap[contentType] || contentType;
   }
@@ -430,8 +488,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   }
 
   function renderIdeaCard(idea: SavedIdea, cardColor: string) {
-    const isAIGenerated = idea.source === 'ai';
-
     return (
       <div key={idea.id} className={`p-4 ${cardColor} rounded-xl border`}>
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -461,7 +517,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         </div>
 
         {idea.description && (
-          <div className="mb-3 p-3 bg-white/70 rounded-lg max-h-64 overflow-y-auto">
+          <div className="mb-3 p-3 bg-white/70 rounded-lg max-h-[500px] overflow-y-auto">
             <div className="text-xs text-gray-700 whitespace-pre-line">
               {idea.description}
             </div>
@@ -480,7 +536,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
             className="flex-1 px-3 py-1.5 bg-gradient-to-r from-belaya-bright to-belaya-bright text-white rounded-lg hover:from-belaya-deep hover:to-belaya-deep transition-all text-xs font-medium flex items-center justify-center gap-1.5"
           >
             <Calendar className="w-3.5 h-3.5" />
-            À produire
+            A produire
           </button>
           <button
             onClick={() => handleToggleSave(idea.id, idea.is_saved || false)}
@@ -513,8 +569,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Boîte à idées</h2>
-              <p className="text-sm text-gray-600">Génère et organise tes idées de contenu</p>
+              <h2 className="text-2xl font-bold text-gray-900">Boite a idees</h2>
+              <p className="text-sm text-gray-600">Genere et organise tes idees de contenu</p>
             </div>
           </div>
           <button
@@ -530,12 +586,12 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
             onClick={() => setActiveTab('manual')}
             className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
               activeTab === 'manual'
-                ? 'bg-white text-purple-600 shadow-md'
+                ? 'bg-white text-orange-600 shadow-md'
                 : 'text-gray-600 hover:bg-white/50'
             }`}
           >
             <Target className="w-5 h-5" />
-            Mes idées ({manualIdeas.length})
+            Mes idees ({manualIdeas.length})
           </button>
           <button
             onClick={() => setActiveTab('ai')}
@@ -546,7 +602,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
             }`}
           >
             <Sparkles className="w-5 h-5" />
-            Idées générées par IA ({aiIdeas.length})
+            Idees generees par IA ({aiIdeas.length})
           </button>
           <button
             onClick={() => setActiveTab('saved')}
@@ -557,15 +613,15 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
             }`}
           >
             <Star className="w-5 h-5" />
-            Idées sauvegardées ({starredIdeas.length})
+            Idees sauvegardees ({starredIdeas.length})
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
           {activeTab === 'manual' && (
             <div className="space-y-4">
-              <div className="p-5 bg-white border-2 border-purple-300 rounded-xl shadow-lg">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Nouvelle idée</h3>
+              <div className="p-5 bg-white border-2 border-orange-300 rounded-xl shadow-lg">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Nouvelle idee</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
@@ -573,7 +629,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                       type="text"
                       value={manualIdea.title}
                       onChange={(e) => setManualIdea({ ...manualIdea, title: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="Ex: Tutoriel French Manucure"
                     />
                   </div>
@@ -583,7 +639,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                       <select
                         value={manualIdea.content_type}
                         onChange={(e) => setManualIdea({ ...manualIdea, content_type: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
                         <option value="reel">Reel</option>
                         <option value="carrousel">Carrousel</option>
@@ -597,7 +653,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                       <select
                         value={manualIdea.platform}
                         onChange={(e) => setManualIdea({ ...manualIdea, platform: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
                         <option value="instagram">Instagram</option>
                         <option value="tiktok">TikTok</option>
@@ -612,20 +668,20 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                       <select
                         value={manualIdea.objective}
                         onChange={(e) => setManualIdea({ ...manualIdea, objective: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
                         <option value="attirer">Attirer</option>
-                        <option value="éduquer">Éduquer</option>
+                        <option value="eduquer">Eduquer</option>
                         <option value="convertir">Convertir</option>
-                        <option value="fidéliser">Fidéliser</option>
+                        <option value="fideliser">Fideliser</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Pilier éditorial</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Pilier editorial</label>
                       <select
                         value={manualIdea.editorial_pillar}
                         onChange={(e) => setManualIdea({ ...manualIdea, editorial_pillar: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
                         <option value="">Aucun pilier</option>
                         {pillars.map(pillar => (
@@ -641,9 +697,9 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     <textarea
                       value={manualIdea.notes}
                       onChange={(e) => setManualIdea({ ...manualIdea, notes: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       rows={3}
-                      placeholder="Décris ton idée, ajoute des détails..."
+                      placeholder="Decris ton idee, ajoute des details..."
                     />
                   </div>
 
@@ -671,15 +727,15 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     <button
                       onClick={handleCreateManualIdea}
                       disabled={saving}
-                      className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {saving ? (
                         <>
                           <Loader className="w-4 h-4 animate-spin" />
-                          Création...
+                          Creation...
                         </>
                       ) : (
-                        'Créer l\'idée'
+                        'Creer l\'idee'
                       )}
                     </button>
                   </div>
@@ -689,11 +745,11 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               {manualIdeas.length === 0 ? (
                 <div className="text-center py-12">
                   <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg font-medium mb-2">Aucune idée</p>
-                  <p className="text-gray-400 text-sm">Ajoute tes propres idées manuellement</p>
+                  <p className="text-gray-500 text-lg font-medium mb-2">Aucune idee</p>
+                  <p className="text-gray-400 text-sm">Ajoute tes propres idees manuellement</p>
                 </div>
               ) : (
-                manualIdeas.map((idea) => renderIdeaCard(idea, 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100'))
+                manualIdeas.map((idea) => renderIdeaCard(idea, 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-100'))
               )}
             </div>
           )}
@@ -701,11 +757,11 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
           {activeTab === 'ai' && (
             <div className="space-y-4">
               <div className="p-5 bg-white border-2 border-orange-300 rounded-xl shadow-lg">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Générateur d'idées stratégiques</h3>
-                <p className="text-sm text-gray-600 mb-4">L'IA va créer 5 idées stratégiques avec hooks, angles et justifications</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Generateur d'idees strategiques</h3>
+                <p className="text-sm text-gray-600 mb-4">L'IA va creer 5 idees strategiques avec hooks, angles et justifications</p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Thème ou sujet (optionnel)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Theme ou sujet (optionnel)</label>
                     <input
                       type="text"
                       value={aiIdea.title}
@@ -713,7 +769,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="Ex: Transformation client, Erreurs courantes, Technique signature..."
                     />
-                    <p className="text-xs text-gray-500 mt-1">Laisse vide pour des idées génériques adaptées à tes critères</p>
+                    <p className="text-xs text-gray-500 mt-1">Laisse vide pour des idees adaptees a tes criteres</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -753,13 +809,13 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
                         <option value="attirer">Attirer</option>
-                        <option value="éduquer">Éduquer</option>
+                        <option value="eduquer">Eduquer</option>
                         <option value="convertir">Convertir</option>
-                        <option value="fidéliser">Fidéliser</option>
+                        <option value="fideliser">Fideliser</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Pilier éditorial</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Pilier editorial</label>
                       <select
                         value={aiIdea.editorial_pillar}
                         onChange={(e) => setAiIdea({ ...aiIdea, editorial_pillar: e.target.value })}
@@ -789,12 +845,12 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     {generating ? (
                       <>
                         <Loader className="w-5 h-5 animate-spin" />
-                        Génération de 5 idées stratégiques...
+                        Generation IA en cours...
                       </>
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5" />
-                        Générer 5 idées stratégiques
+                        Generer 5 idees strategiques
                       </>
                     )}
                   </button>
@@ -804,8 +860,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               {aiIdeas.length === 0 ? (
                 <div className="text-center py-12">
                   <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg font-medium mb-2">Aucune idée générée par IA</p>
-                  <p className="text-gray-400 text-sm">Utilise le formulaire ci-dessus pour générer des idées</p>
+                  <p className="text-gray-500 text-lg font-medium mb-2">Aucune idee generee par IA</p>
+                  <p className="text-gray-400 text-sm">Utilise le formulaire ci-dessus pour generer des idees</p>
                 </div>
               ) : (
                 aiIdeas.map((idea) => renderIdeaCard(idea, 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-100'))
@@ -818,8 +874,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               {starredIdeas.length === 0 ? (
                 <div className="text-center py-12">
                   <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg font-medium mb-2">Aucune idée sauvegardée</p>
-                  <p className="text-gray-400 text-sm">Sauvegarde tes idées favorites depuis les autres onglets</p>
+                  <p className="text-gray-500 text-lg font-medium mb-2">Aucune idee sauvegardee</p>
+                  <p className="text-gray-400 text-sm">Sauvegarde tes idees favorites depuis les autres onglets</p>
                 </div>
               ) : (
                 starredIdeas.map((idea) => renderIdeaCard(idea, 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200'))
@@ -838,6 +894,13 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
             Choisis la date et l'heure pour commencer la production de : <span className="font-semibold">{selectedIdea.title}</span>
           </p>
 
+          {producing && (
+            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-2">
+              <Loader className="w-4 h-4 animate-spin text-orange-600" />
+              <p className="text-sm text-orange-700">Generation du script IA en cours...</p>
+            </div>
+          )}
+
           <div className="space-y-4 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Date de production *</label>
@@ -846,6 +909,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                 value={productionDate}
                 onChange={(e) => setProductionDate(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                disabled={producing}
               />
             </div>
             <div>
@@ -855,6 +919,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                 value={productionTime}
                 onChange={(e) => setProductionTime(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                disabled={producing}
               />
             </div>
           </div>
@@ -862,18 +927,29 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
           <div className="flex gap-3">
             <button
               onClick={() => {
-                setShowProductionModal(false);
-                setSelectedIdea(null);
+                if (!producing) {
+                  setShowProductionModal(false);
+                  setSelectedIdea(null);
+                }
               }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              disabled={producing}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
             >
               Annuler
             </button>
             <button
               onClick={confirmProduction}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-belaya-bright to-belaya-bright text-white rounded-lg hover:from-belaya-deep hover:to-belaya-deep transition-all font-medium"
+              disabled={producing}
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-belaya-bright to-belaya-bright text-white rounded-lg hover:from-belaya-deep hover:to-belaya-deep transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Confirmer
+              {producing ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  Production...
+                </>
+              ) : (
+                'Confirmer'
+              )}
             </button>
           </div>
         </div>

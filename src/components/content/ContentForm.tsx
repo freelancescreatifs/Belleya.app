@@ -3,8 +3,7 @@ import { Save, Calendar, Clock, Image as ImageIcon, Upload, Sparkles, Info, Link
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { normalizeTime } from '../../lib/timeHelpers';
-import { generateContentAI, generateContentIdeas } from '../../lib/contentAIGenerator';
-import { type ProfessionKey } from '../../lib/professionHelpers';
+import { generateContentAI } from '../../lib/contentAIGenerator';
 import MediaUploader from './MediaUploader';
 import { MediaFile, uploadMultipleMedia, getMediaType, urlsToMediaFiles } from '../../lib/mediaHelpers';
 import InfoTooltip from '../shared/InfoTooltip';
@@ -376,35 +375,50 @@ export default function ContentForm({
 
     setGeneratingCaption(true);
     try {
-      const primaryPlatform = (selectedPlatforms[0] || 'instagram') as 'instagram' | 'tiktok' | 'linkedin' | 'facebook' | 'youtube' | 'twitter';
-      const contentType = formData.content_type as 'post' | 'reel' | 'carrousel' | 'story' | 'video' | 'live';
-      const profession = professionType as ProfessionKey;
+      const primaryPlatform = selectedPlatforms[0] || 'instagram';
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
 
-      const ideas = generateContentIdeas(
-        profession || 'nail_artist' as ProfessionKey,
-        contentType,
-        primaryPlatform,
-        formData.objective || 'attirer',
-        formData.editorial_pillar || undefined,
-        formData.title
-      );
-
-      if (ideas.length === 0) {
-        alert('Aucune idée générée. Essayez avec d\'autres paramètres.');
+      if (!token) {
+        alert('Session expirée, veuillez vous reconnecter.');
         return;
       }
 
-      const firstIdea = ideas[0];
-
-      setFormData({
-        ...formData,
-        description: firstIdea.description
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-content-script`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          mode: 'produce',
+          title: formData.title,
+          content_type: formData.content_type,
+          platform: primaryPlatform,
+          objective: formData.objective || 'attirer',
+          editorial_pillar: formData.editorial_pillar || undefined,
+          profession: professionType || 'nail_artist',
+        }),
       });
 
-      alert('Script stratégique généré avec succès !');
-    } catch (error) {
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: 'Erreur inconnue' }));
+        throw new Error(err.error || `Erreur HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.script) {
+        setFormData({ ...formData, description: data.script });
+        alert('Script stratégique IA généré avec succès !');
+      } else {
+        alert('Aucun script généré. Réessayez.');
+      }
+    } catch (error: any) {
       console.error('Error generating AI content:', error);
-      alert('Erreur lors de la génération du contenu');
+      alert(error.message || 'Erreur lors de la génération du contenu');
     } finally {
       setGeneratingCaption(false);
     }
@@ -978,7 +992,7 @@ export default function ContentForm({
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-3 md:p-6">
+      <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-300 rounded-xl p-3 md:p-6">
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <h3 className="text-base md:text-lg font-semibold text-blue-900 flex items-center gap-1.5 md:gap-2">
             <Calendar className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
@@ -996,7 +1010,7 @@ export default function ContentForm({
               <button
                 type="button"
                 onClick={handleAutoPlanning}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 text-xs md:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 text-xs md:text-sm bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-lg hover:from-blue-600 hover:to-sky-600 transition-all shadow-md"
               >
                 <Wand2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 Auto-plan
@@ -1071,7 +1085,7 @@ export default function ContentForm({
         )}
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 space-y-3">
+      <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-xl p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <label className="flex items-center gap-2 text-sm font-semibold text-blue-900">
@@ -1093,8 +1107,8 @@ export default function ContentForm({
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={8}
-          className="w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm"
+          rows={16}
+          className="w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm whitespace-pre-wrap"
           placeholder="Cliquez sur 'Générer IA' pour créer un script stratégique ultra-détaillé..."
         />
       </div>
@@ -1108,7 +1122,7 @@ export default function ContentForm({
             type="button"
             onClick={handleGenerateCaption}
             disabled={generatingScript || !formData.description}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
+            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-lg hover:from-blue-600 hover:to-sky-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
           >
             <Wand2 className="w-4 h-4" />
             {generatingScript ? 'Génération...' : 'Générer légende'}
@@ -1118,7 +1132,7 @@ export default function ContentForm({
           value={formData.caption}
           onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
           rows={3}
-          className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base"
+          className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
           placeholder="Génération automatique basée sur le script..."
         />
       </div>
