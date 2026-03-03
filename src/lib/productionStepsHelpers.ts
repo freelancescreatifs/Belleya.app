@@ -1,4 +1,4 @@
-import { FileEdit, Camera, Scissors, CheckCircle, CalendarCheck, MessageSquare } from 'lucide-react';
+import { File as FileEdit, Camera, Scissors, CheckCircle, CalendarCheck, MessageSquare } from 'lucide-react';
 import { createElement } from 'react';
 
 export type ContentStatus = 'script' | 'shooting' | 'editing' | 'scheduled' | 'published';
