@@ -137,7 +137,7 @@ Deno.serve(async (req: Request) => {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
-        client_id: null,
+        client_id: crmClientId,
         pro_id: proId,
         service_id: serviceId,
         appointment_date: appointmentDate,
