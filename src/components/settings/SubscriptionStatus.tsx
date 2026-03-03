@@ -29,7 +29,7 @@ export default function SubscriptionStatus() {
         .eq('company_id', companyId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       setSubscriptionData(data);
     } catch (error) {
