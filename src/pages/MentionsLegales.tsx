@@ -101,7 +101,7 @@ export default function MentionsLegales() {
                 Pour exercer ces droits, vous pouvez nous contacter à l'adresse : support@belaya.app
               </p>
               <p>
-                Les données collectées sont destinées à l'usage exclusif de Belleya et ne seront en aucun cas cédées à des tiers
+                Les données collectées sont destinées à l'usage exclusif de Belaya et ne seront en aucun cas cédées à des tiers
                 sans votre consentement préalable.
               </p>
             </section>

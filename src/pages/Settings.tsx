@@ -33,10 +33,10 @@ export default function Settings() {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="border-b border-gray-200">
-          <div className="flex">
+          <div className="flex overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('company')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'company'
                   ? 'text-[#C43586] border-b-2 border-[#C43586]'
                   : 'text-gray-600 hover:text-gray-900'
@@ -47,7 +47,7 @@ export default function Settings() {
             </button>
             <button
               onClick={() => setActiveTab('documents')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'documents'
                   ? 'text-[#C43586] border-b-2 border-[#C43586]'
                   : 'text-gray-600 hover:text-gray-900'
@@ -58,7 +58,7 @@ export default function Settings() {
             </button>
             <button
               onClick={() => setActiveTab('profitability')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'profitability'
                   ? 'text-[#C43586] border-b-2 border-[#C43586]'
                   : 'text-gray-600 hover:text-gray-900'
@@ -69,7 +69,7 @@ export default function Settings() {
             </button>
             <button
               onClick={() => setActiveTab('tabs')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'tabs'
                   ? 'text-[#C43586] border-b-2 border-[#C43586]'
                   : 'text-gray-600 hover:text-gray-900'
@@ -80,7 +80,7 @@ export default function Settings() {
             </button>
             <button
               onClick={() => setActiveTab('language')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'language'
                   ? 'text-[#C43586] border-b-2 border-[#C43586]'
                   : 'text-gray-600 hover:text-gray-900'
@@ -91,7 +91,7 @@ export default function Settings() {
             </button>
             <button
               onClick={() => setActiveTab('integrations')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'integrations'
                   ? 'text-[#C43586] border-b-2 border-[#C43586]'
                   : 'text-gray-600 hover:text-gray-900'
@@ -102,7 +102,7 @@ export default function Settings() {
             </button>
             <button
               onClick={() => setActiveTab('subscription')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'subscription'
                   ? 'text-[#C43586] border-b-2 border-[#C43586]'
                   : 'text-gray-600 hover:text-gray-900'

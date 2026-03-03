@@ -72,7 +72,7 @@ export default function SubscriptionStatus() {
       case 'studio':
         return <Zap className="w-6 h-6 text-amber-600" />;
       case 'empire':
-        return <Crown className="w-6 h-6 text-purple-600" />;
+        return <Crown className="w-6 h-6 text-belaya-deep" />;
       default:
         return <Sparkles className="w-6 h-6 text-slate-600" />;
     }
@@ -85,7 +85,7 @@ export default function SubscriptionStatus() {
       case 'studio':
         return 'from-amber-500 to-orange-500';
       case 'empire':
-        return 'from-purple-500 to-pink-500';
+        return 'from-belaya-deep to-belaya-vivid';
       default:
         return 'from-slate-500 to-slate-600';
     }
