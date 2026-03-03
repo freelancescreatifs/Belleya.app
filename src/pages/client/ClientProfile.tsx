@@ -209,7 +209,7 @@ export default function ClientProfile() {
               ? `${profile.first_name} ${profile.last_name}`
               : 'Mon profil'}
           </h1>
-          <p className="text-white/90 text-sm">Cliente BelleYa</p>
+          <p className="text-white/90 text-sm">Cliente Belaya</p>
         </div>
       </div>
 
@@ -344,7 +344,7 @@ export default function ClientProfile() {
         </button>
 
         <div className="text-center text-sm text-gray-500 py-4">
-          BelleYa v1.0
+          Belaya v1.0
         </div>
       </div>
 

@@ -80,7 +80,7 @@ function buildStudentEmailHtml(payload: StudentEmailPayload): string {
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
           <tr>
             <td style="background:linear-gradient(135deg,#e84c8a,#d63a78);padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">Belleya</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">Belaya</h1>
               <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Formation</p>
             </td>
           </tr>
@@ -90,13 +90,13 @@ function buildStudentEmailHtml(payload: StudentEmailPayload): string {
               ${attachmentsHtml}
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
               <p style="margin:0;color:#9ca3af;font-size:13px;line-height:1.5;text-align:center;">
-                Cet email vous a &eacute;t&eacute; envoy&eacute; par <strong>${safeProvider}</strong> via Belleya.
+                Cet email vous a &eacute;t&eacute; envoy&eacute; par <strong>${safeProvider}</strong> via Belaya.
               </p>
             </td>
           </tr>
           <tr>
             <td style="background-color:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
-              <p style="margin:0;color:#9ca3af;font-size:12px;">&copy; ${new Date().getFullYear()} Belleya. Tous droits r&eacute;serv&eacute;s.</p>
+              <p style="margin:0;color:#9ca3af;font-size:12px;">&copy; ${new Date().getFullYear()} Belaya. Tous droits r&eacute;serv&eacute;s.</p>
             </td>
           </tr>
         </table>
@@ -152,7 +152,7 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `Belleya <onboarding@resend.dev>`,
+        from: `Belaya <onboarding@resend.dev>`,
         to: [to],
         subject,
         html,

@@ -10,7 +10,7 @@ export const geocodeAddress = async (address: string): Promise<GeocodeResult | n
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
       {
         headers: {
-          'User-Agent': 'BelleYa-App',
+          'User-Agent': 'Belaya-App',
         },
       }
     );
@@ -39,7 +39,7 @@ export const reverseGeocode = async (lat: number, lon: number): Promise<string |
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
       {
         headers: {
-          'User-Agent': 'BelleYa-App',
+          'User-Agent': 'Belaya-App',
         },
       }
     );

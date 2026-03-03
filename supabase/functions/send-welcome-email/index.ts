@@ -19,8 +19,8 @@ interface WelcomeEmailPayload {
 
 function buildEmailHtml(firstName: string, providerName: string, bookingSlug?: string | null): string {
   const bookingUrl = bookingSlug
-    ? `https://belleya.app/book/${bookingSlug}`
-    : "https://belleya.app/";
+    ? `https://belaya.app/book/${bookingSlug}`
+    : "https://belaya.app/";
 
   return `
 <!DOCTYPE html>
@@ -37,7 +37,7 @@ function buildEmailHtml(firstName: string, providerName: string, bookingSlug?: s
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#e84c8a,#d63a78);padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">Belleya</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">Belaya</h1>
               <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Votre espace beaute en ligne</p>
             </td>
           </tr>
@@ -46,7 +46,7 @@ function buildEmailHtml(firstName: string, providerName: string, bookingSlug?: s
             <td style="padding:40px;">
               <h2 style="margin:0 0 16px;color:#1f2937;font-size:22px;font-weight:600;">Bonjour ${firstName},</h2>
               <p style="margin:0 0 16px;color:#4b5563;font-size:16px;line-height:1.6;">
-                <strong>${providerName}</strong> vous a ajout&eacute;(e) sur <strong>Belleya</strong>, votre plateforme beaut&eacute; en ligne.
+                <strong>${providerName}</strong> vous a ajout&eacute;(e) sur <strong>Belaya</strong>, votre plateforme beaut&eacute; en ligne.
               </p>
               <p style="margin:0 0 24px;color:#4b5563;font-size:16px;line-height:1.6;">
                 Vous pouvez d&eacute;sormais prendre rendez-vous en ligne, consulter l'historique de vos prestations et profiter d'avantages exclusifs.
@@ -63,14 +63,14 @@ function buildEmailHtml(firstName: string, providerName: string, bookingSlug?: s
               </table>
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 24px;">
               <p style="margin:0;color:#9ca3af;font-size:13px;line-height:1.5;text-align:center;">
-                Cet email vous a &eacute;t&eacute; envoy&eacute; car <strong>${providerName}</strong> utilise Belleya pour g&eacute;rer ses rendez-vous. Si vous pensez avoir re&ccedil;u ce message par erreur, vous pouvez l'ignorer.
+                Cet email vous a &eacute;t&eacute; envoy&eacute; car <strong>${providerName}</strong> utilise Belaya pour g&eacute;rer ses rendez-vous. Si vous pensez avoir re&ccedil;u ce message par erreur, vous pouvez l'ignorer.
               </p>
             </td>
           </tr>
           <!-- Footer -->
           <tr>
             <td style="background-color:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
-              <p style="margin:0;color:#9ca3af;font-size:12px;">&copy; ${new Date().getFullYear()} Belleya. Tous droits r&eacute;serv&eacute;s.</p>
+              <p style="margin:0;color:#9ca3af;font-size:12px;">&copy; ${new Date().getFullYear()} Belaya. Tous droits r&eacute;serv&eacute;s.</p>
             </td>
           </tr>
         </table>
@@ -142,9 +142,9 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Belleya <onboarding@resend.dev>",
+            from: "Belaya <onboarding@resend.dev>",
             to: [client.email],
-            subject: "Bienvenue sur Belleya !",
+            subject: "Bienvenue sur Belaya !",
             html,
           }),
         });

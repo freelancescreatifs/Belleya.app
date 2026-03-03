@@ -26,7 +26,7 @@ Deno.serve(async (req: Request) => {
     const redirectUri = Deno.env.get("GOOGLE_CALENDAR_REDIRECT_URI")!;
 
     const appUrl = supabaseUrl.includes("lldznuayrxzvliehywoc")
-      ? "https://belleya.app"
+      ? "https://belaya.app"
       : "http://localhost:5173";
 
     if (errorParam) {
@@ -160,7 +160,7 @@ Deno.serve(async (req: Request) => {
     );
   } catch (err) {
     console.error("google-calendar-callback error:", err);
-    const appUrl = "https://belleya.app";
+    const appUrl = "https://belaya.app";
     return Response.redirect(
       `${appUrl}/settings?google_error=internal_error`,
       302

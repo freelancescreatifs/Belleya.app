@@ -10,9 +10,9 @@ const corsHeaders = {
 };
 
 const PLAN_CONFIG: Record<string, { name: string; amount: number; lookupKey: string }> = {
-  start: { name: "Belleya Start", amount: 2900, lookupKey: "belleya_start_monthly" },
-  studio: { name: "Belleya Studio", amount: 3900, lookupKey: "belleya_studio_monthly" },
-  empire: { name: "Belleya Empire", amount: 5900, lookupKey: "belleya_empire_monthly" },
+  start: { name: "Belaya Start", amount: 2900, lookupKey: "belaya_start_monthly" },
+  studio: { name: "Belaya Studio", amount: 3900, lookupKey: "belaya_studio_monthly" },
+  empire: { name: "Belaya Empire", amount: 5900, lookupKey: "belaya_empire_monthly" },
 };
 
 const VALID_PLANS = Object.keys(PLAN_CONFIG);
@@ -36,13 +36,13 @@ async function getOrCreatePrice(stripe: Stripe, planId: string): Promise<string>
   });
 
   let product = products.data.find(
-    (p) => p.metadata?.belleya_plan === planId
+    (p) => p.metadata?.belaya_plan === planId
   );
 
   if (!product) {
     product = await stripe.products.create({
       name: config.name,
-      metadata: { belleya_plan: planId },
+      metadata: { belaya_plan: planId },
     });
   }
 
@@ -52,7 +52,7 @@ async function getOrCreatePrice(stripe: Stripe, planId: string): Promise<string>
     currency: "eur",
     recurring: { interval: "month" },
     lookup_key: config.lookupKey,
-    metadata: { belleya_plan: planId },
+    metadata: { belaya_plan: planId },
   });
 
   return price.id;
