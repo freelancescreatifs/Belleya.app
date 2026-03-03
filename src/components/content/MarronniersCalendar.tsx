@@ -3,6 +3,7 @@ import { Calendar, Lightbulb, Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
+import ToastContainer from '../shared/ToastContainer';
 
 interface Marronnier {
   id: string;
@@ -16,7 +17,7 @@ interface Marronnier {
 
 export default function MarronniersCalendar() {
   const { user } = useAuth();
-  const { showToast } = useToast();
+  const { toasts, showToast, dismissToast } = useToast();
   const [marronniers, setMarronniers] = useState<Marronnier[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -127,6 +128,7 @@ export default function MarronniersCalendar() {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Calendrier des marronniers</h2>

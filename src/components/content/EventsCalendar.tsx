@@ -3,6 +3,7 @@ import { Calendar, Lightbulb, Sparkles, Plus, X, Bell, Loader2 } from 'lucide-re
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
+import ToastContainer from '../shared/ToastContainer';
 
 interface Event {
   id: string;
@@ -20,7 +21,7 @@ interface EventsCalendarProps {
 
 export default function EventsCalendar({ onContentAdded }: EventsCalendarProps) {
   const { user } = useAuth();
-  const { showToast } = useToast();
+  const { toasts, showToast, dismissToast } = useToast();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -122,6 +123,7 @@ export default function EventsCalendar({ onContentAdded }: EventsCalendarProps) 
 
   return (
     <div className="space-y-6">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
