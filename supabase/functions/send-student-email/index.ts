@@ -21,14 +21,24 @@ interface StudentEmailPayload {
   attachments?: Attachment[];
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function buildStudentEmailHtml(payload: StudentEmailPayload): string {
-  const { studentName, providerName, message, attachments } = payload;
+  const { providerName, message, attachments } = payload;
+  const safeProvider = escapeHtml(providerName);
 
   const messageHtml = message
     .split("\n")
     .map((line: string) =>
       line.trim()
-        ? `<p style="margin:0 0 8px;color:#4b5563;font-size:16px;line-height:1.6;">${line}</p>`
+        ? `<p style="margin:0 0 8px;color:#4b5563;font-size:16px;line-height:1.6;">${escapeHtml(line)}</p>`
         : `<br>`
     )
     .join("");
@@ -40,8 +50,8 @@ function buildStudentEmailHtml(payload: StudentEmailPayload): string {
         (att: Attachment) =>
           `<tr>
             <td style="padding:10px 16px;border-bottom:1px solid #f3f4f6;">
-              <a href="${att.url}" target="_blank" style="color:#2563eb;text-decoration:none;font-size:14px;font-weight:500;">
-                &#128206; ${att.name}
+              <a href="${escapeHtml(att.url)}" target="_blank" style="color:#2563eb;text-decoration:none;font-size:14px;font-weight:500;">
+                &#128206; ${escapeHtml(att.name)}
               </a>
             </td>
           </tr>`
@@ -80,7 +90,7 @@ function buildStudentEmailHtml(payload: StudentEmailPayload): string {
               ${attachmentsHtml}
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
               <p style="margin:0;color:#9ca3af;font-size:13px;line-height:1.5;text-align:center;">
-                Cet email vous a &eacute;t&eacute; envoy&eacute; par <strong>${providerName}</strong> via Belleya.
+                Cet email vous a &eacute;t&eacute; envoy&eacute; par <strong>${safeProvider}</strong> via Belleya.
               </p>
             </td>
           </tr>
