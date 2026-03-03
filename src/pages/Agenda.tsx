@@ -509,7 +509,28 @@ export default function Agenda() {
   };
 
   const handleGoogleSync = async () => {
-    alert('Synchronisation avec Google Calendar...');
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) return;
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-calendar-sync`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.events && result.events.length > 0) {
+        await loadEvents();
+      }
+    } catch (err) {
+      console.error('Google Calendar sync error:', err);
+    }
   };
 
   const handleDragComplete = (item: CalendarItem, newStart: Date, newEnd: Date, mode: 'move' | 'resize') => {

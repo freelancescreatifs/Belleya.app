@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Building2, FileText, Calculator, LayoutGrid, Globe, Crown } from 'lucide-react';
+import { Building2, FileText, Calculator, LayoutGrid, Globe, Crown, Plug } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import CompanyProfileForm from '../components/settings/CompanyProfileForm';
 import MyDocuments from '../components/settings/MyDocuments';
@@ -8,11 +8,18 @@ import ProfitabilityCalculator from '../components/settings/ProfitabilityCalcula
 import SocialMediaSettings from '../components/settings/SocialMediaSettings';
 import LanguageSettings from '../components/settings/LanguageSettings';
 import SubscriptionStatus from '../components/settings/SubscriptionStatus';
+import GoogleCalendarIntegration from '../components/settings/GoogleCalendarIntegration';
 
 export default function Settings() {
   const { user, refreshProfile } = useAuth();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language' | 'subscription'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language' | 'subscription' | 'integrations'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'integrations' || params.get('google_connected') || params.get('google_error')) {
+      return 'integrations';
+    }
+    return 'company';
+  });
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
@@ -80,6 +87,17 @@ export default function Settings() {
               {t('settings.tabs.language')}
             </button>
             <button
+              onClick={() => setActiveTab('integrations')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+                activeTab === 'integrations'
+                  ? 'text-[#C43586] border-b-2 border-[#C43586]'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Plug className="w-5 h-5" />
+              Integrations
+            </button>
+            <button
               onClick={() => setActiveTab('subscription')}
               className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                 activeTab === 'subscription'
@@ -115,6 +133,10 @@ export default function Settings() {
 
           {activeTab === 'language' && user && (
             <LanguageSettings userId={user.id} />
+          )}
+
+          {activeTab === 'integrations' && user && (
+            <GoogleCalendarIntegration />
           )}
 
           {activeTab === 'subscription' && user && (

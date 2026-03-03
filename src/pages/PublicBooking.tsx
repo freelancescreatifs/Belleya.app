@@ -151,7 +151,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   useEffect(() => {
     if (proProfile) {
       loadServices();
-      loadEvents();
+      loadAllEvents();
       loadWeeklyAvailability();
       loadPhotos();
       loadReviews();
@@ -277,8 +277,17 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     setReviews(reviewsData);
   };
 
-  const loadEvents = async () => {
+  const loadAllEvents = async () => {
     if (!proProfile) return;
+    const [internalEvents, googleBusySlots] = await Promise.all([
+      loadInternalEvents(),
+      loadGoogleBusySlots(),
+    ]);
+    setEvents([...internalEvents, ...googleBusySlots]);
+  };
+
+  const loadInternalEvents = async (): Promise<Event[]> => {
+    if (!proProfile) return [];
 
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
@@ -292,7 +301,37 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       .order('start_at');
 
     if (!error && data) {
-      setEvents(data as Event[]);
+      return data as Event[];
+    }
+    return [];
+  };
+
+  const loadGoogleBusySlots = async (): Promise<Event[]> => {
+    if (!proProfile) return [];
+
+    try {
+      const now = new Date();
+      const threeMonthsFromNow = new Date();
+      threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-google-availability`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          proUserId: proProfile.user_id,
+          timeMin: now.toISOString(),
+          timeMax: threeMonthsFromNow.toISOString(),
+        }),
+      });
+
+      const result = await response.json();
+      return (result.busySlots || []) as Event[];
+    } catch {
+      return [];
     }
   };
 
