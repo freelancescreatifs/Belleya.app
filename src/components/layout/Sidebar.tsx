@@ -119,7 +119,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
               <div>
-                <img src="/logo-1.png" alt="Belaya" className="h-8 w-auto" />
+                <img src="/belayaa.webp" alt="Belaya" className="h-9 w-auto max-w-[140px] object-contain" />
                 <p className="text-xs text-gray-500 mt-1">{t('nav.tagline')}</p>
               </div>
             </div>

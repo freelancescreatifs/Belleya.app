@@ -1,9 +1,9 @@
-const CACHE_NAME = 'belaya-v2';
+const CACHE_NAME = 'belaya-v3';
 const urlsToCache = [
   '/',
   '/index.html',
   '/logo.png',
-  '/logo-1.png'
+  '/belayaa.webp'
 ];
 
 self.addEventListener('install', (event) => {
