@@ -1,0 +1,377 @@
+import {
+  ArrowRight, CheckCircle, DollarSign, Users, Link2, BarChart3,
+  MessageSquare, BookOpen, Headphones, X, TrendingUp, Zap, Target,
+  Clock, ChevronRight, HelpCircle
+} from 'lucide-react';
+import { useState } from 'react';
+
+interface AffiliateLandingProps {
+  onApply: () => void;
+}
+
+export default function AffiliateLanding({ onApply }: AffiliateLandingProps) {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      q: 'Est-ce un emploi salarie ?',
+      a: 'Non. C\'est un programme partenaire independant. Tu es libre de gerer ton activite comme tu le souhaites.'
+    },
+    {
+      q: 'Quand suis-je paye(e) ?',
+      a: 'Paiement mensuel sur les abonnements actifs de tes filleules.'
+    },
+    {
+      q: 'Les commissions sont-elles limitees ?',
+      a: 'Non. Il n\'y a aucune limite au nombre de clientes que tu peux apporter ni au montant de commissions que tu peux generer.'
+    },
+    {
+      q: 'Y a-t-il un plafond ?',
+      a: 'Non. Tes commissions sont proportionnelles au nombre d\'abonnements actifs que tu generes. Plus tu en apportes, plus tu gagnes.'
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-white">
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="Belleya" className="h-10 w-auto" />
+          </a>
+          <button
+            onClick={onApply}
+            className="px-6 py-2.5 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all hover:scale-105"
+          >
+            Je postule
+          </button>
+        </div>
+      </header>
+
+      <section className="relative overflow-hidden py-20 md:py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-belaya-50/30"></div>
+        <div className="absolute top-20 right-0 w-96 h-96 bg-belaya-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-belaya-50/50 rounded-full blur-3xl"></div>
+
+        <div className="container mx-auto px-4 relative">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-belaya-50 text-belaya-deep px-4 py-2 rounded-full text-sm font-medium mb-8 border border-belaya-200">
+              <Zap className="w-4 h-4" />
+              Programme Partenaire Belleya
+            </div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Gagne un revenu mensuel{' '}
+              <span className="bg-gradient-to-r from-belaya-deep to-belaya-bright bg-clip-text text-transparent">
+                recurrent
+              </span>{' '}
+              en recommandant Belleya
+            </h1>
+
+            <p className="text-lg md:text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
+              Rejoins le programme partenaire Belleya et touche{' '}
+              <strong className="text-gray-900">10% de commission</strong>{' '}
+              pendant toute la duree d'abonnement des clientes que tu apportes.
+            </p>
+
+            <p className="text-2xl md:text-3xl font-bold text-belaya-deep mb-10">
+              Potentiel : 500 a 2 000+ EUR / mois
+            </p>
+
+            <button
+              onClick={onApply}
+              className="group inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white rounded-full font-bold text-lg shadow-[0_10px_40px_rgba(196,53,134,0.3)] hover:shadow-[0_15px_50px_rgba(196,53,134,0.4)] transition-all hover:scale-105"
+            >
+              Je postule maintenant
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Pourquoi c'est une vraie opportunite
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Belleya est une plateforme dediee aux entrepreneuses beaute : nail artists, techniciennes cils,
+                estheticiennes. Marche en forte croissance avec un besoin reel.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-50 to-belaya-50/30 rounded-2xl p-6 md:p-8 border border-gray-100 mb-8">
+              <p className="text-center text-gray-600 mb-2">Abonnement plateforme</p>
+              <p className="text-center text-5xl font-bold text-gray-900">29 EUR<span className="text-lg text-gray-500 font-normal"> / mois</span></p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-belaya-50 rounded-xl flex items-center justify-center mb-4">
+                  <DollarSign className="w-6 h-6 text-belaya-deep" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">10% sur chaque abonnement actif</h3>
+                <p className="text-gray-600 text-sm">Commission recurrente tant que la cliente reste abonnee.</p>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-belaya-50 rounded-xl flex items-center justify-center mb-4">
+                  <Target className="w-6 h-6 text-belaya-deep" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">2,90 EUR par mois par cliente</h3>
+                <p className="text-gray-600 text-sm">Montant fixe et previsible par abonnement actif.</p>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-belaya-50 rounded-xl flex items-center justify-center mb-4">
+                  <TrendingUp className="w-6 h-6 text-belaya-deep" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Revenu cumulatif</h3>
+                <p className="text-gray-600 text-sm">Tes commissions augmentent tant que tes clientes restent abonnees.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Combien tu peux gagner
+              </h2>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { amount: '290', subs: '100' },
+                { amount: '870', subs: '300' },
+                { amount: '1 450', subs: '500' }
+              ].map((tier, i) => (
+                <div
+                  key={i}
+                  className={`rounded-2xl p-8 text-center border-2 transition-all hover:-translate-y-1 ${
+                    i === 2
+                      ? 'bg-gradient-to-br from-belaya-deep to-belaya-bright text-white border-transparent shadow-xl'
+                      : 'bg-white border-gray-200 hover:border-belaya-200 shadow-sm hover:shadow-md'
+                  }`}
+                >
+                  <p className={`text-4xl md:text-5xl font-bold mb-2 ${i === 2 ? 'text-white' : 'text-gray-900'}`}>
+                    {tier.amount} EUR
+                  </p>
+                  <p className={`text-lg ${i === 2 ? 'text-white/90' : 'text-gray-500'}`}>/ mois</p>
+                  <div className={`w-12 h-px mx-auto my-4 ${i === 2 ? 'bg-white/30' : 'bg-gray-200'}`}></div>
+                  <p className={`font-medium ${i === 2 ? 'text-white/90' : 'text-gray-600'}`}>
+                    {tier.subs} abonnees actives
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Ce que tu feras au quotidien
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                'Prospecter des entrepreneuses beaute',
+                'Presenter Belleya et ses avantages',
+                'Expliquer la valeur de la plateforme',
+                'Accompagner jusqu\'a l\'inscription'
+              ].map((task, i) => (
+                <div key={i} className="flex items-center gap-4 bg-gray-50 rounded-xl p-5 border border-gray-100">
+                  <div className="w-10 h-10 bg-belaya-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-belaya-deep" />
+                  </div>
+                  <p className="text-gray-800 font-medium">{task}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Tous les outils pour reussir
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { icon: Link2, label: 'Lien d\'affiliation unique' },
+                { icon: BarChart3, label: 'Dashboard personnel' },
+                { icon: DollarSign, label: 'Suivi clair de tes commissions' },
+                { icon: MessageSquare, label: 'Scripts de prospection' },
+                { icon: BookOpen, label: 'Mini formation d\'integration' },
+                { icon: Headphones, label: 'Support dedie' }
+              ].map((tool, i) => (
+                <div key={i} className="flex items-center gap-4 bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+                  <div className="w-10 h-10 bg-belaya-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <tool.icon className="w-5 h-5 text-belaya-deep" />
+                  </div>
+                  <p className="text-gray-800 font-medium text-sm">{tool.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Pas pour tout le monde
+              </h2>
+              <p className="text-gray-600">On cherche des partenaires motives et serieux.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-red-50/50 rounded-2xl p-8 border border-red-100">
+                <h3 className="text-lg font-bold text-red-800 mb-6 flex items-center gap-2">
+                  <X className="w-5 h-5" />
+                  Ce n'est PAS pour toi si :
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    'tu cherches un salaire fixe',
+                    'tu abandonnes vite',
+                    'tu manques de discipline'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-red-700">
+                      <X className="w-4 h-4 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-emerald-50/50 rounded-2xl p-8 border border-emerald-100">
+                <h3 className="text-lg font-bold text-emerald-800 mb-6 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  C'est pour toi si :
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    'tu veux construire un revenu recurrent',
+                    'tu es a l\'aise en DM et en prospection',
+                    'tu as un mindset performance'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-emerald-700">
+                      <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Le processus en 4 etapes
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { step: '01', title: 'Tu postules', desc: 'Remplis le formulaire de candidature en 2 minutes.' },
+                { step: '02', title: 'On valide ton profil', desc: 'Notre equipe examine ta candidature sous 48h.' },
+                { step: '03', title: 'Tu recois ton lien', desc: 'Ton lien d\'affiliation unique est active.' },
+                { step: '04', title: 'Tu generes des commissions', desc: 'Chaque abonnement actif te rapporte 10% / mois.' }
+              ].map((s, i) => (
+                <div key={i} className="relative">
+                  <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm h-full">
+                    <div className="text-4xl font-bold text-belaya-100 mb-4">{s.step}</div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{s.title}</h3>
+                    <p className="text-sm text-gray-600">{s.desc}</p>
+                  </div>
+                  {i < 3 && (
+                    <div className="hidden lg:flex absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                      <ChevronRight className="w-6 h-6 text-belaya-300" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Questions frequentes
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {faqs.map((faq, i) => (
+                <div key={i} className="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between p-5 text-left"
+                  >
+                    <span className="font-semibold text-gray-900 pr-4">{faq.q}</span>
+                    <HelpCircle className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFaq === i ? 'rotate-45' : ''}`} />
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-5 pb-5">
+                      <p className="text-gray-600">{faq.a}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-gradient-to-br from-belaya-deep to-belaya-bright text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white">
+              Pret(e) a demarrer ?
+            </h2>
+            <p className="text-lg md:text-xl mb-10 text-white/90">
+              Rejoins une equipe de partenaires ambitieux et commence a generer des commissions recurrentes des aujourd'hui.
+            </p>
+            <button
+              onClick={onApply}
+              className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-belaya-deep rounded-full font-bold text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
+            >
+              Je postule maintenant
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-8 bg-gray-900 text-gray-400 text-center text-sm">
+        <p>&copy; 2026 Belleya. Tous droits reserves.</p>
+      </footer>
+    </div>
+  );
+}

@@ -38,6 +38,9 @@ import ClientMap from './pages/client/ClientMap';
 import ClientFavorites from './pages/client/ClientFavorites';
 import ClientProfile from './pages/client/ClientProfile';
 import ProviderProfile from './pages/client/ProviderProfile';
+import AffiliateLanding from './pages/AffiliateLanding';
+import AffiliateApply from './pages/AffiliateApply';
+import PartnerDashboard from './pages/PartnerDashboard';
 import ChatBot from './components/shared/ChatBot';
 import TrialBanner from './components/shared/TrialBanner';
 import {
@@ -120,6 +123,8 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  const [affiliatePage, setAffiliatePage] = useState<'landing' | 'apply' | 'dashboard' | null>(null);
+
   const pathname = window.location.pathname;
   const isBookingPage = pathname.startsWith('/book/');
   const isProviderProfilePage = pathname.startsWith('/provider/');
@@ -131,6 +136,9 @@ function AppContent() {
   const isSubscriptionCancelPage = pathname === '/subscription-cancel';
   const isMentionsLegalesPage = pathname === '/mentions-legales';
   const isCGVPage = pathname === '/cgv';
+  const isAffiliateLandingPage = pathname === '/partenaire';
+  const isAffiliateApplyPage = pathname === '/partenaire/apply';
+  const isPartnerDashboardPage = pathname === '/partner/dashboard';
 
   if (isBookingPage) {
     const slug = pathname.replace('/book/', '');
@@ -196,6 +204,47 @@ function AppContent() {
         <CGV />
         <ChatBot />
       </>
+    );
+  }
+
+  if (isAffiliateLandingPage || affiliatePage === 'landing') {
+    return (
+      <AffiliateLanding
+        onApply={() => {
+          setAffiliatePage('apply');
+          window.history.pushState({}, '', '/partenaire/apply');
+        }}
+      />
+    );
+  }
+
+  if (isAffiliateApplyPage || affiliatePage === 'apply') {
+    return (
+      <AffiliateApply
+        onBack={() => {
+          setAffiliatePage('landing');
+          window.history.pushState({}, '', '/partenaire');
+        }}
+        onSuccess={() => {
+          setAffiliatePage('dashboard');
+          window.history.pushState({}, '', '/partner/dashboard');
+        }}
+      />
+    );
+  }
+
+  if (isPartnerDashboardPage || affiliatePage === 'dashboard') {
+    return (
+      <PartnerDashboard
+        onBack={() => {
+          setAffiliatePage(null);
+          window.history.pushState({}, '', '/');
+        }}
+        onApply={() => {
+          setAffiliatePage('apply');
+          window.history.pushState({}, '', '/partenaire/apply');
+        }}
+      />
     );
   }
 
