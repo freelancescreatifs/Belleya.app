@@ -154,7 +154,7 @@
     }
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Home",
     "agenda": "Calendar",
     "clients": "Clients",
     "content": "Content",
@@ -173,7 +173,12 @@
     "logout": "Logout",
     "loggingOut": "Logging out...",
     "admin": "Administration",
-    "tagline": "Control your business, not the other way around"
+    "tagline": "Control your business, not the other way around",
+    "publicProfile": "Public Profile",
+    "more": "More",
+    "moreOptions": "More Options",
+    "confirmLogout": "Are you sure you want to log out?",
+    "logoutError": "Error logging out. Please try again."
   },
   "common": {
     "add": "Add",
@@ -229,18 +234,49 @@
     "day": "Day",
     "month": "Month",
     "year": "Year",
-    "totalClients": "Clients",
+    "totalClients": "Total Clients",
     "revenue": "Revenue",
     "expenses": "Expenses",
     "profit": "Profit",
     "lowStock": "Low Stock",
+    "pendingTasks": "Pending Tasks",
     "upcomingTasks": "Upcoming Tasks",
+    "itemsToOrder": "Items to Order",
     "yearlyEvolution": "Yearly Evolution",
     "revenueByType": "Revenue by Type",
     "totalGenerated": "Total Generated",
     "revenues": "Revenues",
     "completeProfile": "Complete your company profile",
-    "completeProfileDesc": "Add your company information to benefit from tax advice and calculations tailored to your status."
+    "completeProfileDesc": "To benefit from personalized alerts, expense calculations and advice tailored to your status, fill in your company information in settings.",
+    "goToSettings": "Go to Settings",
+    "periodOfDay": "today",
+    "periodOfMonth": "this month",
+    "periodOfYear": "this year",
+    "periodRevenue": "Revenue {{period}}",
+    "periodExpenses": "Expenses {{period}}",
+    "periodProfit": "Profit {{period}}",
+    "avgMonthlyTooltip": "Monthly average: {{amount}} \u20ac",
+    "revenueTypes": {
+      "prestation": "Service",
+      "formation": "Training",
+      "digital_sale": "Digital Sale",
+      "commission": "Commission",
+      "other": "Other"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    }
   },
   "agenda": {
     "title": "Calendar",

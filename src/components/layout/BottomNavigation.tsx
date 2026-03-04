@@ -21,6 +21,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import { useMenuPreferences } from '../../lib/useMenuPreferences';
 import { useAuth } from '../../contexts/AuthContext';
@@ -31,33 +32,37 @@ interface BottomNavigationProps {
   onPageChange: (page: string) => void;
 }
 
-const mainTabs = [
-  { id: 'dashboard', label: 'Accueil', icon: LayoutDashboard },
-  { id: 'agenda', label: 'Agenda', icon: Calendar },
-  { id: 'clients', label: 'Clientes', icon: Users },
-  { id: 'tasks', label: 'Tâches', icon: CheckSquare },
+const mainTabDefs = [
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { id: 'agenda', labelKey: 'nav.agenda', icon: Calendar },
+  { id: 'clients', labelKey: 'nav.clients', icon: Users },
+  { id: 'tasks', labelKey: 'nav.tasks', icon: CheckSquare },
 ];
 
-const moreTabs = [
-  { id: 'content', label: 'Contenu', icon: Video },
-  { id: 'training', label: 'Élèves', icon: GraduationCap },
-  { id: 'services', label: 'Services', icon: Scissors },
-  { id: 'finances', label: 'Transactions', icon: Euro },
-  { id: 'stock', label: 'Stock', icon: Package },
-  { id: 'goals', label: 'Objectifs', icon: Target },
-  { id: 'public-profile', label: 'Profil public', icon: Eye },
-  { id: 'inspiration', label: 'Inspiration', icon: Lightbulb },
-  { id: 'marketing', label: 'Marketing', icon: Mail },
-  { id: 'partnerships', label: 'Partenariats', icon: Handshake },
-  { id: 'settings', label: 'Paramètres', icon: Settings },
-  { id: 'admin', label: 'Administration', icon: Shield },
+const moreTabDefs = [
+  { id: 'content', labelKey: 'nav.content', icon: Video },
+  { id: 'training', labelKey: 'training.title', icon: GraduationCap },
+  { id: 'services', labelKey: 'nav.services', icon: Scissors },
+  { id: 'finances', labelKey: 'nav.finances', icon: Euro },
+  { id: 'stock', labelKey: 'nav.stock', icon: Package },
+  { id: 'goals', labelKey: 'nav.goals', icon: Target },
+  { id: 'public-profile', labelKey: 'nav.publicProfile', icon: Eye },
+  { id: 'inspiration', labelKey: 'nav.inspiration', icon: Lightbulb },
+  { id: 'marketing', labelKey: 'nav.marketing', icon: Mail },
+  { id: 'partnerships', labelKey: 'nav.partnerships', icon: Handshake },
+  { id: 'settings', labelKey: 'nav.settings', icon: Settings },
+  { id: 'admin', labelKey: 'nav.admin', icon: Shield },
 ];
 
 export default function BottomNavigation({ currentPage, onPageChange }: BottomNavigationProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { menuVisibility } = useMenuPreferences(user?.id);
   const { canAccess, isActive: subscriptionActive } = useSubscription();
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+
+  const mainTabs = mainTabDefs.map(tab => ({ ...tab, label: t(tab.labelKey) }));
+  const moreTabs = moreTabDefs.map(tab => ({ ...tab, label: t(tab.labelKey) }));
 
   const visibleMainTabs = mainTabs.filter(tab => menuVisibility[tab.id as keyof typeof menuVisibility] !== false);
   const visibleMoreTabs = moreTabs.filter(tab => menuVisibility[tab.id as keyof typeof menuVisibility] !== false);
@@ -79,7 +84,7 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
   };
 
   const handleLogout = async () => {
-    if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+    if (confirm(t('nav.confirmLogout'))) {
       await supabase.auth.signOut();
       window.location.reload();
     }
@@ -123,7 +128,7 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
           >
             <MoreHorizontal className={`w-6 h-6 mb-0.5 ${isMoreTabActive && !isMainTabActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
             <span className={`text-[10px] leading-tight ${isMoreTabActive && !isMainTabActive ? 'font-semibold' : 'font-medium'}`}>
-              Plus
+              {t('nav.more')}
             </span>
           </button>
         </div>
@@ -142,7 +147,7 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
           <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl shadow-2xl max-h-[75vh] flex flex-col safe-area-bottom">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Plus d'options</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('nav.moreOptions')}</h3>
               <button
                 onClick={() => setShowMoreMenu(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -206,7 +211,7 @@ export default function BottomNavigation({ currentPage, onPageChange }: BottomNa
                 className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
               >
                 <LogOut className="w-5 h-5" />
-                Déconnexion
+                {t('nav.logout')}
               </button>
             </div>
           </div>

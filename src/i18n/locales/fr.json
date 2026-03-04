@@ -154,12 +154,12 @@
     }
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Accueil",
     "agenda": "Agenda",
     "clients": "Clientes",
     "content": "Contenu",
     "marketing": "Marketing",
-    "finances": "Finances",
+    "finances": "Transactions",
     "goals": "Objectifs",
     "tasks": "Tâches",
     "training": "Formation",
@@ -173,7 +173,12 @@
     "logout": "Déconnexion",
     "loggingOut": "Déconnexion...",
     "admin": "Administration",
-    "tagline": "Contrôle ton business, pas l'inverse"
+    "tagline": "Contrôle ton business, pas l'inverse",
+    "publicProfile": "Profil public",
+    "more": "Plus",
+    "moreOptions": "Plus d'options",
+    "confirmLogout": "Voulez-vous vraiment vous déconnecter ?",
+    "logoutError": "Erreur lors de la déconnexion. Veuillez réessayer."
   },
   "common": {
     "add": "Ajouter",
@@ -212,7 +217,7 @@
     "details": "Détails"
   },
   "dashboard": {
-    "title": "Tableau de bord",
+    "title": "Dashboard",
     "subtitle": "Vue d'ensemble de votre activité",
     "loading": "Chargement...",
     "welcome": "Bienvenue",
@@ -229,18 +234,49 @@
     "day": "Jour",
     "month": "Mois",
     "year": "Année",
-    "totalClients": "Clientes",
+    "totalClients": "Total Clientes",
     "revenue": "Recettes",
     "expenses": "Dépenses",
     "profit": "Bénéfice",
     "lowStock": "Stock faible",
+    "pendingTasks": "Tâches en attente",
     "upcomingTasks": "Tâches à venir",
+    "itemsToOrder": "Articles à commander",
     "yearlyEvolution": "Évolution annuelle",
     "revenueByType": "Revenus par type de recette",
     "totalGenerated": "Total généré",
     "revenues": "Revenus",
     "completeProfile": "Complétez votre profil d'entreprise",
-    "completeProfileDesc": "Ajoutez les informations de votre entreprise pour bénéficier de conseils fiscaux et de calculs adaptés à votre statut."
+    "completeProfileDesc": "Pour bénéficier d'alertes personnalisées, de calculs de charges et de conseils adaptés à votre statut, renseignez les informations de votre entreprise dans les paramètres.",
+    "goToSettings": "Aller aux paramètres",
+    "periodOfDay": "du jour",
+    "periodOfMonth": "du mois",
+    "periodOfYear": "de l'année",
+    "periodRevenue": "Revenus {{period}}",
+    "periodExpenses": "Dépenses {{period}}",
+    "periodProfit": "Bénéfice {{period}}",
+    "avgMonthlyTooltip": "Moyenne mensuelle: {{amount}} €",
+    "revenueTypes": {
+      "prestation": "Prestation",
+      "formation": "Formation",
+      "digital_sale": "Vente digitale",
+      "commission": "Commission",
+      "other": "Autre"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Fév",
+      "mar": "Mar",
+      "apr": "Avr",
+      "may": "Mai",
+      "jun": "Juin",
+      "jul": "Juil",
+      "aug": "Aoû",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Déc"
+    }
   },
   "agenda": {
     "title": "Agenda",

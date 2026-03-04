@@ -64,7 +64,7 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
     { id: 'tasks', label: t('nav.tasks'), icon: CheckSquare },
     { id: 'goals', label: t('nav.goals'), icon: Target },
     { id: 'content', label: t('nav.content'), icon: Video },
-    { id: 'public-profile', label: 'Profil public', icon: Eye },
+    { id: 'public-profile', label: t('nav.publicProfile'), icon: Eye },
     { id: 'inspiration', label: t('nav.inspiration'), icon: Lightbulb },
     { id: 'marketing', label: t('nav.marketing'), icon: Mail },
     { id: 'partnerships', label: t('nav.partnerships'), icon: Handshake },
@@ -75,8 +75,8 @@ export default function Sidebar({ currentPage, onPageChange, isMobileOpen = fals
       setIsSigningOut(true);
       await signOut();
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
-      alert('Erreur lors de la déconnexion. Veuillez réessayer.');
+      console.error('Logout error:', error);
+      alert(t('nav.logoutError'));
     } finally {
       setIsSigningOut(false);
     }

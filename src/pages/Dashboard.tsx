@@ -67,7 +67,7 @@ interface DashboardProps {
 
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [stats, setStats] = useState<Stats>({
     totalClients: 0,
     revenue: 0,
@@ -288,10 +288,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         }
       });
 
-      const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
       const data = Array.from(monthlyMap.entries()).map(([yearMonth, values], index) => {
         return {
-          month: monthNames[index],
+          month: t(`dashboard.months.${monthKeys[index]}`),
           revenue: values.revenue,
           expenses: values.expenses,
         };
@@ -333,11 +333,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         setPeriodTotal(total);
 
         const typeLabels: Record<string, string> = {
-          'prestation': 'Prestation',
-          'formation': 'Formation',
-          'digital_sale': 'Vente digitale',
-          'commission': 'Commission',
-          'other': 'Autre',
+          'prestation': t('dashboard.revenueTypes.prestation'),
+          'formation': t('dashboard.revenueTypes.formation'),
+          'digital_sale': t('dashboard.revenueTypes.digital_sale'),
+          'commission': t('dashboard.revenueTypes.commission'),
+          'other': t('dashboard.revenueTypes.other'),
         };
 
         const typeColors: Record<string, string> = {
@@ -501,14 +501,14 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   };
 
   const getPeriodLabel = () => {
-    if (periodFilter === 'day') return 'du jour';
-    if (periodFilter === 'month') return 'du mois';
-    return 'de l\'année';
+    if (periodFilter === 'day') return t('dashboard.periodOfDay');
+    if (periodFilter === 'month') return t('dashboard.periodOfMonth');
+    return t('dashboard.periodOfYear');
   };
 
   const firstRowCards = [
     {
-      label: 'Total Clientes',
+      label: t('dashboard.totalClients'),
       value: stats.totalClients,
       icon: Users,
       color: 'from-blue-400 to-blue-600',
@@ -518,7 +518,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       showAlert: false,
     },
     {
-      label: 'Tâches en attente',
+      label: t('dashboard.pendingTasks'),
       value: stats.upcomingTasks,
       icon: Calendar,
       color: 'from-cyan-400 to-cyan-600',
@@ -528,7 +528,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       showAlert: false,
     },
     {
-      label: 'Articles à commander',
+      label: t('dashboard.itemsToOrder'),
       value: stats.lowStock,
       icon: Package,
       color: 'from-rose-400 to-rose-600',
@@ -541,17 +541,17 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   const revenueExpenseCards = [
     {
-      label: 'CA du mois',
+      label: t('dashboard.monthRevenue'),
       value: `${stats.currentMonthRevenue.toFixed(2)} €`,
       icon: TrendingUp,
       color: 'from-green-400 to-green-600',
       bgColor: 'bg-green-50',
       textColor: 'text-green-600',
-      tooltip: `Moyenne mensuelle: ${stats.avgMonthlyRevenue.toFixed(2)} €`,
+      tooltip: t('dashboard.avgMonthlyTooltip', { amount: stats.avgMonthlyRevenue.toFixed(2) }),
       link: 'finances',
     },
     {
-      label: `Revenus ${getPeriodLabel()}`,
+      label: t('dashboard.periodRevenue', { period: getPeriodLabel() }),
       value: `${stats.revenue.toFixed(2)} €`,
       icon: TrendingUp,
       color: 'from-green-400 to-green-600',
@@ -560,7 +560,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       link: 'finances',
     },
     {
-      label: `Dépenses ${getPeriodLabel()}`,
+      label: t('dashboard.periodExpenses', { period: getPeriodLabel() }),
       value: `${stats.expenses.toFixed(2)} €`,
       icon: Euro,
       color: 'from-orange-400 to-orange-600',
@@ -587,10 +587,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   };
 
   const getDisplayDate = () => {
+    const locale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
     if (periodFilter === 'day') {
-      return selectedDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      return selectedDate.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     } else if (periodFilter === 'month') {
-      return selectedDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+      return selectedDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
     }
     return selectedDate.getFullYear().toString();
   };
@@ -752,7 +753,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               <TrendingUp className="w-6 h-6 text-[#C43586]" />
             </div>
           </div>
-          <p className="text-sm text-gray-600 mb-1">Bénéfice {getPeriodLabel()}</p>
+          <p className="text-sm text-gray-600 mb-1">{t('dashboard.periodProfit', { period: getPeriodLabel() })}</p>
           <p className="text-2xl font-bold text-gray-900">{(stats.revenue - stats.expenses).toFixed(2)} €</p>
         </div>
 
@@ -773,7 +774,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         {monthlyData.length > 0 && (
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Évolution annuelle</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.yearlyEvolution')}</h2>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setSelectedYear(selectedYear - 1)}
@@ -844,11 +845,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-500 rounded"></div>
-                <span className="text-sm text-gray-700">Revenus</span>
+                <span className="text-sm text-gray-700">{t('dashboard.revenues')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                <span className="text-sm text-gray-700">Dépenses</span>
+                <span className="text-sm text-gray-700">{t('dashboard.expenses')}</span>
               </div>
             </div>
           </div>
@@ -856,9 +857,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
         {revenueTypeData.length > 0 && (
           <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Revenus par type de recette</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('dashboard.revenueByType')}</h2>
             <div className="mb-6 pb-4 border-b border-gray-100">
-              <p className="text-sm text-gray-600">Total généré {getPeriodLabel()}</p>
+              <p className="text-sm text-gray-600">{t('dashboard.totalGenerated')} {getPeriodLabel()}</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {periodTotal.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
               </p>
@@ -954,16 +955,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
       {!companyProfile && (
         <div className="mt-8 bg-gradient-to-br from-belaya-50 to-belaya-100 rounded-2xl p-6 border border-belaya-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Complétez votre profil d'entreprise</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('dashboard.completeProfile')}</h2>
           <p className="text-gray-700 mb-4">
-            Pour bénéficier d'alertes personnalisées, de calculs de charges et de conseils adaptés à votre statut,
-            renseignez les informations de votre entreprise dans les paramètres.
+            {t('dashboard.completeProfileDesc')}
           </p>
           <button
             onClick={() => window.location.href = '#settings'}
             className="inline-block px-4 py-2 bg-[#E51E8F] text-white rounded-lg hover:bg-belaya-deep transition-colors"
           >
-            Aller aux paramètres
+            {t('dashboard.goToSettings')}
           </button>
         </div>
       )}
