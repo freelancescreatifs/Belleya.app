@@ -37,7 +37,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
       <header className="w-full relative">
         <img
-          src="/installation_du_widget_(5)_copie.png"
+          src="/Installation_du_Widget_(4).webp"
           alt={t('landing.header.altText')}
           className="w-full h-auto object-cover"
         />
