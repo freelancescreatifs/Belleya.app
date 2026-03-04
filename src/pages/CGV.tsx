@@ -213,7 +213,7 @@ export default function CGV() {
               </p>
               <ul className="list-none space-y-2 ml-4">
                 <li><strong>Email :</strong> contact@belaya.app</li>
-                <li><strong>WhatsApp :</strong> <a href={"https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY?mode=gi_t"} target={"_blank"} rel={"noopener noreferrer"} className={"text-belaya-primary hover:underline"}>Rejoindre notre groupe</a></li>
+                <li><strong>WhatsApp :</strong> <a href={"https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY?mode=gi_t"} target={\"_blank"} rel={"noopener noreferrer"} className={"text-belaya-primary hover:underline"}>Rejoindre notre groupe</a></li>
               </ul>
             </section>
           </div>
