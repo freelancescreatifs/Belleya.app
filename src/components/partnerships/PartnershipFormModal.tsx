@@ -1,7 +1,9 @@
-import { X, Upload, AlertCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { X, Upload, AlertCircle, Trash2, ImageIcon } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
+import ToastContainer from '../shared/ToastContainer';
 
 interface Partnership {
   id: string;
@@ -17,6 +19,7 @@ interface Partnership {
   end_date: string | null;
   conditions: string | null;
   estimated_goal: number;
+  is_default?: boolean;
   last_action: string | null;
   next_action: string | null;
   promotion_frequency: string | null;
@@ -29,9 +32,17 @@ interface PartnershipFormModalProps {
   onSave: () => void;
 }
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 export default function PartnershipFormModal({ partnership, onClose, onSave }: PartnershipFormModalProps) {
   const { user } = useAuth();
+  const { toasts, showToast, dismissToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isBelaya = partnership?.is_default && partnership?.company_name === 'Belaya';
   const [form, setForm] = useState({
     company_name: '',
@@ -72,15 +83,76 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
         promotion_frequency: partnership.promotion_frequency || '',
         notes: partnership.notes || ''
       });
+      if (partnership.logo_url) {
+        setLogoPreview(partnership.logo_url);
+      }
     }
   }, [partnership]);
 
+  const handleFileSelect = (file: File) => {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showToast('error', 'Format non supporté. Utilisez JPG, PNG ou WebP.');
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      showToast('error', 'Fichier trop volumineux (max 5 Mo).');
+      return;
+    }
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setForm({ ...form, logo_url: '' });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const uploadLogo = async (): Promise<string | null> => {
+    if (!logoFile || !user) return null;
+    setUploading(true);
+    try {
+      const ext = logoFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const path = `${user.id}/partnerships/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('service-photos')
+        .upload(path, logoFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('service-photos')
+        .getPublicUrl(path);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !form.company_name.trim()) return;
+    if (!user || (!isBelaya && !form.company_name.trim())) return;
 
     setLoading(true);
     try {
+      let logoUrl = form.logo_url.trim() || null;
+
+      if (logoFile) {
+        const uploadedUrl = await uploadLogo();
+        if (uploadedUrl) logoUrl = uploadedUrl;
+      }
+
       let data;
 
       if (isBelaya) {
@@ -92,7 +164,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
         data = {
           user_id: user.id,
           company_name: form.company_name.trim(),
-          logo_url: form.logo_url.trim() || null,
+          logo_url: logoUrl,
           partnership_type: form.partnership_type,
           commission_rate: Number(form.commission_rate) || 0,
           compensation_mode: form.compensation_mode,
@@ -129,7 +201,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
       onClose();
     } catch (error) {
       console.error('Error saving partnership:', error);
-      alert('Erreur lors de l\'enregistrement');
+      showToast('error', 'Erreur lors de l\'enregistrement');
     } finally {
       setLoading(false);
     }
@@ -189,20 +261,64 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Logo (URL)
+                    Logo
                   </label>
-                  <div className="flex gap-3">
-                    <input
-                      type="url"
-                      value={form.logo_url}
-                      onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
-                      placeholder="https://example.com/logo.png"
-                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-belaya-500"
-                    />
-                    {form.logo_url && (
-                      <img src={form.logo_url} alt="Logo" className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
-                    )}
-                  </div>
+                  {logoPreview ? (
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={logoPreview}
+                        alt="Logo"
+                        className="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
+                      />
+                      <div className="flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                          <Upload className="w-4 h-4" />
+                          Changer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveLogo}
+                          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDrop={handleDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                      className="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-belaya-400 hover:bg-rose-50/30 transition-all"
+                    >
+                      <div className="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center">
+                        <ImageIcon className="w-6 h-6 text-belaya-primary" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-700">
+                          Cliquez ou glissez une image
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          JPG, PNG ou WebP (max 5 Mo)
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file);
+                    }}
+                    className="hidden"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -441,10 +557,10 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
             <div className="flex gap-3 pt-4 border-t border-gray-200">
               <button
                 type="submit"
-                disabled={loading || !form.company_name.trim()}
+                disabled={loading || uploading || (!isBelaya && !form.company_name.trim())}
                 className="flex-1 px-4 py-2.5 bg-gradient-to-r from-belaya-primary to-belaya-500 text-white rounded-lg hover:from-belaya-primary hover:to-belaya-primary transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                {loading ? 'Enregistrement...' : partnership ? 'Modifier' : 'Créer le partenariat'}
+                {uploading ? 'Upload en cours...' : loading ? 'Enregistrement...' : partnership ? 'Modifier' : 'Créer le partenariat'}
               </button>
               <button
                 type="button"
@@ -457,6 +573,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
           </form>
         </div>
       </div>
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

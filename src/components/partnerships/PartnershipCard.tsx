@@ -1,4 +1,4 @@
-import { TrendingUp, Calendar, AlertCircle, CheckCircle, Clock, CreditCard as Edit, Sparkles } from 'lucide-react';
+import { TrendingUp, Calendar, AlertCircle, CheckCircle, Clock, Pencil, Sparkles } from 'lucide-react';
 
 interface Partnership {
   id: string;
@@ -71,24 +71,26 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
+      className={`relative bg-white rounded-xl border-2 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group ${
         partnership.is_default ? 'border-belaya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50' : 'border-gray-200 hover:border-belaya-300'
       }`}
     >
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onEdit();
-        }}
-        className="absolute top-4 left-4 p-2 bg-white rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50 z-10"
-      >
-        <Edit className="w-4 h-4 text-gray-600" />
-      </button>
+      {!partnership.is_default && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          className="absolute top-4 right-4 p-2 bg-white rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50 z-10"
+        >
+          <Pencil className="w-4 h-4 text-gray-600" />
+        </button>
+      )}
 
       <div className="flex items-start gap-4 mb-4">
         {partnership.is_default ? (
-          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belaya-200 flex-shrink-0">
-            <span className="text-2xl font-bold text-belaya-primary">B</span>
+          <div className="w-16 h-16 rounded-xl overflow-hidden border border-belaya-200 flex-shrink-0">
+            <img src="/belayaa.webp" alt="Belaya" className="w-full h-full object-cover" />
           </div>
         ) : partnership.logo_url ? (
           <img
