@@ -32,7 +32,7 @@ interface RevenueTypeData {
 }
 
 interface MonthlyData {
-  month: string;
+  monthIndex: number;
   revenue: number;
   expenses: number;
 }
@@ -288,10 +288,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         }
       });
 
-      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
       const data = Array.from(monthlyMap.entries()).map(([yearMonth, values], index) => {
         return {
-          month: t(`dashboard.months.${monthKeys[index]}`),
+          monthIndex: index,
           revenue: values.revenue,
           expenses: values.expenses,
         };
@@ -332,14 +331,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
         setPeriodTotal(total);
 
-        const typeLabels: Record<string, string> = {
-          'prestation': t('dashboard.revenueTypes.prestation'),
-          'formation': t('dashboard.revenueTypes.formation'),
-          'digital_sale': t('dashboard.revenueTypes.digital_sale'),
-          'commission': t('dashboard.revenueTypes.commission'),
-          'other': t('dashboard.revenueTypes.other'),
-        };
-
         const typeColors: Record<string, string> = {
           'prestation': 'rgb(236, 72, 153)',
           'formation': 'rgb(59, 130, 246)',
@@ -351,7 +342,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         const revenueData: RevenueTypeData[] = Array.from(typeMap.entries())
           .map(([type, total]) => ({
             revenue_type: type,
-            label: typeLabels[type] || type,
+            label: type,
             total: total,
             color: typeColors[type] || 'rgb(156, 163, 175)',
           }))
@@ -498,6 +489,16 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       Lightbulb,
     };
     return icons[iconName] || AlertCircle;
+  };
+
+  const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+  const getMonthName = (index: number) => t(`dashboard.months.${monthKeys[index]}`);
+
+  const getRevenueTypeLabel = (type: string) => {
+    const key = `dashboard.revenueTypes.${type}`;
+    const translated = t(key);
+    return translated !== key ? translated : type;
   };
 
   const getPeriodLabel = () => {
@@ -834,7 +835,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                             />
                           </div>
                         </div>
-                        <span className="text-xs font-medium text-gray-600">{data.month}</span>
+                        <span className="text-xs font-medium text-gray-600">{getMonthName(data.monthIndex)}</span>
                       </div>
                     );
                   })}
@@ -900,7 +901,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                             fill={item.color}
                             className="hover:opacity-80 transition-opacity cursor-pointer"
                           />
-                          <title>{`${item.label}: ${item.total.toFixed(2)}€ (${percentage.toFixed(1)}%)`}</title>
+                          <title>{`${getRevenueTypeLabel(item.revenue_type)}: ${item.total.toFixed(2)}€ (${percentage.toFixed(1)}%)`}</title>
                         </g>
                       );
                     });
@@ -919,7 +920,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-sm text-gray-700 truncate">{item.label}</span>
+                      <span className="text-sm text-gray-700 truncate">{getRevenueTypeLabel(item.revenue_type)}</span>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="text-sm text-gray-600">
