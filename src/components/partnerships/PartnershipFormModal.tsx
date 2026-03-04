@@ -1,4 +1,4 @@
-import { X, Upload, AlertCircle, Trash2, ImageIcon } from 'lucide-react';
+import { X, Upload, AlertCircle, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
