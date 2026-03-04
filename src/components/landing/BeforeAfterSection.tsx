@@ -51,7 +51,7 @@ export default function BeforeAfterSection() {
           </div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite] leading-tight">
-            Votre vie professionnelle :<br className="hidden sm:block" /><span className="sm:hidden"> </span>AVANT / APRÈS Belaya
+            Votre vie professionnelle :<br className="hidden sm:block" /><span className="sm:hidden"> </span>AVANT / APRES Belaya.app
           </h2>
           <p className="text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Passez du chaos à la sérénité en quelques clics
@@ -146,7 +146,7 @@ export default function BeforeAfterSection() {
               </div>
 
               <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-gray-700 leading-relaxed mb-2">
-                <span className="font-bold bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">Belaya</span> n'est pas un simple logiciel.
+                <span className="font-bold bg-gradient-to-r from-[#efaa9a] via-[#d9629b] to-[#efaa9a] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">Belaya.app</span> n'est pas un simple logiciel.
               </p>
               <p className="text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 leading-relaxed">
                 C'est votre alliée pour reprendre le contrôle et retrouver votre sérénité.

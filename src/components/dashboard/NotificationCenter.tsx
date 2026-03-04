@@ -236,7 +236,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
       case 'review_received':
         return <Star className="w-5 h-5 text-amber-500" />;
       case 'comment_received':
-        return <MessageCircle className="w-5 h-5 text-purple-500" />;
+        return <MessageCircle className="w-5 h-5 text-rose-500" />;
       case 'new_follower':
         return <Users className="w-5 h-5 text-belaya-500" />;
       case 'new_like':

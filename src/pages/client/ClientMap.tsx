@@ -247,8 +247,8 @@ export default function ClientMap() {
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
               <img
-                src="/logo.png"
-                alt="Belaya"
+                src="/belayaa.webp"
+                alt="Belaya.app"
                 className="h-10 w-auto"
               />
               <h1 className="text-2xl font-bold bg-gradient-to-r from-belaya-powder to-belaya-deep bg-clip-text text-transparent">
@@ -257,7 +257,7 @@ export default function ClientMap() {
             </div>
 
             <button
-              onClick={() => window.open('https://support.belaya.com', '_blank')}
+              onClick={() => window.open('https://support.belaya.app', '_blank')}
               className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all border-2 border-brand-100"
               aria-label="Aide et support"
             >

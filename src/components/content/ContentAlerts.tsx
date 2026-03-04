@@ -31,7 +31,7 @@ export default function ContentAlerts({ alerts, onDismiss }: ContentAlertsProps)
   function getAlertColors(type: string) {
     switch (type) {
       case 'marronnier':
-        return 'bg-purple-50 border-purple-200 text-purple-800';
+        return 'bg-rose-50 border-rose-200 text-rose-800';
       case 'tip':
         return 'bg-blue-50 border-blue-200 text-blue-800';
       case 'reminder':

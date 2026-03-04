@@ -796,10 +796,10 @@ export default function Admin() {
                 <p className="text-3xl font-bold text-gray-900">{stats.startUsers}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-brand-100 rounded-xl p-6 border border-purple-200">
+              <div className="bg-gradient-to-br from-rose-50 to-brand-100 rounded-xl p-6 border border-rose-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Star className="w-6 h-6 text-purple-600" />
+                    <Star className="w-6 h-6 text-rose-600" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Studio</span>
                 </div>
@@ -862,10 +862,10 @@ export default function Admin() {
                 <p className="text-3xl font-bold text-gray-900">{stats.newUsers30d}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-brand-100 rounded-xl p-6 border border-purple-200">
+              <div className="bg-gradient-to-br from-rose-50 to-brand-100 rounded-xl p-6 border border-rose-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Activity className="w-6 h-6 text-purple-600" />
+                    <Activity className="w-6 h-6 text-rose-600" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Utilisateurs actifs</span>
                 </div>
@@ -957,10 +957,10 @@ export default function Admin() {
                 <p className="text-3xl font-bold text-gray-900">{stats.monthlyRevenue.toFixed(2)} €</p>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-brand-100 rounded-xl p-6 border border-purple-200">
+              <div className="bg-gradient-to-br from-rose-50 to-brand-100 rounded-xl p-6 border border-rose-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Percent className="w-6 h-6 text-purple-600" />
+                    <Percent className="w-6 h-6 text-rose-600" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Commission moyenne</span>
                 </div>
@@ -1113,7 +1113,7 @@ export default function Admin() {
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600">
                         {user.profession ? (
-                          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+                          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-rose-100 text-rose-800">
                             {user.profession === 'nail_artist' ? 'Nail Artist' :
                              user.profession === 'hair_stylist' ? 'Coiffeuse' :
                              user.profession === 'esthetician' ? 'Esthéticienne' :
@@ -1183,7 +1183,7 @@ export default function Admin() {
                           user.role === 'admin'
                             ? 'bg-brand-100 text-brand-800'
                             : user.role === 'pro'
-                            ? 'bg-purple-100 text-purple-800'
+                            ? 'bg-rose-100 text-rose-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}>
                           {user.role}

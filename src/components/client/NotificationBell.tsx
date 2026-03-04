@@ -137,7 +137,7 @@ export default function NotificationBell({ userId, onNavigate }: NotificationBel
       case 'booking_reminder':
         return <Calendar className="w-5 h-5 text-blue-600" />;
       case 'new_content':
-        return <Sparkles className="w-5 h-5 text-purple-600" />;
+        return <Sparkles className="w-5 h-5 text-rose-600" />;
       case 'new_availability':
         return <Calendar className="w-5 h-5 text-belaya-bright" />;
       default:

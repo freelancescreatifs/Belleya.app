@@ -199,19 +199,19 @@ export default function RewardsValidation() {
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                     submission.mission_type === 'follow_comment'
                       ? 'bg-pink-100'
-                      : 'bg-purple-100'
+                      : 'bg-rose-100'
                   }`}>
                     {submission.mission_type === 'follow_comment' ? (
                       <Instagram className={`w-6 h-6 ${
                         submission.mission_type === 'follow_comment'
                           ? 'text-pink-600'
-                          : 'text-purple-600'
+                          : 'text-rose-600'
                       }`} />
                     ) : (
                       <Video className={`w-6 h-6 ${
                         submission.mission_type === 'follow_comment'
                           ? 'text-pink-600'
-                          : 'text-purple-600'
+                          : 'text-rose-600'
                       }`} />
                     )}
                   </div>
@@ -429,7 +429,7 @@ function SubmissionDetailModal({
                       href={submission.video_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-purple-600 hover:underline text-sm"
+                      className="text-rose-600 hover:underline text-sm"
                     >
                       {submission.video_url}
                     </a>

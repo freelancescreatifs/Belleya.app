@@ -159,7 +159,7 @@ export default function PartnershipFormModal({ partnership, onClose, onSave }: P
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-belaya-primary flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-belaya-deep mb-1">Partenariat officiel Belaya</p>
+                    <p className="text-sm font-medium text-belaya-deep mb-1">Partenariat officiel Belaya.app</p>
                     <p className="text-xs text-belaya-deep">
                       Ce partenariat ne peut pas être supprimé. Seuls les objectifs et les notes internes peuvent être modifiés.
                       Pour modifier la commission (25% ou 30%), utilisez le toggle "Service client impliqué" dans les détails du partenariat.

@@ -21,7 +21,7 @@ export default function EducationalCard({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className={`bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200 ${className}`}>
+    <div className={`bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-4 border border-blue-200 ${className}`}>
       <div className="flex items-start gap-3">
         {icon && <div className="text-blue-600 mt-0.5">{icon}</div>}
         <div className="flex-1">

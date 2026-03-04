@@ -426,16 +426,16 @@ export default function GoalSuggestions({ category, onAddGoal }: GoalSuggestions
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200 mb-8">
+    <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 border border-rose-200 mb-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-600 rounded-xl flex items-center justify-center">
             <Lightbulb className="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 className="font-bold text-gray-900 flex items-center gap-2">
               Idées d'objectifs recommandés
-              <Sparkles className="w-4 h-4 text-purple-500" />
+              <Sparkles className="w-4 h-4 text-rose-500" />
             </h3>
             {!isExpanded && (
               <p className="text-sm text-gray-600">Suggestions adaptées à votre activité</p>
@@ -444,7 +444,7 @@ export default function GoalSuggestions({ category, onAddGoal }: GoalSuggestions
         </div>
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 bg-white rounded-lg hover:bg-purple-50 transition-all border border-purple-200"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-rose-600 hover:text-rose-700 bg-white rounded-lg hover:bg-rose-50 transition-all border border-rose-200"
         >
           {isExpanded ? 'Voir moins' : 'Voir plus'}
           <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
@@ -456,7 +456,7 @@ export default function GoalSuggestions({ category, onAddGoal }: GoalSuggestions
           {suggestions.map((suggestion, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl p-4 border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all group"
+              className="bg-white rounded-xl p-4 border border-rose-100 hover:border-rose-300 hover:shadow-md transition-all group"
             >
               <p className="text-sm font-medium text-gray-800 mb-2">{suggestion.title}</p>
               <p className="text-xs text-gray-500 mb-3">
@@ -464,7 +464,7 @@ export default function GoalSuggestions({ category, onAddGoal }: GoalSuggestions
               </p>
               <button
                 onClick={() => onAddGoal(suggestion.title, suggestion.type, suggestion.subgoals)}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all text-sm font-medium"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-lg hover:from-rose-600 hover:to-pink-700 transition-all text-sm font-medium"
               >
                 <Plus className="w-4 h-4" />
                 Ajouter cet objectif

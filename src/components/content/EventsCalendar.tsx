@@ -230,15 +230,15 @@ export default function EventsCalendar({ onContentAdded }: EventsCalendarProps) 
 
                   <div className="mb-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-purple-600" />
+                      <Sparkles className="w-4 h-4 text-rose-600" />
                       <span className="text-sm font-semibold text-gray-900">Thème : {event.theme}</span>
                     </div>
                   </div>
 
                   {event.suggestions && event.suggestions.length > 0 && (
-                    <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+                    <div className="mt-4 p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg">
                       <div className="flex items-center gap-2 mb-3">
-                        <Lightbulb className="w-4 h-4 text-purple-600" />
+                        <Lightbulb className="w-4 h-4 text-rose-600" />
                         <h4 className="text-sm font-semibold text-gray-900">Idées de contenu</h4>
                       </div>
                       <div className="space-y-2">

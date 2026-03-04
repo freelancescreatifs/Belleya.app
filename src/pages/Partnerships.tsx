@@ -89,10 +89,10 @@ export default function Partnerships() {
             compensation_mode: 'recurring',
             status: 'active',
             start_date: new Date().toISOString().split('T')[0],
-            conditions: 'Programme officiel Belaya - Commission mensuelle sur chaque vente HT. 25% par défaut, 30% si impliqué dans le service client.',
+            conditions: 'Programme officiel Belaya.app - Commission mensuelle sur chaque vente HT. 25% par defaut, 30% si implique dans le service client.',
             is_default: true,
             is_client_support_involved: false,
-            notes: 'Partenariat officiel Belaya avec commission récurrente mensuelle.'
+            notes: 'Partenariat officiel Belaya.app avec commission recurrente mensuelle.'
           });
 
         if (insertError) {
@@ -214,10 +214,10 @@ export default function Partnerships() {
           <p className="text-2xl font-bold text-gray-900">{stats.activeCount}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200 shadow-sm">
+        <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-rose-200 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-              <Percent className="w-5 h-5 text-purple-600" />
+              <Percent className="w-5 h-5 text-rose-600" />
             </div>
             <span className="text-sm font-medium text-gray-700">Commission moyenne</span>
           </div>

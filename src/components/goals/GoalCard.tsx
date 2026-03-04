@@ -61,7 +61,7 @@ export default function GoalCard({
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      content: 'from-purple-400 to-brand-100',
+      content: 'from-rose-400 to-brand-100',
       business: 'from-blue-400 to-cyan-600',
       loyalty: 'from-amber-400 to-orange-600',
       financial: 'from-pink-400 to-belaya-deep',
@@ -262,8 +262,8 @@ export default function GoalCard({
             </div>
           )}
           {progress > 0 && progress < 50 && (
-            <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
-              <p className="text-sm font-medium text-purple-700">
+            <div className="p-3 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-lg">
+              <p className="text-sm font-medium text-rose-700">
                 Bon départ ! Chaque étape compte 🌟
               </p>
             </div>

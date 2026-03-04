@@ -267,7 +267,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-rose-600 rounded-lg flex items-center justify-center">
                 <CreditCard className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -290,7 +290,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
               <button
                 onClick={handleConnectStripe}
                 disabled={connectingStripe}
-                className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-rose-600 text-white rounded-lg hover:from-blue-600 hover:to-rose-700 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {connectingStripe ? (
                   <>

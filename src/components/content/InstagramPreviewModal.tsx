@@ -65,8 +65,8 @@ export default function InstagramPreviewModal({
     const badges = {
       idea: { label: 'Idée', className: 'bg-gray-100 text-gray-800' },
       script: { label: 'Script', className: 'bg-orange-100 text-orange-800' },
-      shooting: { label: 'Tournage', className: 'bg-purple-100 text-purple-800' },
-      editing: { label: 'Montage', className: 'bg-indigo-100 text-indigo-800' },
+      shooting: { label: 'Tournage', className: 'bg-rose-100 text-rose-800' },
+      editing: { label: 'Montage', className: 'bg-sky-100 text-sky-800' },
       scheduled: { label: 'Programmé', className: 'bg-blue-100 text-blue-800' },
       published: { label: 'Posté', className: 'bg-green-100 text-green-800' },
     };
@@ -148,7 +148,7 @@ export default function InstagramPreviewModal({
         <div className="w-1/3 flex flex-col">
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400 p-0.5">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 via-pink-400 to-orange-400 p-0.5">
                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                   {profilePhoto ? (
                     <img
@@ -178,7 +178,7 @@ export default function InstagramPreviewModal({
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-4">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400 p-0.5">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-400 via-pink-400 to-orange-400 p-0.5">
                   <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                     {profilePhoto ? (
                       <img

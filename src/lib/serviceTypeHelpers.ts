@@ -20,7 +20,7 @@ export function getServiceTypeTag(serviceType: ServiceType): ServiceTypeTag {
     case 'vente_digitale':
       return {
         label: 'Vente digitale',
-        className: 'bg-purple-100 text-purple-800 border border-purple-200'
+        className: 'bg-rose-100 text-rose-800 border border-rose-200'
       };
     case 'commission':
       return {

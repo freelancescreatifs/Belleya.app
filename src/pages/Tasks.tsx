@@ -1209,7 +1209,7 @@ export default function Tasks() {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       admin: 'from-blue-400 to-cyan-500',
-      content: 'from-purple-400 to-brand-50',
+      content: 'from-rose-400 to-brand-50',
       stock: 'from-orange-400 to-amber-500',
       other: 'from-gray-400 to-slate-500',
     };
@@ -1858,7 +1858,7 @@ export default function Tasks() {
                     <div className="flex gap-1 flex-wrap justify-center min-h-[24px]">
                       {dayIcons.slice(0, 3).map((icon, iconIndex) => {
                         const iconColor = icon.category === 'admin' ? 'bg-blue-400' :
-                                        icon.category === 'stock' ? 'bg-purple-400' :
+                                        icon.category === 'stock' ? 'bg-orange-400' :
                                         icon.category === 'content' ? 'bg-belaya-500' :
                                         'bg-gray-400';
                         return (

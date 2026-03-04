@@ -53,8 +53,8 @@ export default function MarketingStats({
       label: 'CA potentiel',
       value: `${potentialRevenue.toFixed(0)} €`,
       icon: DollarSign,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'text-rose-600',
+      bgColor: 'bg-rose-50',
       tooltip: 'Estimation du chiffre d\'affaires récupérable si les clientes relancées reviennent. Calcul : clientes relançables × panier moyen.'
     }
   ];

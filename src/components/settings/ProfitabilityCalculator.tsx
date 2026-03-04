@@ -212,7 +212,7 @@ export default function ProfitabilityCalculator({ userId }: ProfitabilityCalcula
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-br from-rose-50 to-purple-50 rounded-xl p-6 border border-belaya-100">
+      <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-belaya-100">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
             <Calculator className="w-6 h-6 text-belaya-primary" />

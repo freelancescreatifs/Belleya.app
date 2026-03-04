@@ -310,7 +310,7 @@ export default function ClientGallery({ clientId, companyId: propCompanyId }: Cl
             content={
               <div className="text-sm">
                 <p className="font-bold mb-1">Important</p>
-                <p>Ses photos seront publiées sur le réseau Belaya pour que d'autres clientes puissent les consulter.</p>
+                <p>Ses photos seront publiées sur le reseau Belaya.app pour que d'autres clientes puissent les consulter.</p>
                 <p className="mt-2">Avant de poster les photos, veillez à ce que la cliente soit d'accord et pensez à cacher son visage.</p>
               </div>
             }

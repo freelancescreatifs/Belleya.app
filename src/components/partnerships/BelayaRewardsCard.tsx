@@ -90,7 +90,7 @@ export default function BelayaRewardsCard() {
                   <span className="text-xl font-bold text-belaya-primary">B</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Programme Belaya</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Programme Belaya.app</h3>
                   <p className="text-sm text-gray-600">Jusqu'à 2 mois gratuits</p>
                 </div>
               </div>
@@ -103,12 +103,12 @@ export default function BelayaRewardsCard() {
             </div>
 
             <div className="p-6 space-y-6">
-              <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg p-4 border border-pink-200">
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-lg p-4 border border-pink-200">
                 <div className="flex items-start gap-2 mb-3">
                   <Gift className="w-5 h-5 text-pink-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-gray-700">
                     <strong className="text-gray-900">Comment ça marche ?</strong>
-                    <p className="mt-1">Soutenez Belaya sur Instagram et gagnez des mois gratuits !</p>
+                    <p className="mt-1">Soutenez Belaya.app sur Instagram et gagnez des mois gratuits !</p>
                   </div>
                 </div>
                 {freeMonths > 0 && (
@@ -187,8 +187,8 @@ export default function BelayaRewardsCard() {
               }`}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                      <Video className="w-5 h-5 text-purple-600" />
+                    <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center">
+                      <Video className="w-5 h-5 text-rose-600" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -250,7 +250,7 @@ export default function BelayaRewardsCard() {
                       setShowDetail(false);
                       setShowMissionTwo(true);
                     }}
-                    className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors text-sm font-medium"
                   >
                     Participer à la Mission #2
                   </button>
@@ -299,7 +299,7 @@ export default function BelayaRewardsCard() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-xl font-bold text-gray-900">Belaya</h3>
+              <h3 className="text-xl font-bold text-gray-900">Belaya.app</h3>
               <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-semibold rounded-full">
                 <Sparkles className="w-3 h-3" />
                 Officiel

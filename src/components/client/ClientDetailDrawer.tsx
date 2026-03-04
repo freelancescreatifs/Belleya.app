@@ -556,12 +556,12 @@ export default function ClientDetailDrawer({
                     {stats.totalSpent.toFixed(2)} €
                   </p>
                 </div>
-                <div className="bg-purple-50 rounded-lg md:rounded-xl p-2 md:p-3">
+                <div className="bg-rose-50 rounded-lg md:rounded-xl p-2 md:p-3">
                   <div className="flex items-center gap-1 md:gap-2 mb-1">
-                    <Clock className="w-3 h-3 md:w-4 md:h-4 text-purple-600 flex-shrink-0" />
-                    <p className="text-[10px] md:text-xs text-purple-600 font-medium truncate">Dernier RDV</p>
+                    <Clock className="w-3 h-3 md:w-4 md:h-4 text-rose-600 flex-shrink-0" />
+                    <p className="text-[10px] md:text-xs text-rose-600 font-medium truncate">Dernier RDV</p>
                   </div>
-                  <p className="text-sm md:text-lg font-bold text-purple-900 truncate">
+                  <p className="text-sm md:text-lg font-bold text-rose-900 truncate">
                     {stats.lastAppointment ? new Date(stats.lastAppointment).toLocaleDateString('fr-FR') : '—'}
                   </p>
                 </div>

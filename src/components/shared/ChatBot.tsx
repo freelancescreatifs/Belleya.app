@@ -240,27 +240,27 @@ export default function ChatBot() {
         )}
 
         {topic.uiPaths && topic.uiPaths.length > 0 && (
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-3">
-            <h5 className="font-bold text-purple-900 text-xs mb-2 flex items-center gap-2">
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-3">
+            <h5 className="font-bold text-rose-900 text-xs mb-2 flex items-center gap-2">
               <span>🎯</span>
               Où cliquer dans l'app
             </h5>
             <div className="space-y-1.5">
               {topic.uiPaths.map((path, idx) => (
                 <div key={idx} className="flex items-start gap-2 group">
-                  <code className="text-[11px] bg-purple-100 text-purple-800 px-2 py-1 rounded flex-1 font-mono leading-relaxed">
+                  <code className="text-[11px] bg-rose-100 text-rose-800 px-2 py-1 rounded flex-1 font-mono leading-relaxed">
                     {path}
                   </code>
                   <button
                     onClick={() => copyToClipboard(path, `${topic.id}-path-${idx}`)}
-                    className="p-1 hover:bg-purple-200 rounded transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 opacity-100"
+                    className="p-1 hover:bg-rose-200 rounded transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 opacity-100"
                     title="Copier"
                     style={{ touchAction: 'manipulation' }}
                   >
                     {copiedIndex === `${topic.id}-path-${idx}` ? (
                       <Check className="w-3 h-3 text-belaya-bright" />
                     ) : (
-                      <Copy className="w-3 h-3 text-purple-600" />
+                      <Copy className="w-3 h-3 text-rose-600" />
                     )}
                   </button>
                 </div>

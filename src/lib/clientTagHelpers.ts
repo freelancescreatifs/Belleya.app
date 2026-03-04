@@ -21,7 +21,7 @@ export function getClientTag(data: ClientTagData): ClientTag {
 
   if (completedRDV >= 10) {
     return {
-      class: 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border border-purple-200',
+      class: 'bg-gradient-to-r from-rose-100 to-pink-100 text-rose-800 border border-rose-200',
       label: '💎 Cliente VIP',
       icon: '💎'
     };

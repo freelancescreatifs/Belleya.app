@@ -147,7 +147,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-900">Notifications par SMS</span>
-                <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-0.5 rounded font-medium">Premium</span>
+                <span className="text-xs bg-gradient-to-r from-blue-500 to-rose-500 text-white px-2 py-0.5 rounded font-medium">Premium</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 Recevoir un SMS à chaque nouvelle réservation
@@ -174,7 +174,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-900">Demander un acompte</span>
                 <InfoTooltip content="Demander un acompte lors de la réservation pour sécuriser le RDV" />
-                <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-0.5 rounded font-medium">Premium</span>
+                <span className="text-xs bg-gradient-to-r from-blue-500 to-rose-500 text-white px-2 py-0.5 rounded font-medium">Premium</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 Sécurisez vos rendez-vous avec un acompte à la réservation
@@ -202,7 +202,7 @@ export default function BookingSettings({ settings, onChange }: BookingSettingsP
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Qui paie les frais de transaction (1,5%) ?
-                  <InfoTooltip content="Frais de la plateforme Belaya sur chaque acompte. Vous pouvez choisir de les absorber ou de les facturer au client." />
+                  <InfoTooltip content="Frais de la plateforme Belaya.app sur chaque acompte. Vous pouvez choisir de les absorber ou de les facturer au client." />
                 </label>
                 <div className="space-y-2">
                   <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">

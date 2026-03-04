@@ -203,10 +203,10 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-2 h-full overflow-y-auto overflow-x-hidden max-w-full">
+    <div className="bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50 rounded-2xl p-2 h-full overflow-y-auto overflow-x-hidden max-w-full">
       <div className="flex items-center justify-between mb-3 px-2">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-xl">
+          <div className="p-2 bg-gradient-to-br from-rose-500 via-pink-500 to-orange-500 rounded-xl">
             <Instagram className="w-5 h-5 text-white" />
           </div>
           <div>

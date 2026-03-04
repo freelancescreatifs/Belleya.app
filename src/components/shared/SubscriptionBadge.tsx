@@ -19,9 +19,9 @@ export default function SubscriptionBadge({ planType, className = '' }: Subscrip
     studio: {
       icon: Star,
       label: 'Studio',
-      bgColor: 'bg-purple-100',
-      textColor: 'text-purple-800',
-      iconColor: 'text-purple-600'
+      bgColor: 'bg-rose-100',
+      textColor: 'text-rose-800',
+      iconColor: 'text-rose-600'
     },
     empire: {
       icon: Crown,

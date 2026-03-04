@@ -32,7 +32,7 @@ export default function SubscriptionSuccess() {
           </h1>
 
           <p className="text-slate-600 mb-8">
-            Merci pour votre confiance. Votre abonnement Belaya est maintenant actif.
+            Merci pour votre confiance. Votre abonnement Belaya.app est maintenant actif.
             Profitez de toutes les fonctionnalites !
           </p>
 

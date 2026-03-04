@@ -100,13 +100,13 @@ const PRESET_COLORS = [
   '#EC4899', // Pink
   '#F59E0B', // Orange
   '#10B981', // Green
-  '#8B5CF6', // Purple
+  '#E11D48', // Rose
   '#3B82F6', // Blue
   '#EF4444', // Red
   '#14B8A6', // Teal
   '#F97316', // Deep Orange
   '#06B6D4', // Cyan
-  '#A855F7', // Deep Purple
+  '#BE123C', // Deep Rose
 ];
 
 export default function ContentForm({

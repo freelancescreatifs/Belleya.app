@@ -190,7 +190,7 @@ export default function ClientProfile() {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
       <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white px-6 pt-12 pb-8">
         <div className="flex items-center gap-3 mb-4">
-          <img src="/belaya-logo.png" alt="Belaya" className="h-24 w-auto" />
+          <img src="/belayaa.webp" alt="Belaya.app" className="h-20 w-auto" />
         </div>
         <div className="flex flex-col items-center">
           {profile?.photo_url ? (
@@ -209,7 +209,7 @@ export default function ClientProfile() {
               ? `${profile.first_name} ${profile.last_name}`
               : 'Mon profil'}
           </h1>
-          <p className="text-white/90 text-sm">Cliente Belaya</p>
+          <p className="text-white/90 text-sm">Cliente Belaya.app</p>
         </div>
       </div>
 
@@ -344,7 +344,7 @@ export default function ClientProfile() {
         </button>
 
         <div className="text-center text-sm text-gray-500 py-4">
-          Belaya v1.0
+          Belaya.app v1.0
         </div>
       </div>
 

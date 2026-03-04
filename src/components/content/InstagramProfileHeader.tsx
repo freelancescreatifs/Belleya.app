@@ -149,7 +149,7 @@ export default function InstagramProfileHeader({ postsCount }: InstagramProfileH
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400 p-0.5">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-rose-400 via-pink-400 to-orange-400 p-0.5">
                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                   {profile.instagram_profile_photo ? (
                     <img
@@ -270,7 +270,7 @@ export default function InstagramProfileHeader({ postsCount }: InstagramProfileH
 
           <div className="flex items-center gap-6 mb-4">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400 p-0.5">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-rose-400 via-pink-400 to-orange-400 p-0.5">
                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                   {profile.instagram_profile_photo ? (
                     <img

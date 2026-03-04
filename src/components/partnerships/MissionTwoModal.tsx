@@ -104,13 +104,13 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="bg-rose-50 border border-rose-200 rounded-lg p-4">
             <div className="flex gap-2">
-              <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-purple-800">
+              <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-rose-800">
                 <strong>Instructions :</strong>
                 <ol className="list-decimal ml-4 mt-2 space-y-1">
-                  <li>Créez une vidéo avis sur Belaya (format Reel/Story recommandé)</li>
+                  <li>Creez une video avis sur Belaya.app (format Reel/Story recommande)</li>
                   <li>Mentionnez @belaya.app dans votre publication</li>
                   <li>Partagez votre expérience authentique avec l'application</li>
                   <li>Téléchargez votre vidéo ou fournissez le lien Instagram</li>
@@ -130,11 +130,11 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
                 onClick={() => setUploadMode('file')}
                 className={`p-4 rounded-lg border-2 transition-colors ${
                   uploadMode === 'file'
-                    ? 'border-purple-500 bg-purple-50'
+                    ? 'border-rose-500 bg-rose-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <Upload className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                <Upload className="w-6 h-6 mx-auto mb-2 text-rose-600" />
                 <p className="text-sm font-medium text-gray-900">Télécharger</p>
                 <p className="text-xs text-gray-500">Fichier vidéo</p>
               </button>
@@ -143,11 +143,11 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
                 onClick={() => setUploadMode('url')}
                 className={`p-4 rounded-lg border-2 transition-colors ${
                   uploadMode === 'url'
-                    ? 'border-purple-500 bg-purple-50'
+                    ? 'border-rose-500 bg-rose-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <Instagram className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                <Instagram className="w-6 h-6 mx-auto mb-2 text-rose-600" />
                 <p className="text-sm font-medium text-gray-900">Lien Instagram</p>
                 <p className="text-xs text-gray-500">URL du post</p>
               </button>
@@ -174,16 +174,16 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-purple-500 transition-colors"
+                className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-rose-500 transition-colors"
               >
                 {videoFile ? (
                   <div className="text-center">
-                    <Video className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                    <Video className="w-8 h-8 mx-auto text-rose-600 mb-2" />
                     <p className="text-sm text-gray-900 font-medium">{videoFile.name}</p>
                     <p className="text-xs text-gray-500">
                       {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
                     </p>
-                    <p className="text-xs text-purple-600 mt-2">Cliquez pour changer</p>
+                    <p className="text-xs text-rose-600 mt-2">Cliquez pour changer</p>
                   </div>
                 ) : (
                   <div className="text-center">
@@ -205,7 +205,7 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
                 value={formData.video_url}
                 onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
                 placeholder="https://www.instagram.com/reel/..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                 required={uploadMode === 'url'}
               />
             </div>
@@ -221,7 +221,7 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
               value={formData.instagram_handle}
               onChange={(e) => setFormData({ ...formData, instagram_handle: e.target.value })}
               placeholder="@votre_pseudo"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
             />
           </div>
 
@@ -231,7 +231,7 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
                 type="checkbox"
                 checked={formData.consent_commercial}
                 onChange={(e) => setFormData({ ...formData, consent_commercial: e.target.checked })}
-                className="mt-1 w-5 h-5 text-purple-600 rounded focus:ring-purple-500"
+                className="mt-1 w-5 h-5 text-rose-600 rounded focus:ring-rose-500"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -241,7 +241,7 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
                   </span>
                 </div>
                 <p className="text-sm text-yellow-800">
-                  J'autorise Belaya à réutiliser cette vidéo à des fins commerciales et/ou sur la landing page.
+                  J'autorise Belaya.app a reutiliser cette vidéo à des fins commerciales et/ou sur la landing page.
                   Cette autorisation est nécessaire pour valider la mission et recevoir le mois gratuit.
                 </p>
               </div>
@@ -260,7 +260,7 @@ export default function MissionTwoModal({ onClose, onSuccess }: MissionTwoModalP
             <button
               type="submit"
               disabled={!isValid || uploading}
-              className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {uploading ? 'Envoi en cours...' : 'Soumettre ma vidéo'}
             </button>
