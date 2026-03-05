@@ -167,7 +167,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
           supabase.rpc('sync_affiliate_signup_statuses').catch(() => {});
 
-          const [signupsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.all([
+          const [signupsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.allSettled([
             supabase
               .from('affiliate_signups')
               .select('*')
@@ -182,7 +182,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .limit(50),
             supabase.rpc('get_leaderboard_today'),
             supabase.rpc('get_leaderboard_month'),
-            supabase.rpc('get_zone_rouge').catch(() => ({ data: [] })),
+            supabase.rpc('get_zone_rouge'),
             supabase
               .from('monthly_competitions')
               .select('*')
@@ -191,12 +191,12 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .limit(12),
           ]);
 
-          setSignups(signupsRes.data || []);
-          setCommissions(commissionsRes.data || []);
-          setLeaderboardToday(todayRes.data || []);
-          setLeaderboardMonth(monthRes.data || []);
-          setZoneRouge(zoneRes.data || []);
-          setCompetitions(compRes.data || []);
+          setSignups(signupsRes.status === 'fulfilled' ? signupsRes.value.data || [] : []);
+          setCommissions(commissionsRes.status === 'fulfilled' ? commissionsRes.value.data || [] : []);
+          setLeaderboardToday(todayRes.status === 'fulfilled' ? todayRes.value.data || [] : []);
+          setLeaderboardMonth(monthRes.status === 'fulfilled' ? monthRes.value.data || [] : []);
+          setZoneRouge(zoneRes.status === 'fulfilled' ? zoneRes.value.data || [] : []);
+          setCompetitions(compRes.status === 'fulfilled' ? compRes.value.data || [] : []);
         }
       }
     } catch (err) {
