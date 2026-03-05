@@ -6,7 +6,6 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from '../components/shared/ToastContainer';
 import RewardsValidation from '../components/admin/RewardsValidation';
 import AffiliateApplicationsTab from '../components/admin/AffiliateApplicationsTab';
-import AffiliatePartnersTab from '../components/admin/AffiliatePartnersTab';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -85,7 +84,7 @@ export default function Admin() {
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships' | 'rewards' | 'affiliates' | 'affiliate_partners'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships' | 'rewards' | 'affiliates'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -728,17 +727,6 @@ export default function Admin() {
           Avis & Récompenses
         </button>
         <button
-          onClick={() => setActiveTab('affiliate_partners')}
-          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
-            activeTab === 'affiliate_partners'
-              ? 'border-brand-500 text-brand-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          <Handshake className="w-4 h-4 inline mr-1" />
-          Partenariats Belaya
-        </button>
-        <button
           onClick={() => setActiveTab('affiliates')}
           className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'affiliates'
@@ -747,7 +735,7 @@ export default function Admin() {
           }`}
         >
           <UserCheck className="w-4 h-4 inline mr-1" />
-          Candidatures
+          Affiliés
         </button>
       </div>
 
@@ -1430,10 +1418,6 @@ export default function Admin() {
 
       {activeTab === 'rewards' && (
         <RewardsValidation />
-      )}
-
-      {activeTab === 'affiliate_partners' && (
-        <AffiliatePartnersTab />
       )}
 
       {activeTab === 'affiliates' && (
