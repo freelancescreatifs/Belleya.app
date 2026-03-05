@@ -214,6 +214,10 @@ function AppContent() {
           setAffiliatePage('apply');
           window.history.pushState({}, '', '/partenaire/apply');
         }}
+        onDashboard={() => {
+          setAffiliatePage('dashboard');
+          window.history.pushState({}, '', '/partner/dashboard');
+        }}
       />
     );
   }
