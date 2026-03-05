@@ -213,12 +213,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .maybeSingle();
 
             if (affiliateData) {
+              const now = new Date();
+              const trialEnd = new Date(now);
+              trialEnd.setDate(trialEnd.getDate() + 14);
+
               await supabase.from('affiliate_signups').insert({
                 affiliate_id: affiliateData.id,
                 user_id: data.user.id,
                 first_name: firstName || null,
                 subscription_status: 'trialing',
-                attributed_at: new Date().toISOString(),
+                attributed_at: now.toISOString(),
+                trial_start_date: now.toISOString(),
+                trial_end_date: trialEnd.toISOString(),
               });
 
               localStorage.removeItem('belaya_ref');

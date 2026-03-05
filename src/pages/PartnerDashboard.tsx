@@ -3,7 +3,7 @@ import {
   Link2, Copy, CheckCircle, Clock, XCircle, Users, DollarSign,
   TrendingUp, ArrowLeft, Loader2, BarChart3, LogOut, Lock,
   Award, AlertTriangle, Flame, Trophy, Crown, Shield, ChevronUp,
-  Zap, LogIn, Calendar, Eye, EyeOff
+  Zap, LogIn, Eye, EyeOff
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -34,6 +34,11 @@ interface AffiliateSignup {
   subscription_status: string;
   attributed_at: string;
   created_at: string;
+  trial_start_date: string | null;
+  trial_end_date: string | null;
+  subscription_start_date: string | null;
+  monthly_amount: number;
+  user_id: string;
 }
 
 interface AffiliateCommission {
@@ -151,6 +156,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             active_sub_count: affiliateData.active_sub_count || 0,
             days_since_last_signup: affiliateData.days_since_last_signup || 0,
           });
+
+          await supabase.rpc('sync_affiliate_signup_statuses').catch(() => {});
 
           const [signupsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.all([
             supabase
@@ -312,7 +319,6 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   if (!affiliate) return null;
 
   const totalCommissions = commissions.reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
-  const activeSignups = signups.filter(s => s.subscription_status === 'active').length;
   const affiliateLink = `https://belaya.app/${affiliate.ref_code}`;
   const commissionRate = Number(affiliate.commission_rate || affiliate.base_commission_rate || 0.10) * 100;
   const rank = getRankConfig(affiliate.active_sub_count);
@@ -320,17 +326,42 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const progress = getRankProgress(affiliate.active_sub_count);
   const RankIcon = rank.icon;
 
+  const now = new Date();
+
+  const enrichedSignups = signups.map(s => {
+    const trialEnd = s.trial_end_date ? new Date(s.trial_end_date) : new Date(new Date(s.created_at).getTime() + 14 * 24 * 60 * 60 * 1000);
+    const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    let computedStatus: 'trialing' | 'active' | 'expired' | 'canceled' = 'trialing';
+    if (s.subscription_status === 'active') computedStatus = 'active';
+    else if (s.subscription_status === 'canceled') computedStatus = 'canceled';
+    else if (daysLeft <= 0 && s.subscription_status !== 'active') computedStatus = 'expired';
+    else computedStatus = 'trialing';
+    return { ...s, computedStatus, daysLeft, trialEnd };
+  });
+
+  const statusOrder = { trialing: 0, active: 1, expired: 2, canceled: 3 };
+  enrichedSignups.sort((a, b) => {
+    const orderDiff = statusOrder[a.computedStatus] - statusOrder[b.computedStatus];
+    if (orderDiff !== 0) return orderDiff;
+    if (a.computedStatus === 'trialing') return a.daysLeft - b.daysLeft;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const activeSignups = enrichedSignups.filter(s => s.computedStatus === 'active').length;
+  const trialingSignups = enrichedSignups.filter(s => s.computedStatus === 'trialing').length;
+  const expiredSignups = enrichedSignups.filter(s => s.computedStatus === 'expired').length;
+  const totalInscriptions = enrichedSignups.length;
+
+  const activeMRR = enrichedSignups
+    .filter(s => s.computedStatus === 'active')
+    .reduce((sum, s) => sum + Number(s.monthly_amount || 29), 0);
+
   const currentMonthCommission = commissions
     .filter(c => {
       const d = new Date(c.created_at);
-      const now = new Date();
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     })
     .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
-
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const conversions30d = signups.filter(s => new Date(s.created_at) >= thirtyDaysAgo).length;
 
   const lastConversionLabel = affiliate.last_signup_date
     ? new Date(affiliate.last_signup_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
@@ -454,13 +485,22 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <KPICard icon={Users} label="Abonnes actifs" value={String(activeSignups)} color="text-emerald-600" />
-          <KPICard icon={DollarSign} label="MRR genere" value={`${(activeSignups * 29 * (commissionRate / 100)).toFixed(0)} EUR`} color="text-teal-600" />
-          <KPICard icon={DollarSign} label="Commission ce mois" value={`${currentMonthCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
-          <KPICard icon={TrendingUp} label="Conversions totales" value={String(signups.length)} />
-          <KPICard icon={Calendar} label="Conversions 30j" value={String(conversions30d)} />
-          <KPICard icon={Clock} label="Derniere conversion" value={lastConversionLabel} />
+        <div className="mb-2">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Revenus (abonnes payants uniquement)</p>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <KPICard icon={CheckCircle} label="Abos actifs" value={String(activeSignups)} color="text-emerald-600" />
+            <KPICard icon={DollarSign} label="MRR genere" value={`${activeMRR.toFixed(0)} EUR`} color="text-teal-600" />
+            <KPICard icon={DollarSign} label="Commission ce mois" value={`${currentMonthCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
+          </div>
+        </div>
+        <div className="mb-6">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Acquisition (toutes inscriptions)</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <KPICard icon={Users} label="Inscriptions" value={String(totalInscriptions)} />
+            <KPICard icon={Clock} label="Essais en cours" value={String(trialingSignups)} color="text-amber-600" />
+            <KPICard icon={TrendingUp} label="Conversions" value={String(activeSignups)} color="text-emerald-600" />
+            <KPICard icon={XCircle} label="Non converties" value={String(expiredSignups)} color="text-red-500" />
+          </div>
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto">
@@ -644,7 +684,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
         {activeTab === 'signups' && (
           <div className="bg-white rounded-xl border border-gray-200">
-            {signups.length === 0 ? (
+            {enrichedSignups.length === 0 ? (
               <div className="p-8 text-center">
                 <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">Aucune inscription pour le moment</p>
@@ -654,38 +694,58 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-100">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Prenom</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ville</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Client</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date inscription</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Jours restants</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Fin d'essai</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Montant</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {signups.map((s) => (
-                      <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-gray-900">{s.first_name || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{s.city || '-'}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                            s.subscription_status === 'active'
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : s.subscription_status === 'trialing'
-                              ? 'bg-blue-50 text-blue-700'
-                              : s.subscription_status === 'canceled'
-                              ? 'bg-red-50 text-red-700'
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
-                            {s.subscription_status === 'active' ? 'Actif' :
-                             s.subscription_status === 'trialing' ? 'Essai' :
-                             s.subscription_status === 'canceled' ? 'Annule' :
-                             s.subscription_status || '-'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-500">
-                          {new Date(s.created_at).toLocaleDateString('fr-FR')}
-                        </td>
-                      </tr>
-                    ))}
+                    {enrichedSignups.map((s) => {
+                      const isUrgent = s.computedStatus === 'trialing' && s.daysLeft <= 2 && s.daysLeft > 0;
+                      return (
+                        <tr key={s.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${isUrgent ? 'bg-orange-50/50' : ''}`}>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {s.first_name || 'Utilisateur'} <span className="text-gray-400 text-xs">#{s.id.slice(0, 6)}</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {new Date(s.created_at).toLocaleDateString('fr-FR')}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <StatusTag status={s.computedStatus} daysLeft={s.daysLeft} />
+                              {isUrgent && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700 border border-orange-200">
+                                  <Flame className="w-3 h-3" />
+                                  A relancer
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {s.computedStatus === 'trialing' ? (
+                              <span className={`font-semibold ${s.daysLeft <= 2 ? 'text-orange-600' : s.daysLeft <= 5 ? 'text-amber-600' : 'text-gray-700'}`}>
+                                J-{Math.max(0, s.daysLeft)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {s.trialEnd.toLocaleDateString('fr-FR')}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {s.computedStatus === 'active' ? (
+                              <span className="font-medium text-emerald-700">{Number(s.monthly_amount || 29).toFixed(0)} EUR/mois</span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -985,6 +1045,39 @@ function PartnerAuthForm({ onBack }: { onBack: () => void }) {
       </div>
     </div>
   );
+}
+
+function StatusTag({ status, daysLeft }: { status: 'trialing' | 'active' | 'expired' | 'canceled'; daysLeft: number }) {
+  switch (status) {
+    case 'trialing':
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+          <Clock className="w-3 h-3" />
+          Essai — J-{Math.max(0, daysLeft)}
+        </span>
+      );
+    case 'active':
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <CheckCircle className="w-3 h-3" />
+          Abonnee
+        </span>
+      );
+    case 'expired':
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+          <XCircle className="w-3 h-3" />
+          N'a pas pris
+        </span>
+      );
+    case 'canceled':
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+          <XCircle className="w-3 h-3" />
+          Annulee
+        </span>
+      );
+  }
 }
 
 function LeaderboardCard({ title, icon: Icon, entries, metric, currentAffiliateId }: {
