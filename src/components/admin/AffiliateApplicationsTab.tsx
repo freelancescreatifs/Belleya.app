@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Clock, Search, Users, Loader2, ExternalLink } from 'lucide-react';
+import {
+  CheckCircle, XCircle, Clock, Search, Users, Loader2, ExternalLink,
+  Trash2, Edit2, X, AlertTriangle
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
@@ -31,6 +34,9 @@ export default function AffiliateApplicationsTab() {
   const [search, setSearch] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Application | null>(null);
+  const [editTarget, setEditTarget] = useState<Application | null>(null);
+  const [editForm, setEditForm] = useState({ full_name: '', email: '', phone: '', motivation: '' });
 
   useEffect(() => {
     loadApplications();
@@ -67,6 +73,7 @@ export default function AffiliateApplicationsTab() {
       if (updateError) throw updateError;
 
       const refCode = generateRefCode(app.full_name || app.email);
+      const now = new Date().toISOString();
 
       const { error: affiliateError } = await supabase
         .from('affiliates')
@@ -79,10 +86,21 @@ export default function AffiliateApplicationsTab() {
           base_commission_rate: 0.10,
           status: 'active',
           is_active: true,
-          level: 'recrue'
+          level: 'recrue',
+          program: 'belaya_affiliation',
+          approved_at: now,
         });
 
       if (affiliateError) throw affiliateError;
+
+      const { error: roleError } = await supabase
+        .from('user_profiles')
+        .update({ role: 'affiliate' })
+        .eq('user_id', app.user_id);
+
+      if (roleError) {
+        console.warn('Could not update user role:', roleError);
+      }
 
       showToast('success', `Candidature de ${app.full_name} acceptee`);
       await loadApplications();
@@ -112,6 +130,56 @@ export default function AffiliateApplicationsTab() {
     } catch (err: any) {
       console.error('Error rejecting application:', err);
       showToast('error', err.message || 'Erreur lors du refus');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setProcessingId(deleteTarget.id);
+    try {
+      const { error } = await supabase
+        .from('affiliate_applications')
+        .delete()
+        .eq('id', deleteTarget.id);
+
+      if (error) throw error;
+
+      setApplications(prev => prev.filter(a => a.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      showToast('success', 'Candidature supprimee');
+    } catch (err: any) {
+      showToast('error', err.message || 'Erreur lors de la suppression');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editTarget) return;
+    setProcessingId(editTarget.id);
+    try {
+      const { error } = await supabase
+        .from('affiliate_applications')
+        .update({
+          full_name: editForm.full_name,
+          email: editForm.email,
+          phone: editForm.phone || null,
+          motivation: editForm.motivation,
+        })
+        .eq('id', editTarget.id);
+
+      if (error) throw error;
+
+      setApplications(prev => prev.map(a => {
+        if (a.id !== editTarget.id) return a;
+        return { ...a, ...editForm, phone: editForm.phone || null };
+      }));
+      setEditTarget(null);
+      showToast('success', 'Candidature modifiee');
+    } catch (err: any) {
+      showToast('error', err.message || 'Erreur lors de la modification');
     } finally {
       setProcessingId(null);
     }
@@ -148,7 +216,7 @@ export default function AffiliateApplicationsTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Demandes d'affiliation</h2>
+          <h2 className="text-xl font-bold text-gray-900">Candidatures Affiliation</h2>
           <p className="text-sm text-gray-500">
             {pendingCount > 0
               ? `${pendingCount} candidature${pendingCount > 1 ? 's' : ''} en attente`
@@ -228,26 +296,50 @@ export default function AffiliateApplicationsTab() {
                     <span className="text-xs text-gray-400">
                       {new Date(app.created_at).toLocaleDateString('fr-FR')}
                     </span>
-                    {app.status === 'pending' && (
-                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleApprove(app)}
-                          disabled={processingId === app.id}
-                          className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                        >
-                          {processingId === app.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : 'Accepter'}
-                        </button>
-                        <button
-                          onClick={() => handleReject(app)}
-                          disabled={processingId === app.id}
-                          className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200 transition-colors disabled:opacity-50"
-                        >
-                          Refuser
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                      {app.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleApprove(app)}
+                            disabled={processingId === app.id}
+                            className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                          >
+                            {processingId === app.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : 'Accepter'}
+                          </button>
+                          <button
+                            onClick={() => handleReject(app)}
+                            disabled={processingId === app.id}
+                            className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200 transition-colors disabled:opacity-50"
+                          >
+                            Refuser
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => {
+                          setEditTarget(app);
+                          setEditForm({
+                            full_name: app.full_name || '',
+                            email: app.email || '',
+                            phone: app.phone || '',
+                            motivation: app.motivation || '',
+                          });
+                        }}
+                        className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Modifier"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(app)}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -315,6 +407,121 @@ export default function AffiliateApplicationsTab() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-7 h-7 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Supprimer cette candidature ?</h3>
+              <p className="text-sm text-gray-600 mb-1">
+                La candidature de <strong>{deleteTarget.full_name}</strong> sera supprimee.
+              </p>
+              <p className="text-xs text-gray-400 mb-6">
+                {deleteTarget.status === 'approved'
+                  ? 'Le compte affilie existant ne sera pas affecte.'
+                  : 'Cette action est irreversible.'}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDelete}
+                disabled={processingId === deleteTarget.id}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {processingId === deleteTarget.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Supprimer
+              </button>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editTarget && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Modifier la candidature</h3>
+              <button
+                onClick={() => setEditTarget(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                <input
+                  type="text"
+                  value={editForm.full_name}
+                  onChange={(e) => setEditForm(f => ({ ...f, full_name: e.target.value }))}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm(f => ({ ...f, email: e.target.value }))}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Telephone</label>
+                <input
+                  type="tel"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm(f => ({ ...f, phone: e.target.value }))}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Motivation</label>
+                <textarea
+                  value={editForm.motivation}
+                  onChange={(e) => setEditForm(f => ({ ...f, motivation: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleEditSave}
+                disabled={processingId === editTarget.id}
+                className="flex-1 px-4 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {processingId === editTarget.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : null}
+                Enregistrer
+              </button>
+              <button
+                onClick={() => setEditTarget(null)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
