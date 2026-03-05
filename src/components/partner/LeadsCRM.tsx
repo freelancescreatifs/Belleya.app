@@ -1,8 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Plus, Search, Edit2, Trash2, X, Save, AlertTriangle, Clock,
-  Instagram, Phone, MapPin, StickyNote, Calendar, ChevronDown, Loader2
-} from 'lucide-react';
+import { Plus, Search, CreditCard as Edit2, Trash2, X, Save, AlertTriangle, Clock, Instagram, Phone, MapPin, StickyNote, Calendar, ChevronDown, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface CRMLead {
