@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Bell, Check, Loader2, Flame, ExternalLink } from 'lucide-react';
+import { Bell, Check, Loader as Loader2, Flame, ExternalLink } from 'lucide-react';
 
 interface AdminNotif {
   id: string;

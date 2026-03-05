@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Star, TrendingUp, DollarSign, ChevronRight, Shield, Zap, BarChart3, Award } from 'lucide-react';
+import { ArrowRight, Star, TrendingUp, DollarSign, ChevronRight, Shield, Zap, ChartBar as BarChart3, Award } from 'lucide-react';
 
 function useScrollFadeIn() {
   const ref = useRef<HTMLDivElement>(null);

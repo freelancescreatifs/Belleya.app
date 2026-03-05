@@ -8,7 +8,7 @@ import DashboardStats from '../components/partner/DashboardStats';
 import DashboardLeaderboard from '../components/partner/DashboardLeaderboard';
 import DashboardZoneRouge from '../components/partner/DashboardZoneRouge';
 import DashboardCommissions from '../components/partner/DashboardCommissions';
-import { LogOut, Copy, Check, AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
+import { LogOut, Copy, Check, TriangleAlert as AlertTriangle, Circle as XCircle, RefreshCw } from 'lucide-react';
 
 export default function PartnerDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();

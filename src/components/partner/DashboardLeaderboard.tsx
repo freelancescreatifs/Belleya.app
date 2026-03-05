@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Trophy, TrendingUp, Loader2 } from 'lucide-react';
+import { Trophy, TrendingUp, Loader as Loader2 } from 'lucide-react';
 import { formatEUR } from '../../lib/affiliateUtils';
 
 interface LeaderEntry {

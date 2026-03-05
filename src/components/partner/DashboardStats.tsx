@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { TrendingUp, Users, DollarSign, Zap, Loader2 } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Zap, Loader as Loader2 } from 'lucide-react';
 import { formatEUR } from '../../lib/affiliateUtils';
 
 interface Stats {

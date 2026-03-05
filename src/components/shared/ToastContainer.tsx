@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle, Info, X } from 'lucide-react';
+import { CircleCheck as CheckCircle, Circle as XCircle, Info, X } from 'lucide-react';
 import type { Toast } from '../../hooks/useToast';
 
 interface Props {

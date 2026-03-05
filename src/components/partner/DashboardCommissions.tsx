@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { DollarSign, Loader2 } from 'lucide-react';
+import { DollarSign, Loader as Loader2 } from 'lucide-react';
 
 export default function DashboardCommissions({ affiliateId }: { affiliateId: string }) {
   const [commissions, setCommissions] = useState<any[]>([]);

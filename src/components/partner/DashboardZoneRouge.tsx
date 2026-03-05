@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react';
+import { TriangleAlert as AlertTriangle } from 'lucide-react';
 import { daysSince } from '../../lib/affiliateUtils';
 import type { AffiliateData } from '../../hooks/useAffiliate';
 
