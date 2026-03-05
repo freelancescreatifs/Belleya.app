@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, CreditCard as Edit2, Trash2, Crown, X, ChevronLeft, ChevronRight, CreditCard, Gift, UserCheck } from 'lucide-react';
+import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, CreditCard as Edit2, Trash2, Crown, X, ChevronLeft, ChevronRight, CreditCard, Gift, UserCheck, BarChart3 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
@@ -8,6 +8,7 @@ import RewardsValidation from '../components/admin/RewardsValidation';
 import AffiliateApplicationsTab from '../components/admin/AffiliateApplicationsTab';
 import AffiliatePartnersTab from '../components/admin/AffiliatePartnersTab';
 import AffiliateKPIDashboard from '../components/admin/AffiliateKPIDashboard';
+import AdminAffiliateAnalytics from '../components/admin/AdminAffiliateAnalytics';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -86,7 +87,7 @@ export default function Admin() {
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'rewards' | 'affiliates' | 'affiliate_partners'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'rewards' | 'affiliates' | 'affiliate_partners' | 'affiliate_analytics'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -719,6 +720,17 @@ export default function Admin() {
           Affiliés Belaya
         </button>
         <button
+          onClick={() => setActiveTab('affiliate_analytics')}
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
+            activeTab === 'affiliate_analytics'
+              ? 'border-brand-500 text-brand-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4 inline mr-1" />
+          Analytics
+        </button>
+        <button
           onClick={() => setActiveTab('rewards')}
           className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'rewards'
@@ -1302,6 +1314,10 @@ export default function Admin() {
 
       {activeTab === 'affiliates' && (
         <AffiliateApplicationsTab />
+      )}
+
+      {activeTab === 'affiliate_analytics' && (
+        <AdminAffiliateAnalytics />
       )}
 
       {showEditModal && editingUser && (

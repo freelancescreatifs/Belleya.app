@@ -4,7 +4,7 @@ import {
   TrendingUp, ArrowLeft, Loader2, LogOut, Lock,
   AlertTriangle, Flame, Trophy, Crown, Shield, ChevronUp,
   Zap, LogIn, Eye, EyeOff, LayoutDashboard, UserCheck, Info,
-  Menu, X
+  Menu, X, Settings, Lightbulb
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,6 +17,7 @@ import DashboardCommissions from '../components/partner/DashboardCommissions';
 import ProspectsCRM from '../components/partner/LeadsCRM';
 import SharedMessages from '../components/partner/SharedMessages';
 import SalesTips from '../components/partner/SalesTips';
+import DashboardSettings from '../components/partner/DashboardSettings';
 
 interface Affiliate {
   id: string;
@@ -38,6 +39,7 @@ interface Affiliate {
   disable_leaderboard: boolean;
   special_commission_rate: number | null;
   full_name: string;
+  avatar_url?: string | null;
 }
 
 interface AffiliateLead {
@@ -79,7 +81,7 @@ interface PartnerDashboardProps {
   onApply: () => void;
 }
 
-type ActiveSection = 'dashboard' | 'prospects' | 'signups';
+type ActiveSection = 'dashboard' | 'prospects' | 'signups' | 'conseils' | 'settings';
 
 const RANK_CONFIG = [
   { min: 0, max: 9, label: 'Recrue', rate: 10, icon: Shield, color: 'from-gray-500 to-gray-600', bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
@@ -324,6 +326,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
     { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { key: 'prospects', label: 'Prospects', icon: UserCheck },
     { key: 'signups', label: 'Inscriptions', icon: Users },
+    { key: 'conseils', label: 'Conseils', icon: Lightbulb },
+    { key: 'settings', label: 'Parametres', icon: Settings },
   ];
 
   const handleNavClick = (key: ActiveSection) => {
@@ -482,6 +486,28 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               <h2 className="text-xl font-bold text-gray-900 mb-1">Inscriptions</h2>
               <p className="text-sm text-gray-500 mb-6">Personnes inscrites via ton lien affilie</p>
               <SignupsSection affiliate={affiliate} leads={leads} />
+            </div>
+          )}
+
+          {activeSection === 'conseils' && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Conseils</h2>
+              <p className="text-sm text-gray-500 mb-6">Techniques et astuces pour convertir tes prospects</p>
+              <SalesTips />
+            </div>
+          )}
+
+          {activeSection === 'settings' && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Parametres</h2>
+              <p className="text-sm text-gray-500 mb-6">Tes informations et preferences</p>
+              <DashboardSettings
+                affiliate={affiliate}
+                rank={rank}
+                commissionRate={commissionRate}
+                showToast={showToast}
+                onAvatarUpdated={(url) => setAffiliate(prev => prev ? { ...prev, avatar_url: url } : prev)}
+              />
             </div>
           )}
 
@@ -670,28 +696,6 @@ function DashboardOverview({
           </div>
         </div>
       )}
-
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <h3 className="font-semibold text-gray-900 mb-4 text-sm">Informations du compte</h3>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {!affiliate.disable_tiers && <InfoRow label="Niveau" value={rank.label} />}
-          <InfoRow label="Taux de commission" value={`${commissionRate}%${affiliate.is_special ? ' (fixe)' : ''}`} />
-          <InfoRow label="Membre depuis" value={affiliate.created_at ? new Date(affiliate.created_at).toLocaleDateString('fr-FR') : '-'} />
-          <div>
-            <p className="text-sm text-gray-500">Statut</p>
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-              affiliate.status === 'active' ? 'bg-emerald-50 text-emerald-700' :
-              affiliate.status === 'observation' ? 'bg-amber-50 text-amber-700' :
-              'bg-red-50 text-red-700'
-            }`}>
-              {affiliate.status === 'active' ? 'Actif' : affiliate.status === 'observation' ? 'Observation' : 'Desactive'}
-            </span>
-          </div>
-          {affiliate.bonus_amount > 0 && (
-            <InfoRow label="Bonus" value={`${affiliate.bonus_amount} EUR${affiliate.bonus_note ? ` (${affiliate.bonus_note})` : ''}`} />
-          )}
-        </div>
-      </div>
 
       {leads.length === 0 && commissions.length === 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
