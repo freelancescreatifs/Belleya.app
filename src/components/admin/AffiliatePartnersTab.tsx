@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Search, Users, Loader2, DollarSign, TrendingUp, Award,
-  ChevronRight, Edit2, X, ExternalLink, Calendar, Mail
-} from 'lucide-react';
+import { Search, Users, Loader2, DollarSign, TrendingUp, Award, ChevronRight, CreditCard as Edit2, X, ExternalLink, Calendar, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';

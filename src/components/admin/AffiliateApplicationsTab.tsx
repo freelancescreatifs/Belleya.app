@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  CheckCircle, XCircle, Clock, Search, Users, Loader2, ExternalLink,
-  Trash2, Edit2, X, AlertTriangle
-} from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Search, Users, Loader2, ExternalLink, Trash2, CreditCard as Edit2, X, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
