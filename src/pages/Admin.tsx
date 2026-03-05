@@ -7,6 +7,7 @@ import ToastContainer from '../components/shared/ToastContainer';
 import RewardsValidation from '../components/admin/RewardsValidation';
 import AffiliateApplicationsTab from '../components/admin/AffiliateApplicationsTab';
 import AffiliatePartnersTab from '../components/admin/AffiliatePartnersTab';
+import AffiliateKPIDashboard from '../components/admin/AffiliateKPIDashboard';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -715,7 +716,7 @@ export default function Admin() {
           }`}
         >
           <Handshake className="w-4 h-4 inline mr-1" />
-          Affili\u00e9s Belaya
+          Affiliés Belaya
         </button>
         <button
           onClick={() => setActiveTab('rewards')}
@@ -961,7 +962,6 @@ export default function Admin() {
 
           {/* Graphiques */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Graphique des nouveaux utilisateurs */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Nouveaux abonnés par mois</h3>
               <div className="space-y-3">
@@ -986,7 +986,6 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* Graphique des revenus */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Revenus par mois</h3>
               <div className="space-y-3">
@@ -1011,6 +1010,8 @@ export default function Admin() {
               </div>
             </div>
           </div>
+
+          <AffiliateKPIDashboard />
         </div>
       )}
 

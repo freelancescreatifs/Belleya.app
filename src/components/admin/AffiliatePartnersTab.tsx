@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Users, Loader2, DollarSign, TrendingUp, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, Clock, ArrowUpDown, UserX, Mail, Zap, Download } from 'lucide-react';
+import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, UserX, Mail, Download } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
@@ -308,12 +308,6 @@ export default function AffiliatePartnersTab() {
   });
 
   const activeAffiliates = affiliates.filter(a => a.status === 'active');
-  const totalConversions = affiliates.reduce((s, a) => s + a.signups_count, 0);
-  const totalActiveSubs = affiliates.reduce((s, a) => s + a.active_sub_count, 0);
-  const totalMRR = affiliates.reduce((s, a) => s + a.mrr_generated, 0);
-  const totalCommissionsMonth = affiliates.reduce((s, a) => s + a.commissions_month, 0);
-  const totalCommissionsAll = affiliates.reduce((s, a) => s + a.commissions_total, 0);
-  const pendingCommissions = affiliates.reduce((s, a) => s + a.commissions_month, 0);
 
   const exportCSV = () => {
     if (filtered.length === 0) return;
@@ -348,16 +342,6 @@ export default function AffiliatePartnersTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        <KPICard icon={Users} label="Affilies actifs" value={activeAffiliates.length} color="rose" />
-        <KPICard icon={TrendingUp} label="Clients convertis" value={totalConversions} color="emerald" />
-        <KPICard icon={Zap} label="Abos actifs" value={totalActiveSubs} color="blue" />
-        <KPICard icon={DollarSign} label="MRR genere" value={`${totalMRR.toFixed(0)} EUR`} color="teal" />
-        <KPICard icon={DollarSign} label="Commission mois" value={`${totalCommissionsMonth.toFixed(0)} EUR`} color="amber" />
-        <KPICard icon={DollarSign} label="Commission totale" value={`${totalCommissionsAll.toFixed(0)} EUR`} color="green" />
-        <KPICard icon={Clock} label="A payer" value={`${pendingCommissions.toFixed(0)} EUR`} color="orange" />
-      </div>
-
       <div className="flex gap-2 border-b border-gray-200">
         <button
           onClick={() => setSubTab('table')}
@@ -804,41 +788,3 @@ export default function AffiliatePartnersTab() {
   );
 }
 
-function KPICard({ icon: Icon, label, value, color }: {
-  icon: any;
-  label: string;
-  value: string | number;
-  color: string;
-}) {
-  const colorMap: Record<string, string> = {
-    rose: 'from-rose-50 to-pink-50 border-rose-200',
-    emerald: 'from-emerald-50 to-teal-50 border-emerald-200',
-    blue: 'from-blue-50 to-cyan-50 border-blue-200',
-    teal: 'from-teal-50 to-cyan-50 border-teal-200',
-    amber: 'from-amber-50 to-orange-50 border-amber-200',
-    green: 'from-green-50 to-emerald-50 border-green-200',
-    orange: 'from-orange-50 to-amber-50 border-orange-200',
-  };
-
-  const iconColorMap: Record<string, string> = {
-    rose: 'text-rose-600',
-    emerald: 'text-emerald-600',
-    blue: 'text-blue-600',
-    teal: 'text-teal-600',
-    amber: 'text-amber-600',
-    green: 'text-green-600',
-    orange: 'text-orange-600',
-  };
-
-  return (
-    <div className={`bg-gradient-to-br ${colorMap[color] || colorMap.rose} rounded-xl p-4 border`}>
-      <div className="flex items-center gap-2 mb-1.5">
-        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
-          <Icon className={`w-4 h-4 ${iconColorMap[color] || iconColorMap.rose}`} />
-        </div>
-        <span className="text-xs font-medium text-gray-600 leading-tight">{label}</span>
-      </div>
-      <p className="text-xl font-bold text-gray-900">{value}</p>
-    </div>
-  );
-}
