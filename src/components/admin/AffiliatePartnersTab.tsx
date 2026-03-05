@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, UserX, Mail, Download } from 'lucide-react';
+import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, Mail, Download, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
@@ -86,6 +86,7 @@ export default function AffiliatePartnersTab() {
   const [leaderboardAll, setLeaderboardAll] = useState<LeaderboardEntry[]>([]);
   const [leaderboardMonth, setLeaderboardMonth] = useState<LeaderboardEntry[]>([]);
   const [zoneRouge, setZoneRouge] = useState<ZoneRougeEntry[]>([]);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const loadAffiliates = useCallback(async () => {
     setLoading(true);
@@ -94,6 +95,7 @@ export default function AffiliatePartnersTab() {
         .from('affiliates')
         .select('*')
         .eq('program', 'belaya_affiliation')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -257,18 +259,24 @@ export default function AffiliatePartnersTab() {
     }
   };
 
-  const handleDisableAffiliate = async (affiliateId: string) => {
+  const handleDeleteAffiliate = async (affiliateId: string) => {
     try {
       const { error } = await supabase
         .from('affiliates')
-        .update({ status: 'disabled', is_active: false, updated_at: new Date().toISOString() })
+        .update({
+          status: 'disabled',
+          is_active: false,
+          deleted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', affiliateId);
       if (error) throw error;
-      setAffiliates(prev => prev.map(a => a.id === affiliateId ? { ...a, status: 'disabled', is_active: false } : a));
+      setAffiliates(prev => prev.filter(a => a.id !== affiliateId));
       setZoneRouge(prev => prev.filter(z => z.affiliate_id !== affiliateId));
-      showToast('success', 'Affilie desactive');
+      setDeleteConfirmId(null);
+      showToast('success', 'Affilie supprime');
     } catch (err: any) {
-      showToast('error', err.message || 'Erreur');
+      showToast('error', err.message || 'Erreur lors de la suppression');
     }
   };
 
@@ -585,6 +593,13 @@ export default function AffiliatePartnersTab() {
                                   >
                                     <ChevronRight className="w-3.5 h-3.5" />
                                   </button>
+                                  <button
+                                    onClick={() => setDeleteConfirmId(aff.id)}
+                                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Supprimer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
                                 </>
                               )}
                             </div>
@@ -674,11 +689,11 @@ export default function AffiliatePartnersTab() {
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => handleDisableAffiliate(z.affiliate_id)}
+                              onClick={() => setDeleteConfirmId(z.affiliate_id)}
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Desactiver"
+                              title="Supprimer"
                             >
-                              <UserX className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </td>
@@ -781,6 +796,34 @@ export default function AffiliatePartnersTab() {
           }}
           showToast={showToast}
         />
+      )}
+
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6 text-red-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 text-center mb-2">Supprimer cet affilie ?</h3>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              Cette action masque l'affilie et conserve l'historique des commissions.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleDeleteAffiliate(deleteConfirmId)}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

@@ -960,10 +960,11 @@ export default function Admin() {
           </div>
 
 
-          {/* Graphiques */}
+          <AffiliateKPIDashboard />
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Nouveaux abonnés par mois</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Nouveaux abonnes par mois</h3>
               <div className="space-y-3">
                 {monthlyStats.map((stat) => {
                   const maxUsers = Math.max(...monthlyStats.map(s => s.newUsers), 1);
@@ -1001,7 +1002,7 @@ export default function Admin() {
                           className="h-full bg-emerald-500 rounded-full flex items-center justify-end pr-2"
                           style={{ width: `${Math.max(widthPercentage, 5)}%` }}
                         >
-                          <span className="text-xs font-semibold text-white">{stat.revenue.toFixed(0)}€</span>
+                          <span className="text-xs font-semibold text-white">{stat.revenue.toFixed(0)}EUR</span>
                         </div>
                       </div>
                     </div>
@@ -1010,8 +1011,6 @@ export default function Admin() {
               </div>
             </div>
           </div>
-
-          <AffiliateKPIDashboard />
         </div>
       )}
 
