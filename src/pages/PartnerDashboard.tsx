@@ -923,7 +923,7 @@ function PartnerAuthForm({ onBack }: { onBack: () => void }) {
         if (!form.firstName.trim() || !form.lastName.trim()) {
           throw new Error('Le prenom et le nom sont requis');
         }
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
           options: {
@@ -935,6 +935,40 @@ function PartnerAuthForm({ onBack }: { onBack: () => void }) {
           }
         });
         if (error) throw error;
+
+        if (signUpData?.user) {
+          const refCode = localStorage.getItem('belaya_ref');
+          if (refCode) {
+            try {
+              const { data: affiliateData } = await supabase
+                .from('affiliates')
+                .select('id')
+                .eq('ref_code', refCode)
+                .maybeSingle();
+
+              if (affiliateData) {
+                const now = new Date();
+                const trialEnd = new Date(now);
+                trialEnd.setDate(trialEnd.getDate() + 14);
+
+                await supabase.from('affiliate_signups').insert({
+                  affiliate_id: affiliateData.id,
+                  user_id: signUpData.user.id,
+                  first_name: form.firstName.trim() || null,
+                  subscription_status: 'trialing',
+                  attributed_at: now.toISOString(),
+                  trial_start_date: now.toISOString(),
+                  trial_end_date: trialEnd.toISOString(),
+                });
+
+                localStorage.removeItem('belaya_ref');
+                localStorage.removeItem('belaya_ref_date');
+              }
+            } catch (refErr) {
+              console.error('Error attributing affiliate:', refErr);
+            }
+          }
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: form.email,
