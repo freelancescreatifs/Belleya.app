@@ -166,7 +166,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           };
           setAffiliate(parsedAffiliate);
 
-          supabase.rpc('sync_affiliate_signup_statuses').catch(() => {});
+          supabase.rpc('sync_affiliate_signup_statuses').then(() => {}, () => {});
 
           const [leadsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.allSettled([
             supabase.rpc('get_affiliate_leads', { p_affiliate_id: affiliateData.id }),
