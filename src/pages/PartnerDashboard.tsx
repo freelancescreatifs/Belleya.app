@@ -188,6 +188,10 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           ]);
 
           const leadsData = leadsRes.status === 'fulfilled' ? leadsRes.value.data || [] : [];
+          if (leadsRes.status === 'fulfilled' && leadsRes.value.error) {
+            console.error('[Leads] RPC error:', leadsRes.value.error);
+          }
+          console.log('[Leads] affiliate_id:', affiliateData.id, 'count:', leadsData.length);
           setLeads(leadsData);
           setCommissions(commissionsRes.status === 'fulfilled' ? commissionsRes.value.data || [] : []);
           setLeaderboardToday(todayRes.status === 'fulfilled' ? todayRes.value.data || [] : []);
@@ -684,9 +688,13 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
         {activeTab === 'signups' && (
           <div className="space-y-4">
             <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-xs text-gray-500 flex flex-wrap gap-x-6 gap-y-1">
-              <span>Affiliate: <span className="font-mono font-medium text-gray-700">{affiliate.ref_code}</span></span>
-              <span>ID: <span className="font-mono text-gray-400">{affiliate.id.slice(0, 8)}...</span></span>
-              <span>Leads DB: <span className="font-bold text-gray-700">{leads.length}</span></span>
+              <span>Ref: <span className="font-mono font-medium text-gray-700">{affiliate.ref_code}</span></span>
+              <span>ID: <span className="font-mono text-gray-400">{affiliate.id.slice(0, 8)}</span></span>
+              <span>Leads: <span className="font-bold text-gray-700">{leads.length}</span></span>
+              <span>LS ref: <span className="font-mono text-gray-400">{localStorage.getItem('belaya_ref') || 'none'}</span></span>
+              {leads.length > 0 && (
+                <span>1st user_id: <span className="font-mono text-gray-400">{leads[0].id?.slice(0, 8)}</span></span>
+              )}
             </div>
             <div className="bg-white rounded-xl border border-gray-200">
               {leads.length === 0 ? (
