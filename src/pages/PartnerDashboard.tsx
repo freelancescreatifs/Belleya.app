@@ -31,18 +31,19 @@ interface Affiliate {
   special_commission_rate: number | null;
 }
 
-interface AffiliateSignup {
+interface AffiliateLead {
   id: string;
   first_name: string | null;
-  city: string | null;
   subscription_status: string;
-  attributed_at: string;
-  created_at: string;
-  trial_start_date: string | null;
+  computed_status: 'trialing' | 'active' | 'expired' | 'canceled';
+  days_left: number;
   trial_end_date: string | null;
   subscription_start_date: string | null;
   monthly_amount: number;
-  user_id: string;
+  plan_label: string | null;
+  mrr: number;
+  commission: number;
+  created_at: string;
 }
 
 interface AffiliateCommission {
@@ -115,7 +116,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const [loading, setLoading] = useState(true);
   const [applicationStatus, setApplicationStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none');
   const [affiliate, setAffiliate] = useState<Affiliate | null>(null);
-  const [signups, setSignups] = useState<AffiliateSignup[]>([]);
+  const [leads, setLeads] = useState<AffiliateLead[]>([]);
   const [commissions, setCommissions] = useState<AffiliateCommission[]>([]);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'signups' | 'commissions' | 'leaderboard'>('overview');
@@ -167,13 +168,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
           supabase.rpc('sync_affiliate_signup_statuses').catch(() => {});
 
-          const [signupsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.allSettled([
-            supabase
-              .from('affiliate_signups')
-              .select('*')
-              .eq('affiliate_id', affiliateData.id)
-              .order('created_at', { ascending: false })
-              .limit(100),
+          const [leadsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.allSettled([
+            supabase.rpc('get_affiliate_leads', { p_affiliate_id: affiliateData.id }),
             supabase
               .from('affiliate_commissions')
               .select('*')
@@ -191,7 +187,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .limit(12),
           ]);
 
-          setSignups(signupsRes.status === 'fulfilled' ? signupsRes.value.data || [] : []);
+          const leadsData = leadsRes.status === 'fulfilled' ? leadsRes.value.data || [] : [];
+          setLeads(leadsData);
           setCommissions(commissionsRes.status === 'fulfilled' ? commissionsRes.value.data || [] : []);
           setLeaderboardToday(todayRes.status === 'fulfilled' ? todayRes.value.data || [] : []);
           setLeaderboardMonth(monthRes.status === 'fulfilled' ? monthRes.value.data || [] : []);
@@ -338,34 +335,14 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
   const now = new Date();
 
-  const enrichedSignups = signups.map(s => {
-    const trialEnd = s.trial_end_date ? new Date(s.trial_end_date) : new Date(new Date(s.created_at).getTime() + 14 * 24 * 60 * 60 * 1000);
-    const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const status = s.subscription_status || '';
-    let computedStatus: 'trialing' | 'active' | 'expired' | 'canceled' = 'trialing';
-    if (status === 'active') computedStatus = 'active';
-    else if (status === 'canceled') computedStatus = 'canceled';
-    else if (status === 'expired' || (daysLeft <= 0 && status !== 'active')) computedStatus = 'expired';
-    else computedStatus = 'trialing';
-    return { ...s, computedStatus, daysLeft, trialEnd };
-  });
+  const activeSignups = leads.filter(s => s.computed_status === 'active').length;
+  const trialingSignups = leads.filter(s => s.computed_status === 'trialing').length;
+  const expiredSignups = leads.filter(s => s.computed_status === 'expired').length;
+  const totalInscriptions = leads.length;
 
-  const statusOrder = { trialing: 0, active: 1, expired: 2, canceled: 3 };
-  enrichedSignups.sort((a, b) => {
-    const orderDiff = statusOrder[a.computedStatus] - statusOrder[b.computedStatus];
-    if (orderDiff !== 0) return orderDiff;
-    if (a.computedStatus === 'trialing') return a.daysLeft - b.daysLeft;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
-
-  const activeSignups = enrichedSignups.filter(s => s.computedStatus === 'active').length;
-  const trialingSignups = enrichedSignups.filter(s => s.computedStatus === 'trialing').length;
-  const expiredSignups = enrichedSignups.filter(s => s.computedStatus === 'expired').length;
-  const totalInscriptions = enrichedSignups.length;
-
-  const activeMRR = enrichedSignups
-    .filter(s => s.computedStatus === 'active')
-    .reduce((sum, s) => sum + Number(s.monthly_amount || 29), 0);
+  const activeMRR = leads
+    .filter(s => s.computed_status === 'active')
+    .reduce((sum, s) => sum + Number(s.mrr || 0), 0);
 
   const currentMonthCommission = commissions
     .filter(c => {
@@ -608,7 +585,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               </div>
             )}
 
-            {signups.length === 0 && commissions.length === 0 && (
+            {leads.length === 0 && commissions.length === 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
                 <div className="w-14 h-14 bg-belaya-50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <TrendingUp className="w-7 h-7 text-belaya-deep" />
@@ -705,67 +682,68 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
         )}
 
         {activeTab === 'signups' && (
-          <div className="bg-white rounded-xl border border-gray-200">
-            {enrichedSignups.length === 0 ? (
-              <div className="p-8 text-center">
-                <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Aucune inscription pour le moment</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Prenom</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Jours restants</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Plan choisi</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">MRR genere</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Commission</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date inscription</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {enrichedSignups.map((s) => {
-                      const monthlyAmt = Number(s.monthly_amount || 0);
-                      const signupMRR = s.computedStatus === 'active' ? (monthlyAmt > 0 ? monthlyAmt : 29) : 0;
-                      const signupCommission = signupMRR * Number(affiliate.commission_rate || affiliate.base_commission_rate || 0.10);
-                      const planLabel = s.computedStatus === 'active' ? (monthlyAmt >= 49 ? 'Elite' : monthlyAmt >= 39 ? 'Pro' : 'Start') : null;
-
-                      return (
+          <div className="space-y-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-xs text-gray-500 flex flex-wrap gap-x-6 gap-y-1">
+              <span>Affiliate: <span className="font-mono font-medium text-gray-700">{affiliate.ref_code}</span></span>
+              <span>ID: <span className="font-mono text-gray-400">{affiliate.id.slice(0, 8)}...</span></span>
+              <span>Leads DB: <span className="font-bold text-gray-700">{leads.length}</span></span>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200">
+              {leads.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500">Aucune inscription pour le moment</p>
+                  <p className="text-xs text-gray-400 mt-2">Les personnes inscrites via ton lien apparaitront ici</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Prenom</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Jours restants</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Plan choisi</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">MRR genere</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Commission</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date inscription</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leads.map((s) => (
                         <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 text-sm font-medium text-gray-900">
                             {s.first_name || 'Utilisateur'}
                           </td>
                           <td className="px-4 py-3">
-                            <StatusTag status={s.computedStatus} daysLeft={s.daysLeft} />
+                            <StatusTag status={s.computed_status} daysLeft={s.days_left} />
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            {s.computedStatus === 'trialing' ? (
-                              <span className={`font-semibold ${s.daysLeft <= 2 ? 'text-orange-600' : s.daysLeft <= 5 ? 'text-amber-600' : 'text-gray-700'}`}>
-                                J-{Math.max(0, s.daysLeft)}
+                            {s.computed_status === 'trialing' ? (
+                              <span className={`font-semibold ${s.days_left <= 2 ? 'text-orange-600' : s.days_left <= 5 ? 'text-amber-600' : 'text-gray-700'}`}>
+                                J-{Math.max(0, s.days_left)}
                               </span>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            {planLabel ? (
-                              <span className="font-medium text-gray-900">{planLabel}</span>
+                            {s.plan_label ? (
+                              <span className="font-medium text-gray-900">{s.plan_label}</span>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            {signupMRR > 0 ? (
-                              <span className="font-medium text-emerald-700">{signupMRR.toFixed(0)} EUR</span>
+                            {Number(s.mrr) > 0 ? (
+                              <span className="font-medium text-emerald-700">{Number(s.mrr).toFixed(0)} EUR</span>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            {signupCommission > 0 ? (
-                              <span className="font-medium text-belaya-deep">{signupCommission.toFixed(2)} EUR</span>
+                            {Number(s.commission) > 0 ? (
+                              <span className="font-medium text-belaya-deep">{Number(s.commission).toFixed(2)} EUR</span>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
@@ -774,12 +752,12 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                             {new Date(s.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                           </td>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
