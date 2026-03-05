@@ -588,10 +588,6 @@ button, a, [role="button"] {
   animation: slide-in 0.3s ease-out;
 }
 
-.animate-slide-in-right {
-  animation: slide-in 0.3s ease-out;
-}
-
 /* Hide scrollbar utility */
 .hide-scrollbar {
   -ms-overflow-style: none;
