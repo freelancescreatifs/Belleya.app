@@ -124,15 +124,14 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const [zoneRouge, setZoneRouge] = useState<ZoneRougeEntry[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
 
-  const loadData = useCallback(async () => {
-    if (!user) return;
+  const loadData = useCallback(async (userId: string) => {
     setLoading(true);
 
     try {
       const { data: appData } = await supabase
         .from('affiliate_applications')
         .select('status')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (!appData) {
@@ -147,11 +146,11 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
         const { data: affiliateData } = await supabase
           .from('affiliates')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (affiliateData) {
-          setAffiliate({
+          const parsedAffiliate: Affiliate = {
             ...affiliateData,
             commission_rate: Number(affiliateData.commission_rate || 0.10),
             base_commission_rate: Number(affiliateData.base_commission_rate || 0.10),
@@ -163,9 +162,10 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             disable_tiers: affiliateData.disable_tiers || false,
             disable_leaderboard: affiliateData.disable_leaderboard || false,
             special_commission_rate: affiliateData.special_commission_rate ? Number(affiliateData.special_commission_rate) : null,
-          });
+          };
+          setAffiliate(parsedAffiliate);
 
-          await supabase.rpc('sync_affiliate_signup_statuses').catch(() => {});
+          supabase.rpc('sync_affiliate_signup_statuses').catch(() => {});
 
           const [signupsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.all([
             supabase
@@ -173,7 +173,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .select('*')
               .eq('affiliate_id', affiliateData.id)
               .order('created_at', { ascending: false })
-              .limit(50),
+              .limit(100),
             supabase
               .from('affiliate_commissions')
               .select('*')
@@ -182,7 +182,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .limit(50),
             supabase.rpc('get_leaderboard_today'),
             supabase.rpc('get_leaderboard_month'),
-            supabase.rpc('get_zone_rouge'),
+            supabase.rpc('get_zone_rouge').catch(() => ({ data: [] })),
             supabase
               .from('monthly_competitions')
               .select('*')
@@ -204,11 +204,13 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    if (user) loadData();
-  }, [user, loadData]);
+    if (user?.id) {
+      loadData(user.id);
+    }
+  }, [user?.id, loadData]);
 
   useEffect(() => {
     if (!affiliate) return;
@@ -339,10 +341,11 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const enrichedSignups = signups.map(s => {
     const trialEnd = s.trial_end_date ? new Date(s.trial_end_date) : new Date(new Date(s.created_at).getTime() + 14 * 24 * 60 * 60 * 1000);
     const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const status = s.subscription_status || '';
     let computedStatus: 'trialing' | 'active' | 'expired' | 'canceled' = 'trialing';
-    if (s.subscription_status === 'active') computedStatus = 'active';
-    else if (s.subscription_status === 'canceled') computedStatus = 'canceled';
-    else if (daysLeft <= 0 && s.subscription_status !== 'active') computedStatus = 'expired';
+    if (status === 'active') computedStatus = 'active';
+    else if (status === 'canceled') computedStatus = 'canceled';
+    else if (status === 'expired' || (daysLeft <= 0 && status !== 'active')) computedStatus = 'expired';
     else computedStatus = 'trialing';
     return { ...s, computedStatus, daysLeft, trialEnd };
   });
