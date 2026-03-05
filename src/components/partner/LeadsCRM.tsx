@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, CreditCard as Edit2, Trash2, X, Save, AlertTriangle, Clock, Instagram, Phone, MapPin, StickyNote, Calendar, ChevronDown, Loader2 } from 'lucide-react';
+import {
+  Plus, Search, CreditCard as Edit2, Trash2, X, Save, AlertTriangle,
+  Clock, Instagram, Phone, MapPin, StickyNote, Calendar, ChevronDown,
+  Loader2
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface CRMLead {
@@ -17,9 +21,18 @@ interface CRMLead {
   updated_at: string;
 }
 
-interface LeadsCRMProps {
+interface AffiliateLead {
+  id: string;
+  first_name: string | null;
+  computed_status: 'trialing' | 'active' | 'expired' | 'canceled';
+  days_left: number;
+  created_at: string;
+}
+
+interface ProspectsCRMProps {
   affiliateId: string;
   showToast: (type: string, msg: string) => void;
+  trialLeads?: AffiliateLead[];
 }
 
 const STATUS_OPTIONS = [
@@ -46,7 +59,7 @@ const EMPTY_FORM = {
   notes: '',
 };
 
-export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
+export default function ProspectsCRM({ affiliateId, showToast, trialLeads = [] }: ProspectsCRMProps) {
   const [leads, setLeads] = useState<CRMLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -57,6 +70,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
   const [saving, setSaving] = useState(false);
   const [selectedLead, setSelectedLead] = useState<CRMLead | null>(null);
   const [igWarning, setIgWarning] = useState('');
+  const [igBlocked, setIgBlocked] = useState(false);
 
   const loadLeads = useCallback(async () => {
     setLoading(true);
@@ -75,17 +89,35 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
   }, [loadLeads]);
 
   const checkInstagramDuplicate = async (ig: string) => {
-    if (!ig.trim()) { setIgWarning(''); return; }
+    if (!ig.trim()) {
+      setIgWarning('');
+      setIgBlocked(false);
+      return;
+    }
+
+    const normalizedIg = ig.trim().toLowerCase().replace(/^@/, '');
+
+    const ownDuplicate = leads.find(
+      (l) => l.instagram.toLowerCase().replace(/^@/, '') === normalizedIg && l.id !== editingId
+    );
+    if (ownDuplicate) {
+      setIgWarning('Ce compte Instagram est deja dans ta liste de prospects.');
+      setIgBlocked(true);
+      return;
+    }
+
     const { count } = await supabase
       .from('affiliate_crm_leads')
       .select('id', { count: 'exact', head: true })
-      .eq('instagram', ig.trim())
+      .ilike('instagram', normalizedIg)
       .neq('affiliate_id', affiliateId);
 
     if (count && count > 0) {
-      setIgWarning('Ce compte Instagram existe peut-etre deja chez un autre affilie. Tu peux quand meme l\'ajouter, mais evite les doublons.');
+      setIgWarning('Ce compte Instagram a deja ete contacte par un autre affilie. Tu peux quand meme l\'ajouter, mais verifie avant de contacter ce prospect.');
+      setIgBlocked(false);
     } else {
       setIgWarning('');
+      setIgBlocked(false);
     }
   };
 
@@ -93,6 +125,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
     setForm(EMPTY_FORM);
     setEditingId(null);
     setIgWarning('');
+    setIgBlocked(false);
     setShowForm(true);
     setSelectedLead(null);
   };
@@ -110,6 +143,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
     });
     setEditingId(lead.id);
     setIgWarning('');
+    setIgBlocked(false);
     setShowForm(true);
     setSelectedLead(null);
   };
@@ -119,40 +153,41 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
       showToast('error', 'Le nom est requis');
       return;
     }
+    if (!form.instagram.trim()) {
+      showToast('error', 'L\'Instagram est requis');
+      return;
+    }
+    if (igBlocked) {
+      showToast('error', 'Ce compte Instagram est deja dans ta liste');
+      return;
+    }
+
     setSaving(true);
     try {
+      const payload = {
+        name: form.name.trim(),
+        city: form.city.trim(),
+        instagram: form.instagram.trim(),
+        phone: form.phone.trim(),
+        status: form.status,
+        first_contact_date: form.first_contact_date || null,
+        next_follow_up: form.next_follow_up || null,
+        notes: form.notes.trim(),
+      };
+
       if (editingId) {
         const { error } = await supabase
           .from('affiliate_crm_leads')
-          .update({
-            name: form.name.trim(),
-            city: form.city.trim(),
-            instagram: form.instagram.trim(),
-            phone: form.phone.trim(),
-            status: form.status,
-            first_contact_date: form.first_contact_date || null,
-            next_follow_up: form.next_follow_up || null,
-            notes: form.notes.trim(),
-          })
+          .update(payload)
           .eq('id', editingId);
         if (error) throw error;
-        showToast('success', 'Lead mis a jour');
+        showToast('success', 'Prospect mis a jour');
       } else {
         const { error } = await supabase
           .from('affiliate_crm_leads')
-          .insert({
-            affiliate_id: affiliateId,
-            name: form.name.trim(),
-            city: form.city.trim(),
-            instagram: form.instagram.trim(),
-            phone: form.phone.trim(),
-            status: form.status,
-            first_contact_date: form.first_contact_date || null,
-            next_follow_up: form.next_follow_up || null,
-            notes: form.notes.trim(),
-          });
+          .insert({ ...payload, affiliate_id: affiliateId });
         if (error) throw error;
-        showToast('success', 'Lead ajoute');
+        showToast('success', 'Prospect ajoute');
       }
       setShowForm(false);
       setEditingId(null);
@@ -167,7 +202,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from('affiliate_crm_leads').delete().eq('id', id);
     if (!error) {
-      showToast('success', 'Lead supprime');
+      showToast('success', 'Prospect supprime');
       setSelectedLead(null);
       await loadLeads();
     }
@@ -177,6 +212,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
 
   const todayFollowUps = leads.filter((l) => l.next_follow_up === today);
   const overdueFollowUps = leads.filter((l) => l.next_follow_up && l.next_follow_up < today);
+  const urgentTrials = trialLeads.filter((l) => l.computed_status === 'trialing' && l.days_left <= 2);
 
   const filtered = leads.filter((l) => {
     const matchSearch = !search || l.name.toLowerCase().includes(search.toLowerCase()) || l.city.toLowerCase().includes(search.toLowerCase()) || l.instagram.toLowerCase().includes(search.toLowerCase());
@@ -194,8 +230,19 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
 
   return (
     <div className="space-y-6">
-      {(todayFollowUps.length > 0 || overdueFollowUps.length > 0) && (
+      {(urgentTrials.length > 0 || todayFollowUps.length > 0 || overdueFollowUps.length > 0) && (
         <div className="space-y-3">
+          {urgentTrials.length > 0 && (
+            <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-bold text-orange-800 text-sm">{urgentTrials.length} essai{urgentTrials.length > 1 ? 's' : ''} finissant dans 48h</h4>
+                <p className="text-xs text-orange-600 mt-0.5">
+                  {urgentTrials.map((l) => l.first_name || 'Utilisateur').join(', ')} - Priorite maximale !
+                </p>
+              </div>
+            </div>
+          )}
           {overdueFollowUps.length > 0 && (
             <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -252,7 +299,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all"
         >
           <Plus className="w-4 h-4" />
-          Ajouter un lead
+          Ajouter un prospect
         </button>
       </div>
 
@@ -260,7 +307,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
         <div className="bg-white rounded-xl border-2 border-belaya-200 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">
-              {editingId ? 'Modifier le lead' : 'Nouveau lead'}
+              {editingId ? 'Modifier le prospect' : 'Nouveau prospect'}
             </h3>
             <button onClick={() => { setShowForm(false); setEditingId(null); }} className="p-1 hover:bg-gray-100 rounded-lg">
               <X className="w-5 h-5 text-gray-500" />
@@ -278,6 +325,25 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
               />
             </div>
             <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Instagram *</label>
+              <input
+                type="text"
+                value={form.instagram}
+                onChange={(e) => setForm({ ...form, instagram: e.target.value })}
+                onBlur={() => checkInstagramDuplicate(form.instagram)}
+                placeholder="@compte"
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-belaya-primary ${
+                  igBlocked ? 'border-red-300 bg-red-50' : igWarning ? 'border-amber-300' : 'border-gray-200'
+                }`}
+              />
+              {igWarning && (
+                <p className={`text-xs mt-1 flex items-start gap-1 ${igBlocked ? 'text-red-600' : 'text-amber-600'}`}>
+                  <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  {igWarning}
+                </p>
+              )}
+            </div>
+            <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Ville</label>
               <input
                 type="text"
@@ -286,23 +352,6 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
                 placeholder="Paris, Lyon..."
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-belaya-primary"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Instagram</label>
-              <input
-                type="text"
-                value={form.instagram}
-                onChange={(e) => setForm({ ...form, instagram: e.target.value })}
-                onBlur={() => checkInstagramDuplicate(form.instagram)}
-                placeholder="@compte"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-belaya-primary"
-              />
-              {igWarning && (
-                <p className="text-xs text-amber-600 mt-1 flex items-start gap-1">
-                  <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                  {igWarning}
-                </p>
-              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Telephone</label>
@@ -349,8 +398,8 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
               <textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                rows={2}
-                placeholder="Notes libres..."
+                rows={3}
+                placeholder="Notes de conversation, informations utiles..."
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-belaya-primary resize-none"
               />
             </div>
@@ -364,7 +413,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
             </button>
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || igBlocked}
               className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -389,16 +438,21 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="flex items-center gap-2 text-sm">
+              <Instagram className="w-4 h-4 text-gray-400" />
+              <span className="text-gray-700 font-medium">{selectedLead.instagram || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
               <MapPin className="w-4 h-4 text-gray-400" />
               <span className="text-gray-700">{selectedLead.city || '-'}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <Instagram className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-700">{selectedLead.instagram || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
               <Phone className="w-4 h-4 text-gray-400" />
               <span className="text-gray-700">{selectedLead.phone || '-'}</span>
+            </div>
+            <div>
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusConfig(selectedLead.status).color}`}>
+                {getStatusConfig(selectedLead.status).label}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="w-4 h-4 text-gray-400" />
@@ -408,21 +462,30 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Clock className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-700">
+              <span className={`${
+                selectedLead.next_follow_up && selectedLead.next_follow_up < today ? 'text-red-600 font-medium' :
+                selectedLead.next_follow_up === today ? 'text-amber-600 font-medium' : 'text-gray-700'
+              }`}>
                 Relance: {selectedLead.next_follow_up ? new Date(selectedLead.next_follow_up).toLocaleDateString('fr-FR') : '-'}
-              </span>
-            </div>
-            <div>
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusConfig(selectedLead.status).color}`}>
-                {getStatusConfig(selectedLead.status).label}
+                {selectedLead.next_follow_up && selectedLead.next_follow_up < today && ' (en retard)'}
+                {selectedLead.next_follow_up === today && ' (aujourd\'hui)'}
               </span>
             </div>
             {selectedLead.notes && (
-              <div className="sm:col-span-2 flex items-start gap-2 text-sm">
+              <div className="sm:col-span-2 flex items-start gap-2 text-sm bg-gray-50 rounded-lg p-3">
                 <StickyNote className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <span className="text-gray-700 whitespace-pre-wrap">{selectedLead.notes}</span>
               </div>
             )}
+          </div>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => handleDelete(selectedLead.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Supprimer
+            </button>
           </div>
         </div>
       )}
@@ -430,8 +493,8 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
       {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
           <Plus className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Aucun lead pour le moment</p>
-          <p className="text-xs text-gray-400 mt-1">Ajoute tes prospects pour suivre tes relances</p>
+          <p className="text-gray-500">Aucun prospect pour le moment</p>
+          <p className="text-xs text-gray-400 mt-1">Ajoute les entrepreneures beaute que tu contactes pour suivre tes relances</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -440,8 +503,8 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
                   <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase">Nom</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase">Ville</th>
                   <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase">Instagram</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Ville</th>
                   <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase">Statut</th>
                   <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase">Relance</th>
                   <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase">Actions</th>
@@ -460,8 +523,8 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
                       onClick={() => setSelectedLead(lead)}
                     >
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{lead.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{lead.city || '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{lead.instagram || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{lead.city || '-'}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusConfig(lead.status).color}`}>
                           {getStatusConfig(lead.status).label}
@@ -504,7 +567,7 @@ export default function LeadsCRM({ affiliateId, showToast }: LeadsCRMProps) {
       )}
 
       <div className="text-xs text-gray-400 text-center">
-        {leads.length} lead{leads.length !== 1 ? 's' : ''} au total
+        {leads.length} prospect{leads.length !== 1 ? 's' : ''} au total
       </div>
     </div>
   );

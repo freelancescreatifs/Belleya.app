@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Link2, Copy, CheckCircle, Clock, XCircle, Users, DollarSign,
-  TrendingUp, ArrowLeft, Loader2, BarChart3, LogOut, Lock,
-  Award, AlertTriangle, Flame, Trophy, Crown, Shield, ChevronUp,
-  Zap, LogIn, Eye, EyeOff, LayoutDashboard, UserCheck, BookOpen,
+  TrendingUp, ArrowLeft, Loader2, LogOut, Lock,
+  AlertTriangle, Flame, Trophy, Crown, Shield, ChevronUp,
+  Zap, LogIn, Eye, EyeOff, LayoutDashboard, UserCheck, Info,
   Menu, X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -12,7 +12,10 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from '../components/shared/ToastContainer';
 import DashboardCharts from '../components/partner/DashboardCharts';
 import DashboardRelance from '../components/partner/DashboardRelance';
-import LeadsCRM from '../components/partner/LeadsCRM';
+import DashboardLeaderboard from '../components/partner/DashboardLeaderboard';
+import DashboardCommissions from '../components/partner/DashboardCommissions';
+import ProspectsCRM from '../components/partner/LeadsCRM';
+import SharedMessages from '../components/partner/SharedMessages';
 import SalesTips from '../components/partner/SalesTips';
 
 interface Affiliate {
@@ -34,6 +37,7 @@ interface Affiliate {
   disable_tiers: boolean;
   disable_leaderboard: boolean;
   special_commission_rate: number | null;
+  full_name: string;
 }
 
 interface AffiliateLead {
@@ -61,20 +65,6 @@ interface AffiliateCommission {
   subscription_plan: string | null;
 }
 
-interface LeaderboardEntry {
-  affiliate_id: string;
-  full_name: string;
-  signups_count?: number;
-  commission_total?: number;
-}
-
-interface ZoneRougeEntry {
-  affiliate_id: string;
-  full_name: string;
-  days_inactive: number;
-  status: string;
-}
-
 interface Competition {
   id: string;
   month: string;
@@ -89,12 +79,12 @@ interface PartnerDashboardProps {
   onApply: () => void;
 }
 
-type ActiveSection = 'dashboard' | 'leads' | 'signups' | 'stats' | 'commissions' | 'leaderboard' | 'tips';
+type ActiveSection = 'dashboard' | 'prospects' | 'signups';
 
 const RANK_CONFIG = [
   { min: 0, max: 9, label: 'Recrue', rate: 10, icon: Shield, color: 'from-gray-500 to-gray-600', bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
   { min: 10, max: 49, label: 'Closer', rate: 12, icon: Zap, color: 'from-blue-500 to-blue-600', bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
-  { min: 50, max: 149, label: 'Pro', rate: 15, icon: Award, color: 'from-amber-500 to-orange-500', bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200' },
+  { min: 50, max: 149, label: 'Pro', rate: 15, icon: Crown, color: 'from-amber-500 to-orange-500', bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200' },
   { min: 150, max: Infinity, label: 'Elite', rate: 15, icon: Crown, color: 'from-rose-500 to-rose-600', bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-200' },
 ];
 
@@ -127,15 +117,11 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const [commissions, setCommissions] = useState<AffiliateCommission[]>([]);
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
-  const [leaderboardToday, setLeaderboardToday] = useState<LeaderboardEntry[]>([]);
-  const [leaderboardMonth, setLeaderboardMonth] = useState<LeaderboardEntry[]>([]);
-  const [zoneRouge, setZoneRouge] = useState<ZoneRougeEntry[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const loadData = useCallback(async (userId: string) => {
     setLoading(true);
-
     try {
       const { data: appData } = await supabase
         .from('affiliate_applications')
@@ -171,12 +157,13 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             disable_tiers: affiliateData.disable_tiers || false,
             disable_leaderboard: affiliateData.disable_leaderboard || false,
             special_commission_rate: affiliateData.special_commission_rate ? Number(affiliateData.special_commission_rate) : null,
+            full_name: affiliateData.full_name || '',
           };
           setAffiliate(parsedAffiliate);
 
           supabase.rpc('sync_affiliate_signup_statuses').then(() => {}, () => {});
 
-          const [leadsRes, commissionsRes, todayRes, monthRes, zoneRes, compRes] = await Promise.allSettled([
+          const [leadsRes, commissionsRes, compRes] = await Promise.allSettled([
             supabase.rpc('get_affiliate_leads', { p_affiliate_id: affiliateData.id }),
             supabase
               .from('affiliate_commissions')
@@ -184,9 +171,6 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .eq('affiliate_id', affiliateData.id)
               .order('created_at', { ascending: false })
               .limit(50),
-            supabase.rpc('get_leaderboard_today'),
-            supabase.rpc('get_leaderboard_month'),
-            supabase.rpc('get_zone_rouge'),
             supabase
               .from('monthly_competitions')
               .select('*')
@@ -195,12 +179,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .limit(12),
           ]);
 
-          const leadsData = leadsRes.status === 'fulfilled' ? leadsRes.value.data || [] : [];
-          setLeads(leadsData);
+          setLeads(leadsRes.status === 'fulfilled' ? leadsRes.value.data || [] : []);
           setCommissions(commissionsRes.status === 'fulfilled' ? commissionsRes.value.data || [] : []);
-          setLeaderboardToday(todayRes.status === 'fulfilled' ? todayRes.value.data || [] : []);
-          setLeaderboardMonth(monthRes.status === 'fulfilled' ? monthRes.value.data || [] : []);
-          setZoneRouge(zoneRes.status === 'fulfilled' ? zoneRes.value.data || [] : []);
           setCompetitions(compRes.status === 'fulfilled' ? compRes.value.data || [] : []);
         }
       }
@@ -216,20 +196,6 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
       loadData(user.id);
     }
   }, [user?.id, loadData]);
-
-  useEffect(() => {
-    if (!affiliate) return;
-    const interval = setInterval(() => {
-      Promise.all([
-        supabase.rpc('get_leaderboard_today'),
-        supabase.rpc('get_leaderboard_month'),
-      ]).then(([todayRes, monthRes]) => {
-        setLeaderboardToday(todayRes.data || []);
-        setLeaderboardMonth(monthRes.data || []);
-      });
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [affiliate]);
 
   const copyLink = () => {
     if (!affiliate) return;
@@ -356,12 +322,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
   const NAV_ITEMS: { key: ActiveSection; label: string; icon: React.ElementType }[] = [
     { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { key: 'leads', label: 'Leads (CRM)', icon: UserCheck },
+    { key: 'prospects', label: 'Prospects', icon: UserCheck },
     { key: 'signups', label: 'Inscriptions', icon: Users },
-    { key: 'stats', label: 'Statistiques', icon: BarChart3 },
-    { key: 'commissions', label: 'Commissions', icon: DollarSign },
-    ...(!affiliate.disable_leaderboard ? [{ key: 'leaderboard' as ActiveSection, label: 'Leaderboard', icon: Trophy }] : []),
-    { key: 'tips', label: 'Conseils', icon: BookOpen },
   ];
 
   const handleNavClick = (key: ActiveSection) => {
@@ -485,11 +447,33 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             />
           )}
 
-          {activeSection === 'leads' && (
+          {activeSection === 'prospects' && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Leads (CRM)</h2>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-xl font-bold text-gray-900">Prospects</h2>
+                <div className="relative group">
+                  <Info className="w-4 h-4 text-gray-400 cursor-help" />
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-10">
+                    Ajoute ici les entrepreneures beaute que tu contactes. Suis tes relances, notes et statuts pour ne perdre aucun prospect.
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-1 w-2 h-2 bg-gray-900 rotate-45" />
+                  </div>
+                </div>
+              </div>
               <p className="text-sm text-gray-500 mb-6">Gere tes prospects et organise tes relances</p>
-              <LeadsCRM affiliateId={affiliate.id} showToast={showToast} />
+
+              <div className="space-y-8">
+                <ProspectsCRM affiliateId={affiliate.id} showToast={showToast} trialLeads={leads} />
+
+                <div className="border-t border-gray-200 pt-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Messages partages</h3>
+                  <SharedMessages affiliateId={affiliate.id} affiliateName={affiliate.full_name || 'Affilie'} showToast={showToast} />
+                </div>
+
+                <div className="border-t border-gray-200 pt-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Conseils commerciaux</h3>
+                  <SalesTips />
+                </div>
+              </div>
             </div>
           )}
 
@@ -498,55 +482,6 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               <h2 className="text-xl font-bold text-gray-900 mb-1">Inscriptions</h2>
               <p className="text-sm text-gray-500 mb-6">Personnes inscrites via ton lien affilie</p>
               <SignupsSection affiliate={affiliate} leads={leads} />
-            </div>
-          )}
-
-          {activeSection === 'stats' && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Statistiques</h2>
-              <p className="text-sm text-gray-500 mb-6">Analyse tes performances detaillees</p>
-              <DashboardCharts leads={leads} commissionRate={commissionRate} />
-              {leads.length === 0 && (
-                <div className="bg-white rounded-xl border border-gray-200 p-8 text-center mt-6">
-                  <BarChart3 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">Les graphiques apparaitront quand tu auras des inscriptions</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeSection === 'commissions' && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Commissions</h2>
-              <p className="text-sm text-gray-500 mb-6">Historique et suivi de tes commissions</p>
-              <CommissionsSection
-                commissions={commissions}
-                activeMRR={activeMRR}
-                estimatedCommission={estimatedCommission}
-                totalEarned={affiliate.total_earned}
-              />
-            </div>
-          )}
-
-          {activeSection === 'leaderboard' && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Leaderboard</h2>
-              <p className="text-sm text-gray-500 mb-6">Classement des affilies</p>
-              <LeaderboardSection
-                affiliate={affiliate}
-                leaderboardToday={leaderboardToday}
-                leaderboardMonth={leaderboardMonth}
-                zoneRouge={zoneRouge}
-                isInZoneRouge={isInZoneRouge}
-              />
-            </div>
-          )}
-
-          {activeSection === 'tips' && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Conseils commerciaux</h2>
-              <p className="text-sm text-gray-500 mb-6">Techniques pour convertir plus de prospects</p>
-              <SalesTips />
             </div>
           )}
 
@@ -681,6 +616,29 @@ function DashboardOverview({
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
       <DashboardRelance leads={leads} />
 
+      {!affiliate.disable_leaderboard && (
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-amber-500" />
+            Leaderboard
+          </h3>
+          <DashboardLeaderboard />
+        </div>
+      )}
+
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <DollarSign className="w-5 h-5 text-emerald-600" />
+          Commissions
+        </h3>
+        <div className="grid sm:grid-cols-3 gap-4 mb-4">
+          <KPICard icon={DollarSign} label="Commission ce mois" value={`${estimatedCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
+          <KPICard icon={TrendingUp} label="MRR genere" value={`${activeMRR.toFixed(0)} EUR`} color="text-emerald-700" />
+          <KPICard icon={DollarSign} label="Total gagne" value={`${affiliate.total_earned.toFixed(2)} EUR`} color="text-gray-900" />
+        </div>
+        <DashboardCommissions affiliateId={affiliate.id} />
+      </div>
+
       {competitions.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -813,137 +771,6 @@ function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: Aff
   );
 }
 
-function CommissionsSection({ commissions, activeMRR, estimatedCommission, totalEarned }: {
-  commissions: AffiliateCommission[];
-  activeMRR: number;
-  estimatedCommission: number;
-  totalEarned: number;
-}) {
-  return (
-    <div className="space-y-6">
-      <div className="grid sm:grid-cols-3 gap-4">
-        <KPICard icon={DollarSign} label="Commission ce mois" value={`${estimatedCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
-        <KPICard icon={TrendingUp} label="MRR genere" value={`${activeMRR.toFixed(0)} EUR`} color="text-emerald-700" />
-        <KPICard icon={DollarSign} label="Total gagne" value={`${totalEarned.toFixed(2)} EUR`} color="text-gray-900" />
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200">
-        {commissions.length === 0 ? (
-          <div className="p-8 text-center">
-            <DollarSign className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Aucune commission pour le moment</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Periode</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Plan</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">MRR</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Commission</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {commissions.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-sm text-gray-900">{c.period || '-'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{c.subscription_plan || '-'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{Number(c.mrr || 0).toFixed(2)} EUR</td>
-                    <td className="px-4 py-3 text-sm font-semibold text-belaya-deep">{Number(c.commission_amount || 0).toFixed(2)} EUR</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        c.status === 'paid' ? 'bg-emerald-50 text-emerald-700' :
-                        c.status === 'pending' ? 'bg-amber-50 text-amber-700' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {c.status === 'paid' ? 'Paye' : c.status === 'pending' ? 'En attente' : c.status || '-'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function LeaderboardSection({ affiliate, leaderboardToday, leaderboardMonth, zoneRouge, isInZoneRouge }: {
-  affiliate: Affiliate;
-  leaderboardToday: LeaderboardEntry[];
-  leaderboardMonth: LeaderboardEntry[];
-  zoneRouge: ZoneRougeEntry[];
-  isInZoneRouge: boolean;
-}) {
-  return (
-    <div className="space-y-6">
-      <div className="grid lg:grid-cols-2 gap-6">
-        <LeaderboardCard title="Top du jour" icon={Flame} entries={leaderboardToday} metric="signups" currentAffiliateId={affiliate.id} />
-        <LeaderboardCard title="Top du mois" icon={Trophy} entries={leaderboardMonth} metric="commissions" currentAffiliateId={affiliate.id} />
-      </div>
-
-      {(zoneRouge.length > 0 || isInZoneRouge) && (
-        <div className="bg-white rounded-xl border-2 border-red-200 p-6">
-          <h3 className="font-semibold text-red-800 mb-4 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
-            Zone Rouge
-          </h3>
-          <p className="text-sm text-gray-600 mb-4">Affilies sans inscription depuis plus de 7 jours</p>
-          {zoneRouge.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">Aucun affilie en zone rouge</p>
-          ) : (
-            <div className="space-y-2">
-              {zoneRouge.map((z) => (
-                <div
-                  key={z.affiliate_id}
-                  className={`flex items-center justify-between p-3 rounded-lg ${
-                    z.affiliate_id === affiliate.id ? 'bg-red-50 border border-red-200' : 'bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                      <Flame className="w-4 h-4 text-red-500" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">
-                      {z.full_name || 'Anonyme'}
-                      {z.affiliate_id === affiliate.id && <span className="ml-2 text-xs text-red-600 font-bold">(Toi)</span>}
-                    </span>
-                  </div>
-                  <span className="text-sm font-bold text-red-600">{z.days_inactive}j sans inscription</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-6">
-        <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-          <Crown className="w-5 h-5 text-amber-500" />
-          Challenge mensuel - Top 3
-        </h3>
-        <p className="text-sm text-gray-600 mb-4">Chaque mois, les 3 meilleurs affilies sont recompenses :</p>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { rank: 1, reward: 300 },
-            { rank: 2, reward: 150 },
-            { rank: 3, reward: 75 },
-          ].map((tier) => (
-            <div key={tier.rank} className="bg-white rounded-lg p-4 text-center border border-amber-100">
-              <p className="text-2xl mb-1">{tier.rank === 1 ? '1er' : tier.rank === 2 ? '2e' : '3e'}</p>
-              <p className="text-xl font-bold text-gray-900">{tier.reward} EUR</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DashboardHeader({ onBack, onLogout }: { onBack: () => void; onLogout: () => void }) {
   return (
     <header className="bg-white border-b border-gray-200">
@@ -1017,59 +844,6 @@ function StatusTag({ status, daysLeft }: { status: 'trialing' | 'active' | 'expi
         </span>
       );
   }
-}
-
-function LeaderboardCard({ title, icon: Icon, entries, metric, currentAffiliateId }: {
-  title: string;
-  icon: React.ElementType;
-  entries: LeaderboardEntry[];
-  metric: 'signups' | 'commissions';
-  currentAffiliateId: string;
-}) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-        <Icon className="w-5 h-5 text-amber-500" />
-        {title}
-      </h3>
-      {entries.length === 0 ? (
-        <p className="text-sm text-gray-400 text-center py-6">Pas encore de donnees</p>
-      ) : (
-        <div className="space-y-2">
-          {entries.map((entry, i) => {
-            const isMe = entry.affiliate_id === currentAffiliateId;
-            const val = metric === 'signups'
-              ? `${entry.signups_count || 0} inscriptions`
-              : `${Number(entry.commission_total || 0).toFixed(2)} EUR`;
-            return (
-              <div
-                key={entry.affiliate_id}
-                className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                  isMe ? 'bg-belaya-50 border border-belaya-200' : 'bg-gray-50 hover:bg-gray-100'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                    i === 0 ? 'bg-amber-100 text-amber-700' :
-                    i === 1 ? 'bg-gray-200 text-gray-700' :
-                    i === 2 ? 'bg-orange-100 text-orange-700' :
-                    'bg-gray-100 text-gray-500'
-                  }`}>
-                    {i + 1}
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">
-                    {entry.full_name || 'Anonyme'}
-                    {isMe && <span className="ml-1 text-xs text-belaya-deep font-bold">(Toi)</span>}
-                  </span>
-                </div>
-                <span className="text-sm font-semibold text-gray-700">{val}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
 }
 
 function PartnerAuthForm({ onBack }: { onBack: () => void }) {

@@ -1,4 +1,4 @@
-import { AlertTriangle, Clock, MessageSquare, ExternalLink, Lightbulb, Target } from 'lucide-react';
+import { AlertTriangle, Clock, Lightbulb, Target } from 'lucide-react';
 
 interface AffiliateLead {
   id: string;
@@ -12,20 +12,18 @@ interface DashboardRelanceProps {
   leads: AffiliateLead[];
 }
 
-const NOTION_URL = 'https://www.notion.so/Partenariat-Commerciaux-30878cef78ce80cca57ac0682e041ddb?source=copy_link';
-
 const TIPS = [
   {
-    title: 'Contacte tes leads avant la fin de leur essai',
+    title: 'Contacte avant la fin de l\'essai',
     body: 'Le moment ideal est J-3, J-2 et J-1. C\'est la que le taux de conversion est le plus eleve.',
   },
   {
     title: 'Pose les bonnes questions',
-    body: 'Demande-leur s\'ils ont teste la plateforme, s\'ils ont des questions, et ce qui les bloque pour passer a l\'abonnement.',
+    body: 'Demande-leur s\'ils ont teste la plateforme, s\'ils ont des questions, et ce qui les bloque.',
   },
   {
-    title: 'Explique les benefices principaux',
-    body: 'Gagner du temps sur leur gestion, attirer plus de clientes et centraliser leur activite au meme endroit.',
+    title: 'Mets en avant les benefices',
+    body: 'Gagner du temps, attirer plus de clientes et centraliser leur activite au meme endroit.',
   },
 ];
 
@@ -37,6 +35,8 @@ export default function DashboardRelance({ leads }: DashboardRelanceProps) {
   const relanceLeads = leads
     .filter((l) => l.computed_status === 'trialing')
     .sort((a, b) => a.days_left - b.days_left);
+
+  if (relanceLeads.length === 0 && urgentLeads.length === 0) return null;
 
   return (
     <div className="space-y-6">
@@ -51,7 +51,7 @@ export default function DashboardRelance({ leads }: DashboardRelanceProps) {
                 {urgentLeads.length} essai{urgentLeads.length > 1 ? 's' : ''} finissant dans 48h
               </h3>
               <p className="text-sm text-orange-700">
-                Ces leads sont prioritaires pour la relance. Contacte-les maintenant pour maximiser tes conversions.
+                Contacte-les maintenant pour maximiser tes conversions.
               </p>
             </div>
           </div>
@@ -63,7 +63,7 @@ export default function DashboardRelance({ leads }: DashboardRelanceProps) {
           <div className="px-6 pt-5 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <Target className="w-5 h-5 text-blue-500" />
-              <h3 className="font-semibold text-gray-900">Leads a relancer</h3>
+              <h3 className="font-semibold text-gray-900">Essais a relancer</h3>
               <span className="ml-auto text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
                 {relanceLeads.length}
               </span>
@@ -131,25 +131,6 @@ export default function DashboardRelance({ leads }: DashboardRelanceProps) {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquare className="w-5 h-5 text-gray-700" />
-          <h3 className="font-semibold text-gray-900">Gestion des leads</h3>
-        </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Pour suivre tes prospects et organiser tes relances, enregistre tes leads dans ce tableau.
-        </p>
-        <a
-          href={NOTION_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-lg font-medium text-sm hover:bg-gray-800 transition-all hover:shadow-lg"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Acceder au tableau des leads
-        </a>
       </div>
     </div>
   );

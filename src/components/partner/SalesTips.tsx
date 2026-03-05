@@ -1,6 +1,4 @@
-import { MessageSquare, Lightbulb, Shield, ExternalLink } from 'lucide-react';
-
-const NOTION_URL = 'https://www.notion.so/Partenariat-Commerciaux-30878cef78ce80cca57ac0682e041ddb?source=copy_link';
+import { MessageSquare, Lightbulb, Shield } from 'lucide-react';
 
 const OBJECTIONS = [
   {
@@ -117,25 +115,6 @@ export default function SalesTips() {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquare className="w-5 h-5 text-gray-700" />
-          <h3 className="font-semibold text-gray-900">Tableau de suivi des leads</h3>
-        </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Pour suivre tes prospects et organiser tes relances, tu peux aussi utiliser le tableau partage Notion.
-        </p>
-        <a
-          href={NOTION_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-lg font-medium text-sm hover:bg-gray-800 transition-all hover:shadow-lg"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Acceder au tableau Notion
-        </a>
       </div>
     </div>
   );
