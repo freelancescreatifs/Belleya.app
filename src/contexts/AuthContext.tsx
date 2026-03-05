@@ -164,12 +164,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      console.log('[SignUp] ✅ User created successfully in auth.users');
-      console.log('[SignUp] User ID:', data.user?.id);
-      console.log('[SignUp] User email:', data.user?.email);
-
       if (data.user) {
-        console.log('[SignUp] Waiting for database triggers to create profile...');
+        const refCode = localStorage.getItem('belaya_ref');
+        if (refCode) {
+          try {
+            await supabase.rpc('attribute_affiliate_signup', {
+              p_ref_code: refCode,
+              p_first_name: firstName || null,
+            });
+            localStorage.removeItem('belaya_ref');
+            localStorage.removeItem('belaya_ref_date');
+          } catch (refErr) {
+            console.error('[SignUp] Error attributing affiliate:', refErr);
+          }
+        }
 
         const maxRetries = 5;
         let retryCount = 0;
@@ -177,7 +185,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         while (retryCount < maxRetries && !profileLoaded) {
           const delay = 500 + (retryCount * 500);
-          console.log(`[SignUp] Retry ${retryCount + 1}/${maxRetries} - waiting ${delay}ms`);
           await new Promise(resolve => setTimeout(resolve, delay));
 
           const { data: profileData, error: profileError } = await supabase
@@ -189,50 +196,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (profileError) {
             console.error(`[SignUp] Error checking profile (retry ${retryCount + 1}):`, profileError);
           } else if (profileData) {
-            console.log('[SignUp] ✅ Profile found:', profileData.role);
             setProfile(profileData);
             profileLoaded = true;
-          } else {
-            console.log(`[SignUp] Profile not yet created (retry ${retryCount + 1}/${maxRetries})`);
           }
 
           retryCount++;
-        }
-
-        if (!profileLoaded) {
-          console.warn('[SignUp] Profile not found after all retries');
-        }
-
-        const refCode = localStorage.getItem('belaya_ref');
-        if (refCode) {
-          try {
-            const { data: affiliateData } = await supabase
-              .from('affiliates')
-              .select('id')
-              .eq('ref_code', refCode)
-              .maybeSingle();
-
-            if (affiliateData) {
-              const now = new Date();
-              const trialEnd = new Date(now);
-              trialEnd.setDate(trialEnd.getDate() + 14);
-
-              await supabase.from('affiliate_signups').insert({
-                affiliate_id: affiliateData.id,
-                user_id: data.user.id,
-                first_name: firstName || null,
-                subscription_status: 'trialing',
-                attributed_at: now.toISOString(),
-                trial_start_date: now.toISOString(),
-                trial_end_date: trialEnd.toISOString(),
-              });
-
-              localStorage.removeItem('belaya_ref');
-              localStorage.removeItem('belaya_ref_date');
-            }
-          } catch (refErr) {
-            console.error('[SignUp] Error attributing affiliate:', refErr);
-          }
         }
       }
     } catch (err: any) {

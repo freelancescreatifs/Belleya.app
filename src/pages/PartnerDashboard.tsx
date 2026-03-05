@@ -918,30 +918,12 @@ function PartnerAuthForm({ onBack }: { onBack: () => void }) {
           const refCode = localStorage.getItem('belaya_ref');
           if (refCode) {
             try {
-              const { data: affiliateData } = await supabase
-                .from('affiliates')
-                .select('id')
-                .eq('ref_code', refCode)
-                .maybeSingle();
-
-              if (affiliateData) {
-                const now = new Date();
-                const trialEnd = new Date(now);
-                trialEnd.setDate(trialEnd.getDate() + 14);
-
-                await supabase.from('affiliate_signups').insert({
-                  affiliate_id: affiliateData.id,
-                  user_id: signUpData.user.id,
-                  first_name: form.firstName.trim() || null,
-                  subscription_status: 'trialing',
-                  attributed_at: now.toISOString(),
-                  trial_start_date: now.toISOString(),
-                  trial_end_date: trialEnd.toISOString(),
-                });
-
-                localStorage.removeItem('belaya_ref');
-                localStorage.removeItem('belaya_ref_date');
-              }
+              await supabase.rpc('attribute_affiliate_signup', {
+                p_ref_code: refCode,
+                p_first_name: form.firstName.trim() || null,
+              });
+              localStorage.removeItem('belaya_ref');
+              localStorage.removeItem('belaya_ref_date');
             } catch (refErr) {
               console.error('Error attributing affiliate:', refErr);
             }
