@@ -9,6 +9,8 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
 import ToastContainer from '../components/shared/ToastContainer';
+import DashboardCharts from '../components/partner/DashboardCharts';
+import DashboardRelance from '../components/partner/DashboardRelance';
 
 interface Affiliate {
   id: string;
@@ -588,6 +590,13 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 </div>
               </div>
             )}
+
+            <DashboardCharts
+              leads={leads}
+              commissionRate={commissionRate}
+            />
+
+            <DashboardRelance leads={leads} />
 
             {leads.length === 0 && commissions.length === 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
