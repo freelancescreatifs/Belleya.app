@@ -759,7 +759,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
               </a>
               <a
                 href="/partenaire"
-                title="Rejoindre le programme d'affiliation Belleya"
+                title="Rejoindre le programme d'affiliation Belaya"
                 className="hover:text-[rgb(113,19,65)] transition-colors flex items-center gap-1"
               >
                 <Handshake className="w-4 h-4" />

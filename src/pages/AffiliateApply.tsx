@@ -275,7 +275,7 @@ export default function AffiliateApply({ onBack, onSuccess }: AffiliateApplyProp
           </button>
           <div>
             <h1 className="text-lg font-bold text-gray-900">Candidature partenaire</h1>
-            <p className="text-sm text-gray-500">Programme d'affiliation Belleya</p>
+            <p className="text-sm text-gray-500">Programme d'affiliation Belaya</p>
           </div>
         </div>
       </header>

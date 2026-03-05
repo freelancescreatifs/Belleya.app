@@ -197,7 +197,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Demande envoyee</h2>
             <p className="text-gray-600 mb-6">
-              Ta candidature est en cours de validation par l'equipe Belleya.
+              Ta candidature est en cours de validation par l'equipe Belaya.
             </p>
             <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-200">
               <Clock className="w-4 h-4" />
@@ -272,7 +272,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             </button>
             <div>
               <h1 className="text-lg font-bold text-gray-900">Dashboard Partenaire</h1>
-              <p className="text-sm text-gray-500">Programme d'affiliation Belleya</p>
+              <p className="text-sm text-gray-500">Programme d'affiliation Belaya</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
