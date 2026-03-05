@@ -6,6 +6,7 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from '../components/shared/ToastContainer';
 import RewardsValidation from '../components/admin/RewardsValidation';
 import AffiliateApplicationsTab from '../components/admin/AffiliateApplicationsTab';
+import AffiliatePartnersTab from '../components/admin/AffiliatePartnersTab';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -84,7 +85,7 @@ export default function Admin() {
   });
   const [users, setUsers] = useState<UserData[]>([]);
   const [partnerships, setPartnerships] = useState<PartnershipData[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'partnerships' | 'rewards' | 'affiliates'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'clients' | 'rewards' | 'affiliates' | 'affiliate_partners'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -706,14 +707,15 @@ export default function Admin() {
           Clients
         </button>
         <button
-          onClick={() => setActiveTab('partnerships')}
+          onClick={() => setActiveTab('affiliate_partners')}
           className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
-            activeTab === 'partnerships'
+            activeTab === 'affiliate_partners'
               ? 'border-brand-500 text-brand-600'
               : 'border-transparent text-gray-600 hover:text-gray-900'
           }`}
         >
-          Partenariats
+          <Handshake className="w-4 h-4 inline mr-1" />
+          Affili\u00e9s Belaya
         </button>
         <button
           onClick={() => setActiveTab('rewards')}
@@ -735,7 +737,7 @@ export default function Admin() {
           }`}
         >
           <UserCheck className="w-4 h-4 inline mr-1" />
-          Affiliés
+          Candidatures
         </button>
       </div>
 
@@ -956,50 +958,6 @@ export default function Admin() {
             </div>
           </div>
 
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Partenariats</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-belaya-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Handshake className="w-6 h-6 text-belaya-bright" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">Revenus du mois</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{stats.monthlyRevenue.toFixed(2)} €</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-rose-50 to-brand-100 rounded-xl p-6 border border-rose-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Percent className="w-6 h-6 text-rose-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">Commission moyenne</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{stats.avgCommission.toFixed(1)} %</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-brand-50 to-brand-100 rounded-xl p-6 border border-brand-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Star className="w-6 h-6 text-brand-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">Top partenariat</span>
-                </div>
-                <p className="text-xl font-bold text-gray-900 truncate">{stats.topPartnership || '—'}</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <Clock className="w-6 h-6 text-amber-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">À encaisser</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900">{stats.pendingRevenue.toFixed(2)} €</p>
-              </div>
-            </div>
-          </div>
 
           {/* Graphiques */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1334,90 +1292,12 @@ export default function Admin() {
         </div>
       )}
 
-      {activeTab === 'partnerships' && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            <div className="relative flex-1 max-w-full sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par entreprise ou email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-            </div>
-            <button
-              onClick={() => exportToCSV(partnerships, 'partnerships')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Download className="w-5 h-5" />
-              Export CSV
-            </button>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Entreprise</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nom utilisateur</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Commission</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Statut</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Revenus mois</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredPartnerships.map((partnership) => (
-                    <tr key={partnership.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-900">{partnership.company_name}</span>
-                          {partnership.is_default && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-100 text-brand-800">
-                              Programme officiel
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{partnership.user_name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{partnership.user_email}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600 capitalize">{partnership.partnership_type}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{partnership.commission_rate}%</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          partnership.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : partnership.status === 'pending'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {partnership.status === 'active' ? 'Actif' : partnership.status === 'pending' ? 'En attente' : 'Terminé'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-belaya-bright">
-                        {partnership.monthly_revenue.toFixed(2)} €
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {filteredPartnerships.length === 0 && (
-              <div className="text-center py-12">
-                <Handshake className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600">Aucun partenariat trouvé</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {activeTab === 'rewards' && (
         <RewardsValidation />
+      )}
+
+      {activeTab === 'affiliate_partners' && (
+        <AffiliatePartnersTab />
       )}
 
       {activeTab === 'affiliates' && (
