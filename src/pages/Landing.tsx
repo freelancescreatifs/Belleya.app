@@ -2,7 +2,7 @@ import {
   Sparkles, Calendar, Globe, Users, Image, Scissors, TrendingUp,
   Target, Package, BarChart, CheckCircle, Heart, Star, Zap, Shield,
   Clock, Lock, MessageCircle, ArrowRight, MessageSquare, Brain, DollarSign,
-  BarChart3, AlertCircle, Search, Flame, Eye, Crown
+  BarChart3, AlertCircle, Search, Flame, Eye, Crown, Handshake
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AnimatedKeywords from '../components/landing/AnimatedKeywords';
@@ -756,6 +756,14 @@ export default function Landing({ onSelectRole }: LandingProps) {
               </a>
               <a href="/cgv" className="hover:text-[rgb(113,19,65)] transition-colors">
                 CGV
+              </a>
+              <a
+                href="/partenaire"
+                title="Rejoindre le programme d'affiliation Belleya"
+                className="hover:text-[rgb(113,19,65)] transition-colors flex items-center gap-1"
+              >
+                <Handshake className="w-4 h-4" />
+                Programme d'affiliation
               </a>
             </div>
 
