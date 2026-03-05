@@ -1,603 +1,70 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Safe Area Insets for iOS/Android */
-@supports (padding: max(0px)) {
+@theme {
+  --color-brand-50: #fdf2f8;
+  --color-brand-100: #fce7f3;
+  --color-brand-200: #fbcfe8;
+  --color-brand-300: #f9a8d4;
+  --color-brand-400: #f472b6;
+  --color-brand-500: #ec4899;
+  --color-brand-600: #db2777;
+  --color-brand-700: #be185d;
+  --color-brand-800: #9d174d;
+  --color-brand-900: #831843;
+
+  --color-belaya-50: #f0fdf4;
+  --color-belaya-100: #dcfce7;
+  --color-belaya-200: #bbf7d0;
+  --color-belaya-300: #86efac;
+  --color-belaya-400: #4ade80;
+  --color-belaya-500: #22c55e;
+  --color-belaya-600: #16a34a;
+  --color-belaya-bright: #10b981;
+}
+
+@layer base {
   body {
-    padding-left: max(0px, env(safe-area-inset-left));
-    padding-right: max(0px, env(safe-area-inset-right));
-  }
-}
-
-/* Mobile App Optimizations */
-* {
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
-  -webkit-touch-callout: none;
-  box-sizing: border-box;
-}
-
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  touch-action: manipulation;
-}
-
-body {
-  overscroll-behavior-y: none;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-  margin: 0;
-  padding: 0;
-}
-
-#root {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-  min-height: 100vh;
-}
-
-/* Force no horizontal overflow on mobile - Optimized and less aggressive */
-@media (max-width: 768px) {
-  html {
-    overflow-x: hidden;
-    width: 100%;
-  }
-
-  body {
-    overflow-x: hidden;
-    width: 100%;
+    @apply antialiased text-gray-900 bg-gray-50;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     margin: 0;
   }
+}
 
-  #root {
-    overflow-x: hidden;
-    width: 100%;
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
   }
-
-  /* Force ONLY structural elements, not all elements */
-  main, section, header, footer, article, aside, nav {
-    max-width: 100%;
-    box-sizing: border-box;
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
   }
-
-  /* Prevent containers from causing horizontal scroll */
-  .container,
-  [class*="container"]:not(svg):not(button),
-  [class*="wrapper"]:not(svg):not(button) {
-    max-width: 100%;
-    overflow-x: hidden;
-    box-sizing: border-box;
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out forwards;
   }
-
-  /* Prevent tables and pre elements from overflowing */
-  table, pre, code {
-    max-width: 100%;
-    overflow-x: auto;
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
   }
-
-  /* Ensure images and videos don't overflow - EXCLUDE SVG icons */
-  img:not([class*="w-"]):not([class*="h-"]),
-  video,
-  canvas {
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Prevent scale transforms from causing overflow */
-  [class*="scale-"] {
-    transform-origin: center;
-  }
-
-  /* Ensure sidebar doesn't cause overflow when hidden */
-  .fixed.w-64 {
-    max-width: 256px;
-  }
-
-  /* Ensure translated elements stay in bounds */
-  .-translate-x-full {
-    margin-left: 0;
-  }
-
-  /* Prevent form elements from causing overflow */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="search"],
-  select,
-  textarea {
-    max-width: 100%;
-    box-sizing: border-box;
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
   }
 }
 
-/* Prevent zoom on input focus (iOS) */
-@media screen and (max-width: 768px) {
-  input, select, textarea {
-    font-size: 16px !important;
-  }
-}
-
-/* Touch targets - minimum 44x44px for better mobile UX */
-button, a, [role="button"] {
-  touch-action: manipulation;
-}
-
-/* Smooth scrolling for better mobile experience */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-/* Mobile-first UI enhancements */
-@media (max-width: 768px) {
-  /* Better spacing for mobile */
-  section {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-  }
-
-  /* Optimize font sizes for mobile readability */
-  h1, .text-4xl, .text-5xl, .text-6xl {
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
-
-  /* Better button spacing */
-  button {
-    padding: 0.625rem 1rem;
-    font-size: 0.9375rem;
-  }
-
-  /* Improve card spacing */
-  [class*="rounded-xl"],
-  [class*="rounded-2xl"] {
-    padding: 1rem;
-  }
-
-  /* Better grid gaps */
-  [class*="grid"] {
-    gap: 0.75rem;
-  }
-
-  /* Optimize text sizes */
-  p, span, div {
-    font-size: clamp(0.875rem, 2.5vw, 1rem);
-  }
-}
-
-/* Support for dvh with fallback for older browsers */
-@supports not (height: 100dvh) {
-  .h-\[60dvh\] {
-    height: 60vh !important;
-  }
-}
-
-/* Mapbox GL Customization */
-.mapboxgl-map {
-  font-family: inherit;
-}
-
-.mapboxgl-canvas {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  touch-action: pan-x pan-y;
-}
-
-/* Mapbox Popup Customization */
-.mapbox-popup-custom .mapboxgl-popup-content {
-  padding: 0;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  background: white;
-}
-
-.mapbox-popup-custom .mapboxgl-popup-close-button {
-  font-size: 20px;
-  color: #374151;
-  padding: 8px;
-  right: 4px;
-  top: 4px;
-  background: transparent;
-  border: none;
-}
-
-.mapbox-popup-custom .mapboxgl-popup-close-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 6px;
-}
-
-.mapbox-popup-custom .mapboxgl-popup-tip {
-  border-top-color: white;
-}
-
-/* Mapbox Controls Styling - Match gray/white theme */
-.mapboxgl-ctrl-group {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  background: white;
-  border: 1px solid #e5e7eb;
-}
-
-.mapboxgl-ctrl-group button {
-  width: 36px;
-  height: 36px;
-  background: white;
-  border: none;
-}
-
-.mapboxgl-ctrl-group button:hover {
-  background-color: #f9fafb;
-}
-
-.mapboxgl-ctrl-geolocate {
-  border-radius: 8px;
-}
-
-/* Mapbox Attribution */
-.mapboxgl-ctrl-attrib {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 6px;
-  font-size: 11px;
-}
-
-.mapboxgl-ctrl-attrib a {
-  color: #6b7280;
-}
-
-/* Mapbox Marker Customization */
-.mapboxgl-marker {
-  cursor: pointer;
-}
-
-/* Navigation Control */
-.mapboxgl-ctrl-compass {
-  display: none;
-}
-
-/* Mobile optimizations for Mapbox */
-@media (max-width: 768px) {
-  .mapboxgl-ctrl-group {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-  }
-
-  .mapboxgl-ctrl-group button {
-    width: 32px;
-    height: 32px;
-  }
-
-  .mapbox-popup-custom .mapboxgl-popup-content {
-    max-width: 280px;
-  }
-}
-
-/* Hide scrollbar but keep functionality */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Ensure buttons in horizontal scroll don't shrink */
-.scrollbar-hide > button {
-  flex-shrink: 0;
-}
-
-/* Safe Area Bottom - iOS/Android notch and home indicator */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Bottom Navigation - ensure it respects safe areas */
-@supports (padding: max(0px)) {
-  .safe-area-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-  }
-}
-
-/* ChatBot - ensure proper interaction on mobile */
-[class*="chatbot"] {
-  pointer-events: auto;
-  touch-action: manipulation;
-}
-
-/* ChatBot scroll container */
-[class*="chatbot-scroll"] {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Leaflet Map Container - Responsive */
-.map-container-responsive {
-  height: 60vh;
-  min-height: 400px;
-  max-height: 700px;
-  position: relative;
-}
-
-@media (max-width: 768px) {
-  .map-container-responsive {
-    height: 50vh;
-    min-height: 300px;
-    max-height: 500px;
-  }
-}
-
-@media (max-width: 480px) {
-  .map-container-responsive {
-    height: 45vh;
-    min-height: 280px;
-    max-height: 400px;
-  }
-}
-
-/* Client Map Wrapper - Fixed dimensions for stable rendering */
-.map-wrapper-client {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 50vh !important;
-  min-height: 260px !important;
-  position: relative;
-  overflow: hidden;
-  background: #e8e8e8;
-}
-
-@media (min-width: 768px) {
-  .map-wrapper-client {
-    height: 420px !important;
-    min-height: 420px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .map-wrapper-client {
-    height: 45vh !important;
-    min-height: 260px !important;
-  }
-}
-
-/* Client Leaflet Container - Force full size */
-.leaflet-map-client {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-}
-
-.leaflet-map-client .leaflet-container {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  background: #e8e8e8;
-}
-
-/* Apply grayscale to client map */
-.leaflet-map-client .leaflet-tile-pane {
-  filter: grayscale(100%) contrast(1.1);
-  -webkit-filter: grayscale(100%) contrast(1.1);
-}
-
-/* Leaflet Map Styles - Grayscale Theme */
-.leaflet-container {
-  width: 100% !important;
-  height: 100% !important;
-  z-index: 0;
-  background: #e8e8e8;
-  font-family: inherit;
-}
-
-/* Grayscale Map Style */
-.grayscale-map .leaflet-tile-pane {
-  filter: grayscale(100%) contrast(1.1);
-  -webkit-filter: grayscale(100%) contrast(1.1);
-}
-
-.leaflet-container a {
-  color: #4a5568;
-  text-decoration: none;
-}
-
-.leaflet-container a:hover {
-  color: #2d3748;
-}
-
-/* Attribution - Subtle gray style */
-.leaflet-control-attribution {
-  background: rgba(255, 255, 255, 0.9) !important;
-  font-size: 10px !important;
-  color: #718096 !important;
-  padding: 2px 5px !important;
-}
-
-/* Zoom Controls - Modern gray design */
-.leaflet-control-zoom {
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-}
-
-.leaflet-control-zoom a {
-  background: white !important;
-  color: #4a5568 !important;
-  border: none !important;
-  width: 36px !important;
-  height: 36px !important;
-  line-height: 36px !important;
-  font-size: 20px !important;
-  font-weight: bold !important;
-  transition: all 0.2s ease !important;
-}
-
-.leaflet-control-zoom a:hover {
-  background: #f7fafc !important;
-  color: #2d3748 !important;
-}
-
-.leaflet-control-zoom a:first-child {
-  border-bottom: 1px solid #e2e8f0 !important;
-}
-
-/* Custom Marker Styles */
-.custom-user-marker,
-.custom-provider-marker {
-  background: transparent !important;
-  border: none !important;
-}
-
-.custom-user-marker > div,
-.custom-provider-marker > div {
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-/* Custom Popup Styles - Modern grayscale design */
-.leaflet-popup-content-wrapper {
-  border-radius: 12px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  background: white !important;
-}
-
-.leaflet-popup-content {
-  margin: 0 !important;
-  min-width: 250px !important;
-  max-width: 300px !important;
-}
-
-.leaflet-popup-tip {
-  background: white !important;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.1) !important;
-}
-
-.leaflet-popup-close-button {
-  font-size: 24px !important;
-  padding: 8px 12px !important;
-  color: #718096 !important;
-  font-weight: normal !important;
-}
-
-.leaflet-popup-close-button:hover {
-  color: #2d3748 !important;
-  background: transparent !important;
-}
-
-/* Leaflet Controls - Better positioning on mobile */
-@media (max-width: 768px) {
-  .leaflet-control-zoom {
-    margin-right: 10px !important;
-    margin-bottom: 10px !important;
-  }
-
-  .leaflet-control-zoom a {
-    width: 32px !important;
-    height: 32px !important;
-    line-height: 32px !important;
-    font-size: 18px !important;
-  }
-
-  .leaflet-popup-content {
-    min-width: 200px !important;
-    max-width: 280px !important;
-  }
-
-  .leaflet-control-attribution {
-    font-size: 9px !important;
-    max-width: 60% !important;
-  }
-}
-
-/* Fix for Leaflet map rendering on mobile */
-.leaflet-map-pane {
-  z-index: 1;
-}
-
-.leaflet-tile-pane {
-  z-index: 1;
-}
-
-.leaflet-overlay-pane {
-  z-index: 2;
-}
-
-.leaflet-marker-pane {
-  z-index: 3;
-}
-
-.leaflet-popup-pane {
-  z-index: 4;
-}
-
-/* Ensure map tiles load properly */
-.leaflet-tile {
-  max-width: none !important;
-  max-height: none !important;
-}
-
-/* Prevent tile loading issues on mobile */
-.leaflet-tile-container {
-  position: absolute;
-  z-index: 1;
-}
-
-/* Touch interactions optimization */
-.leaflet-container .leaflet-control-zoom {
-  touch-action: manipulation;
-}
-
-.leaflet-interactive {
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-/* Toast notification animations */
-@keyframes slide-in {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-in {
-  animation: slide-in 0.3s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slide-in 0.3s ease-out;
-}
-
-/* Hide scrollbar utility */
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes glow {
+  from { box-shadow: 0 0 20px rgba(236, 72, 153, 0.15); }
+  to { box-shadow: 0 0 30px rgba(236, 72, 153, 0.3); }
 }
