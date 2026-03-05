@@ -25,6 +25,10 @@ interface Affiliate {
   created_at: string;
   bonus_amount: number;
   bonus_note: string | null;
+  is_special: boolean;
+  disable_tiers: boolean;
+  disable_leaderboard: boolean;
+  special_commission_rate: number | null;
 }
 
 interface AffiliateSignup {
@@ -155,6 +159,10 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             bonus_amount: Number(affiliateData.bonus_amount || 0),
             active_sub_count: affiliateData.active_sub_count || 0,
             days_since_last_signup: affiliateData.days_since_last_signup || 0,
+            is_special: affiliateData.is_special || false,
+            disable_tiers: affiliateData.disable_tiers || false,
+            disable_leaderboard: affiliateData.disable_leaderboard || false,
+            special_commission_rate: affiliateData.special_commission_rate ? Number(affiliateData.special_commission_rate) : null,
           });
 
           await supabase.rpc('sync_affiliate_signup_statuses').catch(() => {});
@@ -363,6 +371,10 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
     })
     .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
 
+  const estimatedCommission = currentMonthCommission > 0
+    ? currentMonthCommission
+    : activeMRR * Number(affiliate.commission_rate || affiliate.base_commission_rate || 0.10);
+
   const lastConversionLabel = affiliate.last_signup_date
     ? new Date(affiliate.last_signup_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
     : 'Aucune';
@@ -406,46 +418,60 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${rank.color} flex items-center justify-center shadow-lg`}>
-              <RankIcon className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-gray-900">{rank.label}</h2>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${rank.bg} ${rank.text}`}>
-                  {commissionRate}%
-                </span>
+        {affiliate.disable_tiers ? (
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
+                <DollarSign className="w-7 h-7 text-white" />
               </div>
-              <p className="text-sm text-gray-500">
-                {affiliate.active_sub_count} abonnements actifs
-              </p>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Commission : {commissionRate}%</h2>
+                <p className="text-sm text-gray-500">Compte special - taux fixe</p>
+              </div>
             </div>
           </div>
-          {nextRank ? (
-            <div>
-              <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-                <span>{affiliate.active_sub_count} / {nextRank.min}</span>
-                <span className="flex items-center gap-1">
-                  <ChevronUp className="w-3 h-3" />
-                  {nextRank.label} ({nextRank.rate}%)
-                </span>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${rank.color} flex items-center justify-center shadow-lg`}>
+                <RankIcon className="w-7 h-7 text-white" />
               </div>
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full bg-gradient-to-r ${rank.color} transition-all duration-700`}
-                  style={{ width: `${progress}%` }}
-                />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-gray-900">{rank.label}</h2>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${rank.bg} ${rank.text}`}>
+                    {commissionRate}%
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {affiliate.active_sub_count} abonnements actifs
+                </p>
               </div>
-              <p className="text-xs text-gray-400 mt-1">
-                Encore {nextRank.min - affiliate.active_sub_count} abonnements pour passer {nextRank.label}
-              </p>
             </div>
-          ) : (
-            <p className="text-sm text-rose-600 font-medium">Rang maximum atteint</p>
-          )}
-        </div>
+            {nextRank ? (
+              <div>
+                <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                  <span>{affiliate.active_sub_count} / {nextRank.min}</span>
+                  <span className="flex items-center gap-1">
+                    <ChevronUp className="w-3 h-3" />
+                    {nextRank.label} ({nextRank.rate}%)
+                  </span>
+                </div>
+                <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full bg-gradient-to-r ${rank.color} transition-all duration-700`}
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Encore {nextRank.min - affiliate.active_sub_count} abonnements pour passer {nextRank.label}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-rose-600 font-medium">Rang maximum atteint</p>
+            )}
+          </div>
+        )}
 
         <div className="bg-gradient-to-r from-belaya-deep to-belaya-bright rounded-2xl p-6 mb-6 text-white">
           <div className="flex items-center gap-2 mb-3">
@@ -485,28 +511,21 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           </div>
         )}
 
-        <div className="mb-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Revenus (abonnes payants uniquement)</p>
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <KPICard icon={CheckCircle} label="Abos actifs" value={String(activeSignups)} color="text-emerald-600" />
-            <KPICard icon={DollarSign} label="MRR genere" value={`${activeMRR.toFixed(0)} EUR`} color="text-teal-600" />
-            <KPICard icon={DollarSign} label="Commission ce mois" value={`${currentMonthCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
-          </div>
-        </div>
         <div className="mb-6">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Acquisition (toutes inscriptions)</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <KPICard icon={Users} label="Inscriptions" value={String(totalInscriptions)} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <KPICard icon={Users} label="Inscriptions totales" value={String(totalInscriptions)} color="text-blue-600" />
             <KPICard icon={Clock} label="Essais en cours" value={String(trialingSignups)} color="text-amber-600" />
-            <KPICard icon={TrendingUp} label="Conversions" value={String(activeSignups)} color="text-emerald-600" />
-            <KPICard icon={XCircle} label="Non converties" value={String(expiredSignups)} color="text-red-500" />
+            <KPICard icon={CheckCircle} label="Conversions payantes" value={String(activeSignups)} color="text-emerald-600" />
+            <KPICard icon={TrendingUp} label="Taux de conversion" value={totalInscriptions > 0 ? `${Math.round((activeSignups / totalInscriptions) * 100)}%` : '0%'} color="text-teal-600" />
+            <KPICard icon={DollarSign} label="MRR genere" value={`${activeMRR.toFixed(0)} EUR`} color="text-emerald-700" />
+            <KPICard icon={DollarSign} label="Commission estimee" value={`${estimatedCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
           </div>
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto">
           {[
             { key: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
-            { key: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+            ...(!affiliate.disable_leaderboard ? [{ key: 'leaderboard', label: 'Leaderboard', icon: Trophy }] : []),
             { key: 'signups', label: 'Inscriptions', icon: Users },
             { key: 'commissions', label: 'Commissions', icon: DollarSign },
           ].map(({ key, label, icon: Icon }) => (
@@ -530,8 +549,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Informations du compte</h3>
               <div className="grid sm:grid-cols-2 gap-4">
-                <InfoRow label="Niveau" value={rank.label} />
-                <InfoRow label="Taux de commission" value={`${commissionRate}%`} />
+                {!affiliate.disable_tiers && <InfoRow label="Niveau" value={rank.label} />}
+                <InfoRow label="Taux de commission" value={`${commissionRate}%${affiliate.is_special ? ' (fixe)' : ''}`} />
                 <InfoRow label="Membre depuis" value={affiliate.created_at ? new Date(affiliate.created_at).toLocaleDateString('fr-FR') : '-'} />
                 <div>
                   <p className="text-sm text-gray-500">Statut</p>
@@ -694,35 +713,29 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-100">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Client</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date inscription</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Prenom</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Jours restants</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Fin d'essai</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Montant</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Plan choisi</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">MRR genere</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Commission</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date inscription</th>
                     </tr>
                   </thead>
                   <tbody>
                     {enrichedSignups.map((s) => {
-                      const isUrgent = s.computedStatus === 'trialing' && s.daysLeft <= 2 && s.daysLeft > 0;
+                      const monthlyAmt = Number(s.monthly_amount || 0);
+                      const signupMRR = s.computedStatus === 'active' ? (monthlyAmt > 0 ? monthlyAmt : 29) : 0;
+                      const signupCommission = signupMRR * Number(affiliate.commission_rate || affiliate.base_commission_rate || 0.10);
+                      const planLabel = s.computedStatus === 'active' ? (monthlyAmt >= 49 ? 'Elite' : monthlyAmt >= 39 ? 'Pro' : 'Start') : null;
+
                       return (
-                        <tr key={s.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${isUrgent ? 'bg-orange-50/50' : ''}`}>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {s.first_name || 'Utilisateur'} <span className="text-gray-400 text-xs">#{s.id.slice(0, 6)}</span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-500">
-                            {new Date(s.created_at).toLocaleDateString('fr-FR')}
+                        <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                            {s.first_name || 'Utilisateur'}
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <StatusTag status={s.computedStatus} daysLeft={s.daysLeft} />
-                              {isUrgent && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700 border border-orange-200">
-                                  <Flame className="w-3 h-3" />
-                                  A relancer
-                                </span>
-                              )}
-                            </div>
+                            <StatusTag status={s.computedStatus} daysLeft={s.daysLeft} />
                           </td>
                           <td className="px-4 py-3 text-sm">
                             {s.computedStatus === 'trialing' ? (
@@ -733,15 +746,29 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                               <span className="text-gray-400">-</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-500">
-                            {s.trialEnd.toLocaleDateString('fr-FR')}
-                          </td>
                           <td className="px-4 py-3 text-sm">
-                            {s.computedStatus === 'active' ? (
-                              <span className="font-medium text-emerald-700">{Number(s.monthly_amount || 29).toFixed(0)} EUR/mois</span>
+                            {planLabel ? (
+                              <span className="font-medium text-gray-900">{planLabel}</span>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {signupMRR > 0 ? (
+                              <span className="font-medium text-emerald-700">{signupMRR.toFixed(0)} EUR</span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {signupCommission > 0 ? (
+                              <span className="font-medium text-belaya-deep">{signupCommission.toFixed(2)} EUR</span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {new Date(s.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                           </td>
                         </tr>
                       );
@@ -836,7 +863,7 @@ function DashboardHeader({ onBack, onLogout, affiliate, rank }: {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {affiliate && rank && (
+          {affiliate && rank && !affiliate.disable_tiers && (
             <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${rank.bg} ${rank.text} ${rank.border} border`}>
               {rank.label}
             </span>
@@ -1053,7 +1080,7 @@ function StatusTag({ status, daysLeft }: { status: 'trialing' | 'active' | 'expi
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
           <Clock className="w-3 h-3" />
-          Essai — J-{Math.max(0, daysLeft)}
+          Essai (J-{Math.max(0, daysLeft)})
         </span>
       );
     case 'active':
