@@ -1,14 +1,12 @@
 import {
   ArrowRight, CheckCircle, DollarSign, Link2, BarChart3,
   MessageSquare, BookOpen, Headphones, X, TrendingUp, Zap, Target,
-  ChevronRight, HelpCircle, Sparkles, LogIn, LayoutDashboard, Handshake
+  ChevronRight, HelpCircle, Sparkles
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 
 interface AffiliateLandingProps {
   onApply: () => void;
-  onDashboard?: () => void;
 }
 
 function useScrollReveal(threshold = 0.15) {
@@ -81,8 +79,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
   return <span ref={ref}>{count.toLocaleString('fr-FR')}{suffix}</span>;
 }
 
-export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLandingProps) {
-  const { user } = useAuth();
+export default function AffiliateLanding({ onApply }: AffiliateLandingProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
 
@@ -149,31 +146,12 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
           <a href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="Belaya" className="h-10 w-auto" />
           </a>
-          <div className="flex items-center gap-3">
-            {user && onDashboard ? (
-              <button
-                onClick={onDashboard}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-full font-semibold text-sm hover:bg-gray-800 transition-all duration-300 hover:scale-105 active:scale-95"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Mon Dashboard
-              </button>
-            ) : (
-              <button
-                onClick={onDashboard || onApply}
-                className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-gray-700 rounded-full font-medium text-sm hover:bg-gray-50 transition-all duration-300"
-              >
-                <LogIn className="w-4 h-4" />
-                Connexion
-              </button>
-            )}
-            <button
-              onClick={onApply}
-              className="px-6 py-2.5 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              Je postule
-            </button>
-          </div>
+          <button
+            onClick={onApply}
+            className="px-6 py-2.5 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95"
+          >
+            Je postule
+          </button>
         </div>
       </header>
 
@@ -531,16 +509,8 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
-      <footer className="py-10 bg-gray-900 text-center">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Handshake className="w-5 h-5 text-belaya-bright" />
-            <p className="text-white font-semibold text-lg">
-              Devenir partenaire Belleya -- Gagne 10% a vie
-            </p>
-          </div>
-          <p className="text-gray-400 text-sm">&copy; 2026 Belaya. Tous droits reserves.</p>
-        </div>
+      <footer className="py-8 bg-gray-900 text-gray-400 text-center text-sm">
+        <p>&copy; 2026 Belaya. Tous droits reserves.</p>
       </footer>
     </div>
   );
