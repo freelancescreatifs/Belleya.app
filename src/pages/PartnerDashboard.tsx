@@ -3,7 +3,7 @@ import {
   Link2, Copy, CheckCircle, Clock, XCircle, Users, DollarSign,
   TrendingUp, ArrowLeft, Loader2, BarChart3, LogOut, Lock,
   Award, AlertTriangle, Flame, Trophy, Crown, Shield, ChevronUp,
-  Zap
+  Zap, LogIn, Calendar, Eye, EyeOff
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -225,17 +225,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center max-w-md w-full">
-          <p className="text-gray-600 mb-4">Connecte-toi pour acceder a ton dashboard partenaire.</p>
-          <button
-            onClick={onBack}
-            className="px-6 py-3 bg-belaya-deep text-white rounded-lg font-semibold hover:shadow-lg transition-all"
-          >
-            Se connecter
-          </button>
-        </div>
-      </div>
+      <PartnerAuthForm onBack={onBack} />
     );
   }
 
@@ -337,6 +327,14 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     })
     .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const conversions30d = signups.filter(s => new Date(s.created_at) >= thirtyDaysAgo).length;
+
+  const lastConversionLabel = affiliate.last_signup_date
+    ? new Date(affiliate.last_signup_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    : 'Aucune';
 
   const isObservation = affiliate.status === 'observation';
   const isDisabled = affiliate.status === 'disabled';
@@ -442,11 +440,27 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <KPICard icon={Users} label="Inscriptions" value={String(signups.length)} />
-          <KPICard icon={CheckCircle} label="Abonnes actifs" value={String(activeSignups)} color="text-emerald-600" />
+        {isInZoneRouge && !isDisabled && !isObservation && (
+          <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-xl p-5 flex items-start gap-4">
+            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Flame className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <h3 className="font-bold text-red-800 mb-1">Zone rouge : {affiliate.days_since_last_signup} jours sans conversion</h3>
+              <p className="text-sm text-red-700">
+                Partage ton lien pour sortir de la zone rouge. Sans inscription dans les prochains jours, ton compte passera en observation.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <KPICard icon={Users} label="Abonnes actifs" value={String(activeSignups)} color="text-emerald-600" />
+          <KPICard icon={DollarSign} label="MRR genere" value={`${(activeSignups * 29 * (commissionRate / 100)).toFixed(0)} EUR`} color="text-teal-600" />
           <KPICard icon={DollarSign} label="Commission ce mois" value={`${currentMonthCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
-          <KPICard icon={TrendingUp} label="Total gagne" value={`${totalCommissions.toFixed(2)} EUR`} />
+          <KPICard icon={TrendingUp} label="Conversions totales" value={String(signups.length)} />
+          <KPICard icon={Calendar} label="Conversions 30j" value={String(conversions30d)} />
+          <KPICard icon={Clock} label="Derniere conversion" value={lastConversionLabel} />
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto">
@@ -798,6 +812,177 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-sm text-gray-500">{label}</p>
       <p className="font-medium text-gray-900">{value}</p>
+    </div>
+  );
+}
+
+function PartnerAuthForm({ onBack }: { onBack: () => void }) {
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' });
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+
+    try {
+      if (authMode === 'signup') {
+        if (!form.firstName.trim() || !form.lastName.trim()) {
+          throw new Error('Le prenom et le nom sont requis');
+        }
+        const { error } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: {
+            data: {
+              role: 'pro',
+              first_name: form.firstName.trim(),
+              last_name: form.lastName.trim()
+            }
+          }
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password
+        });
+        if (error) throw error;
+      }
+    } catch (err: any) {
+      setAuthError(err.message === 'Invalid login credentials'
+        ? 'Email ou mot de passe incorrect'
+        : err.message || 'Erreur d\'authentification');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-belaya-50/20 to-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <a href="/" className="inline-block mb-4">
+            <img src="/logo.png" alt="Belaya" className="h-14 w-auto mx-auto" />
+          </a>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Espace Partenaire</h1>
+          <p className="text-gray-500 text-sm">Connecte-toi pour acceder a ton dashboard</p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setAuthMode('login')}
+              className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                authMode === 'login'
+                  ? 'bg-gradient-to-r from-belaya-deep to-belaya-bright text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Connexion
+            </button>
+            <button
+              onClick={() => setAuthMode('signup')}
+              className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                authMode === 'signup'
+                  ? 'bg-gradient-to-r from-belaya-deep to-belaya-bright text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Creer un compte
+            </button>
+          </div>
+
+          {authError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-4">
+              {authError}
+            </div>
+          )}
+
+          <form onSubmit={handleAuth} className="space-y-4">
+            {authMode === 'signup' && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Prenom</label>
+                  <input
+                    type="text"
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-belaya-primary focus:border-belaya-primary transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                  <input
+                    type="text"
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-belaya-primary focus:border-belaya-primary transition-all"
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+                placeholder="ton@email.com"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-belaya-primary focus:border-belaya-primary transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required
+                  minLength={6}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-belaya-primary focus:border-belaya-primary transition-all pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={authLoading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-belaya-deep to-belaya-bright text-white rounded-xl font-semibold transition-all hover:shadow-lg disabled:opacity-50"
+            >
+              {authLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <LogIn className="w-5 h-5" />
+              )}
+              {authMode === 'signup' ? 'Creer mon compte' : 'Se connecter'}
+            </button>
+          </form>
+        </div>
+
+        <div className="text-center mt-6">
+          <button
+            onClick={onBack}
+            className="text-sm text-gray-500 hover:text-belaya-deep transition-colors inline-flex items-center gap-1"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Retour a la page partenaire
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
