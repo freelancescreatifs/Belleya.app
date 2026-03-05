@@ -1,12 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Search, Users, Loader as Loader2, DollarSign, TrendingUp, Award, ChevronRight, CreditCard as Edit2, TriangleAlert as AlertTriangle, ListFilter as Filter, Trophy, Clock, ArrowUpDown, UserX, Mail, Zap, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Users, Loader2, DollarSign, TrendingUp, Award, ChevronRight, CreditCard as Edit2, X, ExternalLink, Calendar, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
-import AffiliateDetailDrawer from './AffiliateDetailDrawer';
-import { getRank, daysSince } from '../../lib/affiliateUtils';
 
-export interface EnrichedAffiliate {
+interface AffiliateData {
   id: string;
   user_id: string;
   full_name: string | null;
@@ -23,66 +21,89 @@ export interface EnrichedAffiliate {
   total_earned: number;
   created_at: string;
   approved_at: string | null;
-  last_signup_date: string | null;
   last_activity_date: string | null;
   last_sign_in_at: string | null;
-  days_since_last_signup: number;
   signups_count: number;
   commissions_total: number;
-  commissions_month: number;
-  mrr_generated: number;
-  signups_30d: number;
-  phone?: string | null;
-  instagram_url?: string | null;
 }
 
-type SubTab = 'table' | 'zone_rouge' | 'leaderboard';
-type StatusFilter = 'all' | 'active' | 'observation' | 'paused' | 'disabled';
-type RankFilter = 'all' | 'recrue' | 'closer' | 'pro' | 'elite';
-type PerfFilter = 'all' | 'top' | 'zone_rouge' | 'zero' | 'high_commission';
+const RANK_THRESHOLDS = [
+  { min: 0, max: 9, label: 'Recrue', color: 'bg-gray-100 text-gray-700', barColor: 'bg-gray-400' },
+  { min: 10, max: 49, label: 'Closer', color: 'bg-blue-100 text-blue-700', barColor: 'bg-blue-500' },
+  { min: 50, max: 149, label: 'Pro', color: 'bg-amber-100 text-amber-700', barColor: 'bg-amber-500' },
+  { min: 150, max: Infinity, label: 'Elite', color: 'bg-rose-100 text-rose-700', barColor: 'bg-rose-500' },
+];
+
+function getRank(conversions: number) {
+  return RANK_THRESHOLDS.find(r => conversions >= r.min && conversions <= r.max) || RANK_THRESHOLDS[0];
+}
+
+function getNextRank(conversions: number) {
+  const currentIdx = RANK_THRESHOLDS.findIndex(r => conversions >= r.min && conversions <= r.max);
+  if (currentIdx < RANK_THRESHOLDS.length - 1) {
+    return RANK_THRESHOLDS[currentIdx + 1];
+  }
+  return null;
+}
+
+function getRankProgress(conversions: number) {
+  const rank = getRank(conversions);
+  const next = getNextRank(conversions);
+  if (!next) return 100;
+  const rangeSize = rank.max - rank.min + 1;
+  const progress = conversions - rank.min;
+  return Math.min(100, Math.round((progress / rangeSize) * 100));
+}
 
 export default function AffiliatePartnersTab() {
   const { toasts, showToast, dismissToast } = useToast();
-  const [affiliates, setAffiliates] = useState<EnrichedAffiliate[]>([]);
+  const [affiliates, setAffiliates] = useState<AffiliateData[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selectedAffiliate, setSelectedAffiliate] = useState<EnrichedAffiliate | null>(null);
+  const [selectedAffiliate, setSelectedAffiliate] = useState<AffiliateData | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState({ commission_rate: 0, bonus_amount: 0 });
+  const [editValues, setEditValues] = useState({ commission_rate: 0, bonus_amount: 0, bonus_note: '' });
   const [saving, setSaving] = useState(false);
-  const [subTab, setSubTab] = useState<SubTab>('table');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [rankFilter, setRankFilter] = useState<RankFilter>('all');
-  const [perfFilter, setPerfFilter] = useState<PerfFilter>('all');
-  const [showFilters, setShowFilters] = useState(false);
 
-  const loadAffiliates = useCallback(async () => {
+  useEffect(() => {
+    loadAffiliates();
+  }, []);
+
+  const loadAffiliates = async () => {
     setLoading(true);
     try {
-      const { data: rows, error } = await supabase
+      const { data: affiliateRows, error } = await supabase
         .from('affiliates')
         .select('*')
         .eq('program', 'belaya_affiliation')
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
+
       if (error) throw error;
 
-      const now = new Date();
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
-      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
-      const enriched: EnrichedAffiliate[] = await Promise.all(
-        (rows || []).map(async (aff) => {
-          const [sAll, s30, cAll, cMonth, auth, app] = await Promise.all([
-            supabase.from('affiliate_signups').select('id', { count: 'exact', head: true }).eq('affiliate_id', aff.id),
-            supabase.from('affiliate_signups').select('id', { count: 'exact', head: true }).eq('affiliate_id', aff.id).gte('created_at', thirtyDaysAgo.toISOString()),
-            supabase.from('affiliate_commissions').select('commission_amount, mrr').eq('affiliate_id', aff.id),
-            supabase.from('affiliate_commissions').select('commission_amount').eq('affiliate_id', aff.id).eq('period', currentMonth),
-            supabase.from('admin_users_view').select('last_sign_in_at').eq('user_id', aff.user_id).maybeSingle(),
-            supabase.from('affiliate_applications').select('phone, instagram_url').eq('user_id', aff.user_id).maybeSingle(),
+      const enriched: AffiliateData[] = await Promise.all(
+        (affiliateRows || []).map(async (aff) => {
+          const [signupsRes, commissionsRes, authRes] = await Promise.all([
+            supabase
+              .from('affiliate_signups')
+              .select('id', { count: 'exact', head: true })
+              .eq('affiliate_id', aff.id),
+            supabase
+              .from('affiliate_commissions')
+              .select('commission_amount')
+              .eq('affiliate_id', aff.id),
+            supabase
+              .from('admin_users_view')
+              .select('last_sign_in_at')
+              .eq('user_id', aff.user_id)
+              .maybeSingle()
           ]);
-          const commTotal = (cAll.data || []).reduce((s, c) => s + Number(c.commission_amount || 0), 0);
-          const mrrTotal = (cAll.data || []).reduce((s, c) => s + Number(c.mrr || 0), 0);
-          const commMonth = (cMonth.data || []).reduce((s, c) => s + Number(c.commission_amount || 0), 0);
+
+          const signups_count = signupsRes.count || 0;
+          const commissions_total = (commissionsRes.data || []).reduce(
+            (sum, c) => sum + Number(c.commission_amount || 0), 0
+          );
+
           return {
             ...aff,
             commission_rate: Number(aff.commission_rate || 0.10),
@@ -90,35 +111,355 @@ export default function AffiliatePartnersTab() {
             total_earned: Number(aff.total_earned || 0),
             active_referrals: aff.active_referrals || 0,
             active_sub_count: aff.active_sub_count || 0,
-            days_since_last_signup: aff.days_since_last_signup || 0,
-            signups_count: sAll.count || 0,
-            signups_30d: s30.count || 0,
-            commissions_total: commTotal,
-            commissions_month: commMonth,
-            mrr_generated: mrrTotal,
-            last_sign_in_at: auth.data?.last_sign_in_at || null,
-            phone: app.data?.phone || null,
-            instagram_url: app.data?.instagram_url || null,
+            signups_count,
+            commissions_total,
+            last_sign_in_at: authRes.data?.last_sign_in_at || null,
           };
         })
       );
+
       setAffiliates(enriched);
     } catch (err) {
       console.error('Error loading affiliates:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  useEffect(() => { loadAffiliates(); }, [loadAffiliates]);
-
-  const handleSaveEdit = async (id: string) => {
+  const handleSaveEdit = async (affiliateId: string) => {
     setSaving(true);
     try {
-      const { error } = await supabase.from('affiliates').update({ commission_rate: editValues.commission_rate, bonus_amount: editValues.bonus_amount, updated_at: new Date().toISOString() }).eq('id', id);
+      const { error } = await supabase
+        .from('affiliates')
+        .update({
+          commission_rate: editValues.commission_rate,
+          bonus_amount: editValues.bonus_amount,
+          bonus_note: editValues.bonus_note || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', affiliateId);
+
       if (error) throw error;
-      setAffiliates(prev => prev.map(a => a.id !== id ? a : { ...a, ...editValues }));
+
+      setAffiliates(prev => prev.map(a => {
+        if (a.id !== affiliateId) return a;
+        return {
+          ...a,
+          commission_rate: editValues.commission_rate,
+          bonus_amount: editValues.bonus_amount,
+          bonus_note: editValues.bonus_note || null,
+        };
+      }));
+
+      if (selectedAffiliate?.id === affiliateId) {
+        setSelectedAffiliate(prev => prev ? {
+          ...prev,
+          commission_rate: editValues.commission_rate,
+          bonus_amount: editValues.bonus_amount,
+          bonus_note: editValues.bonus_note || null,
+        } : null);
+      }
+
       setEditingId(null);
+      showToast('success', 'Modifications enregistrees');
+    } catch (err: any) {
+      showToast('error', err.message || 'Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startEditing = (aff: AffiliateData) => {
+    setEditingId(aff.id);
+    setEditValues({
+      commission_rate: aff.commission_rate,
+      bonus_amount: aff.bonus_amount,
+      bonus_note: aff.bonus_note || '',
+    });
+  };
+
+  const filtered = affiliates.filter(a => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      (a.full_name || '').toLowerCase().includes(q) ||
+      (a.email || '').toLowerCase().includes(q) ||
+      a.ref_code.toLowerCase().includes(q)
+    );
+  });
+
+  const totalConversions = affiliates.reduce((s, a) => s + a.signups_count, 0);
+  const totalCommissions = affiliates.reduce((s, a) => s + a.commissions_total, 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-5 border border-rose-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+              <Users className="w-5 h-5 text-rose-600" />
+            </div>
+            <span className="text-sm font-medium text-gray-600">Affilies actifs</span>
+          </div>
+          <p className="text-3xl font-bold text-gray-900">{affiliates.length}</p>
+        </div>
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-5 border border-emerald-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+            </div>
+            <span className="text-sm font-medium text-gray-600">Total conversions</span>
+          </div>
+          <p className="text-3xl font-bold text-gray-900">{totalConversions}</p>
+        </div>
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 border border-amber-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+              <DollarSign className="w-5 h-5 text-amber-600" />
+            </div>
+            <span className="text-sm font-medium text-gray-600">Commissions versees</span>
+          </div>
+          <p className="text-3xl font-bold text-gray-900">{totalCommissions.toFixed(2)} EUR</p>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="relative flex-1 max-w-md w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher par nom, email ou code..."
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          />
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="text-center py-12">
+          <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+          <p className="text-gray-600">Aucun partenaire Belaya trouve</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Nom</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Depuis</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Converti</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Remuneration</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Commission</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Bonus</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Rang</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Dernier login</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filtered.map((aff) => {
+                  const rank = getRank(aff.signups_count);
+                  const isEditing = editingId === aff.id;
+
+                  return (
+                    <tr key={aff.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        {aff.full_name || '---'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{aff.email || '---'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                        {aff.approved_at
+                          ? new Date(aff.approved_at).toLocaleDateString('fr-FR')
+                          : new Date(aff.created_at).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">{aff.signups_count}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-emerald-700">
+                        {aff.commissions_total.toFixed(2)} EUR
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="1"
+                            value={editValues.commission_rate}
+                            onChange={(e) => setEditValues(v => ({ ...v, commission_rate: parseFloat(e.target.value) || 0 }))}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-brand-500"
+                          />
+                        ) : (
+                          <span className="text-gray-900">{(aff.commission_rate * 100).toFixed(0)}%</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            step="1"
+                            min="0"
+                            value={editValues.bonus_amount}
+                            onChange={(e) => setEditValues(v => ({ ...v, bonus_amount: parseFloat(e.target.value) || 0 }))}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-brand-500"
+                          />
+                        ) : (
+                          <span className="text-gray-600">
+                            {aff.bonus_amount > 0 ? `${aff.bonus_amount} EUR` : '---'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${rank.color}`}>
+                          {rank.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                        {aff.last_sign_in_at
+                          ? new Date(aff.last_sign_in_at).toLocaleDateString('fr-FR')
+                          : '---'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          {isEditing ? (
+                            <>
+                              <button
+                                onClick={() => handleSaveEdit(aff.id)}
+                                disabled={saving}
+                                className="px-2 py-1 bg-emerald-600 text-white rounded text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+                              >
+                                {saving ? '...' : 'OK'}
+                              </button>
+                              <button
+                                onClick={() => setEditingId(null)}
+                                className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium hover:bg-gray-200"
+                              >
+                                X
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => startEditing(aff)}
+                                className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Modifier"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setSelectedAffiliate(aff)}
+                                className="p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                                title="Voir le detail"
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {selectedAffiliate && (
+        <AffiliateDetailDrawer
+          affiliate={selectedAffiliate}
+          onClose={() => setSelectedAffiliate(null)}
+          onSave={(updated) => {
+            setAffiliates(prev => prev.map(a => a.id === updated.id ? { ...a, ...updated } : a));
+            setSelectedAffiliate(prev => prev ? { ...prev, ...updated } : null);
+          }}
+          showToast={showToast}
+        />
+      )}
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+    </div>
+  );
+}
+
+function AffiliateDetailDrawer({
+  affiliate,
+  onClose,
+  onSave,
+  showToast,
+}: {
+  affiliate: AffiliateData;
+  onClose: () => void;
+  onSave: (updated: Partial<AffiliateData> & { id: string }) => void;
+  showToast: (type: string, msg: string) => void;
+}) {
+  const [editMode, setEditMode] = useState(false);
+  const [form, setForm] = useState({
+    commission_rate: affiliate.commission_rate,
+    bonus_amount: affiliate.bonus_amount,
+    bonus_note: affiliate.bonus_note || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [commissions, setCommissions] = useState<any[]>([]);
+  const [loadingCommissions, setLoadingCommissions] = useState(true);
+
+  const rank = getRank(affiliate.signups_count);
+  const nextRank = getNextRank(affiliate.signups_count);
+  const progress = getRankProgress(affiliate.signups_count);
+
+  useEffect(() => {
+    loadCommissions();
+  }, [affiliate.id]);
+
+  const loadCommissions = async () => {
+    setLoadingCommissions(true);
+    try {
+      const { data } = await supabase
+        .from('affiliate_commissions')
+        .select('*')
+        .eq('affiliate_id', affiliate.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      setCommissions(data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingCommissions(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('affiliates')
+        .update({
+          commission_rate: form.commission_rate,
+          bonus_amount: form.bonus_amount,
+          bonus_note: form.bonus_note || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', affiliate.id);
+
+      if (error) throw error;
+
+      onSave({
+        id: affiliate.id,
+        commission_rate: form.commission_rate,
+        bonus_amount: form.bonus_amount,
+        bonus_note: form.bonus_note || null,
+      });
+      setEditMode(false);
       showToast('success', 'Modifications enregistrees');
     } catch (err: any) {
       showToast('error', err.message || 'Erreur');
@@ -127,270 +468,228 @@ export default function AffiliatePartnersTab() {
     }
   };
 
-  const handleDisable = async (id: string) => {
-    try {
-      const { error } = await supabase.from('affiliates').update({ status: 'disabled', is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
-      if (error) throw error;
-      setAffiliates(prev => prev.map(a => a.id === id ? { ...a, status: 'disabled', is_active: false } : a));
-      showToast('success', 'Affilie desactive');
-    } catch (err: any) {
-      showToast('error', err.message || 'Erreur');
-    }
-  };
-
-  const startEditing = (a: EnrichedAffiliate) => {
-    setEditingId(a.id);
-    setEditValues({ commission_rate: a.commission_rate, bonus_amount: a.bonus_amount });
-  };
-
-  const filtered = affiliates.filter(a => {
-    if (statusFilter !== 'all' && a.status !== statusFilter) return false;
-    if (rankFilter !== 'all' && getRank(a.signups_count).label.toLowerCase() !== rankFilter) return false;
-    if (perfFilter === 'top' && a.signups_count < 10) return false;
-    if (perfFilter === 'zone_rouge' && daysSince(a.last_signup_date) < 7) return false;
-    if (perfFilter === 'zero' && a.signups_count > 0) return false;
-    if (perfFilter === 'high_commission' && a.commissions_total < 100) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return (a.full_name || '').toLowerCase().includes(q) || (a.email || '').toLowerCase().includes(q) || a.ref_code.toLowerCase().includes(q);
-    }
-    return true;
-  });
-
-  const zoneRouge = affiliates
-    .filter(a => a.status === 'active' && ((!a.last_signup_date && a.signups_count === 0) || daysSince(a.last_signup_date) >= 7))
-    .sort((a, b) => daysSince(b.last_signup_date) - daysSince(a.last_signup_date));
-
-  const leaderAll = [...affiliates].filter(a => a.status === 'active').sort((a, b) => b.signups_count - a.signups_count).slice(0, 10);
-  const leaderMonth = [...affiliates].filter(a => a.status === 'active').sort((a, b) => b.signups_30d - a.signups_30d).slice(0, 10);
-
-  const activeAffs = affiliates.filter(a => a.status === 'active');
-  const totalConversions = affiliates.reduce((s, a) => s + a.signups_count, 0);
-  const totalSubs = affiliates.reduce((s, a) => s + a.active_sub_count, 0);
-  const totalMRR = affiliates.reduce((s, a) => s + a.mrr_generated, 0);
-  const commMonth = affiliates.reduce((s, a) => s + a.commissions_month, 0);
-  const commAll = affiliates.reduce((s, a) => s + a.commissions_total, 0);
-
-  const exportCSV = () => {
-    if (!filtered.length) return;
-    const h = ['Nom','Email','Conversions','Abos actifs','MRR','Com mois','Com totale','%','Rang','Statut'];
-    const r = filtered.map(a => [a.full_name||'', a.email||'', a.signups_count, a.active_sub_count, a.mrr_generated.toFixed(2), a.commissions_month.toFixed(2), a.commissions_total.toFixed(2), (a.commission_rate*100).toFixed(0)+'%', getRank(a.signups_count).label, a.status]);
-    const csv = [h.join(','), ...r.map(x => x.join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `affilies_belaya_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-  };
-
-  if (loading) return <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-brand-600" /></div>;
-
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        <KPI icon={Users} label="Affilies actifs" value={activeAffs.length} c="rose" />
-        <KPI icon={TrendingUp} label="Clients convertis" value={totalConversions} c="emerald" />
-        <KPI icon={Zap} label="Abos actifs" value={totalSubs} c="blue" />
-        <KPI icon={DollarSign} label="MRR genere" value={`${totalMRR.toFixed(0)} EUR`} c="teal" />
-        <KPI icon={DollarSign} label="Com. mois" value={`${commMonth.toFixed(0)} EUR`} c="amber" />
-        <KPI icon={DollarSign} label="Com. totale" value={`${commAll.toFixed(0)} EUR`} c="green" />
-        <KPI icon={Clock} label="A payer" value={`${commMonth.toFixed(0)} EUR`} c="orange" />
-      </div>
-
-      <div className="flex gap-2 border-b border-gray-200">
-        {([['table', 'Affilies', Users, 'brand'], ['zone_rouge', `Zone rouge (${zoneRouge.length})`, AlertTriangle, 'red'], ['leaderboard', 'Classement', Trophy, 'amber']] as const).map(([key, label, Icon, color]) => (
-          <button key={key} onClick={() => setSubTab(key)} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${subTab === key ? `border-${color}-500 text-${color}-600` : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-            <Icon className="w-4 h-4 inline mr-1.5" />{label}
+    <div className="fixed inset-0 bg-black/40 flex justify-end z-50" onClick={onClose}>
+      <div
+        className="bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl animate-slide-in-right"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+          <h3 className="text-lg font-bold text-gray-900">Fiche Partenaire</h3>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <X className="w-5 h-5" />
           </button>
-        ))}
-      </div>
+        </div>
 
-      {subTab === 'table' && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="relative flex-1 max-w-md w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher..." className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500" />
+        <div className="p-6 space-y-6">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center">
+              <span className="text-xl font-bold text-rose-600">
+                {(affiliate.full_name || 'A')[0].toUpperCase()}
+              </span>
             </div>
-            <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2.5 border rounded-lg text-sm font-medium ${showFilters ? 'bg-brand-50 border-brand-300 text-brand-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
-              <Filter className="w-4 h-4" />Filtres
-              {(statusFilter !== 'all' || rankFilter !== 'all' || perfFilter !== 'all') && <span className="w-2 h-2 rounded-full bg-brand-500" />}
-            </button>
-            <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"><Download className="w-4 h-4" />Export</button>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xl font-bold text-gray-900 truncate">{affiliate.full_name || '---'}</h4>
+              <p className="text-sm text-gray-500 flex items-center gap-1">
+                <Mail className="w-3.5 h-3.5" />
+                {affiliate.email || '---'}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">Code : {affiliate.ref_code}</p>
+            </div>
           </div>
 
-          {showFilters && (
-            <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Statut</label>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatusFilter)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                  <option value="all">Tous</option><option value="active">Active</option><option value="observation">Observation</option><option value="paused">Paused</option><option value="disabled">Disabled</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Rang</label>
-                <select value={rankFilter} onChange={(e) => setRankFilter(e.target.value as RankFilter)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                  <option value="all">Tous</option><option value="recrue">Recrue</option><option value="closer">Closer</option><option value="pro">Pro</option><option value="elite">Elite</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Performance</label>
-                <select value={perfFilter} onChange={(e) => setPerfFilter(e.target.value as PerfFilter)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                  <option value="all">Tous</option><option value="top">Top performers</option><option value="zone_rouge">Zone rouge</option><option value="zero">Aucun client</option><option value="high_commission">Commission &gt; 100 EUR</option>
-                </select>
-              </div>
+          <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Rang actuel</span>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${rank.color}`}>
+                <Award className="w-4 h-4" />
+                {rank.label}
+              </span>
             </div>
-          )}
-
-          {filtered.length === 0 ? (
-            <div className="text-center py-12"><Users className="w-12 h-12 text-gray-400 mx-auto mb-3" /><p className="text-gray-600">Aucun affilie trouve</p></div>
-          ) : (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      {['Nom','Email','Depuis','Login','Conv.','Abos','MRR','Com. mois','Com. totale','%','Bonus','Rang','Statut','Actions'].map(h => (
-                        <th key={h} className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase whitespace-nowrap">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {filtered.map((a) => {
-                      const rank = getRank(a.signups_count);
-                      const isEd = editingId === a.id;
-                      return (
-                        <tr key={a.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">{a.full_name || '---'}</td>
-                          <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap">{a.email || '---'}</td>
-                          <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap">{new Date(a.approved_at || a.created_at).toLocaleDateString('fr-FR')}</td>
-                          <td className="px-3 py-3 text-sm text-gray-500 whitespace-nowrap">{a.last_sign_in_at ? new Date(a.last_sign_in_at).toLocaleDateString('fr-FR') : '---'}</td>
-                          <td className="px-3 py-3 text-sm font-semibold text-gray-900">{a.signups_count}</td>
-                          <td className="px-3 py-3 text-sm text-gray-900">{a.active_sub_count}</td>
-                          <td className="px-3 py-3 text-sm text-gray-900 whitespace-nowrap">{a.mrr_generated.toFixed(0)} EUR</td>
-                          <td className="px-3 py-3 text-sm font-medium text-emerald-700 whitespace-nowrap">{a.commissions_month.toFixed(0)} EUR</td>
-                          <td className="px-3 py-3 text-sm font-semibold text-emerald-700 whitespace-nowrap">{a.commissions_total.toFixed(0)} EUR</td>
-                          <td className="px-3 py-3 text-sm">
-                            {isEd ? <input type="number" step="0.01" min="0" max="1" value={editValues.commission_rate} onChange={(e) => setEditValues(v => ({ ...v, commission_rate: parseFloat(e.target.value) || 0 }))} className="w-16 px-1.5 py-1 border border-gray-300 rounded text-xs" /> : <span>{(a.commission_rate * 100).toFixed(0)}%</span>}
-                          </td>
-                          <td className="px-3 py-3 text-sm">
-                            {isEd ? <input type="number" step="1" min="0" value={editValues.bonus_amount} onChange={(e) => setEditValues(v => ({ ...v, bonus_amount: parseFloat(e.target.value) || 0 }))} className="w-16 px-1.5 py-1 border border-gray-300 rounded text-xs" /> : <span className="text-gray-600">{a.bonus_amount > 0 ? `${a.bonus_amount} EUR` : '---'}</span>}
-                          </td>
-                          <td className="px-3 py-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${rank.color}`}>{rank.label}</span></td>
-                          <td className="px-3 py-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${a.status === 'active' ? 'bg-green-100 text-green-700' : a.status === 'observation' ? 'bg-amber-100 text-amber-700' : a.status === 'disabled' ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'}`}>{a.status}</span></td>
-                          <td className="px-3 py-3">
-                            <div className="flex items-center gap-1">
-                              {isEd ? (
-                                <><button onClick={() => handleSaveEdit(a.id)} disabled={saving} className="px-2 py-1 bg-emerald-600 text-white rounded text-xs font-medium hover:bg-emerald-700 disabled:opacity-50">{saving ? '...' : 'OK'}</button><button onClick={() => setEditingId(null)} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200">X</button></>
-                              ) : (
-                                <><button onClick={() => startEditing(a)} className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg" title="Modifier"><Edit2 className="w-3.5 h-3.5" /></button><button onClick={() => setSelectedAffiliate(a)} className="p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg" title="Fiche"><ChevronRight className="w-3.5 h-3.5" /></button></>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+            {nextRank && (
+              <div>
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>{affiliate.signups_count} conversions</span>
+                  <span>{nextRank.min} pour {nextRank.label}</span>
+                </div>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${rank.barColor}`}
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {subTab === 'zone_rouge' && (
-        <div className="space-y-4">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-5 h-5 text-red-600" /><h3 className="font-semibold text-red-900">Zone rouge - Affilies inactifs</h3></div>
-            <p className="text-sm text-red-700">Affilies sans conversion depuis 7 jours ou plus.</p>
+            )}
+            {!nextRank && (
+              <p className="text-xs text-rose-600 font-medium">Rang maximum atteint</p>
+            )}
           </div>
-          {zoneRouge.length === 0 ? (
-            <div className="text-center py-12"><Award className="w-12 h-12 text-green-400 mx-auto mb-3" /><p className="text-gray-600">Aucun affilie inactif</p></div>
-          ) : (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden"><div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-red-50 border-b border-red-100"><tr>
-                  {['Nom','Email','Jours inactif','Derniere conv.','Rang','Com. %','Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-red-800 uppercase">{h}</th>)}
-                </tr></thead>
-                <tbody className="divide-y divide-gray-200">
-                  {zoneRouge.map((z) => {
-                    const days = daysSince(z.last_signup_date);
-                    return (
-                      <tr key={z.id} className="hover:bg-red-50/50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{z.full_name || '---'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{z.email || '---'}</td>
-                        <td className="px-4 py-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${days >= 30 ? 'bg-red-200 text-red-800' : days >= 14 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{days >= 999 ? 'Jamais' : `${days}j`}</span></td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{z.last_signup_date ? new Date(z.last_signup_date).toLocaleDateString('fr-FR') : 'Jamais'}</td>
-                        <td className="px-4 py-3 text-sm">{getRank(z.signups_count).label}</td>
-                        <td className="px-4 py-3 text-sm">{(z.commission_rate * 100).toFixed(0)}%</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1">
-                            <button onClick={() => window.open(`mailto:${z.email}?subject=Votre partenariat Belaya`, '_blank')} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Contacter"><Mail className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => { startEditing(z as any); setSubTab('table'); }} className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg" title="Modifier"><Edit2 className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => handleDisable(z.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Desactiver"><UserX className="w-3.5 h-3.5" /></button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div></div>
-          )}
-        </div>
-      )}
 
-      {subTab === 'leaderboard' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-4 border-b border-amber-100"><div className="flex items-center gap-2"><Trophy className="w-5 h-5 text-amber-600" /><h3 className="font-semibold text-gray-900">Classement total</h3></div></div>
-            <div className="divide-y divide-gray-100">
-              {leaderAll.length === 0 ? <p className="text-sm text-gray-500 text-center py-6">Aucune donnee</p> :
-                leaderAll.map((e, i) => (
-                  <div key={e.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50">
-                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-200 text-gray-700' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500'}`}>{i+1}</span>
-                    <span className="flex-1 text-sm font-medium text-gray-900 truncate">{e.full_name || '---'}</span>
-                    <span className="text-sm font-bold text-gray-900 shrink-0">{e.signups_count} conv.</span>
-                    <span className="text-sm font-semibold text-emerald-700 shrink-0">{e.commissions_total.toFixed(0)} EUR</span>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white border border-gray-200 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Conversions</p>
+              <p className="text-xl font-bold text-gray-900">{affiliate.signups_count}</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Abonnements actifs</p>
+              <p className="text-xl font-bold text-gray-900">{affiliate.active_sub_count}</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Commission totale</p>
+              <p className="text-xl font-bold text-emerald-700">{affiliate.commissions_total.toFixed(2)} EUR</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">MRR attribue</p>
+              <p className="text-xl font-bold text-gray-900">
+                {(affiliate.active_sub_count * 29).toFixed(2)} EUR
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h5 className="font-semibold text-gray-900">Parametres</h5>
+              {!editMode && (
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  Modifier
+                </button>
+              )}
+            </div>
+
+            {editMode ? (
+              <div className="space-y-3 bg-gray-50 rounded-lg p-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">% Commission</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                    value={form.commission_rate}
+                    onChange={(e) => setForm(f => ({ ...f, commission_rate: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500"
+                  />
+                  <p className="text-xs text-gray-400 mt-0.5">Ex: 0.10 = 10%, 0.15 = 15%</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Bonus (EUR)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    value={form.bonus_amount}
+                    onChange={(e) => setForm(f => ({ ...f, bonus_amount: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Note bonus</label>
+                  <input
+                    type="text"
+                    value={form.bonus_note}
+                    onChange={(e) => setForm(f => ({ ...f, bonus_note: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500"
+                    placeholder="Ex: Bonus parrainage Q1"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex-1 px-3 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-50"
+                  >
+                    {saving ? 'Enregistrement...' : 'Enregistrer'}
+                  </button>
+                  <button
+                    onClick={() => setEditMode(false)}
+                    className="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-gray-500 text-xs">Commission</p>
+                  <p className="font-semibold text-gray-900">{(affiliate.commission_rate * 100).toFixed(0)}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs">Bonus</p>
+                  <p className="font-semibold text-gray-900">
+                    {affiliate.bonus_amount > 0 ? `${affiliate.bonus_amount} EUR` : '---'}
+                  </p>
+                </div>
+                {affiliate.bonus_note && (
+                  <div className="col-span-2">
+                    <p className="text-gray-500 text-xs">Note</p>
+                    <p className="text-gray-700">{affiliate.bonus_note}</p>
                   </div>
-                ))
-              }
-            </div>
+                )}
+              </div>
+            )}
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-5 py-4 border-b border-blue-100"><div className="flex items-center gap-2"><ArrowUpDown className="w-5 h-5 text-blue-600" /><h3 className="font-semibold text-gray-900">Top du mois (30j)</h3></div></div>
-            <div className="divide-y divide-gray-100">
-              {leaderMonth.length === 0 ? <p className="text-sm text-gray-500 text-center py-6">Aucune donnee</p> :
-                leaderMonth.map((e, i) => (
-                  <div key={e.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50">
-                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-blue-100 text-blue-700' : i === 1 ? 'bg-gray-200 text-gray-700' : i === 2 ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-500'}`}>{i+1}</span>
-                    <span className="flex-1 text-sm font-medium text-gray-900 truncate">{e.full_name || '---'}</span>
-                    <span className="text-sm font-bold text-gray-900 shrink-0">{e.signups_30d} conv.</span>
-                    <span className="text-sm font-semibold text-emerald-700 shrink-0">{e.commissions_month.toFixed(0)} EUR</span>
-                  </div>
-                ))
-              }
+
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Inscription</span>
+              <span className="text-gray-900">{new Date(affiliate.created_at).toLocaleDateString('fr-FR')}</span>
             </div>
+            {affiliate.approved_at && (
+              <div className="flex justify-between">
+                <span className="text-gray-500">Approuve le</span>
+                <span className="text-gray-900">{new Date(affiliate.approved_at).toLocaleDateString('fr-FR')}</span>
+              </div>
+            )}
+            {affiliate.last_sign_in_at && (
+              <div className="flex justify-between">
+                <span className="text-gray-500">Derniere connexion</span>
+                <span className="text-gray-900">{new Date(affiliate.last_sign_in_at).toLocaleDateString('fr-FR')}</span>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h5 className="font-semibold text-gray-900 mb-3">Historique commissions</h5>
+            {loadingCommissions ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              </div>
+            ) : commissions.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-4">Aucune commission enregistree</p>
+            ) : (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {commissions.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{c.period}</p>
+                      <p className="text-xs text-gray-500">
+                        {c.subscription_plan || '---'} | {(Number(c.commission_rate) * 100).toFixed(0)}%
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-emerald-700">
+                        {Number(c.commission_amount).toFixed(2)} EUR
+                      </p>
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${
+                        c.status === 'paid' ? 'bg-green-100 text-green-700' :
+                        c.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {c.status === 'paid' ? 'Paye' : c.status === 'pending' ? 'En attente' : c.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      )}
-
-      {selectedAffiliate && <AffiliateDetailDrawer affiliate={selectedAffiliate} onClose={() => setSelectedAffiliate(null)} onSave={(u) => { setAffiliates(prev => prev.map(a => a.id === u.id ? { ...a, ...u } : a)); setSelectedAffiliate(prev => prev ? { ...prev, ...u } : null); }} showToast={showToast} />}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-    </div>
-  );
-}
-
-function KPI({ icon: Icon, label, value, c }: { icon: any; label: string; value: string | number; c: string }) {
-  const colors: Record<string, string> = { rose: 'from-rose-50 to-pink-50 border-rose-200', emerald: 'from-emerald-50 to-teal-50 border-emerald-200', blue: 'from-blue-50 to-cyan-50 border-blue-200', teal: 'from-teal-50 to-cyan-50 border-teal-200', amber: 'from-amber-50 to-orange-50 border-amber-200', green: 'from-green-50 to-emerald-50 border-green-200', orange: 'from-orange-50 to-amber-50 border-orange-200' };
-  const iconColors: Record<string, string> = { rose: 'text-rose-600', emerald: 'text-emerald-600', blue: 'text-blue-600', teal: 'text-teal-600', amber: 'text-amber-600', green: 'text-green-600', orange: 'text-orange-600' };
-  return (
-    <div className={`bg-gradient-to-br ${colors[c] || colors.rose} rounded-xl p-4 border`}>
-      <div className="flex items-center gap-2 mb-1.5">
-        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0"><Icon className={`w-4 h-4 ${iconColors[c] || iconColors.rose}`} /></div>
-        <span className="text-xs font-medium text-gray-600 leading-tight">{label}</span>
       </div>
-      <p className="text-xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
