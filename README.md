@@ -1,166 +1,73 @@
-# Belleya - Plateforme de Gestion pour Professionnels de la Beauté
+# React + TypeScript + Vite
 
-Application complète de gestion pour les professionnels de la beauté et leurs clients.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Prérequis
+Currently, two official plugins are available:
 
-- Node.js 18+ et npm
-- Compte Supabase (gratuit)
-- Git
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Installation
+## React Compiler
 
-### 1. Cloner le projet
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-```bash
-git clone https://github.com/votre-username/belleya.git
-cd belleya
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-### 2. Installer les dépendances
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-npm install
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-### 3. Configurer les variables d'environnement
-
-```bash
-# Copier le fichier d'exemple
-cp .env.example .env
-
-# Éditer .env avec vos vraies clés Supabase
-```
-
-Récupérez vos clés Supabase :
-1. Allez sur https://supabase.com/dashboard
-2. Sélectionnez votre projet
-3. Settings → API
-4. Copiez `URL` et `anon public` key
-
-### 4. Configuration de la base de données
-
-Les migrations SQL sont dans `supabase/migrations/`. Pour les appliquer :
-
-1. Via l'interface Supabase :
-   - Dashboard → SQL Editor
-   - Exécutez les migrations dans l'ordre chronologique
-
-2. Ou via la CLI Supabase (si installée) :
-   ```bash
-   supabase db push
-   ```
-
-## Développement
-
-```bash
-# Démarrer le serveur de développement
-npm run dev
-```
-
-L'application sera accessible sur `http://localhost:5173`
-
-## Build Production
-
-```bash
-# Créer le build optimisé
-npm run build
-
-# Prévisualiser le build
-npm run preview
-```
-
-## Structure du Projet
-
-```
-belleya/
-├── src/
-│   ├── components/      # Composants réutilisables
-│   ├── pages/          # Pages de l'application
-│   ├── contexts/       # Context API React
-│   ├── lib/            # Utilitaires et helpers
-│   ├── i18n/           # Traductions (FR/EN)
-│   └── types/          # Types TypeScript
-├── supabase/
-│   ├── migrations/     # Migrations SQL
-│   └── functions/      # Edge Functions
-└── public/             # Assets statiques
-```
-
-## Fonctionnalités Principales
-
-### Pour les Professionnels
-- Gestion d'agenda synchronisé
-- Gestion de clientèle
-- Gestion financière et comptabilité
-- Studio de contenu et réseaux sociaux
-- Gestion des stocks
-- Système de réservation en ligne
-- Marketing automatisé
-
-### Pour les Clients
-- Recherche de professionnels
-- Réservation en ligne
-- Suivi des rendez-vous
-- Galerie de résultats
-- Système de favoris
-
-## Technologies
-
-- **Frontend** : React 18 + TypeScript + Vite
-- **Styling** : Tailwind CSS
-- **Backend** : Supabase (PostgreSQL + Auth + Storage)
-- **Maps** : Leaflet / Mapbox
-- **Internationalisation** : i18next
-
-## Accès Supabase pour l'Équipe
-
-### Donner accès à un membre
-
-1. Dans Supabase Dashboard :
-   - Settings → Team Settings
-   - Invite team member
-   - Entrez l'email du membre
-
-2. Le membre aura accès à :
-   - Database
-   - Storage
-   - Edge Functions
-   - Logs et monitoring
-
-### Niveaux d'accès
-
-- **Owner** : Accès complet (facturation, suppression)
-- **Admin** : Gestion projet sans facturation
-- **Developer** : Accès développement
-
-## Variables d'Environnement
-
-```env
-VITE_SUPABASE_URL=          # URL de votre projet Supabase
-VITE_SUPABASE_ANON_KEY=     # Clé publique (anon) Supabase
-```
-
-## Documentation Complémentaire
-
-- `BELLEYA_QUICKSTART.md` - Guide de démarrage rapide
-- `BELLEYA_FILES_INDEX.md` - Index des fichiers du projet
-- `ADMIN_SETUP.md` - Configuration du système admin
-- `PAYMENT_SYSTEM_GUIDE.md` - Intégration des paiements
-
-## Support
-
-Pour toute question :
-- Email : contact@belleya.fr
-- WhatsApp : https://chat.whatsapp.com/FkLVwP6EDMNCOO4PkASezY
-
-## Sécurité
-
-- Ne committez JAMAIS le fichier `.env`
-- Utilisez toujours les Row Level Security (RLS) policies
-- Les clés API doivent rester secrètes
-- Validez toutes les entrées utilisateur
-
-## Licence
-
-Propriété de Belleya - Tous droits réservés
