@@ -211,7 +211,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
   const copyLink = () => {
     if (!affiliate) return;
-    const link = `${window.location.origin}/?ref=${affiliate.ref_code}`;
+    const link = `https://belaya.app/${affiliate.ref_code}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     showToast('success', 'Lien copie dans le presse-papiers !');
@@ -313,7 +313,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
   const totalCommissions = commissions.reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
   const activeSignups = signups.filter(s => s.subscription_status === 'active').length;
-  const affiliateLink = `${window.location.origin}/?ref=${affiliate.ref_code}`;
+  const affiliateLink = `https://belaya.app/${affiliate.ref_code}`;
   const commissionRate = Number(affiliate.commission_rate || affiliate.base_commission_rate || 0.10) * 100;
   const rank = getRankConfig(affiliate.active_sub_count);
   const nextRank = getNextRank(affiliate.active_sub_count);

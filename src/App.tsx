@@ -42,6 +42,7 @@ import AffiliateLanding from './pages/AffiliateLanding';
 import AffiliateApply from './pages/AffiliateApply';
 import PartnerDashboard from './pages/PartnerDashboard';
 import ChatBot from './components/shared/ChatBot';
+import { supabase } from './lib/supabase';
 import TrialBanner from './components/shared/TrialBanner';
 import {
   Handshake,
@@ -124,6 +125,7 @@ function AppContent() {
   }, []);
 
   const [affiliatePage, setAffiliatePage] = useState<'landing' | 'apply' | 'dashboard' | null>(null);
+  const [affiliateCodeChecked, setAffiliateCodeChecked] = useState(false);
 
   const pathname = window.location.pathname;
   const isBookingPage = pathname.startsWith('/book/');
@@ -139,6 +141,67 @@ function AppContent() {
   const isAffiliateLandingPage = pathname === '/partenaire';
   const isAffiliateApplyPage = pathname === '/partenaire/apply';
   const isPartnerDashboardPage = pathname === '/partner/dashboard';
+
+  const KNOWN_ROUTES = [
+    '/', '/partenaire', '/partenaire/apply', '/partner/dashboard',
+    '/pricing', '/subscription-success', '/subscription-cancel',
+    '/mentions-legales', '/cgv', '/settings', '/diag-auth',
+  ];
+  const KNOWN_PREFIXES = ['/book/', '/provider/', '/profile/', '/training/students/'];
+
+  const isKnownRoute = KNOWN_ROUTES.includes(pathname)
+    || KNOWN_PREFIXES.some(p => pathname.startsWith(p))
+    || pathname === '';
+
+  const refParam = new URLSearchParams(window.location.search).get('ref');
+  if (refParam && !localStorage.getItem('belaya_ref')) {
+    localStorage.setItem('belaya_ref', refParam);
+    localStorage.setItem('belaya_ref_date', new Date().toISOString());
+    window.history.replaceState({}, '', pathname);
+  }
+
+  useEffect(() => {
+    if (affiliateCodeChecked) return;
+    if (isKnownRoute || pathname === '/') {
+      setAffiliateCodeChecked(true);
+      return;
+    }
+
+    const segments = pathname.replace(/^\//, '').split('/');
+    if (segments.length === 1 && /^[a-zA-Z0-9_-]{3,30}$/.test(segments[0])) {
+      const code = segments[0];
+      (async () => {
+        try {
+          const { data } = await supabase
+            .from('affiliates')
+            .select('id, ref_code')
+            .eq('ref_code', code)
+            .maybeSingle();
+
+          if (data) {
+            localStorage.setItem('belaya_ref', code);
+            localStorage.setItem('belaya_ref_date', new Date().toISOString());
+          }
+        } catch (e) {
+          console.error('[Affiliate] Error checking code:', e);
+        } finally {
+          window.history.replaceState({}, '', '/');
+          window.location.reload();
+        }
+      })();
+      return;
+    }
+
+    setAffiliateCodeChecked(true);
+  }, [pathname, isKnownRoute, affiliateCodeChecked]);
+
+  if (!affiliateCodeChecked && !isKnownRoute) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
 
   if (isBookingPage) {
     const slug = pathname.replace('/book/', '');

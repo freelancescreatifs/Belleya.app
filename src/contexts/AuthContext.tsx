@@ -200,7 +200,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (!profileLoaded) {
-          console.warn('[SignUp] ⚠️ Profile not found after all retries');
+          console.warn('[SignUp] Profile not found after all retries');
+        }
+
+        const refCode = localStorage.getItem('belaya_ref');
+        if (refCode) {
+          try {
+            const { data: affiliateData } = await supabase
+              .from('affiliates')
+              .select('id')
+              .eq('ref_code', refCode)
+              .maybeSingle();
+
+            if (affiliateData) {
+              await supabase.from('affiliate_signups').insert({
+                affiliate_id: affiliateData.id,
+                user_id: data.user.id,
+                first_name: firstName || null,
+                subscription_status: 'trialing',
+                attributed_at: new Date().toISOString(),
+              });
+
+              localStorage.removeItem('belaya_ref');
+              localStorage.removeItem('belaya_ref_date');
+            }
+          } catch (refErr) {
+            console.error('[SignUp] Error attributing affiliate:', refErr);
+          }
         }
       }
     } catch (err: any) {

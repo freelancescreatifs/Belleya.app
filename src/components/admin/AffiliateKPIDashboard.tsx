@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, TrendingUp, DollarSign, Zap, Clock, Loader2 } from 'lucide-react';
+import { Users, TrendingUp, DollarSign, Zap, Clock, Loader2, Percent } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface AffiliateKPIs {
@@ -10,6 +10,7 @@ interface AffiliateKPIs {
   commissionsMonth: number;
   commissionsTotal: number;
   pendingPayment: number;
+  avgCommissionRate: number;
 }
 
 export default function AffiliateKPIDashboard() {
@@ -21,6 +22,7 @@ export default function AffiliateKPIDashboard() {
     commissionsMonth: 0,
     commissionsTotal: 0,
     pendingPayment: 0,
+    avgCommissionRate: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -35,12 +37,17 @@ export default function AffiliateKPIDashboard() {
 
       const { data: affiliateRows } = await supabase
         .from('affiliates')
-        .select('id, status, is_active, active_referrals, active_sub_count, total_earned')
+        .select('id, status, is_active, active_referrals, active_sub_count, total_earned, commission_rate')
         .eq('program', 'belaya_affiliation');
 
       const affiliates = affiliateRows || [];
       const activeAffiliates = affiliates.filter(a => a.status === 'active').length;
       const activeSubscriptions = affiliates.reduce((s, a) => s + (a.active_sub_count || 0), 0);
+
+      const activeRates = affiliates.filter(a => a.status === 'active').map(a => Number(a.commission_rate || 0.10));
+      const avgCommissionRate = activeRates.length > 0
+        ? activeRates.reduce((s, r) => s + r, 0) / activeRates.length
+        : 0;
 
       const affiliateIds = affiliates.map(a => a.id);
 
@@ -91,6 +98,7 @@ export default function AffiliateKPIDashboard() {
         commissionsMonth,
         commissionsTotal,
         pendingPayment,
+        avgCommissionRate,
       });
     } catch (err) {
       console.error('Error loading affiliate KPIs:', err);
@@ -107,58 +115,114 @@ export default function AffiliateKPIDashboard() {
     );
   }
 
-  const cards = [
-    { icon: Users, label: 'Affiliés actifs', value: kpis.activeAffiliates, color: 'rose' },
-    { icon: TrendingUp, label: 'Clients convertis', value: kpis.totalConversions, color: 'emerald' },
-    { icon: Zap, label: 'Abos actifs apportés', value: kpis.activeSubscriptions, color: 'blue' },
-    { icon: DollarSign, label: 'MRR généré', value: `${kpis.mrrGenerated.toFixed(0)} €`, color: 'teal' },
-    { icon: DollarSign, label: 'Commission du mois', value: `${kpis.commissionsMonth.toFixed(0)} €`, color: 'amber' },
-    { icon: DollarSign, label: 'Commission totale', value: `${kpis.commissionsTotal.toFixed(0)} €`, color: 'green' },
-    { icon: Clock, label: 'À payer ce mois', value: `${kpis.pendingPayment.toFixed(0)} €`, color: 'orange' },
-  ];
-
-  const colorMap: Record<string, string> = {
-    rose: 'from-rose-50 to-pink-50 border-rose-200',
-    emerald: 'from-emerald-50 to-teal-50 border-emerald-200',
-    blue: 'from-blue-50 to-cyan-50 border-blue-200',
-    teal: 'from-teal-50 to-cyan-50 border-teal-200',
-    amber: 'from-amber-50 to-orange-50 border-amber-200',
-    green: 'from-green-50 to-emerald-50 border-green-200',
-    orange: 'from-orange-50 to-amber-50 border-orange-200',
-  };
-
-  const iconColorMap: Record<string, string> = {
-    rose: 'text-rose-600',
-    emerald: 'text-emerald-600',
-    blue: 'text-blue-600',
-    teal: 'text-teal-600',
-    amber: 'text-amber-600',
-    green: 'text-green-600',
-    orange: 'text-orange-600',
-  };
-
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">KPI Affiliés Belaya</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.label}
-              className={`bg-gradient-to-br ${colorMap[card.color]} rounded-xl p-4 border`}
-            >
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
-                  <Icon className={`w-4 h-4 ${iconColorMap[card.color]}`} />
-                </div>
-                <span className="text-xs font-medium text-gray-600 leading-tight">{card.label}</span>
-              </div>
-              <p className="text-xl font-bold text-gray-900">{card.value}</p>
-            </div>
-          );
-        })}
+    <div className="space-y-5">
+      <h2 className="text-xl font-semibold text-gray-900">KPI Affilies Belaya</h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <PrimaryKPICard
+          icon={Users}
+          label="Affilies actifs"
+          value={String(kpis.activeAffiliates)}
+          gradient="from-rose-50 to-pink-50"
+          border="border-rose-200"
+          iconColor="text-rose-600"
+          iconBg="bg-rose-100"
+        />
+        <PrimaryKPICard
+          icon={TrendingUp}
+          label="Clients convertis"
+          value={String(kpis.totalConversions)}
+          gradient="from-emerald-50 to-teal-50"
+          border="border-emerald-200"
+          iconColor="text-emerald-600"
+          iconBg="bg-emerald-100"
+        />
+        <PrimaryKPICard
+          icon={Zap}
+          label="Abos actifs apportes"
+          value={String(kpis.activeSubscriptions)}
+          gradient="from-blue-50 to-cyan-50"
+          border="border-blue-200"
+          iconColor="text-blue-600"
+          iconBg="bg-blue-100"
+        />
+        <PrimaryKPICard
+          icon={DollarSign}
+          label="MRR genere"
+          value={`${kpis.mrrGenerated.toFixed(0)} EUR`}
+          gradient="from-teal-50 to-cyan-50"
+          border="border-teal-200"
+          iconColor="text-teal-600"
+          iconBg="bg-teal-100"
+        />
       </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <SecondaryKPICard
+          icon={DollarSign}
+          label="Commission du mois"
+          value={`${kpis.commissionsMonth.toFixed(0)} EUR`}
+          iconColor="text-amber-600"
+        />
+        <SecondaryKPICard
+          icon={DollarSign}
+          label="Commission totale"
+          value={`${kpis.commissionsTotal.toFixed(0)} EUR`}
+          iconColor="text-green-600"
+        />
+        <SecondaryKPICard
+          icon={Clock}
+          label="A payer ce mois"
+          value={`${kpis.pendingPayment.toFixed(0)} EUR`}
+          iconColor="text-orange-600"
+        />
+        <SecondaryKPICard
+          icon={Percent}
+          label="Commission moy."
+          value={`${(kpis.avgCommissionRate * 100).toFixed(0)}%`}
+          iconColor="text-gray-600"
+        />
+      </div>
+    </div>
+  );
+}
+
+function PrimaryKPICard({ icon: Icon, label, value, gradient, border, iconColor, iconBg }: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  gradient: string;
+  border: string;
+  iconColor: string;
+  iconBg: string;
+}) {
+  return (
+    <div className={`bg-gradient-to-br ${gradient} rounded-xl p-5 border ${border}`}>
+      <div className="flex items-center gap-3 mb-3">
+        <div className={`w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center shadow-sm`}>
+          <Icon className={`w-5 h-5 ${iconColor}`} />
+        </div>
+        <span className="text-sm font-medium text-gray-600">{label}</span>
+      </div>
+      <p className="text-3xl font-bold text-gray-900">{value}</p>
+    </div>
+  );
+}
+
+function SecondaryKPICard({ icon: Icon, label, value, iconColor }: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  iconColor: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl p-4 border border-gray-200">
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+        <span className="text-xs font-medium text-gray-500">{label}</span>
+      </div>
+      <p className="text-xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }

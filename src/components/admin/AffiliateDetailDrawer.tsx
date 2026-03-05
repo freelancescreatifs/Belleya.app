@@ -79,7 +79,7 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
   const rank = getRank(affiliate.signups_count);
   const nextRank = getNextRank(affiliate.signups_count);
   const progress = getRankProgress(affiliate.signups_count);
-  const affiliateLink = `https://belaya.app/?ref=${affiliate.ref_code}`;
+  const affiliateLink = `https://belaya.app/${affiliate.ref_code}`;
 
   useEffect(() => {
     loadCommissions();
