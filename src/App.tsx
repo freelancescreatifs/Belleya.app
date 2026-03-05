@@ -127,6 +127,24 @@ function AppContent() {
   const [affiliatePage, setAffiliatePage] = useState<'landing' | 'apply' | 'dashboard' | null>(null);
   const [affiliateCodeChecked, setAffiliateCodeChecked] = useState(false);
 
+  useEffect(() => {
+    const syncAffiliateState = () => {
+      const loc = window.location.pathname;
+      if (loc === '/partenaire') {
+        setAffiliatePage('landing');
+      } else if (loc === '/partenaire/apply') {
+        setAffiliatePage('apply');
+      } else if (loc === '/partner/dashboard') {
+        setAffiliatePage('dashboard');
+      } else if (affiliatePage !== null) {
+        setAffiliatePage(null);
+      }
+    };
+
+    window.addEventListener('popstate', syncAffiliateState);
+    return () => window.removeEventListener('popstate', syncAffiliateState);
+  }, [affiliatePage]);
+
   const pathname = window.location.pathname;
   const isBookingPage = pathname.startsWith('/book/');
   const isProviderProfilePage = pathname.startsWith('/provider/');
@@ -170,25 +188,10 @@ function AppContent() {
     const segments = pathname.replace(/^\//, '').split('/');
     if (segments.length === 1 && /^[a-zA-Z0-9_-]{3,30}$/.test(segments[0])) {
       const code = segments[0];
-      (async () => {
-        try {
-          const { data } = await supabase
-            .from('affiliates')
-            .select('id, ref_code')
-            .eq('ref_code', code)
-            .maybeSingle();
-
-          if (data) {
-            localStorage.setItem('belaya_ref', code);
-            localStorage.setItem('belaya_ref_date', new Date().toISOString());
-          }
-        } catch (e) {
-          console.error('[Affiliate] Error checking code:', e);
-        } finally {
-          window.history.replaceState({}, '', '/');
-          window.location.reload();
-        }
-      })();
+      localStorage.setItem('belaya_ref', code);
+      localStorage.setItem('belaya_ref_date', new Date().toISOString());
+      window.history.replaceState({}, '', '/');
+      window.location.reload();
       return;
     }
 
@@ -304,8 +307,8 @@ function AppContent() {
     return (
       <PartnerDashboard
         onBack={() => {
-          setAffiliatePage(null);
-          window.history.pushState({}, '', '/');
+          setAffiliatePage('landing');
+          window.history.pushState({}, '', '/partenaire');
         }}
         onApply={() => {
           setAffiliatePage('apply');
