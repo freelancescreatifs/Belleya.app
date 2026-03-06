@@ -5,6 +5,7 @@ import {
   MessageSquare, Eye
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import LeadsVsSubscribersChart from '../partner/LeadsVsSubscribersChart';
 
 interface AffiliateRow {
   id: string;
@@ -298,6 +299,8 @@ export default function AdminAffiliateAnalytics() {
               ]}
             />
           </div>
+
+          <LeadsVsSubscribersChart />
         </div>
       )}
 

@@ -19,6 +19,7 @@ import ProspectsCRM from '../components/partner/LeadsCRM';
 import SharedMessages from '../components/partner/SharedMessages';
 import SalesTips from '../components/partner/SalesTips';
 import DashboardSettings from '../components/partner/DashboardSettings';
+import LeadsVsSubscribersChart from '../components/partner/LeadsVsSubscribersChart';
 
 interface Affiliate {
   id: string;
@@ -757,6 +758,7 @@ function DashboardOverview({
       />
 
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
+      <LeadsVsSubscribersChart />
       <DashboardRelance leads={leads} />
 
       {!affiliate.disable_leaderboard && <DashboardLeaderboard />}
