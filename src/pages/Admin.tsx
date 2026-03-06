@@ -9,6 +9,7 @@ import AffiliateApplicationsTab from '../components/admin/AffiliateApplicationsT
 import AffiliatePartnersTab from '../components/admin/AffiliatePartnersTab';
 import AffiliateKPIDashboard from '../components/admin/AffiliateKPIDashboard';
 import AdminAffiliateAnalytics from '../components/admin/AdminAffiliateAnalytics';
+import AdminClientsTab from '../components/admin/AdminClientsTab';
 
 type PeriodFilter = 'day' | 'month' | 'year';
 
@@ -1209,99 +1210,7 @@ export default function Admin() {
       )}
 
       {activeTab === 'clients' && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            <div className="relative flex-1 max-w-full sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par email ou nom..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-            </div>
-            <button
-              onClick={() => exportToCSV(filteredClients, 'clients')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Download className="w-5 h-5" />
-              Export CSV
-            </button>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nom</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date inscription</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Dernier login</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredClients.map((client) => (
-                    <tr key={client.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-4 text-sm text-gray-900">{client.email}</td>
-                      <td className="px-4 py-4 text-sm text-gray-900">
-                        {client.first_name || client.last_name
-                          ? `${client.first_name || ''} ${client.last_name || ''}`.trim()
-                          : '—'}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
-                        {new Date(client.created_at).toLocaleDateString('fr-FR')}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-600 whitespace-nowrap">
-                        {client.last_sign_in_at ? new Date(client.last_sign_in_at).toLocaleDateString('fr-FR') : '—'}
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => {
-                              setEditingUser(client);
-                              setEditingClientName({
-                                firstName: client.first_name || '',
-                                lastName: client.last_name || ''
-                              });
-                              setShowEditModal(true);
-                            }}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Modifier le client"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setUserToDelete(client)}
-                            disabled={deletingUserId === client.id}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Supprimer le client"
-                          >
-                            <span className="flex items-center justify-center w-4 h-4">
-                              {deletingUserId === client.id ? (
-                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 inline-block" />
-                              ) : (
-                                <Trash2 className="w-4 h-4" />
-                              )}
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {filteredClients.length === 0 && (
-              <div className="text-center py-12">
-                <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600">Aucun client trouvé</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <AdminClientsTab />
       )}
 
       {activeTab === 'rewards' && (
