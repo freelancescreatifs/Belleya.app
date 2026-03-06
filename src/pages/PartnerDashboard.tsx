@@ -169,8 +169,14 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
           supabase.rpc('sync_affiliate_signup_statuses').then(() => {}, () => {});
 
-          const [leadsRes, commissionsRes, compRes] = await Promise.allSettled([
-            supabase.rpc('get_affiliate_leads', { p_affiliate_id: affiliateData.id }),
+          const commissionRate = Number(affiliateData.commission_rate || affiliateData.base_commission_rate || 0.10);
+
+          const [signupsRes, commissionsRes, compRes] = await Promise.allSettled([
+            supabase
+              .from('affiliate_signups')
+              .select('id, first_name, subscription_status, trial_end_date, subscription_start_date, monthly_amount, created_at')
+              .eq('affiliate_id', affiliateData.id)
+              .order('created_at', { ascending: false }),
             supabase
               .from('affiliate_commissions')
               .select('*')
@@ -185,7 +191,44 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .limit(12),
           ]);
 
-          setLeads(leadsRes.status === 'fulfilled' ? leadsRes.value.data || [] : []);
+          const rawSignups = signupsRes.status === 'fulfilled' ? signupsRes.value.data || [] : [];
+          const computedLeads: AffiliateLead[] = rawSignups.map((s: any) => {
+            const trialEnd = s.trial_end_date ? new Date(s.trial_end_date) : new Date(new Date(s.created_at).getTime() + 14 * 86400000);
+            const now = new Date();
+            let computed_status: 'trialing' | 'active' | 'expired' | 'canceled' = 'trialing';
+            if (s.subscription_status === 'active') computed_status = 'active';
+            else if (s.subscription_status === 'canceled') computed_status = 'canceled';
+            else if (s.subscription_status === 'expired' || trialEnd < now) computed_status = 'expired';
+
+            const daysLeft = computed_status === 'trialing'
+              ? Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / 86400000))
+              : 0;
+
+            const monthlyAmt = Number(s.monthly_amount || 0);
+            const mrr = computed_status === 'active' ? (monthlyAmt > 0 ? monthlyAmt : 29) : 0;
+            const commission = mrr * commissionRate;
+
+            const planLabel = computed_status === 'active'
+              ? (monthlyAmt >= 49 ? 'Elite' : monthlyAmt >= 39 ? 'Pro' : 'Start')
+              : null;
+
+            return {
+              id: s.id,
+              first_name: s.first_name,
+              subscription_status: s.subscription_status,
+              computed_status,
+              days_left: daysLeft,
+              trial_end_date: s.trial_end_date,
+              subscription_start_date: s.subscription_start_date,
+              monthly_amount: monthlyAmt,
+              plan_label: planLabel,
+              mrr,
+              commission,
+              created_at: s.created_at,
+            };
+          });
+
+          setLeads(computedLeads);
           setCommissions(commissionsRes.status === 'fulfilled' ? commissionsRes.value.data || [] : []);
           setCompetitions(compRes.status === 'fulfilled' ? compRes.value.data || [] : []);
         }
@@ -758,7 +801,7 @@ function DashboardOverview({
       />
 
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
-      <LeadsVsSubscribersChart />
+      <LeadsVsSubscribersChart scopeAffiliateId={affiliate.id} />
       <DashboardRelance leads={leads} />
 
       {!affiliate.disable_leaderboard && <DashboardLeaderboard />}
