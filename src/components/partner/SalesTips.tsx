@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lightbulb, MessageSquare, Shield, Clock, ChevronDown, ChevronUp, Target, Sparkles, XCircle } from 'lucide-react';
+import { Lightbulb, MessageSquare, Shield, Clock, ChevronDown, ChevronUp, Target, Sparkles, XCircle, Instagram, Copy, Check, AlertTriangle } from 'lucide-react';
 
 const QUICK_GUIDES = [
   {
@@ -109,8 +109,28 @@ const OBJECTIONS = [
   },
 ];
 
+const BIO_MENTION = '@Affilie certifie de Belaya';
+
 export default function SalesTips() {
   const [expandedGuide, setExpandedGuide] = useState<number | null>(0);
+  const [bioCopied, setBioCopied] = useState(false);
+
+  const handleCopyBio = async () => {
+    try {
+      await navigator.clipboard.writeText(BIO_MENTION);
+      setBioCopied(true);
+      setTimeout(() => setBioCopied(false), 2000);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = BIO_MENTION;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setBioCopied(true);
+      setTimeout(() => setBioCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -187,6 +207,85 @@ export default function SalesTips() {
           <p className="text-xs text-gray-400 mt-3">
             Adapte ce message a ton style. L'important est d'etre naturelle et de montrer que tu connais leur metier.
           </p>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-sm">
+          <Instagram className="w-4 h-4 text-pink-500" />
+          Utiliser ton compte personnel pour prospecter
+        </h3>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+          <p className="text-sm text-gray-700 leading-relaxed">
+            Contacte les professionnelles de la beaute <span className="font-semibold">avec ton compte personnel Instagram</span> pour garder une approche naturelle et humaine.
+          </p>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-800 mb-1">Mention obligatoire dans ta bio</p>
+                <p className="text-sm text-amber-700 leading-relaxed">
+                  Pour garantir la transparence, tu dois indiquer dans ta bio Instagram que tu es affilie au programme Belaya.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex items-center justify-between gap-3">
+            <code className="text-sm font-medium text-gray-800">{BIO_MENTION}</code>
+            <button
+              onClick={handleCopyBio}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                bioCopied
+                  ? 'bg-green-100 text-green-700 border border-green-200'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              {bioCopied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  Copie !
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  Copier
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-xs font-semibold text-blue-800 mb-2">Pourquoi cette regle ?</p>
+            <p className="text-xs text-blue-700 leading-relaxed">
+              La prospection fonctionne mieux lorsqu'elle est faite par une personne reelle.
+              Mais il est important que les prospects sachent que tu fais partie du programme partenaire Belaya.
+              Cette mention dans ta bio permet d'etre clair, professionnel et transparent.
+            </p>
+          </div>
+
+          <div className="border-t border-gray-100 pt-4">
+            <p className="text-xs font-semibold text-gray-700 mb-2">Rappel important</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-start gap-2 text-xs text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5 flex-shrink-0" />
+                Utilise ton <span className="font-medium">compte personnel</span>
+              </li>
+              <li className="flex items-start gap-2 text-xs text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5 flex-shrink-0" />
+                Envoie des <span className="font-medium">messages personnalises</span>
+              </li>
+              <li className="flex items-start gap-2 text-xs text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5 flex-shrink-0" />
+                Evite le spam ou les copier-coller automatiques
+              </li>
+              <li className="flex items-start gap-2 text-xs text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5 flex-shrink-0" />
+                Propose l'<span className="font-medium">essai gratuit de 14 jours</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
