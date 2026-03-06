@@ -69,36 +69,37 @@ function BarChart({ data, color, suffix = '' }: {
 }) {
   const maxVal = Math.max(...data.map((d) => d.value), 1);
   const count = data.length;
-  const viewW = count * 80 + 40;
-  const viewH = 200;
-  const barArea = viewH - 44;
+  const viewW = count * 90 + 40;
+  const topPad = 28;
+  const bottomPad = 28;
+  const barMaxH = 140;
+  const viewH = topPad + barMaxH + bottomPad;
   const barSlot = (viewW - 40) / count;
 
   return (
     <div className="w-full">
       <svg
         width="100%"
-        height="100%"
         viewBox={`0 0 ${viewW} ${viewH}`}
         preserveAspectRatio="xMidYMid meet"
         className="block"
-        style={{ minHeight: 180 }}
+        style={{ height: 220 }}
       >
         {data.map((d, i) => {
-          const barH = Math.max(2, (d.value / maxVal) * (barArea - 10));
+          const barH = Math.max(3, (d.value / maxVal) * barMaxH);
           const x = 20 + i * barSlot + barSlot * 0.15;
           const w = barSlot * 0.7;
-          const y = barArea - barH;
+          const y = topPad + barMaxH - barH;
 
           return (
             <g key={i}>
-              <rect x={x} y={y} width={w} height={barH} rx={5} fill={color} opacity={0.85} className="transition-all duration-500" />
+              <rect x={x} y={y} width={w} height={barH} rx={6} fill={color} opacity={0.85} className="transition-all duration-500" />
               {d.value > 0 && (
-                <text x={x + w / 2} y={y - 6} textAnchor="middle" className="text-[11px] font-bold" fill="#374151">
+                <text x={x + w / 2} y={y - 8} textAnchor="middle" fontSize="12" fontWeight="700" fill="#374151">
                   {d.value}{suffix}
                 </text>
               )}
-              <text x={x + w / 2} y={viewH - 6} textAnchor="middle" className="text-[10px]" fill="#9CA3AF">
+              <text x={x + w / 2} y={viewH - 6} textAnchor="middle" fontSize="11" fill="#9CA3AF">
                 {d.label}
               </text>
             </g>

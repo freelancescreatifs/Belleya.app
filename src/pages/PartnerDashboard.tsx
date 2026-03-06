@@ -631,10 +631,10 @@ function CommunityDashboardOverview({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { icon: Users, label: 'Inscriptions', value: totalSignups, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { icon: Users, label: 'Inscriptions', value: totalSignups, color: 'text-blue-600', bg: 'bg-blue-50', tooltip: 'Nombre total de personnes inscrites via ton lien d\'affiliation (essais + abonnes)' },
           { icon: Clock, label: 'Essais en cours', value: trialing, color: 'text-amber-600', bg: 'bg-amber-50' },
           { icon: CheckCircle, label: 'Clients abonnes', value: activeSubs, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { icon: DollarSign, label: 'MRR genere', value: `${mrr.toFixed(0)} EUR`, color: 'text-emerald-700', bg: 'bg-emerald-50' },
+          { icon: DollarSign, label: 'MRR genere', value: `${mrr.toFixed(0)} EUR`, color: 'text-emerald-700', bg: 'bg-emerald-50', tooltip: 'Monthly Recurring Revenue : revenus mensuels recurrents generes par tes filleuls abonnes' },
           { icon: TrendingUp, label: 'Commission estimee', value: `${estimatedCommission.toFixed(2)} EUR`, color: 'text-blue-700', bg: 'bg-blue-50' },
           { icon: DollarSign, label: 'Total gagne', value: `${affiliate.total_earned.toFixed(2)} EUR`, color: 'text-gray-900', bg: 'bg-gray-100' },
         ].map(kpi => (
@@ -644,8 +644,19 @@ function CommunityDashboardOverview({
                 <kpi.icon className={`w-3.5 h-3.5 ${kpi.color}`} />
               </div>
             </div>
-            <p className="text-[11px] text-gray-500 mb-0.5">{kpi.label}</p>
-            <p className={`text-lg font-bold ${kpi.color}`}>{typeof kpi.value === 'number' ? kpi.value : kpi.value}</p>
+            <div className="flex items-center gap-1 mb-0.5">
+              <p className="text-[11px] text-gray-500">{kpi.label}</p>
+              {'tooltip' in kpi && kpi.tooltip && (
+                <div className="relative group">
+                  <Info className="w-3 h-3 text-gray-400 cursor-help" />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 w-48 bg-gray-800 text-white text-[10px] leading-tight rounded-lg px-2.5 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 shadow-lg">
+                    {kpi.tooltip}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800" />
+                  </div>
+                </div>
+              )}
+            </div>
+            <p className={`text-lg font-bold ${kpi.color}`}>{kpi.value}</p>
           </div>
         ))}
       </div>
