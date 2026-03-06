@@ -31,6 +31,7 @@ interface AffiliateData {
   phone?: string | null;
   instagram_url?: string | null;
   affiliate_type?: string;
+  avatar_url?: string | null;
 }
 
 const RANK_THRESHOLDS = [
@@ -159,10 +160,14 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
 
         <div className="p-6 space-y-6">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center shrink-0">
-              <span className="text-xl font-bold text-rose-600">
-                {(affiliate.full_name || 'A')[0].toUpperCase()}
-              </span>
+            <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center shrink-0 border-2 border-gray-200">
+              {affiliate.avatar_url ? (
+                <img src={affiliate.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xl font-bold text-rose-600">
+                  {(affiliate.full_name || 'A')[0].toUpperCase()}
+                </span>
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-xl font-bold text-gray-900 truncate">{affiliate.full_name || '---'}</h4>
@@ -339,12 +344,22 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
                   <label className="block text-xs font-medium text-gray-600 mb-1">Type d'affilie</label>
                   <select
                     value={form.affiliate_type}
-                    onChange={(e) => setForm(f => ({ ...f, affiliate_type: e.target.value }))}
+                    onChange={(e) => {
+                      const newType = e.target.value;
+                      setForm(f => ({
+                        ...f,
+                        affiliate_type: newType,
+                        commission_rate: newType === 'community' && f.commission_rate === 0.10 ? 0.15 : f.commission_rate,
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 bg-white"
                   >
                     <option value="sales">Affilie Commercial</option>
                     <option value="community">Affilie Communaute</option>
                   </select>
+                  {form.affiliate_type === 'community' && (
+                    <p className="text-xs text-sky-600 mt-0.5">Commission fixe a {(form.commission_rate * 100).toFixed(0)}% (modifiable ci-dessus)</p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <button

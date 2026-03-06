@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, Mail, Download, Trash2 } from 'lucide-react';
+import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, Mail, Download, Trash2, User } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
@@ -34,6 +34,7 @@ interface AffiliateData {
   phone?: string | null;
   instagram_url?: string | null;
   affiliate_type?: string;
+  avatar_url?: string | null;
 }
 
 interface LeaderboardEntry {
@@ -499,7 +500,16 @@ export default function AffiliatePartnersTab() {
                       return (
                         <tr key={aff.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-                            {aff.full_name || '---'}
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0 flex items-center justify-center">
+                                {aff.avatar_url ? (
+                                  <img src={aff.avatar_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  <User className="w-3.5 h-3.5 text-gray-400" />
+                                )}
+                              </div>
+                              {aff.full_name || '---'}
+                            </div>
                           </td>
                           <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap">{aff.email || '---'}</td>
                           <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap">

@@ -64,31 +64,24 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
         affiliateQuery = affiliateQuery.eq('id', scopeAffiliateId);
       }
 
-      const [affRes, leadsRes, signupsRes] = await Promise.all([
+      const [affRes, allSignupsRes] = await Promise.all([
         affiliateQuery,
-        supabase
-          .from('affiliate_crm_leads')
-          .select('id, affiliate_id, created_at')
-          .gte('created_at', startISO),
         supabase
           .from('affiliate_signups')
           .select('id, affiliate_id, subscription_status, created_at')
-          .eq('subscription_status', 'active')
           .gte('created_at', startISO),
       ]);
 
       const affiliates = affRes.data || [];
-      const allLeads = leadsRes.data || [];
-      const allSignups = signupsRes.data || [];
+      const allSignups = allSignupsRes.data || [];
 
       const leadsMap = new Map<string, number>();
-      allLeads.forEach((l: any) => {
-        leadsMap.set(l.affiliate_id, (leadsMap.get(l.affiliate_id) || 0) + 1);
-      });
-
       const subsMap = new Map<string, number>();
       allSignups.forEach((s: any) => {
-        subsMap.set(s.affiliate_id, (subsMap.get(s.affiliate_id) || 0) + 1);
+        leadsMap.set(s.affiliate_id, (leadsMap.get(s.affiliate_id) || 0) + 1);
+        if (s.subscription_status === 'active') {
+          subsMap.set(s.affiliate_id, (subsMap.get(s.affiliate_id) || 0) + 1);
+        }
       });
 
       const result: AffiliateEntry[] = affiliates
