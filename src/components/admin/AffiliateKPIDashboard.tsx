@@ -131,7 +131,7 @@ export default function AffiliateKPIDashboard() {
         />
         <PrimaryKPICard
           icon={TrendingUp}
-          label="Clients convertis"
+          label="Lead Essai en cours"
           value={String(kpis.totalConversions)}
           gradient="from-emerald-50 to-teal-50"
           border="border-emerald-200"
@@ -140,7 +140,7 @@ export default function AffiliateKPIDashboard() {
         />
         <PrimaryKPICard
           icon={Zap}
-          label="Abos actifs apportes"
+          label="Client Abonnée"
           value={String(kpis.activeSubscriptions)}
           gradient="from-blue-50 to-cyan-50"
           border="border-blue-200"
