@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, UserCheck, UserX, Search, Download, TrendingUp, ArrowRight } from 'lucide-react';
+import { Users, UserCheck, UserX, Search, Download, TrendingUp, ArrowRight, AlertTriangle, RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface ProviderClient {
@@ -24,8 +24,11 @@ type ClientSubTab = 'all' | 'converted' | 'non_converted';
 export default function AdminClientsTab() {
   const [clients, setClients] = useState<ProviderClient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [subTab, setSubTab] = useState<ClientSubTab>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   useEffect(() => {
     loadClients();
@@ -33,24 +36,94 @@ export default function AdminClientsTab() {
 
   const loadClients = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const { data, error } = await supabase.rpc('admin_get_all_provider_clients');
-      if (error) throw error;
-      setClients(data || []);
-    } catch (error) {
-      console.error('Error loading provider clients:', error);
+      const { data, error: rpcError } = await supabase.rpc('admin_get_all_provider_clients');
+      if (rpcError) {
+        console.error('RPC error, falling back to direct query:', rpcError);
+        await loadClientsFallback();
+        return;
+      }
+      if (!data || data.length === 0) {
+        console.warn('RPC returned 0 results, trying fallback');
+        await loadClientsFallback();
+        return;
+      }
+      setClients(data);
+    } catch (err: any) {
+      console.error('Error loading provider clients:', err);
+      await loadClientsFallback();
     } finally {
       setLoading(false);
     }
   };
 
+  const loadClientsFallback = async () => {
+    try {
+      const { data: clientsData, error: clientsError } = await supabase
+        .from('clients')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          created_at,
+          belaya_user_id,
+          is_archived,
+          is_vip,
+          is_fidele,
+          company_id,
+          company_profiles!clients_company_id_fkey (
+            company_name
+          )
+        `)
+        .eq('is_archived', false)
+        .order('created_at', { ascending: false });
+
+      if (clientsError) {
+        console.error('Fallback query error:', clientsError);
+        setError(`Erreur: ${clientsError.message}`);
+        setClients([]);
+        return;
+      }
+
+      const mapped: ProviderClient[] = (clientsData || []).map((c: any) => ({
+        client_id: c.id,
+        client_first_name: c.first_name || '',
+        client_last_name: c.last_name || '',
+        client_email: c.email,
+        client_phone: c.phone,
+        client_created_at: c.created_at,
+        provider_company_name: c.company_profiles?.company_name || null,
+        provider_email: null,
+        is_converted: !!c.belaya_user_id,
+        belaya_user_id: c.belaya_user_id,
+        belaya_registered_at: null,
+        is_archived: c.is_archived || false,
+        is_vip: c.is_vip || false,
+        is_fidele: c.is_fidele || false,
+      }));
+
+      setClients(mapped);
+      if (mapped.length === 0) {
+        setError('Aucun client trouve dans la base de donnees.');
+      }
+    } catch (err: any) {
+      console.error('Fallback error:', err);
+      setError(`Erreur: ${err.message || 'Impossible de charger les clients'}`);
+      setClients([]);
+    }
+  };
+
   const filtered = clients.filter(c => {
-    const matchesSearch =
-      (c.client_email && c.client_email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      c.client_first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.client_last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.provider_company_name && c.provider_company_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (c.provider_email && c.provider_email.toLowerCase().includes(searchQuery.toLowerCase()));
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = !query ||
+      (c.client_email && c.client_email.toLowerCase().includes(query)) ||
+      (c.client_first_name && c.client_first_name.toLowerCase().includes(query)) ||
+      (c.client_last_name && c.client_last_name.toLowerCase().includes(query)) ||
+      (c.provider_company_name && c.provider_company_name.toLowerCase().includes(query)) ||
+      (c.provider_email && c.provider_email.toLowerCase().includes(query));
 
     const matchesTab =
       subTab === 'all' ||
@@ -59,6 +132,13 @@ export default function AdminClientsTab() {
 
     return matchesSearch && matchesTab;
   });
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginatedClients = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, subTab]);
 
   const totalClients = clients.length;
   const convertedCount = clients.filter(c => c.is_converted).length;
@@ -110,6 +190,23 @@ export default function AdminClientsTab() {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-red-800">Probleme de chargement</p>
+            <p className="text-sm text-red-700 mt-1">{error}</p>
+          </div>
+          <button
+            onClick={loadClients}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium flex-shrink-0"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Reessayer
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200">
           <div className="flex items-center gap-2 mb-2">
@@ -194,6 +291,15 @@ export default function AdminClientsTab() {
         </div>
 
         <button
+          onClick={loadClients}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </button>
+
+        <button
           onClick={exportToCSV}
           className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
         >
@@ -218,7 +324,7 @@ export default function AdminClientsTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filtered.map((client) => (
+              {paginatedClients.map((client) => (
                 <tr key={client.client_id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
                     {client.is_converted ? (
@@ -240,11 +346,11 @@ export default function AdminClientsTab() {
                     {client.client_email || <span className="text-gray-400 italic">Aucun</span>}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
-                    {client.client_phone || '—'}
+                    {client.client_phone || '\u2014'}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
                     <div>
-                      <p className="font-medium text-gray-800">{client.provider_company_name || '—'}</p>
+                      <p className="font-medium text-gray-800">{client.provider_company_name || '\u2014'}</p>
                       <p className="text-xs text-gray-500">{client.provider_email || ''}</p>
                     </div>
                   </td>
@@ -257,7 +363,7 @@ export default function AdminClientsTab() {
                         {new Date(client.belaya_registered_at).toLocaleDateString('fr-FR')}
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-400">\u2014</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -275,7 +381,7 @@ export default function AdminClientsTab() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && (
+        {filtered.length === 0 && !error && (
           <div className="text-center py-12">
             <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-gray-600">Aucun client trouve</p>
@@ -283,7 +389,54 @@ export default function AdminClientsTab() {
         )}
       </div>
 
-      <p className="text-xs text-gray-500 text-right">{filtered.length} client(s) affiche(s)</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-500">
+          {filtered.length} client(s) au total - page {currentPage}/{Math.max(totalPages, 1)}
+        </p>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Precedent
+            </button>
+            {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+              let page: number;
+              if (totalPages <= 7) {
+                page = i + 1;
+              } else if (currentPage <= 4) {
+                page = i + 1;
+              } else if (currentPage >= totalPages - 3) {
+                page = totalPages - 6 + i;
+              } else {
+                page = currentPage - 3 + i;
+              }
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-8 h-8 text-sm rounded-lg transition-colors ${
+                    currentPage === page
+                      ? 'bg-[#E51E8F] text-white'
+                      : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Suivant
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
