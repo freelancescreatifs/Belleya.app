@@ -4,7 +4,7 @@ import {
   TrendingUp, ArrowLeft, Loader2, LogOut, Lock,
   AlertTriangle, Flame, Trophy, Crown, Shield, ChevronUp,
   Zap, LogIn, Eye, EyeOff, LayoutDashboard, UserCheck, Info,
-  Menu, X, Settings, Lightbulb
+  Menu, X, Settings, Lightbulb, Phone
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,14 +12,15 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from '../components/shared/ToastContainer';
 import DashboardStats from '../components/partner/DashboardStats';
 import DashboardCharts from '../components/partner/DashboardCharts';
-import DashboardRelance from '../components/partner/DashboardRelance';
 import DashboardLeaderboard from '../components/partner/DashboardLeaderboard';
 import DashboardCommissions from '../components/partner/DashboardCommissions';
 import ProspectsCRM from '../components/partner/LeadsCRM';
 import SharedMessages from '../components/partner/SharedMessages';
 import SalesTips from '../components/partner/SalesTips';
 import DashboardSettings from '../components/partner/DashboardSettings';
-import LeadsVsSubscribersChart from '../components/partner/LeadsVsSubscribersChart';
+import ConversionFunnel from '../components/partner/ConversionFunnel';
+import AffiliatePerformanceTable from '../components/partner/AffiliatePerformanceTable';
+import ContactEssaiGratuit from '../components/partner/ContactEssaiGratuit';
 
 interface Affiliate {
   id: string;
@@ -84,7 +85,7 @@ interface PartnerDashboardProps {
   onApply: () => void;
 }
 
-type ActiveSection = 'dashboard' | 'prospects' | 'signups' | 'conseils' | 'settings';
+type ActiveSection = 'dashboard' | 'prospects' | 'signups' | 'contact_essai' | 'conseils' | 'settings';
 
 const RANK_CONFIG = [
   { min: 0, max: 9, label: 'Recrue', rate: 10, icon: Shield, color: 'from-gray-500 to-gray-600', bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
@@ -124,6 +125,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [crmLeadCount, setCrmLeadCount] = useState(0);
 
   const loadData = useCallback(async (userId: string) => {
     setLoading(true);
@@ -169,9 +171,9 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
           supabase.rpc('sync_affiliate_signup_statuses').then(() => {}, () => {});
 
-          const commissionRate = Number(affiliateData.commission_rate || affiliateData.base_commission_rate || 0.10);
+          const commRate = Number(affiliateData.commission_rate || affiliateData.base_commission_rate || 0.10);
 
-          const [signupsRes, commissionsRes, compRes] = await Promise.allSettled([
+          const [signupsRes, commissionsRes, compRes, crmRes] = await Promise.allSettled([
             supabase
               .from('affiliate_signups')
               .select('id, first_name, subscription_status, trial_end_date, subscription_start_date, monthly_amount, created_at')
@@ -189,6 +191,10 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               .eq('affiliate_id', affiliateData.id)
               .order('month', { ascending: false })
               .limit(12),
+            supabase
+              .from('affiliate_crm_leads')
+              .select('id', { count: 'exact', head: true })
+              .eq('affiliate_id', affiliateData.id),
           ]);
 
           const rawSignups = signupsRes.status === 'fulfilled' ? signupsRes.value.data || [] : [];
@@ -206,7 +212,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
             const monthlyAmt = Number(s.monthly_amount || 0);
             const mrr = computed_status === 'active' ? (monthlyAmt > 0 ? monthlyAmt : 29) : 0;
-            const commission = mrr * commissionRate;
+            const commission = mrr * commRate;
 
             const planLabel = computed_status === 'active'
               ? (monthlyAmt >= 49 ? 'Elite' : monthlyAmt >= 39 ? 'Pro' : 'Start')
@@ -231,6 +237,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           setLeads(computedLeads);
           setCommissions(commissionsRes.status === 'fulfilled' ? commissionsRes.value.data || [] : []);
           setCompetitions(compRes.status === 'fulfilled' ? compRes.value.data || [] : []);
+          setCrmLeadCount(crmRes.status === 'fulfilled' ? crmRes.value.count || 0 : 0);
         }
       }
     } catch (err) {
@@ -359,7 +366,9 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
   const isCommunity = affiliate.affiliate_type === 'community';
 
-  const NAV_ITEMS: { key: ActiveSection; label: string; icon: React.ElementType }[] = isCommunity
+  const trialCount = leads.filter(l => l.computed_status === 'trialing').length;
+
+  const NAV_ITEMS: { key: ActiveSection; label: string; icon: React.ElementType; badge?: number }[] = isCommunity
     ? [
         { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { key: 'signups', label: 'Inscriptions', icon: Users },
@@ -369,6 +378,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
         { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { key: 'prospects', label: 'Prospects', icon: UserCheck },
         { key: 'signups', label: 'Inscriptions', icon: Users },
+        { key: 'contact_essai', label: 'Contact Essai', icon: Phone, badge: trialCount || undefined },
         { key: 'conseils', label: 'Conseils', icon: Lightbulb },
         { key: 'settings', label: 'Parametres', icon: Settings },
       ];
@@ -414,7 +424,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
         <aside className={`fixed lg:sticky top-[57px] left-0 h-[calc(100vh-57px)] w-60 bg-white border-r border-gray-200 z-20 transform transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} overflow-y-auto`}>
           <nav className="p-3 space-y-1">
-            {NAV_ITEMS.map(({ key, label, icon: Icon }) => (
+            {NAV_ITEMS.map(({ key, label, icon: Icon, badge }) => (
               <button
                 key={key}
                 onClick={() => handleNavClick(key)}
@@ -425,7 +435,12 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 }`}
               >
                 <Icon className="w-4.5 h-4.5" />
-                {label}
+                <span className="flex-1 text-left">{label}</span>
+                {badge && badge > 0 && (
+                  <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                    {badge}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -480,6 +495,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 affiliateLink={affiliateLink}
                 copied={copied}
                 copyLink={copyLink}
+                crmLeadCount={crmLeadCount}
               />
             ) : (
               <DashboardOverview
@@ -496,6 +512,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 copied={copied}
                 copyLink={copyLink}
                 showToast={showToast}
+                crmLeadCount={crmLeadCount}
               />
             )
           )}
@@ -530,6 +547,14 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               <h2 className="text-xl font-bold text-gray-900 mb-1">Inscriptions</h2>
               <p className="text-sm text-gray-500 mb-6">Personnes inscrites via ton lien affilie</p>
               <SignupsSection affiliate={affiliate} leads={leads} />
+            </div>
+          )}
+
+          {activeSection === 'contact_essai' && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Contact Essai Gratuit</h2>
+              <p className="text-sm text-gray-500 mb-6">Suis et relance les personnes en essai gratuit</p>
+              <ContactEssaiGratuit leads={leads} />
             </div>
           )}
 
@@ -573,7 +598,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 }
 
 function CommunityDashboardOverview({
-  affiliate, leads, commissionRate, affiliateLink, copied, copyLink,
+  affiliate, leads, commissionRate, affiliateLink, copied, copyLink, crmLeadCount,
 }: {
   affiliate: Affiliate;
   leads: AffiliateLead[];
@@ -581,6 +606,7 @@ function CommunityDashboardOverview({
   affiliateLink: string;
   copied: boolean;
   copyLink: () => void;
+  crmLeadCount: number;
 }) {
   const totalSignups = leads.length;
   const trialing = leads.filter(l => l.computed_status === 'trialing').length;
@@ -615,61 +641,31 @@ function CommunityDashboardOverview({
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
-              <Users className="w-3.5 h-3.5 text-blue-600" />
+        {[
+          { icon: Users, label: 'Inscriptions', value: totalSignups, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { icon: Clock, label: 'Essais en cours', value: trialing, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { icon: CheckCircle, label: 'Clients abonnes', value: activeSubs, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { icon: DollarSign, label: 'MRR genere', value: `${mrr.toFixed(0)} EUR`, color: 'text-emerald-700', bg: 'bg-emerald-50' },
+          { icon: TrendingUp, label: 'Commission estimee', value: `${estimatedCommission.toFixed(2)} EUR`, color: 'text-blue-700', bg: 'bg-blue-50' },
+          { icon: DollarSign, label: 'Total gagne', value: `${affiliate.total_earned.toFixed(2)} EUR`, color: 'text-gray-900', bg: 'bg-gray-100' },
+        ].map(kpi => (
+          <div key={kpi.label} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-7 h-7 ${kpi.bg} rounded-lg flex items-center justify-center`}>
+                <kpi.icon className={`w-3.5 h-3.5 ${kpi.color}`} />
+              </div>
             </div>
+            <p className="text-[11px] text-gray-500 mb-0.5">{kpi.label}</p>
+            <p className={`text-lg font-bold ${kpi.color}`}>{typeof kpi.value === 'number' ? kpi.value : kpi.value}</p>
           </div>
-          <p className="text-[11px] text-gray-500 mb-0.5">Inscriptions</p>
-          <p className="text-lg font-bold text-blue-600">{totalSignups}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center">
-              <Clock className="w-3.5 h-3.5 text-amber-600" />
-            </div>
-          </div>
-          <p className="text-[11px] text-gray-500 mb-0.5">Essais en cours</p>
-          <p className="text-lg font-bold text-amber-600">{trialing}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-            </div>
-          </div>
-          <p className="text-[11px] text-gray-500 mb-0.5">Clients abonnes</p>
-          <p className="text-lg font-bold text-emerald-600">{activeSubs}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-3.5 h-3.5 text-emerald-700" />
-            </div>
-          </div>
-          <p className="text-[11px] text-gray-500 mb-0.5">MRR genere</p>
-          <p className="text-lg font-bold text-emerald-700">{mrr.toFixed(0)} EUR</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-blue-700" />
-            </div>
-          </div>
-          <p className="text-[11px] text-gray-500 mb-0.5">Commission estimee</p>
-          <p className="text-lg font-bold text-blue-700">{estimatedCommission.toFixed(2)} EUR</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-3.5 h-3.5 text-gray-900" />
-            </div>
-          </div>
-          <p className="text-[11px] text-gray-500 mb-0.5">Total gagne</p>
-          <p className="text-lg font-bold text-gray-900">{affiliate.total_earned.toFixed(2)} EUR</p>
-        </div>
+        ))}
       </div>
+
+      <ConversionFunnel
+        crmLeadCount={crmLeadCount}
+        trialingCount={trialing + activeSubs}
+        activeCount={activeSubs}
+      />
 
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
 
@@ -698,7 +694,7 @@ function CommunityDashboardOverview({
 
 function DashboardOverview({
   affiliate, leads, commissions, competitions, commissionRate, rank, nextRank, progress, RankIcon,
-  affiliateLink, copied, copyLink, showToast,
+  affiliateLink, copied, copyLink, showToast, crmLeadCount,
 }: {
   affiliate: Affiliate;
   leads: AffiliateLead[];
@@ -713,7 +709,11 @@ function DashboardOverview({
   copied: boolean;
   copyLink: () => void;
   showToast: (type: string, msg: string) => void;
+  crmLeadCount: number;
 }) {
+  const trialingCount = leads.filter(l => l.computed_status === 'trialing').length;
+  const activeCount = leads.filter(l => l.computed_status === 'active').length;
+
   return (
     <div className="space-y-6">
       {affiliate.disable_tiers ? (
@@ -800,11 +800,17 @@ function DashboardOverview({
         totalEarned={affiliate.total_earned}
       />
 
+      <ConversionFunnel
+        crmLeadCount={crmLeadCount}
+        trialingCount={trialingCount + activeCount}
+        activeCount={activeCount}
+      />
+
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
-      <LeadsVsSubscribersChart scopeAffiliateId={affiliate.id} />
-      <DashboardRelance leads={leads} />
 
       {!affiliate.disable_leaderboard && <DashboardLeaderboard />}
+
+      <AffiliatePerformanceTable currentAffiliateId={affiliate.id} />
 
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -861,18 +867,74 @@ function DashboardOverview({
   );
 }
 
+type SignupFilter = 'all' | 'trialing' | 'active' | 'expired' | 'canceled';
+
+const SIGNUP_FILTERS: { key: SignupFilter; label: string; color: string }[] = [
+  { key: 'all', label: 'Tous', color: 'bg-gray-100 text-gray-700' },
+  { key: 'trialing', label: 'Essai gratuit', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { key: 'active', label: 'Client abonne', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { key: 'expired', label: 'N\'a pas pris', color: 'bg-red-50 text-red-700 border-red-200' },
+  { key: 'canceled', label: 'Annule', color: 'bg-gray-100 text-gray-600 border-gray-200' },
+];
+
+const CONVERSION_TIPS = [
+  {
+    title: 'Contacte avant la fin de l\'essai',
+    body: 'Le moment ideal est J-3, J-2 et J-1. C\'est la que le taux de conversion est le plus eleve.',
+  },
+  {
+    title: 'Pose les bonnes questions',
+    body: 'Demande-leur s\'ils ont teste la plateforme, s\'ils ont des questions, et ce qui les bloque.',
+  },
+  {
+    title: 'Mets en avant les benefices',
+    body: 'Gagner du temps, attirer plus de clientes et centraliser leur activite au meme endroit.',
+  },
+];
+
 function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: AffiliateLead[] }) {
+  const [filter, setFilter] = useState<SignupFilter>('all');
+
+  const filtered = filter === 'all' ? leads : leads.filter(l => l.computed_status === filter);
+
+  const counts: Record<SignupFilter, number> = {
+    all: leads.length,
+    trialing: leads.filter(l => l.computed_status === 'trialing').length,
+    active: leads.filter(l => l.computed_status === 'active').length,
+    expired: leads.filter(l => l.computed_status === 'expired').length,
+    canceled: leads.filter(l => l.computed_status === 'canceled').length,
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-xs text-gray-500 flex flex-wrap gap-x-6 gap-y-1">
         <span>Ref: <span className="font-mono font-medium text-gray-700">{affiliate.ref_code}</span></span>
-        <span>Leads: <span className="font-bold text-gray-700">{leads.length}</span></span>
+        <span>Total: <span className="font-bold text-gray-700">{leads.length}</span></span>
       </div>
+
+      <div className="flex flex-wrap gap-2">
+        {SIGNUP_FILTERS.map(f => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+              filter === f.key
+                ? `${f.color} border-current shadow-sm`
+                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            {f.label} ({counts[f.key]})
+          </button>
+        ))}
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200">
-        {leads.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="p-8 text-center">
             <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Aucune inscription pour le moment</p>
+            <p className="text-gray-500">
+              {filter === 'all' ? 'Aucune inscription pour le moment' : 'Aucun resultat pour ce filtre'}
+            </p>
             <p className="text-xs text-gray-400 mt-2">Les personnes inscrites via ton lien apparaitront ici</p>
           </div>
         ) : (
@@ -890,7 +952,7 @@ function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: Aff
                 </tr>
               </thead>
               <tbody>
-                {leads.map((s) => (
+                {filtered.map((s) => (
                   <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">{s.first_name || 'Utilisateur'}</td>
                     <td className="px-4 py-3"><StatusTag status={s.computed_status} daysLeft={s.days_left} /></td>
@@ -920,6 +982,26 @@ function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: Aff
           </div>
         )}
       </div>
+
+      <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl border border-blue-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Lightbulb className="w-5 h-5 text-blue-600" />
+          <h3 className="font-semibold text-gray-900">Conseils pour convertir tes essais</h3>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4">
+          {CONVERSION_TIPS.map((tip, i) => (
+            <div key={i} className="bg-white rounded-lg p-4 border border-blue-100">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {i + 1}
+                </span>
+                <h4 className="text-sm font-semibold text-gray-900">{tip.title}</h4>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">{tip.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -942,27 +1024,6 @@ function DashboardHeader({ onBack, onLogout }: { onBack: () => void; onLogout: (
         </button>
       </div>
     </header>
-  );
-}
-
-function KPICard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string; color?: string }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
-        <Icon className="w-4 h-4" />
-        {label}
-      </div>
-      <p className={`text-2xl font-bold ${color || 'text-gray-900'}`}>{value}</p>
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="font-medium text-gray-900">{value}</p>
-    </div>
   );
 }
 

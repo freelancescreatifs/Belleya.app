@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { BarChart3, TrendingUp, DollarSign, Users } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Users, TrendingUp, DollarSign } from 'lucide-react';
 
 interface AffiliateLead {
   id: string;
@@ -16,6 +16,8 @@ interface DashboardChartsProps {
   leads: AffiliateLead[];
   commissionRate: number;
 }
+
+type ChartTab = 'signups' | 'subscribers' | 'revenue';
 
 const MONTH_LABELS = [
   'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin',
@@ -60,17 +62,16 @@ function buildMonthlyData(leads: AffiliateLead[]) {
   return months;
 }
 
-function BarChart({ data, dataKey, color, suffix = '' }: {
+function BarChart({ data, color, suffix = '' }: {
   data: { label: string; value: number }[];
-  dataKey: string;
   color: string;
   suffix?: string;
 }) {
   const maxVal = Math.max(...data.map((d) => d.value), 1);
   const barWidth = Math.floor(240 / data.length);
   const chartWidth = barWidth * data.length + 40;
-  const chartHeight = 160;
-  const barArea = chartHeight - 40;
+  const chartHeight = 180;
+  const barArea = chartHeight - 44;
 
   return (
     <div className="overflow-x-auto">
@@ -83,34 +84,13 @@ function BarChart({ data, dataKey, color, suffix = '' }: {
 
           return (
             <g key={i}>
-              <rect
-                x={x}
-                y={y}
-                width={w}
-                height={barH}
-                rx={4}
-                className={`transition-all duration-500`}
-                fill={color}
-                opacity={0.85}
-              />
+              <rect x={x} y={y} width={w} height={barH} rx={5} fill={color} opacity={0.85} className="transition-all duration-500" />
               {d.value > 0 && (
-                <text
-                  x={x + w / 2}
-                  y={y - 6}
-                  textAnchor="middle"
-                  className="text-[11px] font-semibold"
-                  fill="#374151"
-                >
+                <text x={x + w / 2} y={y - 6} textAnchor="middle" className="text-[11px] font-bold" fill="#374151">
                   {d.value}{suffix}
                 </text>
               )}
-              <text
-                x={x + w / 2}
-                y={chartHeight - 6}
-                textAnchor="middle"
-                className="text-[10px]"
-                fill="#9CA3AF"
-              >
+              <text x={x + w / 2} y={chartHeight - 6} textAnchor="middle" className="text-[10px]" fill="#9CA3AF">
                 {d.label}
               </text>
             </g>
@@ -121,105 +101,71 @@ function BarChart({ data, dataKey, color, suffix = '' }: {
   );
 }
 
-function FunnelChart({ steps }: { steps: { label: string; value: number; color: string }[] }) {
-  const maxVal = Math.max(...steps.map((s) => s.value), 1);
-
-  return (
-    <div className="space-y-3">
-      {steps.map((step, i) => {
-        const pct = Math.max(8, (step.value / maxVal) * 100);
-        return (
-          <div key={i}>
-            <div className="flex items-center justify-between text-sm mb-1">
-              <span className="font-medium text-gray-700">{step.label}</span>
-              <span className="font-bold text-gray-900">{step.value}</span>
-            </div>
-            <div className="h-8 bg-gray-100 rounded-lg overflow-hidden">
-              <div
-                className="h-full rounded-lg transition-all duration-700 flex items-center justify-center"
-                style={{ width: `${pct}%`, backgroundColor: step.color }}
-              >
-                {pct > 20 && (
-                  <span className="text-white text-xs font-semibold">
-                    {step.value}
-                  </span>
-                )}
-              </div>
-            </div>
-            {i < steps.length - 1 && (
-              <div className="flex justify-center py-0.5">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M6 2L6 10M6 10L3 7M6 10L9 7" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+const TABS: { key: ChartTab; label: string; icon: React.ElementType; color: string }[] = [
+  { key: 'signups', label: 'Inscriptions', icon: Users, color: '#3B82F6' },
+  { key: 'subscribers', label: 'Abonnes', icon: TrendingUp, color: '#10B981' },
+  { key: 'revenue', label: 'Revenus', icon: DollarSign, color: '#059669' },
+];
 
 export default function DashboardCharts({ leads, commissionRate }: DashboardChartsProps) {
+  const [activeTab, setActiveTab] = useState<ChartTab>('signups');
   const monthlyData = useMemo(() => buildMonthlyData(leads), [leads]);
+
+  if (leads.length === 0) return null;
 
   const signupsData = monthlyData.map((m) => ({ label: m.label, value: m.signups }));
   const conversionsData = monthlyData.map((m) => ({ label: m.label, value: m.conversions }));
   const revenueData = monthlyData.map((m) => ({ label: m.label, value: Math.round(m.revenue) }));
 
-  const totalSignups = leads.length;
-  const totalTrialing = leads.filter((l) => l.computed_status === 'trialing').length;
-  const totalActive = leads.filter((l) => l.computed_status === 'active').length;
+  const total = activeTab === 'signups'
+    ? signupsData.reduce((s, d) => s + d.value, 0)
+    : activeTab === 'subscribers'
+    ? conversionsData.reduce((s, d) => s + d.value, 0)
+    : revenueData.reduce((s, d) => s + d.value, 0);
 
-  const funnelSteps = [
-    { label: 'Inscriptions', value: totalSignups, color: '#3B82F6' },
-    { label: 'Essais', value: totalTrialing + totalActive, color: '#F59E0B' },
-    { label: 'Clients abonnes', value: totalActive, color: '#10B981' },
-  ];
-
-  if (leads.length === 0) return null;
+  const currentTab = TABS.find(t => t.key === activeTab)!;
 
   return (
-    <div className="space-y-6">
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-900">Inscriptions par mois</h3>
-          </div>
-          <BarChart data={signupsData} dataKey="signups" color="#3B82F6" />
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-emerald-500" />
-            <h3 className="font-semibold text-gray-900">Clients abonnes par mois</h3>
-          </div>
-          <BarChart data={conversionsData} dataKey="conversions" color="#10B981" />
-        </div>
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="flex border-b border-gray-100">
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition-colors relative ${
+                isActive
+                  ? 'text-gray-900'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              {isActive && (
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full" style={{ backgroundColor: tab.color }} />
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-5 h-5 text-emerald-600" />
-            <h3 className="font-semibold text-gray-900">Revenus generes</h3>
-          </div>
-          <BarChart data={revenueData} dataKey="revenue" color="#059669" suffix=" EUR" />
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900 text-sm">
+            {activeTab === 'signups' && 'Inscriptions par mois'}
+            {activeTab === 'subscribers' && 'Clients abonnes par mois'}
+            {activeTab === 'revenue' && 'Revenus generes par mois'}
+          </h3>
+          <span className="text-sm font-bold" style={{ color: currentTab.color }}>
+            Total: {total}{activeTab === 'revenue' ? ' EUR' : ''}
+          </span>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="w-5 h-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-900">Funnel de conversion</h3>
-          </div>
-          <FunnelChart steps={funnelSteps} />
-          {totalSignups > 0 && (
-            <p className="text-xs text-gray-400 mt-4 text-center">
-              Taux de conversion : {Math.round((totalActive / totalSignups) * 100)}%
-            </p>
-          )}
-        </div>
+        {activeTab === 'signups' && <BarChart data={signupsData} color="#3B82F6" />}
+        {activeTab === 'subscribers' && <BarChart data={conversionsData} color="#10B981" />}
+        {activeTab === 'revenue' && <BarChart data={revenueData} color="#059669" suffix=" EUR" />}
       </div>
     </div>
   );

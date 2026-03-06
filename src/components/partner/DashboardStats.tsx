@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import {
-  Users, Clock, CheckCircle, TrendingUp, DollarSign, Zap, CalendarDays
+  Users, Clock, CheckCircle, TrendingUp, DollarSign, Zap, CalendarDays, Info
 } from 'lucide-react';
 
 interface AffiliateLead {
@@ -48,6 +48,18 @@ function isInPeriod(dateStr: string, period: Period): boolean {
   }
 }
 
+function Tooltip({ text }: { text: string }) {
+  return (
+    <div className="relative group/tip inline-flex ml-1">
+      <Info className="w-3 h-3 text-gray-400 cursor-help" />
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 bg-gray-900 text-white text-[10px] rounded-lg p-2 shadow-lg opacity-0 pointer-events-none group-hover/tip:opacity-100 group-hover/tip:pointer-events-auto transition-opacity z-20 leading-relaxed">
+        {text}
+        <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-1 w-2 h-2 bg-gray-900 rotate-45" />
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardStats({ leads, commissions, commissionRate, totalEarned }: DashboardStatsProps) {
   const [period, setPeriod] = useState<Period>('month');
 
@@ -72,13 +84,13 @@ export default function DashboardStats({ leads, commissions, commissionRate, tot
   ];
 
   const kpis = [
-    { icon: Users, label: 'Inscriptions totales', value: String(stats.totalSignups), color: 'text-blue-600', bg: 'bg-blue-50' },
-    { icon: Clock, label: 'Essais en cours', value: String(stats.trialing), color: 'text-amber-600', bg: 'bg-amber-50' },
-    { icon: CheckCircle, label: 'Conversions payantes', value: String(stats.paidConversions), color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { icon: TrendingUp, label: 'Taux de conversion', value: `${stats.conversionRate}%`, color: 'text-teal-600', bg: 'bg-teal-50' },
-    { icon: DollarSign, label: 'MRR genere', value: `${stats.mrr.toFixed(0)} EUR`, color: 'text-emerald-700', bg: 'bg-emerald-50' },
-    { icon: Zap, label: 'Commission estimee', value: `${stats.estimatedCommission.toFixed(2)} EUR`, color: 'text-blue-700', bg: 'bg-blue-50' },
-    { icon: DollarSign, label: 'Total gagne', value: `${totalEarned.toFixed(2)} EUR`, color: 'text-gray-900', bg: 'bg-gray-100' },
+    { icon: Users, label: 'Essais gratuits', value: String(stats.totalSignups), color: 'text-blue-600', bg: 'bg-blue-50', tooltip: 'Personnes inscrites en essai gratuit via ton lien' },
+    { icon: Clock, label: 'Essais en cours', value: String(stats.trialing), color: 'text-amber-600', bg: 'bg-amber-50', tooltip: 'Personnes actuellement en periode d\'essai' },
+    { icon: CheckCircle, label: 'Clients abonnes', value: String(stats.paidConversions), color: 'text-emerald-600', bg: 'bg-emerald-50', tooltip: 'Personnes ayant pris un abonnement payant actif' },
+    { icon: TrendingUp, label: 'Taux de conversion', value: `${stats.conversionRate}%`, color: 'text-teal-600', bg: 'bg-teal-50', tooltip: 'Pourcentage d\'inscrits devenus clients payants' },
+    { icon: DollarSign, label: 'MRR genere', value: `${stats.mrr.toFixed(0)} EUR`, color: 'text-emerald-700', bg: 'bg-emerald-50', tooltip: 'Revenus mensuels recurrents generes par tes filleuls' },
+    { icon: Zap, label: 'Commission estimee', value: `${stats.estimatedCommission.toFixed(2)} EUR`, color: 'text-blue-700', bg: 'bg-blue-50', tooltip: 'Ta commission estimee sur le MRR genere' },
+    { icon: DollarSign, label: 'Total gagne', value: `${totalEarned.toFixed(2)} EUR`, color: 'text-gray-900', bg: 'bg-gray-100', tooltip: 'Total de toutes tes commissions recues' },
   ];
 
   return (
@@ -111,6 +123,7 @@ export default function DashboardStats({ leads, commissions, commissionRate, tot
               <div className={`w-7 h-7 ${kpi.bg} rounded-lg flex items-center justify-center`}>
                 <kpi.icon className={`w-3.5 h-3.5 ${kpi.color}`} />
               </div>
+              {kpi.tooltip && <Tooltip text={kpi.tooltip} />}
             </div>
             <p className="text-[11px] text-gray-500 mb-0.5 leading-tight">{kpi.label}</p>
             <p className={`text-lg font-bold ${kpi.color}`}>{kpi.value}</p>
