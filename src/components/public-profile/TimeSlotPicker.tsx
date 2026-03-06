@@ -104,6 +104,42 @@ export default function TimeSlotPicker({
     }
   }
 
+  function mergeAvailableRanges(
+    daySlots: Array<{ start: string; end: string; available: boolean }>
+  ): Array<{ startMin: number; endMin: number }> {
+    const available = daySlots.filter((s) => s.available);
+    if (available.length === 0) return [];
+
+    const sorted = [...available].sort((a, b) => {
+      const [ah, am] = a.start.split(':').map(Number);
+      const [bh, bm] = b.start.split(':').map(Number);
+      return ah * 60 + am - (bh * 60 + bm);
+    });
+
+    const ranges: Array<{ startMin: number; endMin: number }> = [];
+    const [fh, fm] = sorted[0].start.split(':').map(Number);
+    const [feh, fem] = sorted[0].end.split(':').map(Number);
+    let curStart = fh * 60 + fm;
+    let curEnd = feh * 60 + fem;
+
+    for (let i = 1; i < sorted.length; i++) {
+      const [sh, sm] = sorted[i].start.split(':').map(Number);
+      const [eh, em] = sorted[i].end.split(':').map(Number);
+      const slotStart = sh * 60 + sm;
+      const slotEnd = eh * 60 + em;
+
+      if (slotStart <= curEnd) {
+        curEnd = Math.max(curEnd, slotEnd);
+      } else {
+        ranges.push({ startMin: curStart, endMin: curEnd });
+        curStart = slotStart;
+        curEnd = slotEnd;
+      }
+    }
+    ranges.push({ startMin: curStart, endMin: curEnd });
+    return ranges;
+  }
+
   function calculateTimeSlots(date: Date) {
     const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][date.getDay()];
     const dayAvailability = weeklyAvailability?.[dayName] || [];
@@ -113,20 +149,20 @@ export default function TimeSlotPicker({
       return;
     }
 
+    const ranges = mergeAvailableRanges(dayAvailability);
+    if (ranges.length === 0) {
+      setTimeSlots([]);
+      return;
+    }
+
     const slots: TimeSlot[] = [];
     const now = new Date();
     const minBookingTime = new Date(now.getTime() + advanceBookingHours * 60 * 60 * 1000);
 
-    dayAvailability.forEach((availability) => {
-      if (!availability.available) return;
+    ranges.forEach((range) => {
+      let currentTime = range.startMin;
 
-      const [startHour, startMin] = availability.start.split(':').map(Number);
-      const [endHour, endMin] = availability.end.split(':').map(Number);
-
-      let currentTime = startHour * 60 + startMin;
-      const endTime = endHour * 60 + endMin;
-
-      while (currentTime + totalDuration <= endTime) {
+      while (currentTime + totalDuration <= range.endMin) {
         const hours = Math.floor(currentTime / 60);
         const minutes = currentTime % 60;
         const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;

@@ -24,6 +24,43 @@ const DAYS_MAP: { [key: number]: string } = {
 
 const BLOCKING_EVENT_TYPES = ['client', 'personal', 'pro', 'formation', 'google', 'planity'];
 
+function mergeAvailableRanges(
+  daySchedule: Array<{ start: string; end: string; available: boolean }>
+): Array<{ start: number; end: number }> {
+  const available = daySchedule.filter((s) => s.available);
+  if (available.length === 0) return [];
+
+  const sorted = [...available].sort((a, b) => {
+    const [ah, am] = a.start.split(':').map(Number);
+    const [bh, bm] = b.start.split(':').map(Number);
+    return ah * 60 + am - (bh * 60 + bm);
+  });
+
+  const ranges: Array<{ start: number; end: number }> = [];
+  const [firstH, firstM] = sorted[0].start.split(':').map(Number);
+  const [firstEH, firstEM] = sorted[0].end.split(':').map(Number);
+  let currentStart = firstH * 60 + firstM;
+  let currentEnd = firstEH * 60 + firstEM;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const [sh, sm] = sorted[i].start.split(':').map(Number);
+    const [eh, em] = sorted[i].end.split(':').map(Number);
+    const slotStart = sh * 60 + sm;
+    const slotEnd = eh * 60 + em;
+
+    if (slotStart <= currentEnd) {
+      currentEnd = Math.max(currentEnd, slotEnd);
+    } else {
+      ranges.push({ start: currentStart, end: currentEnd });
+      currentStart = slotStart;
+      currentEnd = slotEnd;
+    }
+  }
+  ranges.push({ start: currentStart, end: currentEnd });
+
+  return ranges;
+}
+
 export function isTimeInOpeningHours(
   date: Date,
   time: string,
@@ -41,17 +78,9 @@ export function isTimeInOpeningHours(
   const slotStart = hours * 60 + minutes;
   const slotEnd = slotStart + durationMinutes;
 
-  return daySchedule.some((slot) => {
-    if (!slot.available) return false;
+  const ranges = mergeAvailableRanges(daySchedule);
 
-    const [slotStartHour, slotStartMin] = slot.start.split(':').map(Number);
-    const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
-
-    const scheduleStart = slotStartHour * 60 + slotStartMin;
-    const scheduleEnd = slotEndHour * 60 + slotEndMin;
-
-    return slotStart >= scheduleStart && slotEnd <= scheduleEnd;
-  });
+  return ranges.some((range) => slotStart >= range.start && slotEnd <= range.end);
 }
 
 export function isSlotBlocked(
