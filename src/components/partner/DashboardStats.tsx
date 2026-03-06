@@ -1,95 +1,122 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
-import { TrendingUp, Users, DollarSign, Zap, Loader as Loader2 } from 'lucide-react';
-import { formatEUR } from '../../lib/affiliateUtils';
+import { useState, useMemo } from 'react';
+import {
+  Users, Clock, CheckCircle, TrendingUp, DollarSign, Zap, CalendarDays
+} from 'lucide-react';
 
-interface Stats {
-  totalSignups: number;
-  signups30d: number;
-  activeSubs: number;
-  mrrGenerated: number;
-  commissionMonth: number;
-  commissionTotal: number;
+interface AffiliateLead {
+  id: string;
+  first_name: string | null;
+  computed_status: 'trialing' | 'active' | 'expired' | 'canceled';
+  days_left: number;
+  mrr: number;
+  commission: number;
+  created_at: string;
+  subscription_start_date: string | null;
 }
 
-export default function DashboardStats({ affiliateId }: { affiliateId: string }) {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
+interface AffiliateCommission {
+  id: string;
+  period: string;
+  commission_amount: number;
+  mrr: number;
+  status: string;
+  created_at: string;
+}
 
-  useEffect(() => {
-    loadStats();
-  }, [affiliateId]);
+type Period = 'day' | 'month' | 'year';
 
-  const loadStats = async () => {
-    try {
-      const now = new Date();
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+interface DashboardStatsProps {
+  leads: AffiliateLead[];
+  commissions: AffiliateCommission[];
+  commissionRate: number;
+  totalEarned: number;
+}
 
-      const [totalRes, monthRes, commissionsRes, commissionsMonthRes] = await Promise.all([
-        supabase.from('affiliate_signups').select('id', { count: 'exact', head: true }).eq('affiliate_id', affiliateId),
-        supabase.from('affiliate_signups').select('id', { count: 'exact', head: true }).eq('affiliate_id', affiliateId).gte('created_at', thirtyDaysAgo.toISOString()),
-        supabase.from('affiliate_commissions').select('commission_amount, mrr').eq('affiliate_id', affiliateId),
-        supabase.from('affiliate_commissions').select('commission_amount').eq('affiliate_id', affiliateId).eq('period', currentMonth),
-      ]);
-
-      const commTotal = (commissionsRes.data || []).reduce((s, c) => s + Number(c.commission_amount || 0), 0);
-      const mrrTotal = (commissionsRes.data || []).reduce((s, c) => s + Number(c.mrr || 0), 0);
-      const commMonth = (commissionsMonthRes.data || []).reduce((s, c) => s + Number(c.commission_amount || 0), 0);
-
-      const { count: activeSubsCount } = await supabase
-        .from('affiliate_signups')
-        .select('id', { count: 'exact', head: true })
-        .eq('affiliate_id', affiliateId)
-        .eq('subscription_status', 'active');
-
-      setStats({
-        totalSignups: totalRes.count || 0,
-        signups30d: monthRes.count || 0,
-        activeSubs: activeSubsCount || 0,
-        mrrGenerated: mrrTotal,
-        commissionMonth: commMonth,
-        commissionTotal: commTotal,
-      });
-    } catch (err) {
-      console.error('Stats load error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
+function isInPeriod(dateStr: string, period: Period): boolean {
+  const d = new Date(dateStr);
+  const now = new Date();
+  switch (period) {
+    case 'day':
+      return d.getDate() === now.getDate() &&
+        d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear();
+    case 'month':
+      return d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear();
+    case 'year':
+      return d.getFullYear() === now.getFullYear();
   }
+}
 
-  if (!stats) return null;
+export default function DashboardStats({ leads, commissions, commissionRate, totalEarned }: DashboardStatsProps) {
+  const [period, setPeriod] = useState<Period>('month');
 
-  const cards = [
-    { label: 'Conversions totales', value: stats.totalSignups, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Conversions 30j', value: stats.signups30d, icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Abos actifs', value: stats.activeSubs, icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'MRR genere', value: formatEUR(stats.mrrGenerated), icon: DollarSign, color: 'text-teal-600', bg: 'bg-teal-50' },
-    { label: 'Commission ce mois', value: formatEUR(stats.commissionMonth), icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Commission totale', value: formatEUR(stats.commissionTotal), icon: DollarSign, color: 'text-rose-600', bg: 'bg-rose-50' },
+  const stats = useMemo(() => {
+    const filteredLeads = leads.filter(l => isInPeriod(l.created_at, period));
+    const totalSignups = filteredLeads.length;
+    const trialing = filteredLeads.filter(l => l.computed_status === 'trialing').length;
+    const paidConversions = filteredLeads.filter(l => l.computed_status === 'active').length;
+    const conversionRate = totalSignups > 0 ? Math.round((paidConversions / totalSignups) * 100) : 0;
+    const mrr = filteredLeads
+      .filter(l => l.computed_status === 'active')
+      .reduce((sum, l) => sum + Number(l.mrr || 0), 0);
+    const estimatedCommission = mrr * (commissionRate / 100);
+
+    return { totalSignups, trialing, paidConversions, conversionRate, mrr, estimatedCommission };
+  }, [leads, period, commissionRate]);
+
+  const periods: { key: Period; label: string }[] = [
+    { key: 'day', label: 'Jour' },
+    { key: 'month', label: 'Mois' },
+    { key: 'year', label: 'Annee' },
+  ];
+
+  const kpis = [
+    { icon: Users, label: 'Inscriptions totales', value: String(stats.totalSignups), color: 'text-blue-600', bg: 'bg-blue-50' },
+    { icon: Clock, label: 'Essais en cours', value: String(stats.trialing), color: 'text-amber-600', bg: 'bg-amber-50' },
+    { icon: CheckCircle, label: 'Conversions payantes', value: String(stats.paidConversions), color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { icon: TrendingUp, label: 'Taux de conversion', value: `${stats.conversionRate}%`, color: 'text-teal-600', bg: 'bg-teal-50' },
+    { icon: DollarSign, label: 'MRR genere', value: `${stats.mrr.toFixed(0)} EUR`, color: 'text-emerald-700', bg: 'bg-emerald-50' },
+    { icon: Zap, label: 'Commission estimee', value: `${stats.estimatedCommission.toFixed(2)} EUR`, color: 'text-blue-700', bg: 'bg-blue-50' },
+    { icon: DollarSign, label: 'Total gagne', value: `${totalEarned.toFixed(2)} EUR`, color: 'text-gray-900', bg: 'bg-gray-100' },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      {cards.map((card) => (
-        <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-2 mb-2">
-            <div className={`w-8 h-8 ${card.bg} rounded-lg flex items-center justify-center`}>
-              <card.icon className={`w-4 h-4 ${card.color}`} />
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 mb-0.5">{card.label}</p>
-          <p className="text-lg font-bold text-gray-900">{card.value}</p>
+    <div className="bg-white rounded-2xl border border-gray-200 p-5">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="w-5 h-5 text-gray-500" />
+          <h3 className="font-semibold text-gray-900">Performance</h3>
         </div>
-      ))}
+        <div className="flex bg-gray-100 rounded-lg p-0.5">
+          {periods.map(p => (
+            <button
+              key={p.key}
+              onClick={() => setPeriod(p.key)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                period === p.key
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {kpis.map(kpi => (
+          <div key={kpi.label} className="bg-gray-50 rounded-xl p-4 border border-gray-100 hover:border-gray-200 transition-colors">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-7 h-7 ${kpi.bg} rounded-lg flex items-center justify-center`}>
+                <kpi.icon className={`w-3.5 h-3.5 ${kpi.color}`} />
+              </div>
+            </div>
+            <p className="text-[11px] text-gray-500 mb-0.5 leading-tight">{kpi.label}</p>
+            <p className={`text-lg font-bold ${kpi.color}`}>{kpi.value}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

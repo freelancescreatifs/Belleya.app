@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
 import ToastContainer from '../components/shared/ToastContainer';
+import DashboardStats from '../components/partner/DashboardStats';
 import DashboardCharts from '../components/partner/DashboardCharts';
 import DashboardRelance from '../components/partner/DashboardRelance';
 import DashboardLeaderboard from '../components/partner/DashboardLeaderboard';
@@ -306,18 +307,6 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const progress = getRankProgress(affiliate.active_sub_count);
   const RankIcon = rank.icon;
 
-  const now = new Date();
-  const activeSignups = leads.filter(s => s.computed_status === 'active').length;
-  const trialingSignups = leads.filter(s => s.computed_status === 'trialing').length;
-  const totalInscriptions = leads.length;
-  const activeMRR = leads.filter(s => s.computed_status === 'active').reduce((sum, s) => sum + Number(s.mrr || 0), 0);
-  const currentMonthCommission = commissions
-    .filter(c => { const d = new Date(c.created_at); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); })
-    .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
-  const estimatedCommission = currentMonthCommission > 0
-    ? currentMonthCommission
-    : activeMRR * Number(affiliate.commission_rate || affiliate.base_commission_rate || 0.10);
-
   const isObservation = affiliate.status === 'observation';
   const isDisabled = affiliate.status === 'disabled';
   const isInZoneRouge = affiliate.days_since_last_signup >= 7;
@@ -442,11 +431,6 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
               affiliateLink={affiliateLink}
               copied={copied}
               copyLink={copyLink}
-              totalInscriptions={totalInscriptions}
-              trialingSignups={trialingSignups}
-              activeSignups={activeSignups}
-              activeMRR={activeMRR}
-              estimatedCommission={estimatedCommission}
               showToast={showToast}
             />
           )}
@@ -525,7 +509,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
 function DashboardOverview({
   affiliate, leads, commissions, competitions, commissionRate, rank, nextRank, progress, RankIcon,
-  affiliateLink, copied, copyLink, totalInscriptions, trialingSignups, activeSignups, activeMRR, estimatedCommission, showToast,
+  affiliateLink, copied, copyLink, showToast,
 }: {
   affiliate: Affiliate;
   leads: AffiliateLead[];
@@ -539,11 +523,6 @@ function DashboardOverview({
   affiliateLink: string;
   copied: boolean;
   copyLink: () => void;
-  totalInscriptions: number;
-  trialingSignups: number;
-  activeSignups: number;
-  activeMRR: number;
-  estimatedCommission: number;
   showToast: (type: string, msg: string) => void;
 }) {
   return (
@@ -625,38 +604,23 @@ function DashboardOverview({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <KPICard icon={Users} label="Inscriptions totales" value={String(totalInscriptions)} color="text-blue-600" />
-        <KPICard icon={Clock} label="Essais en cours" value={String(trialingSignups)} color="text-amber-600" />
-        <KPICard icon={CheckCircle} label="Conversions payantes" value={String(activeSignups)} color="text-emerald-600" />
-        <KPICard icon={TrendingUp} label="Taux de conversion" value={totalInscriptions > 0 ? `${Math.round((activeSignups / totalInscriptions) * 100)}%` : '0%'} color="text-teal-600" />
-        <KPICard icon={DollarSign} label="MRR genere" value={`${activeMRR.toFixed(0)} EUR`} color="text-emerald-700" />
-        <KPICard icon={DollarSign} label="Commission estimee" value={`${estimatedCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
-      </div>
+      <DashboardStats
+        leads={leads}
+        commissions={commissions}
+        commissionRate={commissionRate}
+        totalEarned={affiliate.total_earned}
+      />
 
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
       <DashboardRelance leads={leads} />
 
-      {!affiliate.disable_leaderboard && (
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" />
-            Leaderboard
-          </h3>
-          <DashboardLeaderboard />
-        </div>
-      )}
+      {!affiliate.disable_leaderboard && <DashboardLeaderboard />}
 
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
           <DollarSign className="w-5 h-5 text-emerald-600" />
           Commissions
         </h3>
-        <div className="grid sm:grid-cols-3 gap-4 mb-4">
-          <KPICard icon={DollarSign} label="Commission ce mois" value={`${estimatedCommission.toFixed(2)} EUR`} color="text-belaya-deep" />
-          <KPICard icon={TrendingUp} label="MRR genere" value={`${activeMRR.toFixed(0)} EUR`} color="text-emerald-700" />
-          <KPICard icon={DollarSign} label="Total gagne" value={`${affiliate.total_earned.toFixed(2)} EUR`} color="text-gray-900" />
-        </div>
         <DashboardCommissions affiliateId={affiliate.id} />
       </div>
 
@@ -664,7 +628,7 @@ function DashboardOverview({
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-500" />
-            Challenges mensuels
+            Historique challenges
           </h3>
           <div className="space-y-3">
             {competitions.map((c) => (
