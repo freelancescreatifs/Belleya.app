@@ -1,15 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { BarChart3, Loader2, Users, UserCheck } from 'lucide-react';
+import { BarChart3, Loader2, Users, UserCheck, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 type Period = 'day' | 'month' | 'year';
-type ActiveTab = 'leads' | 'subscribers';
+type ActiveTab = 'leads' | 'trials' | 'subscribers';
 
 interface AffiliateEntry {
   affiliate_id: string;
   full_name: string;
   avatar_url: string | null;
   leads_count: number;
+  trials_count: number;
   subscribers_count: number;
 }
 
@@ -76,9 +77,13 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
       const allSignups = allSignupsRes.data || [];
 
       const leadsMap = new Map<string, number>();
+      const trialsMap = new Map<string, number>();
       const subsMap = new Map<string, number>();
       allSignups.forEach((s: any) => {
         leadsMap.set(s.affiliate_id, (leadsMap.get(s.affiliate_id) || 0) + 1);
+        if (s.subscription_status === 'trialing') {
+          trialsMap.set(s.affiliate_id, (trialsMap.get(s.affiliate_id) || 0) + 1);
+        }
         if (s.subscription_status === 'active') {
           subsMap.set(s.affiliate_id, (subsMap.get(s.affiliate_id) || 0) + 1);
         }
@@ -90,10 +95,11 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
           full_name: a.full_name || 'Anonyme',
           avatar_url: a.avatar_url || null,
           leads_count: leadsMap.get(a.id) || 0,
+          trials_count: trialsMap.get(a.id) || 0,
           subscribers_count: subsMap.get(a.id) || 0,
         }))
-        .filter((e: AffiliateEntry) => e.leads_count > 0 || e.subscribers_count > 0)
-        .sort((a: AffiliateEntry, b: AffiliateEntry) => (b.leads_count + b.subscribers_count) - (a.leads_count + a.subscribers_count))
+        .filter((e: AffiliateEntry) => e.leads_count > 0 || e.trials_count > 0 || e.subscribers_count > 0)
+        .sort((a: AffiliateEntry, b: AffiliateEntry) => (b.leads_count + b.trials_count + b.subscribers_count) - (a.leads_count + a.trials_count + a.subscribers_count))
         .slice(0, 12);
 
       setEntries(result);
@@ -125,6 +131,7 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
 
   const tabConfig = {
     leads: { label: 'Leads ajoutes', icon: Users, color: '#3B82F6', tailwind: 'blue' },
+    trials: { label: 'Inscription - Essai en cours', icon: UserPlus, color: '#F59E0B', tailwind: 'amber' },
     subscribers: { label: 'Clients abonnes', icon: UserCheck, color: '#10B981', tailwind: 'emerald' },
   };
 
@@ -133,6 +140,7 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
   const sortedEntries = useMemo(() => {
     return [...entries].sort((a, b) => {
       if (activeTab === 'leads') return b.leads_count - a.leads_count;
+      if (activeTab === 'trials') return b.trials_count - a.trials_count;
       return b.subscribers_count - a.subscribers_count;
     });
   }, [entries, activeTab]);
@@ -163,26 +171,36 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
           const cfg = tabConfig[key];
           const Icon = cfg.icon;
           const isActive = activeTab === key;
+          const activeStyles: Record<ActiveTab, string> = {
+            leads: 'border-blue-500 text-blue-700 bg-blue-50/50',
+            trials: 'border-amber-500 text-amber-700 bg-amber-50/50',
+            subscribers: 'border-emerald-500 text-emerald-700 bg-emerald-50/50',
+          };
+          const badgeStyles: Record<ActiveTab, string> = {
+            leads: 'bg-blue-100 text-blue-700',
+            trials: 'bg-amber-100 text-amber-700',
+            subscribers: 'bg-emerald-100 text-emerald-700',
+          };
+          const getCount = (k: ActiveTab) => {
+            if (k === 'leads') return entries.reduce((s, e) => s + e.leads_count, 0);
+            if (k === 'trials') return entries.reduce((s, e) => s + e.trials_count, 0);
+            return entries.reduce((s, e) => s + e.subscribers_count, 0);
+          };
           return (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
-                isActive
-                  ? key === 'leads'
-                    ? 'border-blue-500 text-blue-700 bg-blue-50/50'
-                    : 'border-emerald-500 text-emerald-700 bg-emerald-50/50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-medium transition-all border-b-2 ${
+                isActive ? activeStyles[key] : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {cfg.label}
+              <span className="hidden sm:inline">{cfg.label}</span>
+              <span className="sm:hidden text-xs">{key === 'leads' ? 'Leads' : key === 'trials' ? 'Essais' : 'Abonnes'}</span>
               <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                isActive
-                  ? key === 'leads' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
-                  : 'bg-gray-100 text-gray-500'
+                isActive ? badgeStyles[key] : 'bg-gray-100 text-gray-500'
               }`}>
-                {entries.reduce((s, e) => s + (key === 'leads' ? e.leads_count : e.subscribers_count), 0)}
+                {getCount(key)}
               </span>
             </button>
           );
@@ -215,7 +233,11 @@ function BarChartSVG({ entries, activeTab, barColor, hoveredIdx, setHoveredIdx }
   hoveredIdx: number | null;
   setHoveredIdx: (idx: number | null) => void;
 }) {
-  const getValue = (e: AffiliateEntry) => activeTab === 'leads' ? e.leads_count : e.subscribers_count;
+  const getValue = (e: AffiliateEntry) => {
+    if (activeTab === 'leads') return e.leads_count;
+    if (activeTab === 'trials') return e.trials_count;
+    return e.subscribers_count;
+  };
   const maxVal = Math.max(...entries.map(getValue), 1);
 
   const barWidth = 36;
@@ -365,10 +387,10 @@ function BarChartSVG({ entries, activeTab, barColor, hoveredIdx, setHoveredIdx }
                     x={centerX}
                     y={barY - 23}
                     textAnchor="middle"
-                    fill={activeTab === 'leads' ? '#93C5FD' : '#6EE7B7'}
+                    fill={activeTab === 'leads' ? '#93C5FD' : activeTab === 'trials' ? '#FCD34D' : '#6EE7B7'}
                     className="text-[10px]"
                   >
-                    {val} {activeTab === 'leads' ? 'lead' : 'abonne'}{val !== 1 ? 's' : ''}
+                    {val} {activeTab === 'leads' ? 'lead' : activeTab === 'trials' ? 'essai' : 'abonne'}{val !== 1 ? 's' : ''}
                   </text>
                 </g>
               )}
