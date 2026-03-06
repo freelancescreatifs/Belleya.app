@@ -458,7 +458,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 <div className="relative group">
                   <Info className="w-4 h-4 text-gray-400 cursor-help" />
                   <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-10">
-                    Ajoute ici les entrepreneures beaute que tu contactes. Suis tes relances, notes et statuts pour ne perdre aucun prospect.
+                    Les personnes que tu contactes sur Instagram. Suis tes relances, notes et statuts pour ne perdre aucun prospect.
                     <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-1 w-2 h-2 bg-gray-900 rotate-45" />
                   </div>
                 </div>
@@ -469,13 +469,8 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
                 <ProspectsCRM affiliateId={affiliate.id} showToast={showToast} trialLeads={leads} />
 
                 <div className="border-t border-gray-200 pt-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Messages partages</h3>
-                  <SharedMessages affiliateId={affiliate.id} affiliateName={affiliate.full_name || 'Affilie'} showToast={showToast} />
-                </div>
-
-                <div className="border-t border-gray-200 pt-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Conseils commerciaux</h3>
-                  <SalesTips />
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Messages qui convertissent</h3>
+                  <SharedMessages affiliateId={affiliate.id} affiliateName={affiliate.full_name || 'Affilie'} affiliateAvatar={affiliate.avatar_url} showToast={showToast} />
                 </div>
               </div>
             </div>

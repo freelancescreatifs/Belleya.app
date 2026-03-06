@@ -1,117 +1,191 @@
-import { MessageSquare, Lightbulb, Shield } from 'lucide-react';
+import { useState } from 'react';
+import { Lightbulb, MessageSquare, Shield, Clock, ChevronDown, ChevronUp, Target, Sparkles } from 'lucide-react';
+
+const QUICK_GUIDES = [
+  {
+    icon: MessageSquare,
+    title: 'Proposer Belaya en 1 message',
+    color: 'text-blue-600 bg-blue-50',
+    content: `Commence par un compliment sincere sur son travail (photos, realisations).
+Enchaine naturellement : "Tu geres comment tes clientes et ton planning au quotidien ?"
+Ecoute sa reponse, puis propose : "Il y a une appli qui aide les pros beaute a tout centraliser, tu peux tester 14 jours gratuitement si ca t'interesse."
+Ne force rien. L'essai gratuit fait le travail.`,
+  },
+  {
+    icon: Clock,
+    title: 'Relances J-3 / J-2 / J-1',
+    color: 'text-amber-600 bg-amber-50',
+    content: `J-3 : "Hello ! Tu as eu le temps de regarder l'appli ? N'hesite pas si tu as des questions."
+J-2 : "Tu as teste quoi pour l'instant ? L'agenda, les fiches clientes ? Je peux te montrer les fonctions les plus utiles."
+J-1 : "Ton essai se termine demain. Ca serait dommage de ne pas profiter de tout ce que tu as commence a mettre en place !"`,
+  },
+  {
+    icon: Target,
+    title: 'Relance "essai termine"',
+    color: 'text-rose-600 bg-rose-50',
+    content: `"Hello ! Ton essai s'est termine. Qu'est-ce que tu en as pense ? Si tu veux continuer, le premier mois est super accessible."
+Si pas de reponse apres 2j : "Je me permets de revenir vers toi. Beaucoup de pros hesitent au debut et finissent par ne plus pouvoir s'en passer. Tu veux qu'on en reparle ?"`,
+  },
+  {
+    icon: Sparkles,
+    title: 'Questions pour comprendre le blocage',
+    color: 'text-teal-600 bg-teal-50',
+    content: `"Qu'est-ce qui t'a manque pendant ton essai ?"
+"Tu as eu le temps de tout explorer ?"
+"C'est le prix qui te bloque, ou tu n'as pas vu l'utilite ?"
+"Tu geres comment tes clientes aujourd'hui ?"
+Ecouter > argumenter. Plus tu comprends son quotidien, mieux tu peux l'aider.`,
+  },
+  {
+    icon: Target,
+    title: 'Vendre les benefices concrets',
+    color: 'text-emerald-600 bg-emerald-50',
+    content: `Organisation : "Tu centralises tout au meme endroit : clientes, rdv, paiements."
+Clientes : "Ton profil en ligne permet aux clientes de te trouver et reserver directement."
+Reseaux sociaux : "L'outil t'aide a planifier tes posts et a organiser ton contenu."
+Temps : "Tu passes moins de temps sur l'administratif et plus sur tes prestations."`,
+  },
+  {
+    icon: Lightbulb,
+    title: 'Rappel cle : 14 jours gratuits',
+    color: 'text-blue-600 bg-blue-50',
+    content: `C'est ton argument le plus puissant. Aucun engagement, aucune carte bancaire.
+"Tu ne risques rien a tester, c'est 14 jours offerts."
+"Le mieux c'est d'essayer toi-meme pour voir si ca te convient."
+"Beaucoup de pros pensaient ne pas en avoir besoin et ne peuvent plus s'en passer."`,
+  },
+];
 
 const OBJECTIONS = [
   {
     question: '"Je n\'ai pas le temps"',
-    answer: 'Justement, l\'application sert a gagner du temps sur la gestion des clientes et l\'organisation. Tout est centralise au meme endroit.',
+    answer: 'Justement, l\'appli sert a gagner du temps sur la gestion. Tout est centralise : clientes, rdv, factures. 14 jours gratuits pour tester a ton rythme.',
   },
   {
     question: '"Je n\'en ai pas besoin"',
-    answer: 'Le mieux est simplement de tester gratuitement pendant 14 jours pour voir si ca peut t\'aider. Aucun engagement.',
+    answer: 'Le mieux c\'est de tester gratuitement. Beaucoup de pros pensaient pareil et ont decouvert des fonctions qu\'elles utilisent tous les jours.',
+  },
+  {
+    question: '"Je reflechis"',
+    answer: 'Bien sur, prends ton temps. L\'essai est gratuit 14 jours. Tu peux tester sans engagement et voir si ca correspond a tes besoins.',
+  },
+  {
+    question: '"C\'est trop cher"',
+    answer: 'Les plans commencent a moins d\'1 EUR par jour. Et le temps que tu gagnes sur la gestion, ca vaut largement l\'investissement. Teste gratuitement pour voir.',
   },
   {
     question: '"J\'utilise deja un outil"',
-    answer: 'Tu peux tester Belaya pendant 14 jours et comparer avec ce que tu utilises deja. Beaucoup de pros ont change apres avoir teste.',
-  },
-];
-
-const APPROACH_TIPS = [
-  {
-    title: 'Comprendre les besoins',
-    items: [
-      'Manque d\'organisation au quotidien',
-      'Difficulte a trouver de nouvelles clientes',
-      'Gestion des reseaux sociaux chronophage',
-      'Pas de suivi client centralise',
-    ],
+    answer: 'Tu peux tester Belaya en parallele pendant 14 jours et comparer. Beaucoup de pros ont change apres avoir vu la difference.',
   },
   {
-    title: 'Les benefices a mettre en avant',
-    items: [
-      'Gagner du temps sur la gestion',
-      'Attirer plus de clientes',
-      'Centraliser toute l\'activite',
-      'Avoir un profil pro visible en ligne',
-    ],
+    question: '"Je ne suis pas organisee"',
+    answer: 'C\'est exactement pour ca que Belaya existe. L\'appli te guide pas a pas pour organiser tes clientes, ton planning et tes finances.',
   },
   {
-    title: 'Le bon timing de relance',
-    items: [
-      'J-3 : rappel que l\'essai se termine bientot',
-      'J-2 : demander s\'ils ont teste les fonctionnalites',
-      'J-1 : proposer de repondre aux dernieres questions',
-    ],
+    question: '"Je veux plus de clientes"',
+    answer: 'Avec Belaya, tu as un profil visible en ligne ou tes clientes peuvent te trouver et reserver. C\'est comme une vitrine professionnelle.',
+  },
+  {
+    question: '"Je galere avec les reseaux sociaux"',
+    answer: 'L\'outil inclut un studio de contenu qui t\'aide a planifier tes posts. Tu peux organiser tes publications et tes idees au meme endroit.',
+  },
+  {
+    question: '"Je n\'ai pas encore teste"',
+    answer: 'Pas de souci ! Tu veux que je t\'envoie le lien ? C\'est gratuit 14 jours, sans carte bancaire. Tu peux commencer quand tu veux.',
   },
 ];
 
 export default function SalesTips() {
+  const [expandedGuide, setExpandedGuide] = useState<number | null>(0);
+
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl border border-blue-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Lightbulb className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Conseils pour convertir tes prospects</h3>
+    <div className="space-y-8">
+      <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl border border-blue-200 p-5">
+        <div className="flex items-start gap-3">
+          <Lightbulb className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-gray-700 leading-relaxed">
+            Inspire-toi de ces guides, mais adapte toujours ton message a la personne.
+            Les meilleurs resultats viennent des conversations humaines et sinceres.
+            <span className="font-medium text-blue-700 block mt-1">
+              Rappel : 14 jours gratuits pour tester Belaya, sans engagement.
+            </span>
+          </p>
         </div>
-        <p className="text-sm text-gray-600 mb-5">
-          Les affilies contactent des entrepreneures de la beaute (nail artists, techniciennes cils,
-          estheticiennes, coiffeuses) pour leur proposer de tester Belaya gratuitement pendant 14 jours.
-          Parle naturellement, evite les copier-coller automatiques.
-        </p>
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          {APPROACH_TIPS.map((tip, i) => (
-            <div key={i} className="bg-white rounded-lg p-4 border border-blue-100">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                  {i + 1}
-                </span>
-                <h4 className="text-sm font-semibold text-gray-900">{tip.title}</h4>
+      <div>
+        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-sm">
+          <Lightbulb className="w-4 h-4 text-amber-500" />
+          Guides rapides
+        </h3>
+        <div className="space-y-2">
+          {QUICK_GUIDES.map((guide, i) => {
+            const isOpen = expandedGuide === i;
+            const Icon = guide.icon;
+            return (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setExpandedGuide(isOpen ? null : i)}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${guide.color}`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-gray-900">{guide.title}</span>
+                  {isOpen ? (
+                    <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  )}
+                </button>
+                {isOpen && (
+                  <div className="px-4 pb-4">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                        {guide.content}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <ul className="space-y-1.5">
-                {tip.items.map((item, j) => (
-                  <li key={j} className="text-xs text-gray-600 flex items-start gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-blue-400 mt-1.5 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <MessageSquare className="w-5 h-5 text-emerald-600" />
-          <h3 className="font-semibold text-gray-900">Exemple de message naturel</h3>
+      <div>
+        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-sm">
+          <MessageSquare className="w-4 h-4 text-emerald-500" />
+          Exemple de premier message
+        </h3>
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 space-y-2.5">
+            <p className="text-sm text-gray-700 leading-relaxed italic">
+              "Hello ! J'ai vu ton travail sur Instagram, franchement tes realisations sont super."
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed italic">
+              "Je travaille avec une application qui aide les professionnelles de la beaute a mieux gerer leurs clientes, leur planning et meme leurs reseaux sociaux."
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed italic">
+              "Tu peux tester gratuitement pendant 14 jours sans engagement si ca t'interesse. Je t'envoie le lien ?"
+            </p>
+          </div>
+          <p className="text-xs text-gray-400 mt-3">
+            Adapte ce message a ton style. L'important est d'etre naturelle et de montrer que tu connais leur metier.
+          </p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <p className="text-sm text-gray-700 leading-relaxed italic">
-            "Hello ! J'ai vu ton travail sur Instagram, c'est super.
-          </p>
-          <p className="text-sm text-gray-700 leading-relaxed italic mt-2">
-            Je travaille avec une application qui aide les professionnelles de la beaute
-            a mieux gerer leurs clientes et leur organisation.
-          </p>
-          <p className="text-sm text-gray-700 leading-relaxed italic mt-2">
-            Tu peux tester gratuitement pendant 14 jours si ca t'interesse."
-          </p>
-        </div>
-        <p className="text-xs text-gray-400 mt-3">
-          Adapte ce message a ton style. L'important est d'etre naturel et de montrer que tu connais leur metier.
-        </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Shield className="w-5 h-5 text-amber-600" />
-          <h3 className="font-semibold text-gray-900">Gestion des objections</h3>
-        </div>
-        <div className="space-y-4">
+      <div>
+        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-sm">
+          <Shield className="w-4 h-4 text-amber-500" />
+          Gestion des objections
+        </h3>
+        <div className="grid sm:grid-cols-2 gap-3">
           {OBJECTIONS.map((obj, i) => (
-            <div key={i} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4">
               <p className="text-sm font-semibold text-gray-800 mb-2">{obj.question}</p>
-              <p className="text-sm text-gray-600 leading-relaxed">{obj.answer}</p>
+              <p className="text-xs text-gray-600 leading-relaxed">{obj.answer}</p>
             </div>
           ))}
         </div>
