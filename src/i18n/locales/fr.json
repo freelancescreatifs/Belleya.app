@@ -7,6 +7,11 @@
       "client": {
         "title": "Je suis cliente",
         "subtitle": "Trouve ta pro idéale et réserve en quelques clics",
+        "sparkles": {
+          "discover": "Découvre les offres beauté autour de toi",
+          "explore": "Explore un feed de prestataires selon tes goûts",
+          "save": "Sauvegarde tes inspirations et partage tes poses"
+        },
         "benefits": {
           "booking": "Réservation en ligne 24/7",
           "appointments": "Tous tes RDV au même endroit",
@@ -18,10 +23,15 @@
         "title": "Je suis pro",
         "subtitle": "Ton business beauté au même endroit. Simple, clair, serein.",
         "badge": "14 jours gratuits",
+        "sparkles": {
+          "visibility": "Gagne en visibilité et attire plus de clientes",
+          "organize": "Organise tes tâches, tes contenus et tes inspirations",
+          "ai": "Génère des idées de contenus avec l'IA et suis tes objectifs"
+        },
         "benefits": {
           "agenda": "Ton agenda + réservations 24/7",
           "clients": "Tes clientes + historique complet",
-          "finances": "Tes finances + objectifs enfin clairs"
+          "finances": "Tes finances, tes stocks et tes performances enfin clairs"
         },
         "cta": "Démarrer gratuitement"
       },

@@ -56,7 +56,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
             <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
               <button
                 onClick={() => onSelectRole('client')}
-                className="group relative bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl transition-all p-6 md:p-8 text-center border-2 border-transparent hover:border-[#efaa9a] transform hover:-translate-y-2 overflow-hidden"
+                className="group relative bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl transition-all p-6 md:p-8 text-left border-2 border-transparent hover:border-[#efaa9a] transform hover:-translate-y-2 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-[#efaa9a]/10 to-[#d9629b]/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
@@ -69,39 +69,58 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     />
                   </div>
 
-                  <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-3" style={{ color: 'rgb(113, 19, 65)' }}>
-                    {t('landing.roles.client.title')}
-                  </h2>
+                  <div className="text-center mb-4">
+                    <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-[#d9629b] mb-1">Cliente</p>
+                    <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-3" style={{ color: 'rgb(113, 19, 65)' }}>
+                      {t('landing.roles.client.title')}
+                    </h2>
+                    <p className="text-sm md:text-lg text-gray-600 leading-relaxed">
+                      {t('landing.roles.client.subtitle')}
+                    </p>
+                  </div>
 
-                  <p className="text-sm md:text-lg text-gray-600 mb-4 md:mb-6 leading-relaxed">
-                    {t('landing.roles.client.subtitle')}
-                  </p>
+                  <div className="space-y-2 mb-5">
+                    {[
+                      t('landing.roles.client.sparkles.discover'),
+                      t('landing.roles.client.sparkles.explore'),
+                      t('landing.roles.client.sparkles.save'),
+                    ].map((text, i) => (
+                      <div key={i} className="flex items-start gap-2.5">
+                        <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0 mt-0.5" />
+                        <span className="text-sm md:text-base text-gray-700 leading-snug">{text}</span>
+                      </div>
+                    ))}
+                  </div>
 
-                  <ul className="space-y-2 text-left max-w-sm mx-auto mb-4 md:mb-6">
-                    <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
-                      <span>{t('landing.roles.client.benefits.booking')}</span>
-                    </li>
-                    <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
-                      <span>{t('landing.roles.client.benefits.appointments')}</span>
-                    </li>
-                    <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
-                      <span>{t('landing.roles.client.benefits.favorites')}</span>
-                    </li>
-                  </ul>
+                  <div className="border-t border-gray-100 pt-4 mb-5">
+                    <ul className="space-y-2 max-w-sm">
+                      <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
+                        <span>{t('landing.roles.client.benefits.booking')}</span>
+                      </li>
+                      <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
+                        <span>{t('landing.roles.client.benefits.appointments')}</span>
+                      </li>
+                      <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0" />
+                        <span>{t('landing.roles.client.benefits.favorites')}</span>
+                      </li>
+                    </ul>
+                  </div>
 
-                  <div className="inline-flex items-center gap-2 text-[rgb(113,19,65)] font-semibold text-base md:text-lg group-hover:gap-3 transition-all">
-                    {t('landing.roles.client.cta')}
-                    <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-2 text-[rgb(113,19,65)] font-semibold text-base md:text-lg group-hover:gap-3 transition-all">
+                      {t('landing.roles.client.cta')}
+                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
                 </div>
               </button>
 
               <button
                 onClick={() => onSelectRole('pro')}
-                className="group relative bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl transition-all p-6 md:p-8 text-center border-2 border-[#efaa9a] hover:border-[#d9629b] transform hover:-translate-y-2 overflow-hidden"
+                className="group relative bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl transition-all p-6 md:p-8 text-left border-2 border-[#efaa9a] hover:border-[#d9629b] transform hover:-translate-y-2 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-[#efaa9a]/20 to-[#d9629b]/20 opacity-50 group-hover:opacity-70 transition-opacity"></div>
 
@@ -118,32 +137,51 @@ export default function Landing({ onSelectRole }: LandingProps) {
                     />
                   </div>
 
-                  <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-3" style={{ color: 'rgb(113, 19, 65)' }}>
-                    {t('landing.roles.pro.title')}
-                  </h2>
+                  <div className="text-center mb-4">
+                    <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-[#d9629b] mb-1">Professionnelle Belaya</p>
+                    <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-3" style={{ color: 'rgb(113, 19, 65)' }}>
+                      {t('landing.roles.pro.title')}
+                    </h2>
+                    <p className="text-sm md:text-lg text-gray-600 leading-relaxed">
+                      {t('landing.roles.pro.subtitle')}
+                    </p>
+                  </div>
 
-                  <p className="text-sm md:text-lg text-gray-600 mb-4 md:mb-6 leading-relaxed">
-                    {t('landing.roles.pro.subtitle')}
-                  </p>
+                  <div className="space-y-2 mb-5">
+                    {[
+                      t('landing.roles.pro.sparkles.visibility'),
+                      t('landing.roles.pro.sparkles.organize'),
+                      t('landing.roles.pro.sparkles.ai'),
+                    ].map((text, i) => (
+                      <div key={i} className="flex items-start gap-2.5">
+                        <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-[#d9629b] flex-shrink-0 mt-0.5" />
+                        <span className="text-sm md:text-base text-gray-700 leading-snug">{text}</span>
+                      </div>
+                    ))}
+                  </div>
 
-                  <ul className="space-y-2 text-left max-w-sm mx-auto mb-4 md:mb-6">
-                    <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
-                      <span>{t('landing.roles.pro.benefits.agenda')}</span>
-                    </li>
-                    <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
-                      <span>{t('landing.roles.pro.benefits.clients')}</span>
-                    </li>
-                    <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
-                      <span>{t('landing.roles.pro.benefits.finances')}</span>
-                    </li>
-                  </ul>
+                  <div className="border-t border-gray-100 pt-4 mb-5">
+                    <ul className="space-y-2 max-w-sm">
+                      <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
+                        <span>{t('landing.roles.pro.benefits.agenda')}</span>
+                      </li>
+                      <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
+                        <span>{t('landing.roles.pro.benefits.clients')}</span>
+                      </li>
+                      <li className="flex items-center gap-2 md:gap-3 text-gray-700 text-sm md:text-base">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-[rgb(113,19,65)] flex-shrink-0" />
+                        <span>{t('landing.roles.pro.benefits.finances')}</span>
+                      </li>
+                    </ul>
+                  </div>
 
-                  <div className="inline-flex items-center gap-2 text-[rgb(113,19,65)] font-semibold text-base md:text-lg group-hover:gap-3 transition-all">
-                    {t('landing.roles.pro.cta')}
-                    <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-2 text-[rgb(113,19,65)] font-semibold text-base md:text-lg group-hover:gap-3 transition-all">
+                      {t('landing.roles.pro.cta')}
+                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
                 </div>
               </button>

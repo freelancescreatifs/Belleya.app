@@ -7,6 +7,11 @@
       "client": {
         "title": "I'm a client",
         "subtitle": "Find your perfect professional and book in just a few clicks",
+        "sparkles": {
+          "discover": "Discover beauty offers near you",
+          "explore": "Explore a feed of professionals tailored to your taste",
+          "save": "Save your inspirations and share your poses"
+        },
         "benefits": {
           "booking": "Online booking 24/7",
           "appointments": "All your appointments in one place",
@@ -18,10 +23,15 @@
         "title": "I'm a professional",
         "subtitle": "Your beauty business in one place. Simple, clear, peaceful.",
         "badge": "14 days free",
+        "sparkles": {
+          "visibility": "Gain visibility and attract more clients",
+          "organize": "Organize your tasks, content and inspirations",
+          "ai": "Generate content ideas with AI and track your goals"
+        },
         "benefits": {
           "agenda": "Your calendar + 24/7 bookings",
           "clients": "Your clients + complete history",
-          "finances": "Your finances + goals finally clear"
+          "finances": "Your finances, stock and performance finally clear"
         },
         "cta": "Start for free"
       },
