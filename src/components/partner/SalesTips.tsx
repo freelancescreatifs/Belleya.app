@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lightbulb, MessageSquare, Shield, Clock, ChevronDown, ChevronUp, Target, Sparkles } from 'lucide-react';
+import { Lightbulb, MessageSquare, Shield, Clock, ChevronDown, ChevronUp, Target, Sparkles, XCircle } from 'lucide-react';
 
 const QUICK_GUIDES = [
   {
@@ -44,6 +44,20 @@ Ecouter > argumenter. Plus tu comprends son quotidien, mieux tu peux l'aider.`,
 Clientes : "Ton profil en ligne permet aux clientes de te trouver et reserver directement."
 Reseaux sociaux : "L'outil t'aide a planifier tes posts et a organiser ton contenu."
 Temps : "Tu passes moins de temps sur l'administratif et plus sur tes prestations."`,
+  },
+  {
+    icon: XCircle,
+    title: 'A ne pas faire vs bon message',
+    color: 'text-red-600 bg-red-50',
+    content: `Mauvais message :
+"Bonjour nous avons une application merci de tester."
+
+Pourquoi ca ne marche pas : c'est impersonnel, generique, sans interet pour la personne. Personne ne va cliquer.
+
+Bon message :
+"Hello ! Je vois que tu fais beaucoup de poses volume russe. On a cree une app pour aider les lash artists a gerer leurs clientes et leurs reseaux. Tu veux tester gratuitement ?"
+
+Pourquoi ca marche : tu montres que tu connais son travail, tu parles son langage et tu lui proposes quelque chose d'utile sans forcer.`,
   },
   {
     icon: Lightbulb,
