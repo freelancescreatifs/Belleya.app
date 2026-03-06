@@ -41,6 +41,7 @@ interface Affiliate {
   special_commission_rate: number | null;
   full_name: string;
   avatar_url?: string | null;
+  affiliate_type: string;
 }
 
 interface AffiliateLead {
@@ -161,6 +162,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             disable_leaderboard: affiliateData.disable_leaderboard || false,
             special_commission_rate: affiliateData.special_commission_rate ? Number(affiliateData.special_commission_rate) : null,
             full_name: affiliateData.full_name || '',
+            affiliate_type: affiliateData.affiliate_type || 'sales',
           };
           setAffiliate(parsedAffiliate);
 
@@ -311,13 +313,21 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
   const isDisabled = affiliate.status === 'disabled';
   const isInZoneRouge = affiliate.days_since_last_signup >= 7;
 
-  const NAV_ITEMS: { key: ActiveSection; label: string; icon: React.ElementType }[] = [
-    { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { key: 'prospects', label: 'Prospects', icon: UserCheck },
-    { key: 'signups', label: 'Inscriptions', icon: Users },
-    { key: 'conseils', label: 'Conseils', icon: Lightbulb },
-    { key: 'settings', label: 'Parametres', icon: Settings },
-  ];
+  const isCommunity = affiliate.affiliate_type === 'community';
+
+  const NAV_ITEMS: { key: ActiveSection; label: string; icon: React.ElementType }[] = isCommunity
+    ? [
+        { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { key: 'signups', label: 'Inscriptions', icon: Users },
+        { key: 'settings', label: 'Parametres', icon: Settings },
+      ]
+    : [
+        { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { key: 'prospects', label: 'Prospects', icon: UserCheck },
+        { key: 'signups', label: 'Inscriptions', icon: Users },
+        { key: 'conseils', label: 'Conseils', icon: Lightbulb },
+        { key: 'settings', label: 'Parametres', icon: Settings },
+      ];
 
   const handleNavClick = (key: ActiveSection) => {
     setActiveSection(key);
@@ -341,7 +351,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {!affiliate.disable_tiers && (
+            {!affiliate.disable_tiers && !isCommunity && (
               <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${rank.bg} ${rank.text} ${rank.border} border`}>
                 {rank.label}
               </span>
@@ -385,7 +395,7 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
         </aside>
 
         <main className="flex-1 min-w-0 p-4 lg:p-6 max-w-5xl mx-auto w-full">
-          {(isDisabled || isObservation || isInZoneRouge) && (
+          {!isCommunity && (isDisabled || isObservation || isInZoneRouge) && (
             <div className="space-y-3 mb-6">
               {isDisabled && (
                 <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-start gap-3">
@@ -418,21 +428,32 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
           )}
 
           {activeSection === 'dashboard' && (
-            <DashboardOverview
-              affiliate={affiliate}
-              leads={leads}
-              commissions={commissions}
-              competitions={competitions}
-              commissionRate={commissionRate}
-              rank={rank}
-              nextRank={nextRank}
-              progress={progress}
-              RankIcon={RankIcon}
-              affiliateLink={affiliateLink}
-              copied={copied}
-              copyLink={copyLink}
-              showToast={showToast}
-            />
+            isCommunity ? (
+              <CommunityDashboardOverview
+                affiliate={affiliate}
+                leads={leads}
+                commissionRate={commissionRate}
+                affiliateLink={affiliateLink}
+                copied={copied}
+                copyLink={copyLink}
+              />
+            ) : (
+              <DashboardOverview
+                affiliate={affiliate}
+                leads={leads}
+                commissions={commissions}
+                competitions={competitions}
+                commissionRate={commissionRate}
+                rank={rank}
+                nextRank={nextRank}
+                progress={progress}
+                RankIcon={RankIcon}
+                affiliateLink={affiliateLink}
+                copied={copied}
+                copyLink={copyLink}
+                showToast={showToast}
+              />
+            )
           )}
 
           {activeSection === 'prospects' && (
@@ -503,6 +524,130 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
       </div>
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+    </div>
+  );
+}
+
+function CommunityDashboardOverview({
+  affiliate, leads, commissionRate, affiliateLink, copied, copyLink,
+}: {
+  affiliate: Affiliate;
+  leads: AffiliateLead[];
+  commissionRate: number;
+  affiliateLink: string;
+  copied: boolean;
+  copyLink: () => void;
+}) {
+  const totalSignups = leads.length;
+  const trialing = leads.filter(l => l.computed_status === 'trialing').length;
+  const activeSubs = leads.filter(l => l.computed_status === 'active').length;
+  const mrr = leads.filter(l => l.computed_status === 'active').reduce((s, l) => s + Number(l.mrr || 0), 0);
+  const estimatedCommission = mrr * (commissionRate / 100);
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-belaya-deep to-belaya-bright rounded-2xl p-5 text-white">
+        <div className="flex items-center gap-2 mb-3">
+          <Link2 className="w-5 h-5" />
+          <h2 className="text-base font-semibold">Ton lien d'affiliation</h2>
+        </div>
+        <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-xl p-3">
+          <input
+            readOnly
+            value={affiliateLink}
+            className="flex-1 bg-transparent text-white placeholder-white/60 text-sm outline-none min-w-0"
+          />
+          <button
+            onClick={copyLink}
+            className="flex items-center gap-2 px-4 py-2 bg-white text-belaya-deep rounded-lg font-medium text-sm hover:shadow-lg transition-all flex-shrink-0"
+          >
+            {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? 'Copie !' : 'Copier'}
+          </button>
+        </div>
+        <p className="text-white/70 text-xs mt-2">
+          Partage ce lien avec ta communaute pour generer des inscriptions
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+              <Users className="w-3.5 h-3.5 text-blue-600" />
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-500 mb-0.5">Inscriptions</p>
+          <p className="text-lg font-bold text-blue-600">{totalSignups}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center">
+              <Clock className="w-3.5 h-3.5 text-amber-600" />
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-500 mb-0.5">Essais en cours</p>
+          <p className="text-lg font-bold text-amber-600">{trialing}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-500 mb-0.5">Clients abonnes</p>
+          <p className="text-lg font-bold text-emerald-600">{activeSubs}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-3.5 h-3.5 text-emerald-700" />
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-500 mb-0.5">MRR genere</p>
+          <p className="text-lg font-bold text-emerald-700">{mrr.toFixed(0)} EUR</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-3.5 h-3.5 text-blue-700" />
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-500 mb-0.5">Commission estimee</p>
+          <p className="text-lg font-bold text-blue-700">{estimatedCommission.toFixed(2)} EUR</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-3.5 h-3.5 text-gray-900" />
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-500 mb-0.5">Total gagne</p>
+          <p className="text-lg font-bold text-gray-900">{affiliate.total_earned.toFixed(2)} EUR</p>
+        </div>
+      </div>
+
+      <DashboardCharts leads={leads} commissionRate={commissionRate} />
+
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <DollarSign className="w-5 h-5 text-emerald-600" />
+          Commissions
+        </h3>
+        <DashboardCommissions affiliateId={affiliate.id} />
+      </div>
+
+      {leads.length === 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <div className="w-14 h-14 bg-belaya-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <TrendingUp className="w-7 h-7 text-belaya-deep" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Pret a demarrer !</h3>
+          <p className="text-gray-500 text-sm max-w-md mx-auto">
+            Partage ton lien d'affiliation avec ta communaute pour commencer a generer des inscriptions et des commissions.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

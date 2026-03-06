@@ -30,6 +30,7 @@ interface AffiliateData {
   signups_30d: number;
   phone?: string | null;
   instagram_url?: string | null;
+  affiliate_type?: string;
 }
 
 const RANK_THRESHOLDS = [
@@ -70,6 +71,7 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
     bonus_amount: affiliate.bonus_amount,
     bonus_note: affiliate.bonus_note || '',
     status: affiliate.status,
+    affiliate_type: affiliate.affiliate_type || 'sales',
   });
   const [saving, setSaving] = useState(false);
   const [commissions, setCommissions] = useState<any[]>([]);
@@ -112,6 +114,7 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
           bonus_amount: form.bonus_amount,
           bonus_note: form.bonus_note || null,
           status: form.status,
+          affiliate_type: form.affiliate_type,
           updated_at: new Date().toISOString(),
         })
         .eq('id', affiliate.id);
@@ -124,6 +127,7 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
         bonus_amount: form.bonus_amount,
         bonus_note: form.bonus_note || null,
         status: form.status,
+        affiliate_type: form.affiliate_type,
       });
       setEditMode(false);
       showToast('success', 'Modifications enregistrees');
@@ -331,6 +335,17 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
                     <option value="disabled">Disabled</option>
                   </select>
                 </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Type d'affilie</label>
+                  <select
+                    value={form.affiliate_type}
+                    onChange={(e) => setForm(f => ({ ...f, affiliate_type: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 bg-white"
+                  >
+                    <option value="sales">Affilie Commercial</option>
+                    <option value="community">Affilie Communaute</option>
+                  </select>
+                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={handleSave}
@@ -358,6 +373,16 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
                   <p className="font-semibold text-gray-900">
                     {affiliate.bonus_amount > 0 ? `${affiliate.bonus_amount} EUR` : '---'}
                   </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs">Type</p>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                    affiliate.affiliate_type === 'community'
+                      ? 'bg-sky-100 text-sky-700'
+                      : 'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    {affiliate.affiliate_type === 'community' ? 'Communaute' : 'Commercial'}
+                  </span>
                 </div>
                 {affiliate.bonus_note && (
                   <div className="col-span-2">

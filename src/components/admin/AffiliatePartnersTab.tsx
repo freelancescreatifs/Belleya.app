@@ -33,6 +33,7 @@ interface AffiliateData {
   signups_30d: number;
   phone?: string | null;
   instagram_url?: string | null;
+  affiliate_type?: string;
 }
 
 interface LeaderboardEntry {
@@ -319,7 +320,7 @@ export default function AffiliatePartnersTab() {
 
   const exportCSV = () => {
     if (filtered.length === 0) return;
-    const headers = ['Nom', 'Email', 'Conversions', 'Abonnements actifs', 'MRR', 'Commission mois', 'Commission totale', 'Commission %', 'Rang', 'Statut'];
+    const headers = ['Nom', 'Email', 'Conversions', 'Abonnements actifs', 'MRR', 'Commission mois', 'Commission totale', 'Commission %', 'Rang', 'Statut', 'Type'];
     const rows = filtered.map(a => [
       a.full_name || '',
       a.email || '',
@@ -331,6 +332,7 @@ export default function AffiliatePartnersTab() {
       (a.commission_rate * 100).toFixed(0) + '%',
       getRank(a.signups_count).label,
       a.status,
+      a.affiliate_type === 'community' ? 'Communaute' : 'Commercial',
     ]);
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -485,6 +487,7 @@ export default function AffiliatePartnersTab() {
                       <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Bonus</th>
                       <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Rang</th>
                       <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Statut</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Type</th>
                       <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
                     </tr>
                   </thead>
@@ -557,6 +560,15 @@ export default function AffiliatePartnersTab() {
                               'bg-gray-100 text-gray-600'
                             }`}>
                               {aff.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              aff.affiliate_type === 'community'
+                                ? 'bg-sky-100 text-sky-700'
+                                : 'bg-emerald-100 text-emerald-700'
+                            }`}>
+                              {aff.affiliate_type === 'community' ? 'Communaute' : 'Commercial'}
                             </span>
                           </td>
                           <td className="px-3 py-3">
