@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, Mail, Download, Trash2, User } from 'lucide-react';
+import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, Mail, Download, Trash2, User, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
@@ -66,7 +66,18 @@ function getRank(conversions: number) {
   return RANK_THRESHOLDS.find(r => conversions >= r.min && conversions <= r.max) || RANK_THRESHOLDS[0];
 }
 
-type SubTab = 'table' | 'zone_rouge' | 'leaderboard';
+interface TrialingSignup {
+  id: string;
+  user_id: string;
+  affiliate_id: string;
+  affiliate_name: string;
+  first_name: string;
+  last_name: string;
+  created_at: string;
+  trial_end_date: string | null;
+}
+
+type SubTab = 'table' | 'trialing' | 'zone_rouge' | 'leaderboard';
 type StatusFilter = 'all' | 'active' | 'observation' | 'paused' | 'disabled';
 type RankFilter = 'all' | 'recrue' | 'closer' | 'pro' | 'elite';
 type PerformanceFilter = 'all' | 'top' | 'zone_rouge' | 'zero' | 'high_commission';
@@ -89,6 +100,7 @@ export default function AffiliatePartnersTab() {
   const [leaderboardMonth, setLeaderboardMonth] = useState<LeaderboardEntry[]>([]);
   const [zoneRouge, setZoneRouge] = useState<ZoneRougeEntry[]>([]);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [trialingSignups, setTrialingSignups] = useState<TrialingSignup[]>([]);
 
   const loadAffiliates = useCallback(async () => {
     setLoading(true);
@@ -172,6 +184,35 @@ export default function AffiliatePartnersTab() {
       );
 
       setAffiliates(enriched);
+
+      const { data: trialingRows } = await supabase
+        .from('affiliate_signups')
+        .select('id, user_id, affiliate_id, subscription_status, created_at, trial_end_date')
+        .eq('subscription_status', 'trialing')
+        .order('created_at', { ascending: false });
+
+      if (trialingRows) {
+        const affiliateMap = new Map(enriched.map(a => [a.id, a.full_name || '---']));
+        const userIds = trialingRows.map(r => r.user_id).filter(Boolean);
+        const { data: profiles } = userIds.length > 0
+          ? await supabase.from('user_profiles').select('user_id, first_name, last_name').in('user_id', userIds)
+          : { data: [] };
+        const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+
+        setTrialingSignups(trialingRows.map(r => {
+          const prof = profileMap.get(r.user_id);
+          return {
+            id: r.id,
+            user_id: r.user_id,
+            affiliate_id: r.affiliate_id,
+            affiliate_name: affiliateMap.get(r.affiliate_id) || 'Inconnu',
+            first_name: prof?.first_name || '',
+            last_name: prof?.last_name || '',
+            created_at: r.created_at,
+            trial_end_date: r.trial_end_date,
+          };
+        }));
+      }
 
       const sortedByConversions = [...enriched]
         .filter(a => a.status === 'active')
@@ -362,6 +403,15 @@ export default function AffiliatePartnersTab() {
         >
           <Users className="w-4 h-4 inline mr-1.5" />
           Affilies ({filtered.length})
+        </button>
+        <button
+          onClick={() => setSubTab('trialing')}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            subTab === 'trialing' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Clock className="w-4 h-4 inline mr-1.5" />
+          Inscris Essai en cours ({trialingSignups.length})
         </button>
         <button
           onClick={() => setSubTab('zone_rouge')}
@@ -625,6 +675,77 @@ export default function AffiliatePartnersTab() {
                                 </>
                               )}
                             </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {subTab === 'trialing' && (
+        <div className="space-y-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="w-5 h-5 text-amber-600" />
+              <h3 className="font-semibold text-amber-900">Inscris en essai gratuit</h3>
+            </div>
+            <p className="text-sm text-amber-700">
+              Utilisateurs inscrits via un lien d'affiliation actuellement en periode d'essai.
+            </p>
+          </div>
+
+          {trialingSignups.length === 0 ? (
+            <div className="text-center py-12">
+              <Clock className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-600">Aucun inscrit en essai pour le moment</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-amber-50 border-b border-amber-100">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase">Nom</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase">Affilie</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase">Date inscription</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase">Fin d'essai</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase">Jours restants</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {trialingSignups.map(signup => {
+                      const daysLeft = signup.trial_end_date
+                        ? Math.max(0, Math.ceil((new Date(signup.trial_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+                        : null;
+                      const displayName = [signup.first_name, signup.last_name].filter(Boolean).join(' ') || '---';
+
+                      return (
+                        <tr key={signup.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{displayName}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700">{signup.affiliate_name}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">
+                            {new Date(signup.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">
+                            {signup.trial_end_date
+                              ? new Date(signup.trial_end_date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                              : '---'}
+                          </td>
+                          <td className="px-4 py-3">
+                            {daysLeft !== null ? (
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                daysLeft <= 3 ? 'bg-red-100 text-red-700' :
+                                daysLeft <= 7 ? 'bg-amber-100 text-amber-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {daysLeft}j
+                              </span>
+                            ) : '---'}
                           </td>
                         </tr>
                       );

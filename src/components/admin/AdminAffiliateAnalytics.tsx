@@ -294,7 +294,7 @@ export default function AdminAffiliateAnalytics() {
             <FunnelGlobal
               steps={[
                 { label: 'Leads contactes', value: kpis.totalLeads, color: '#6366F1' },
-                { label: 'Inscriptions', value: kpis.totalSignups, color: '#3B82F6' },
+                { label: 'Inscription - Essai en cours', value: kpis.totalSignups, color: '#3B82F6' },
                 { label: 'Clients abonnes', value: kpis.totalSubscribed, color: '#10B981' },
               ]}
             />
