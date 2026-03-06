@@ -650,12 +650,6 @@ function CommunityDashboardOverview({
         ))}
       </div>
 
-      <ConversionFunnel
-        crmLeadCount={crmLeadCount}
-        trialingCount={trialing + activeSubs}
-        activeCount={activeSubs}
-      />
-
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
 
       <div>

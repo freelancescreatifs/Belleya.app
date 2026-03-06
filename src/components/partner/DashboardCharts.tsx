@@ -68,18 +68,26 @@ function BarChart({ data, color, suffix = '' }: {
   suffix?: string;
 }) {
   const maxVal = Math.max(...data.map((d) => d.value), 1);
-  const barWidth = Math.floor(240 / data.length);
-  const chartWidth = barWidth * data.length + 40;
-  const chartHeight = 180;
-  const barArea = chartHeight - 44;
+  const count = data.length;
+  const viewW = count * 80 + 40;
+  const viewH = 200;
+  const barArea = viewH - 44;
+  const barSlot = (viewW - 40) / count;
 
   return (
-    <div className="overflow-x-auto">
-      <svg width={chartWidth} height={chartHeight} className="mx-auto" viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
+    <div className="w-full">
+      <svg
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${viewW} ${viewH}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="block"
+        style={{ minHeight: 180 }}
+      >
         {data.map((d, i) => {
           const barH = Math.max(2, (d.value / maxVal) * (barArea - 10));
-          const x = 30 + i * barWidth + barWidth * 0.15;
-          const w = barWidth * 0.7;
+          const x = 20 + i * barSlot + barSlot * 0.15;
+          const w = barSlot * 0.7;
           const y = barArea - barH;
 
           return (
@@ -90,7 +98,7 @@ function BarChart({ data, color, suffix = '' }: {
                   {d.value}{suffix}
                 </text>
               )}
-              <text x={x + w / 2} y={chartHeight - 6} textAnchor="middle" className="text-[10px]" fill="#9CA3AF">
+              <text x={x + w / 2} y={viewH - 6} textAnchor="middle" className="text-[10px]" fill="#9CA3AF">
                 {d.label}
               </text>
             </g>
