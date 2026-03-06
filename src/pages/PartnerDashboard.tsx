@@ -4,7 +4,7 @@ import {
   TrendingUp, ArrowLeft, Loader2, LogOut, Lock,
   AlertTriangle, Flame, Trophy, Crown, Shield, ChevronUp,
   Zap, LogIn, Eye, EyeOff, LayoutDashboard, UserCheck, Info,
-  Menu, X, Settings, Lightbulb, Phone
+  Menu, X, Settings, Lightbulb, MessageSquare, Phone
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,7 +20,6 @@ import SalesTips from '../components/partner/SalesTips';
 import DashboardSettings from '../components/partner/DashboardSettings';
 import ConversionFunnel from '../components/partner/ConversionFunnel';
 import AffiliatePerformanceTable from '../components/partner/AffiliatePerformanceTable';
-import ContactEssaiGratuit from '../components/partner/ContactEssaiGratuit';
 
 interface Affiliate {
   id: string;
@@ -59,6 +58,7 @@ interface AffiliateLead {
   mrr: number;
   commission: number;
   created_at: string;
+  city?: string | null;
 }
 
 interface AffiliateCommission {
@@ -85,7 +85,7 @@ interface PartnerDashboardProps {
   onApply: () => void;
 }
 
-type ActiveSection = 'dashboard' | 'prospects' | 'signups' | 'contact_essai' | 'conseils' | 'settings';
+type ActiveSection = 'dashboard' | 'prospects' | 'inscrits' | 'conseils' | 'settings';
 
 const RANK_CONFIG = [
   { min: 0, max: 9, label: 'Recrue', rate: 10, icon: Shield, color: 'from-gray-500 to-gray-600', bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
@@ -366,19 +366,16 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
 
   const isCommunity = affiliate.affiliate_type === 'community';
 
-  const trialCount = leads.filter(l => l.computed_status === 'trialing').length;
-
   const NAV_ITEMS: { key: ActiveSection; label: string; icon: React.ElementType; badge?: number }[] = isCommunity
     ? [
         { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { key: 'signups', label: 'Inscriptions', icon: Users },
+        { key: 'inscrits', label: 'Inscrits', icon: Users },
         { key: 'settings', label: 'Parametres', icon: Settings },
       ]
     : [
         { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { key: 'prospects', label: 'Prospects', icon: UserCheck },
-        { key: 'signups', label: 'Inscriptions', icon: Users },
-        { key: 'contact_essai', label: 'Contact Essai', icon: Phone, badge: trialCount || undefined },
+        { key: 'inscrits', label: 'Inscrits', icon: Users },
         { key: 'conseils', label: 'Conseils', icon: Lightbulb },
         { key: 'settings', label: 'Parametres', icon: Settings },
       ];
@@ -542,19 +539,11 @@ export default function PartnerDashboard({ onBack, onApply }: PartnerDashboardPr
             </div>
           )}
 
-          {activeSection === 'signups' && (
+          {activeSection === 'inscrits' && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Inscriptions</h2>
-              <p className="text-sm text-gray-500 mb-6">Personnes inscrites via ton lien affilie</p>
-              <SignupsSection affiliate={affiliate} leads={leads} />
-            </div>
-          )}
-
-          {activeSection === 'contact_essai' && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Contact Essai Gratuit</h2>
-              <p className="text-sm text-gray-500 mb-6">Suis et relance les personnes en essai gratuit</p>
-              <ContactEssaiGratuit leads={leads} />
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Inscrits</h2>
+              <p className="text-sm text-gray-500 mb-6">Toutes les personnes inscrites via ton lien</p>
+              <InscritsSection affiliate={affiliate} leads={leads} commissionRate={commissionRate} />
             </div>
           )}
 
@@ -716,6 +705,8 @@ function DashboardOverview({
 
   return (
     <div className="space-y-6">
+      {!affiliate.disable_leaderboard && <DashboardLeaderboard />}
+
       {affiliate.disable_tiers ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-5">
           <div className="flex items-center gap-4">
@@ -793,12 +784,7 @@ function DashboardOverview({
         </p>
       </div>
 
-      <DashboardStats
-        leads={leads}
-        commissions={commissions}
-        commissionRate={commissionRate}
-        totalEarned={affiliate.total_earned}
-      />
+      <AffiliatePerformanceTable currentAffiliateId={affiliate.id} />
 
       <ConversionFunnel
         crmLeadCount={crmLeadCount}
@@ -806,11 +792,14 @@ function DashboardOverview({
         activeCount={activeCount}
       />
 
+      <DashboardStats
+        leads={leads}
+        commissions={commissions}
+        commissionRate={commissionRate}
+        totalEarned={affiliate.total_earned}
+      />
+
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
-
-      {!affiliate.disable_leaderboard && <DashboardLeaderboard />}
-
-      <AffiliatePerformanceTable currentAffiliateId={affiliate.id} />
 
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -867,43 +856,56 @@ function DashboardOverview({
   );
 }
 
-type SignupFilter = 'all' | 'trialing' | 'active' | 'expired' | 'canceled';
+type InscritFilter = 'all' | 'trialing' | 'active' | 'expired' | 'canceled';
 
-const SIGNUP_FILTERS: { key: SignupFilter; label: string; color: string }[] = [
+const INSCRIT_FILTERS: { key: InscritFilter; label: string; color: string }[] = [
   { key: 'all', label: 'Tous', color: 'bg-gray-100 text-gray-700' },
   { key: 'trialing', label: 'Essai gratuit', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   { key: 'active', label: 'Client abonne', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { key: 'expired', label: 'N\'a pas pris', color: 'bg-red-50 text-red-700 border-red-200' },
-  { key: 'canceled', label: 'Annule', color: 'bg-gray-100 text-gray-600 border-gray-200' },
+  { key: 'expired', label: 'Essai expire', color: 'bg-red-50 text-red-700 border-red-200' },
+  { key: 'canceled', label: 'Abonnement annule', color: 'bg-gray-100 text-gray-600 border-gray-200' },
 ];
 
-const CONVERSION_TIPS = [
+const RELANCE_SCRIPTS = [
   {
-    title: 'Contacte avant la fin de l\'essai',
-    body: 'Le moment ideal est J-3, J-2 et J-1. C\'est la que le taux de conversion est le plus eleve.',
+    timing: 'Relance J-3',
+    icon: MessageSquare,
+    color: 'bg-amber-50 border-amber-200 text-amber-800',
+    message: 'Hello ! Tu as eu le temps de tester l\'application ?\n\nBeaucoup de pros beaute l\'utilisent pour mieux gerer leurs clientes et leur organisation.\n\nTon essai gratuit est encore actif si tu veux voir si ca peut t\'aider.',
   },
   {
-    title: 'Pose les bonnes questions',
-    body: 'Demande-leur s\'ils ont teste la plateforme, s\'ils ont des questions, et ce qui les bloque.',
+    timing: 'Relance J-1',
+    icon: Phone,
+    color: 'bg-orange-50 border-orange-200 text-orange-800',
+    message: 'Ton essai gratuit se termine bientot.\n\nSi tu as des questions sur l\'app ou si quelque chose t\'a bloque pendant le test, je peux t\'aider.',
   },
   {
-    title: 'Mets en avant les benefices',
-    body: 'Gagner du temps, attirer plus de clientes et centraliser leur activite au meme endroit.',
+    timing: 'Relance fin d\'essai',
+    icon: AlertTriangle,
+    color: 'bg-red-50 border-red-200 text-red-800',
+    message: 'As-tu eu le temps de tester Belaya ?\n\nCertaines fonctionnalites aident vraiment les professionnelles beaute a attirer plus de clientes et mieux gerer leurs rendez-vous.',
   },
 ];
 
-function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: AffiliateLead[] }) {
-  const [filter, setFilter] = useState<SignupFilter>('all');
+function InscritsSection({ affiliate, leads, commissionRate }: { affiliate: Affiliate; leads: AffiliateLead[]; commissionRate: number }) {
+  const [filter, setFilter] = useState<InscritFilter>('all');
 
   const filtered = filter === 'all' ? leads : leads.filter(l => l.computed_status === filter);
 
-  const counts: Record<SignupFilter, number> = {
+  const counts: Record<InscritFilter, number> = {
     all: leads.length,
     trialing: leads.filter(l => l.computed_status === 'trialing').length,
     active: leads.filter(l => l.computed_status === 'active').length,
     expired: leads.filter(l => l.computed_status === 'expired').length,
     canceled: leads.filter(l => l.computed_status === 'canceled').length,
   };
+
+  const trialLeads = leads.filter(l => l.computed_status === 'trialing').sort((a, b) => a.days_left - b.days_left);
+  const urgentCount = trialLeads.filter(l => l.days_left <= 3).length;
+  const relancerCount = trialLeads.filter(l => l.days_left >= 4 && l.days_left <= 7).length;
+  const comfortableCount = trialLeads.filter(l => l.days_left >= 8).length;
+
+  const showTrialSection = filter === 'trialing';
 
   return (
     <div className="space-y-6">
@@ -913,7 +915,7 @@ function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: Aff
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {SIGNUP_FILTERS.map(f => (
+        {INSCRIT_FILTERS.map(f => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
@@ -927,6 +929,44 @@ function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: Aff
           </button>
         ))}
       </div>
+
+      {showTrialSection && trialLeads.length > 0 && (
+        <>
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div className="bg-red-50 rounded-xl border border-red-200 p-4 text-center">
+              <p className="text-2xl font-bold text-red-700">{urgentCount}</p>
+              <p className="text-xs text-red-600 mt-1 font-medium">Urgents (J-3 ou moins)</p>
+            </div>
+            <div className="bg-amber-50 rounded-xl border border-amber-200 p-4 text-center">
+              <p className="text-2xl font-bold text-amber-700">{relancerCount}</p>
+              <p className="text-xs text-amber-600 mt-1 font-medium">A relancer (J-4 a J-7)</p>
+            </div>
+            <div className="bg-green-50 rounded-xl border border-green-200 p-4 text-center">
+              <p className="text-2xl font-bold text-green-700">{comfortableCount}</p>
+              <p className="text-xs text-green-600 mt-1 font-medium">Confortables (J-8+)</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="font-semibold text-gray-900 text-sm mb-1">Scripts de relance par etape</h3>
+            <p className="text-xs text-gray-500 mb-4">Ces scripts aident les affilies a relancer les prospects.</p>
+            <div className="space-y-3">
+              {RELANCE_SCRIPTS.map((script, i) => {
+                const Icon = script.icon;
+                return (
+                  <div key={i} className={`${script.color} border rounded-xl p-4`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className="w-4 h-4" />
+                      <span className="text-xs font-bold uppercase">{script.timing}</span>
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{script.message}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="bg-white rounded-xl border border-gray-200">
         {filtered.length === 0 ? (
@@ -942,10 +982,10 @@ function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: Aff
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Prenom</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Nom</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Jours restants</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Plan choisi</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Plan</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">MRR genere</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Commission</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date inscription</th>
@@ -982,26 +1022,6 @@ function SignupsSection({ affiliate, leads }: { affiliate: Affiliate; leads: Aff
           </div>
         )}
       </div>
-
-      <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl border border-blue-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Lightbulb className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Conseils pour convertir tes essais</h3>
-        </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {CONVERSION_TIPS.map((tip, i) => (
-            <div key={i} className="bg-white rounded-lg p-4 border border-blue-100">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                  {i + 1}
-                </span>
-                <h4 className="text-sm font-semibold text-gray-900">{tip.title}</h4>
-              </div>
-              <p className="text-xs text-gray-600 leading-relaxed">{tip.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -1033,28 +1053,28 @@ function StatusTag({ status, daysLeft }: { status: 'trialing' | 'active' | 'expi
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
           <Clock className="w-3 h-3" />
-          Essai (J-{Math.max(0, daysLeft)})
+          Essai gratuit
         </span>
       );
     case 'active':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
           <CheckCircle className="w-3 h-3" />
-          Abonnee
+          Client abonne
         </span>
       );
     case 'expired':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
           <XCircle className="w-3 h-3" />
-          N'a pas pris
+          Essai expire
         </span>
       );
     case 'canceled':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
           <XCircle className="w-3 h-3" />
-          Annulee
+          Abonnement annule
         </span>
       );
   }
