@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Trophy, Loader as Loader2, User, Gift, Crown } from 'lucide-react';
+import { Trophy, Loader as Loader2, Gift } from 'lucide-react';
 
 interface LeaderEntry {
   affiliate_id: string;
@@ -27,85 +27,6 @@ function AvatarCircle({ url, name, size = 'md' }: { url: string | null; name: st
       ) : (
         <span className="font-bold text-gray-500">{getInitials(name)}</span>
       )}
-    </div>
-  );
-}
-
-export default function DashboardLeaderboard() {
-  const [todayTop, setTodayTop] = useState<LeaderEntry[]>([]);
-  const [monthTop, setMonthTop] = useState<LeaderEntry[]>([]);
-  const [allTop, setAllTop] = useState<LeaderEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
-
-  const load = async () => {
-    try {
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-      const [todayRes, monthRes, allRes] = await Promise.all([
-        supabase
-          .from('affiliate_signups')
-          .select('affiliate_id, affiliates(full_name, avatar_url)')
-          .gte('created_at', todayStart)
-          .eq('subscription_status', 'active'),
-        supabase
-          .from('affiliate_signups')
-          .select('affiliate_id, affiliates(full_name, avatar_url)')
-          .gte('created_at', monthStart)
-          .eq('subscription_status', 'active'),
-        supabase
-          .from('affiliates')
-          .select('id, full_name, avatar_url, active_sub_count')
-          .eq('status', 'active')
-          .gt('active_sub_count', 0)
-          .order('active_sub_count', { ascending: false })
-          .limit(10),
-      ]);
-
-      setTodayTop(aggregateEntries(todayRes.data || []));
-      setMonthTop(aggregateEntries(monthRes.data || []));
-
-      setAllTop(
-        (allRes.data || []).map((a: any) => ({
-          affiliate_id: a.id,
-          full_name: a.full_name || 'Anonyme',
-          avatar_url: a.avatar_url || null,
-          conversions: a.active_sub_count || 0,
-        }))
-      );
-    } catch (err) {
-      console.error('Leaderboard error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-    intervalRef.current = setInterval(load, 60000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Top3Card title="Top du jour" entries={todayTop.slice(0, 3)} />
-        <Top3Card title="Top du mois" entries={monthTop.slice(0, 3)} />
-      </div>
-
-      {allTop.length > 0 && <ConversionBarChart entries={allTop} />}
-
-      <ChallengeCard />
     </div>
   );
 }
@@ -170,143 +91,6 @@ function Top3Card({ title, entries }: { title: string; entries: LeaderEntry[] })
   );
 }
 
-function ConversionBarChart({ entries }: { entries: LeaderEntry[] }) {
-  const maxVal = Math.max(...entries.map(e => e.conversions), 1);
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-
-  const barWidth = 60;
-  const gap = 16;
-  const avatarSize = 32;
-  const chartHeight = 200;
-  const topPadding = 30;
-  const bottomPadding = 50;
-  const barArea = chartHeight - topPadding - bottomPadding;
-  const totalWidth = entries.length * (barWidth + gap) - gap + 40;
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Crown className="w-4 h-4 text-amber-500" />
-        <h4 className="font-semibold text-sm text-gray-900">Top conversions (clients abonnes)</h4>
-      </div>
-      <div className="overflow-x-auto pb-2">
-        <svg width={totalWidth} height={chartHeight} className="mx-auto block">
-          {entries.map((entry, i) => {
-            const x = 20 + i * (barWidth + gap);
-            const barH = Math.max(4, (entry.conversions / maxVal) * barArea);
-            const barY = topPadding + barArea - barH;
-            const isHovered = hoveredIdx === i;
-            const colors = ['#F59E0B', '#9CA3AF', '#F97316', '#3B82F6', '#10B981', '#06B6D4', '#8B5CF6', '#EC4899', '#14B8A6', '#6366F1'];
-            const color = colors[i % colors.length];
-
-            return (
-              <g
-                key={entry.affiliate_id}
-                onMouseEnter={() => setHoveredIdx(i)}
-                onMouseLeave={() => setHoveredIdx(null)}
-                className="cursor-pointer"
-              >
-                <rect
-                  x={x + 4}
-                  y={barY}
-                  width={barWidth - 8}
-                  height={barH}
-                  rx={6}
-                  fill={color}
-                  opacity={isHovered ? 1 : 0.8}
-                  className="transition-opacity duration-150"
-                />
-                {entry.conversions > 0 && (
-                  <text
-                    x={x + barWidth / 2}
-                    y={barY - 8}
-                    textAnchor="middle"
-                    className="text-xs font-bold"
-                    fill="#374151"
-                  >
-                    {entry.conversions}
-                  </text>
-                )}
-
-                <clipPath id={`avatar-clip-${i}`}>
-                  <circle cx={x + barWidth / 2} cy={chartHeight - bottomPadding + 20} r={avatarSize / 2} />
-                </clipPath>
-                <circle
-                  cx={x + barWidth / 2}
-                  cy={chartHeight - bottomPadding + 20}
-                  r={avatarSize / 2 + 1}
-                  fill="#E5E7EB"
-                />
-                {entry.avatar_url ? (
-                  <image
-                    href={entry.avatar_url}
-                    x={x + barWidth / 2 - avatarSize / 2}
-                    y={chartHeight - bottomPadding + 20 - avatarSize / 2}
-                    width={avatarSize}
-                    height={avatarSize}
-                    clipPath={`url(#avatar-clip-${i})`}
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                ) : (
-                  <>
-                    <circle
-                      cx={x + barWidth / 2}
-                      cy={chartHeight - bottomPadding + 20}
-                      r={avatarSize / 2}
-                      fill="#F3F4F6"
-                    />
-                    <text
-                      x={x + barWidth / 2}
-                      y={chartHeight - bottomPadding + 24}
-                      textAnchor="middle"
-                      className="text-[10px] font-bold"
-                      fill="#9CA3AF"
-                    >
-                      {getInitials(entry.full_name)}
-                    </text>
-                  </>
-                )}
-
-                {isHovered && (
-                  <g>
-                    <rect
-                      x={x + barWidth / 2 - 60}
-                      y={barY - 48}
-                      width={120}
-                      height={36}
-                      rx={6}
-                      fill="#1F2937"
-                      opacity={0.95}
-                    />
-                    <text
-                      x={x + barWidth / 2}
-                      y={barY - 34}
-                      textAnchor="middle"
-                      fill="white"
-                      className="text-[10px] font-medium"
-                    >
-                      {entry.full_name}
-                    </text>
-                    <text
-                      x={x + barWidth / 2}
-                      y={barY - 20}
-                      textAnchor="middle"
-                      fill="#D1D5DB"
-                      className="text-[9px]"
-                    >
-                      {entry.conversions} conversion{entry.conversions !== 1 ? 's' : ''}
-                    </text>
-                  </g>
-                )}
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-    </div>
-  );
-}
-
 function ChallengeCard() {
   const prizes = [
     { rank: '1er', amount: '300 EUR', color: 'from-amber-400 to-amber-500', shadow: 'shadow-amber-200' },
@@ -333,6 +117,83 @@ function ChallengeCard() {
           </div>
         ))}
       </div>
+      <p className="text-xs text-gray-500 mt-3 text-center">
+        Le classement est base uniquement sur le nombre de clients abonnes convertis.
+      </p>
+    </div>
+  );
+}
+
+export default function DashboardLeaderboard({ section }: { section?: 'tops' | 'challenge' | 'all' }) {
+  const [todayTop, setTodayTop] = useState<LeaderEntry[]>([]);
+  const [monthTop, setMonthTop] = useState<LeaderEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  const load = async () => {
+    try {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+      const [todayRes, monthRes] = await Promise.all([
+        supabase
+          .from('affiliate_signups')
+          .select('affiliate_id, affiliates(full_name, avatar_url)')
+          .gte('created_at', todayStart)
+          .eq('subscription_status', 'active'),
+        supabase
+          .from('affiliate_signups')
+          .select('affiliate_id, affiliates(full_name, avatar_url)')
+          .gte('created_at', monthStart)
+          .eq('subscription_status', 'active'),
+      ]);
+
+      setTodayTop(aggregateEntries(todayRes.data || []));
+      setMonthTop(aggregateEntries(monthRes.data || []));
+    } catch (err) {
+      console.error('Leaderboard error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    intervalRef.current = setInterval(load, 60000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  const renderSection = section || 'all';
+
+  if (renderSection === 'tops') {
+    return (
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Top3Card title="Top du jour" entries={todayTop.slice(0, 3)} />
+        <Top3Card title="Top du mois" entries={monthTop.slice(0, 3)} />
+      </div>
+    );
+  }
+
+  if (renderSection === 'challenge') {
+    return <ChallengeCard />;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Top3Card title="Top du jour" entries={todayTop.slice(0, 3)} />
+        <Top3Card title="Top du mois" entries={monthTop.slice(0, 3)} />
+      </div>
+      <ChallengeCard />
     </div>
   );
 }

@@ -705,8 +705,6 @@ function DashboardOverview({
 
   return (
     <div className="space-y-6">
-      {!affiliate.disable_leaderboard && <DashboardLeaderboard />}
-
       {affiliate.disable_tiers ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-5">
           <div className="flex items-center gap-4">
@@ -784,13 +782,9 @@ function DashboardOverview({
         </p>
       </div>
 
-      <AffiliatePerformanceTable currentAffiliateId={affiliate.id} />
+      {!affiliate.disable_leaderboard && <DashboardLeaderboard section="tops" />}
 
-      <ConversionFunnel
-        crmLeadCount={crmLeadCount}
-        trialingCount={trialingCount + activeCount}
-        activeCount={activeCount}
-      />
+      {!affiliate.disable_leaderboard && <DashboardLeaderboard section="challenge" />}
 
       <DashboardStats
         leads={leads}
@@ -799,15 +793,17 @@ function DashboardOverview({
         totalEarned={affiliate.total_earned}
       />
 
+      <ConversionFunnel
+        crmLeadCount={crmLeadCount}
+        trialingCount={trialingCount + activeCount}
+        activeCount={activeCount}
+      />
+
       <DashboardCharts leads={leads} commissionRate={commissionRate} />
 
-      <div>
-        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-emerald-600" />
-          Commissions
-        </h3>
-        <DashboardCommissions affiliateId={affiliate.id} />
-      </div>
+      <AffiliatePerformanceTable currentAffiliateId={affiliate.id} />
+
+      <DashboardCommissions affiliateId={affiliate.id} />
 
       {competitions.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">

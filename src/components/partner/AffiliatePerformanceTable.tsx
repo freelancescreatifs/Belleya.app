@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BarChart3, Info, Loader2, TrendingUp } from 'lucide-react';
+import { BarChart3, Loader2, Users, Clock, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface AffiliateRow {
@@ -9,33 +9,32 @@ interface AffiliateRow {
   leads_count: number;
   trialing_count: number;
   active_count: number;
-  conversion_rate: number;
-  mrr: number;
 }
 
 interface AffiliatePerformanceTableProps {
   currentAffiliateId?: string;
 }
 
+type ChartTab = 'leads' | 'essais' | 'abonnes';
+
+const TABS: { key: ChartTab; label: string; icon: React.ElementType; color: string }[] = [
+  { key: 'leads', label: 'Leads', icon: Users, color: '#3B82F6' },
+  { key: 'essais', label: 'Essais', icon: Clock, color: '#F59E0B' },
+  { key: 'abonnes', label: 'Abonnes', icon: CheckCircle, color: '#10B981' },
+];
+
 function getInitials(name: string) {
   return name.split(' ').map(w => w[0]).filter(Boolean).join('').toUpperCase().slice(0, 2);
 }
 
-function Tooltip({ text }: { text: string }) {
-  return (
-    <div className="relative group/tip inline-flex ml-0.5">
-      <Info className="w-3 h-3 text-gray-400 cursor-help" />
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-gray-900 text-white text-[10px] rounded-lg p-2 shadow-lg opacity-0 pointer-events-none group-hover/tip:opacity-100 group-hover/tip:pointer-events-auto transition-opacity z-20 leading-relaxed">
-        {text}
-        <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-1 w-2 h-2 bg-gray-900 rotate-45" />
-      </div>
-    </div>
-  );
+function getFirstName(name: string) {
+  return name.split(' ')[0] || name;
 }
 
 export default function AffiliatePerformanceTable({ currentAffiliateId }: AffiliatePerformanceTableProps) {
   const [rows, setRows] = useState<AffiliateRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<ChartTab>('leads');
 
   const load = useCallback(async () => {
     try {
@@ -47,7 +46,7 @@ export default function AffiliatePerformanceTable({ currentAffiliateId }: Affili
           .is('deleted_at', null),
         supabase
           .from('affiliate_signups')
-          .select('id, affiliate_id, subscription_status, monthly_amount'),
+          .select('id, affiliate_id, subscription_status'),
         supabase
           .from('affiliate_crm_leads')
           .select('id, affiliate_id'),
@@ -62,11 +61,6 @@ export default function AffiliatePerformanceTable({ currentAffiliateId }: Affili
         const myCrm = crmLeads.filter((l: any) => l.affiliate_id === a.id);
         const trialing = mySignups.filter((s: any) => s.subscription_status === 'trialing' || s.subscription_status === 'trial').length;
         const active = mySignups.filter((s: any) => s.subscription_status === 'active').length;
-        const totalSignups = mySignups.length;
-        const conversionRate = totalSignups > 0 ? Math.round((active / totalSignups) * 100) : 0;
-        const mrr = mySignups
-          .filter((s: any) => s.subscription_status === 'active')
-          .reduce((sum: number, s: any) => sum + (Number(s.monthly_amount) || 29), 0);
 
         return {
           affiliate_id: a.id,
@@ -75,8 +69,6 @@ export default function AffiliatePerformanceTable({ currentAffiliateId }: Affili
           leads_count: myCrm.length,
           trialing_count: trialing,
           active_count: active,
-          conversion_rate: conversionRate,
-          mrr,
         };
       });
 
@@ -108,79 +100,177 @@ export default function AffiliatePerformanceTable({ currentAffiliateId }: Affili
     );
   }
 
+  const currentTab = TABS.find(t => t.key === activeTab)!;
+
+  const getValue = (row: AffiliateRow) => {
+    if (activeTab === 'leads') return row.leads_count;
+    if (activeTab === 'essais') return row.trialing_count;
+    return row.active_count;
+  };
+
+  const sortedRows = [...rows].sort((a, b) => getValue(b) - getValue(a));
+  const displayRows = sortedRows.slice(0, 12);
+  const maxVal = Math.max(...displayRows.map(r => getValue(r)), 1);
+
+  const barWidth = 56;
+  const gap = 12;
+  const chartHeight = 240;
+  const topPadding = 30;
+  const bottomPadding = 56;
+  const barArea = chartHeight - topPadding - bottomPadding;
+  const totalWidth = Math.max(displayRows.length * (barWidth + gap) - gap + 40, 300);
+
+  const gridLines = [];
+  const gridStep = Math.ceil(maxVal / 4) || 1;
+  for (let v = 0; v <= maxVal; v += gridStep) {
+    gridLines.push(v);
+  }
+  if (gridLines[gridLines.length - 1] < maxVal) {
+    gridLines.push(maxVal);
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-        <TrendingUp className="w-4.5 h-4.5 text-blue-500" />
-        <h3 className="font-semibold text-gray-900 text-sm">Performance des affilies</h3>
+      <div className="flex border-b border-gray-100">
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition-colors relative ${
+                isActive ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+              {isActive && (
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full" style={{ backgroundColor: tab.color }} />
+              )}
+            </button>
+          );
+        })}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-gray-500 uppercase">#</th>
-              <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-gray-500 uppercase">Affilie</th>
-              <th className="text-center px-3 py-2.5">
-                <div className="flex items-center justify-center gap-0.5 text-[11px] font-semibold text-gray-500 uppercase">
-                  Leads <Tooltip text="Personnes contactees dans le CRM" />
-                </div>
-              </th>
-              <th className="text-center px-3 py-2.5">
-                <div className="flex items-center justify-center gap-0.5 text-[11px] font-semibold text-gray-500 uppercase">
-                  Essais <Tooltip text="Inscrits en essai gratuit" />
-                </div>
-              </th>
-              <th className="text-center px-3 py-2.5">
-                <div className="flex items-center justify-center gap-0.5 text-[11px] font-semibold text-gray-500 uppercase">
-                  Abonnes <Tooltip text="Clients avec abonnement payant actif" />
-                </div>
-              </th>
-              <th className="text-center px-3 py-2.5 text-[11px] font-semibold text-gray-500 uppercase">Taux conv.</th>
-              <th className="text-right px-4 py-2.5 text-[11px] font-semibold text-gray-500 uppercase">MRR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, i) => {
-              const isCurrent = row.affiliate_id === currentAffiliateId;
+
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-gray-500" />
+            <h3 className="font-semibold text-gray-900 text-sm">Performance des affilies</h3>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto pb-2">
+          <svg width={totalWidth} height={chartHeight} className="mx-auto block">
+            {gridLines.map((v) => {
+              const y = topPadding + barArea - (v / maxVal) * barArea;
               return (
-                <tr
-                  key={row.affiliate_id}
-                  className={`border-b border-gray-50 transition-colors ${
-                    isCurrent ? 'bg-blue-50/60 ring-1 ring-inset ring-blue-200' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <td className="px-4 py-3 text-sm font-medium text-gray-400">{i + 1}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center border border-gray-200">
-                        {row.avatar_url ? (
-                          <img src={row.avatar_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-[10px] font-bold text-gray-500">{getInitials(row.full_name)}</span>
-                        )}
-                      </div>
-                      <span className={`text-sm font-medium truncate ${isCurrent ? 'text-blue-800' : 'text-gray-900'}`}>
-                        {row.full_name}
-                        {isCurrent && <span className="ml-1.5 text-[10px] font-medium text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded">(toi)</span>}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3 text-center text-sm font-semibold text-blue-600">{row.leads_count}</td>
-                  <td className="px-3 py-3 text-center text-sm font-semibold text-amber-600">{row.trialing_count}</td>
-                  <td className="px-3 py-3 text-center text-sm font-semibold text-emerald-600">{row.active_count}</td>
-                  <td className="px-3 py-3 text-center">
-                    <span className={`text-sm font-medium ${row.conversion_rate >= 30 ? 'text-emerald-600' : row.conversion_rate >= 15 ? 'text-amber-600' : 'text-gray-500'}`}>
-                      {row.conversion_rate}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
-                    {row.mrr > 0 ? `${row.mrr.toFixed(0)} EUR` : '-'}
-                  </td>
-                </tr>
+                <g key={`grid-${v}`}>
+                  <line x1={30} y1={y} x2={totalWidth - 10} y2={y} stroke="#F3F4F6" strokeWidth={1} />
+                  <text x={24} y={y + 4} textAnchor="end" className="text-[10px]" fill="#9CA3AF">{v}</text>
+                </g>
               );
             })}
-          </tbody>
-        </table>
+
+            {displayRows.map((row, i) => {
+              const val = getValue(row);
+              const x = 36 + i * (barWidth + gap);
+              const barH = Math.max(2, (val / maxVal) * barArea);
+              const barY = topPadding + barArea - barH;
+              const isCurrent = row.affiliate_id === currentAffiliateId;
+              const avatarSize = 28;
+
+              return (
+                <g key={row.affiliate_id}>
+                  <rect
+                    x={x + 4}
+                    y={barY}
+                    width={barWidth - 8}
+                    height={barH}
+                    rx={5}
+                    fill={currentTab.color}
+                    opacity={isCurrent ? 1 : 0.7}
+                    className="transition-all duration-300"
+                  />
+                  {isCurrent && (
+                    <rect
+                      x={x + 4}
+                      y={barY}
+                      width={barWidth - 8}
+                      height={barH}
+                      rx={5}
+                      fill="none"
+                      stroke={currentTab.color}
+                      strokeWidth={2}
+                    />
+                  )}
+                  {val > 0 && (
+                    <text
+                      x={x + barWidth / 2}
+                      y={barY - 6}
+                      textAnchor="middle"
+                      className="text-[11px] font-bold"
+                      fill="#374151"
+                    >
+                      {val}
+                    </text>
+                  )}
+
+                  <clipPath id={`perf-avatar-${activeTab}-${i}`}>
+                    <circle cx={x + barWidth / 2} cy={chartHeight - bottomPadding + 18} r={avatarSize / 2} />
+                  </clipPath>
+                  <circle
+                    cx={x + barWidth / 2}
+                    cy={chartHeight - bottomPadding + 18}
+                    r={avatarSize / 2 + 1}
+                    fill={isCurrent ? currentTab.color : '#E5E7EB'}
+                  />
+                  {row.avatar_url ? (
+                    <image
+                      href={row.avatar_url}
+                      x={x + barWidth / 2 - avatarSize / 2}
+                      y={chartHeight - bottomPadding + 18 - avatarSize / 2}
+                      width={avatarSize}
+                      height={avatarSize}
+                      clipPath={`url(#perf-avatar-${activeTab}-${i})`}
+                      preserveAspectRatio="xMidYMid slice"
+                    />
+                  ) : (
+                    <>
+                      <circle
+                        cx={x + barWidth / 2}
+                        cy={chartHeight - bottomPadding + 18}
+                        r={avatarSize / 2}
+                        fill={isCurrent ? '#EFF6FF' : '#F3F4F6'}
+                      />
+                      <text
+                        x={x + barWidth / 2}
+                        y={chartHeight - bottomPadding + 22}
+                        textAnchor="middle"
+                        className="text-[9px] font-bold"
+                        fill={isCurrent ? currentTab.color : '#9CA3AF'}
+                      >
+                        {getInitials(row.full_name)}
+                      </text>
+                    </>
+                  )}
+
+                  <text
+                    x={x + barWidth / 2}
+                    y={chartHeight - 4}
+                    textAnchor="middle"
+                    className="text-[9px]"
+                    fill={isCurrent ? currentTab.color : '#9CA3AF'}
+                    fontWeight={isCurrent ? 'bold' : 'normal'}
+                  >
+                    {getFirstName(row.full_name).slice(0, 8)}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
       </div>
     </div>
   );
