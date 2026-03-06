@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { BarChart3, Loader2, User } from 'lucide-react';
+import { BarChart3, Loader2, Users, UserCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 type Period = 'day' | 'month' | 'year';
+type ActiveTab = 'leads' | 'subscribers';
 
 interface AffiliateEntry {
   affiliate_id: string;
@@ -42,6 +43,7 @@ function getPeriodRange(period: Period): { start: Date; end: Date } {
 
 export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSubscribersChartProps) {
   const [period, setPeriod] = useState<Period>('month');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('leads');
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<AffiliateEntry[]>([]);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -128,6 +130,20 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
     }
   }, [period]);
 
+  const tabConfig = {
+    leads: { label: 'Leads ajoutes', icon: Users, color: '#3B82F6', tailwind: 'blue' },
+    subscribers: { label: 'Clients abonnes', icon: UserCheck, color: '#10B981', tailwind: 'emerald' },
+  };
+
+  const currentTab = tabConfig[activeTab];
+
+  const sortedEntries = useMemo(() => {
+    return [...entries].sort((a, b) => {
+      if (activeTab === 'leads') return b.leads_count - a.leads_count;
+      return b.subscribers_count - a.subscribers_count;
+    });
+  }, [entries, activeTab]);
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center min-h-[200px]">
@@ -136,235 +152,237 @@ export default function LeadsVsSubscribersChart({ scopeAffiliateId }: LeadsVsSub
     );
   }
 
-  if (entries.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="px-5 pt-5 pb-0">
+        <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-900 text-sm">Leads vs Clients abonnes</h3>
+            <h3 className="font-semibold text-gray-900 text-sm">Performance des affilies</h3>
           </div>
           <PeriodToggle periods={periods} active={period} onChange={setPeriod} />
         </div>
-        <div className="text-center py-8">
-          <p className="text-sm text-gray-500">Aucune donnee pour cette periode</p>
-        </div>
+        <p className="text-xs text-gray-400 mb-4">{periodLabel}</p>
       </div>
-    );
-  }
 
-  const maxVal = Math.max(...entries.flatMap(e => [e.leads_count, e.subscribers_count]), 1);
+      <div className="flex border-b border-gray-200">
+        {(Object.keys(tabConfig) as ActiveTab[]).map(key => {
+          const cfg = tabConfig[key];
+          const Icon = cfg.icon;
+          const isActive = activeTab === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                isActive
+                  ? key === 'leads'
+                    ? 'border-blue-500 text-blue-700 bg-blue-50/50'
+                    : 'border-emerald-500 text-emerald-700 bg-emerald-50/50'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {cfg.label}
+              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                isActive
+                  ? key === 'leads' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+                  : 'bg-gray-100 text-gray-500'
+              }`}>
+                {entries.reduce((s, e) => s + (key === 'leads' ? e.leads_count : e.subscribers_count), 0)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-  const pairWidth = 52;
-  const gap = 24;
+      <div className="p-5">
+        {sortedEntries.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-gray-500">Aucune donnee pour cette periode</p>
+          </div>
+        ) : (
+          <BarChartSVG
+            entries={sortedEntries}
+            activeTab={activeTab}
+            barColor={currentTab.color}
+            hoveredIdx={hoveredIdx}
+            setHoveredIdx={setHoveredIdx}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BarChartSVG({ entries, activeTab, barColor, hoveredIdx, setHoveredIdx }: {
+  entries: AffiliateEntry[];
+  activeTab: ActiveTab;
+  barColor: string;
+  hoveredIdx: number | null;
+  setHoveredIdx: (idx: number | null) => void;
+}) {
+  const getValue = (e: AffiliateEntry) => activeTab === 'leads' ? e.leads_count : e.subscribers_count;
+  const maxVal = Math.max(...entries.map(getValue), 1);
+
+  const barWidth = 36;
+  const gap = 32;
   const avatarSize = 30;
   const chartHeight = 240;
   const topPadding = 30;
   const bottomPadding = 55;
   const leftPadding = 40;
   const barArea = chartHeight - topPadding - bottomPadding;
-  const totalWidth = leftPadding + entries.length * (pairWidth + gap) - gap + 20;
+  const totalWidth = leftPadding + entries.length * (barWidth + gap) - gap + 20;
 
   const yTicks = [0, Math.round(maxVal * 0.25), Math.round(maxVal * 0.5), Math.round(maxVal * 0.75), maxVal];
   const uniqueTicks = [...new Set(yTicks)];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-blue-500" />
-          <h3 className="font-semibold text-gray-900 text-sm">Leads vs Clients abonnes</h3>
-        </div>
-        <PeriodToggle periods={periods} active={period} onChange={setPeriod} />
-      </div>
-      <p className="text-xs text-gray-400 mb-4">{periodLabel}</p>
-
-      <div className="flex items-center gap-4 mb-3">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-blue-500" />
-          <span className="text-xs text-gray-600">Leads ajoutes</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-emerald-500" />
-          <span className="text-xs text-gray-600">Clients abonnes</span>
-        </div>
-      </div>
-
-      <div className="overflow-x-auto pb-2">
-        <svg width={totalWidth} height={chartHeight} className="block">
-          {uniqueTicks.map(tick => {
-            const y = topPadding + barArea - (tick / maxVal) * barArea;
-            return (
-              <g key={tick}>
-                <line
-                  x1={leftPadding - 5}
-                  y1={y}
-                  x2={totalWidth}
-                  y2={y}
-                  stroke="#F3F4F6"
-                  strokeWidth={1}
-                />
-                <text
-                  x={leftPadding - 8}
-                  y={y + 4}
-                  textAnchor="end"
-                  className="text-[10px]"
-                  fill="#9CA3AF"
-                >
-                  {tick}
-                </text>
-              </g>
-            );
-          })}
-
-          {entries.map((entry, i) => {
-            const groupX = leftPadding + i * (pairWidth + gap);
-            const barW = (pairWidth - 4) / 2;
-            const leadsH = Math.max(3, (entry.leads_count / maxVal) * barArea);
-            const subsH = Math.max(3, (entry.subscribers_count / maxVal) * barArea);
-            const leadsY = topPadding + barArea - leadsH;
-            const subsY = topPadding + barArea - subsH;
-            const isHovered = hoveredIdx === i;
-
-            return (
-              <g
-                key={entry.affiliate_id}
-                onMouseEnter={() => setHoveredIdx(i)}
-                onMouseLeave={() => setHoveredIdx(null)}
-                className="cursor-pointer"
+    <div className="overflow-x-auto pb-2">
+      <svg width={totalWidth} height={chartHeight} className="block">
+        {uniqueTicks.map(tick => {
+          const y = topPadding + barArea - (tick / maxVal) * barArea;
+          return (
+            <g key={tick}>
+              <line
+                x1={leftPadding - 5}
+                y1={y}
+                x2={totalWidth}
+                y2={y}
+                stroke="#F3F4F6"
+                strokeWidth={1}
+              />
+              <text
+                x={leftPadding - 8}
+                y={y + 4}
+                textAnchor="end"
+                className="text-[10px]"
+                fill="#9CA3AF"
               >
-                <rect
-                  x={groupX}
-                  y={leadsY}
-                  width={barW}
-                  height={leadsH}
-                  rx={4}
-                  fill="#3B82F6"
-                  opacity={isHovered ? 1 : 0.8}
-                  className="transition-opacity duration-150"
-                />
-                {entry.leads_count > 0 && (
-                  <text
-                    x={groupX + barW / 2}
-                    y={leadsY - 6}
-                    textAnchor="middle"
-                    className="text-[10px] font-bold"
-                    fill="#3B82F6"
-                  >
-                    {entry.leads_count}
-                  </text>
-                )}
+                {tick}
+              </text>
+            </g>
+          );
+        })}
 
-                <rect
-                  x={groupX + barW + 4}
-                  y={subsY}
-                  width={barW}
-                  height={subsH}
-                  rx={4}
-                  fill="#10B981"
-                  opacity={isHovered ? 1 : 0.8}
-                  className="transition-opacity duration-150"
-                />
-                {entry.subscribers_count > 0 && (
-                  <text
-                    x={groupX + barW + 4 + barW / 2}
-                    y={subsY - 6}
-                    textAnchor="middle"
-                    className="text-[10px] font-bold"
-                    fill="#10B981"
-                  >
-                    {entry.subscribers_count}
-                  </text>
-                )}
+        {entries.map((entry, i) => {
+          const x = leftPadding + i * (barWidth + gap);
+          const val = getValue(entry);
+          const barH = Math.max(3, (val / maxVal) * barArea);
+          const barY = topPadding + barArea - barH;
+          const isHovered = hoveredIdx === i;
+          const centerX = x + barWidth / 2;
 
-                <clipPath id={`lvs-avatar-${i}`}>
+          return (
+            <g
+              key={entry.affiliate_id}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              className="cursor-pointer"
+            >
+              <rect
+                x={x}
+                y={barY}
+                width={barWidth}
+                height={barH}
+                rx={6}
+                fill={barColor}
+                opacity={isHovered ? 1 : 0.75}
+                className="transition-opacity duration-150"
+              />
+              {val > 0 && (
+                <text
+                  x={centerX}
+                  y={barY - 7}
+                  textAnchor="middle"
+                  className="text-[11px] font-bold"
+                  fill={barColor}
+                >
+                  {val}
+                </text>
+              )}
+
+              <clipPath id={`lvs-avatar-${i}`}>
+                <circle
+                  cx={centerX}
+                  cy={chartHeight - bottomPadding + 22}
+                  r={avatarSize / 2}
+                />
+              </clipPath>
+              <circle
+                cx={centerX}
+                cy={chartHeight - bottomPadding + 22}
+                r={avatarSize / 2 + 1}
+                fill={isHovered ? barColor : '#E5E7EB'}
+                opacity={isHovered ? 0.3 : 1}
+                className="transition-all duration-150"
+              />
+              {entry.avatar_url ? (
+                <image
+                  href={entry.avatar_url}
+                  x={centerX - avatarSize / 2}
+                  y={chartHeight - bottomPadding + 22 - avatarSize / 2}
+                  width={avatarSize}
+                  height={avatarSize}
+                  clipPath={`url(#lvs-avatar-${i})`}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              ) : (
+                <>
                   <circle
-                    cx={groupX + pairWidth / 2}
+                    cx={centerX}
                     cy={chartHeight - bottomPadding + 22}
                     r={avatarSize / 2}
+                    fill="#F3F4F6"
                   />
-                </clipPath>
-                <circle
-                  cx={groupX + pairWidth / 2}
-                  cy={chartHeight - bottomPadding + 22}
-                  r={avatarSize / 2 + 1}
-                  fill="#E5E7EB"
-                />
-                {entry.avatar_url ? (
-                  <image
-                    href={entry.avatar_url}
-                    x={groupX + pairWidth / 2 - avatarSize / 2}
-                    y={chartHeight - bottomPadding + 22 - avatarSize / 2}
-                    width={avatarSize}
-                    height={avatarSize}
-                    clipPath={`url(#lvs-avatar-${i})`}
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                ) : (
-                  <>
-                    <circle
-                      cx={groupX + pairWidth / 2}
-                      cy={chartHeight - bottomPadding + 22}
-                      r={avatarSize / 2}
-                      fill="#F3F4F6"
-                    />
-                    <text
-                      x={groupX + pairWidth / 2}
-                      y={chartHeight - bottomPadding + 26}
-                      textAnchor="middle"
-                      className="text-[10px] font-bold"
-                      fill="#9CA3AF"
-                    >
-                      {getInitials(entry.full_name)}
-                    </text>
-                  </>
-                )}
+                  <text
+                    x={centerX}
+                    y={chartHeight - bottomPadding + 26}
+                    textAnchor="middle"
+                    className="text-[10px] font-bold"
+                    fill="#9CA3AF"
+                  >
+                    {getInitials(entry.full_name)}
+                  </text>
+                </>
+              )}
 
-                {isHovered && (
-                  <g>
-                    <rect
-                      x={groupX + pairWidth / 2 - 75}
-                      y={Math.min(leadsY, subsY) - 68}
-                      width={150}
-                      height={56}
-                      rx={8}
-                      fill="#1F2937"
-                      opacity={0.95}
-                    />
-                    <text
-                      x={groupX + pairWidth / 2}
-                      y={Math.min(leadsY, subsY) - 50}
-                      textAnchor="middle"
-                      fill="white"
-                      className="text-[11px] font-semibold"
-                    >
-                      {entry.full_name}
-                    </text>
-                    <text
-                      x={groupX + pairWidth / 2}
-                      y={Math.min(leadsY, subsY) - 36}
-                      textAnchor="middle"
-                      fill="#93C5FD"
-                      className="text-[10px]"
-                    >
-                      {entry.leads_count} lead{entry.leads_count !== 1 ? 's' : ''}
-                    </text>
-                    <text
-                      x={groupX + pairWidth / 2}
-                      y={Math.min(leadsY, subsY) - 22}
-                      textAnchor="middle"
-                      fill="#6EE7B7"
-                      className="text-[10px]"
-                    >
-                      {entry.subscribers_count} abonne{entry.subscribers_count !== 1 ? 's' : ''}
-                    </text>
-                  </g>
-                )}
-              </g>
-            );
-          })}
-        </svg>
-      </div>
+              {isHovered && (
+                <g>
+                  <rect
+                    x={centerX - 70}
+                    y={barY - 56}
+                    width={140}
+                    height={42}
+                    rx={8}
+                    fill="#1F2937"
+                    opacity={0.95}
+                  />
+                  <text
+                    x={centerX}
+                    y={barY - 38}
+                    textAnchor="middle"
+                    fill="white"
+                    className="text-[11px] font-semibold"
+                  >
+                    {entry.full_name}
+                  </text>
+                  <text
+                    x={centerX}
+                    y={barY - 23}
+                    textAnchor="middle"
+                    fill={activeTab === 'leads' ? '#93C5FD' : '#6EE7B7'}
+                    className="text-[10px]"
+                  >
+                    {val} {activeTab === 'leads' ? 'lead' : 'abonne'}{val !== 1 ? 's' : ''}
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
