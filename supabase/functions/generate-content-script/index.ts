@@ -410,10 +410,10 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiKey) {
+    const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!anthropicKey) {
       return new Response(
-        JSON.stringify({ error: "OpenAI API key not configured" }),
+        JSON.stringify({ error: "Claude API key not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -441,37 +441,37 @@ Deno.serve(async (req: Request) => {
       userMessage = `Produis le script complet et détaillé pour ce sujet : "${payload.title}"`;
     }
 
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/chat/completions",
+    const claudeResponse = await fetch(
+      "https://api.anthropic.com/v1/messages",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${openaiKey}`,
+          "x-api-key": anthropicKey,
           "Content-Type": "application/json",
+          "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: "claude-3-5-sonnet-20241022",
+          max_tokens: mode === "ideas" ? 2000 : 4000,
+          system: systemPrompt,
           messages: [
-            { role: "system", content: systemPrompt },
             { role: "user", content: userMessage },
           ],
-          temperature: 0.8,
-          max_tokens: mode === "ideas" ? 2000 : 4000,
         }),
       }
     );
 
-    if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text();
-      console.error("OpenAI API error:", openaiResponse.status, errorText);
+    if (!claudeResponse.ok) {
+      const errorText = await claudeResponse.text();
+      console.error("Claude API error:", claudeResponse.status, errorText);
       let errorMsg = "AI generation failed";
 
-      if (openaiResponse.status === 401) {
-        errorMsg = "OpenAI API key invalid or expired. Please check configuration.";
-      } else if (openaiResponse.status === 429) {
-        errorMsg = "OpenAI rate limit exceeded. Please try again in a moment.";
-      } else if (openaiResponse.status === 500) {
-        errorMsg = "OpenAI service error. Please try again later.";
+      if (claudeResponse.status === 401) {
+        errorMsg = "Claude API key invalid or expired. Please check configuration.";
+      } else if (claudeResponse.status === 429) {
+        errorMsg = "Claude rate limit exceeded. Please try again in a moment.";
+      } else if (claudeResponse.status === 500) {
+        errorMsg = "Claude service error. Please try again later.";
       }
 
       return new Response(
@@ -480,12 +480,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const openaiData = await openaiResponse.json();
-    const content = openaiData.choices?.[0]?.message?.content;
+    const claudeData = await claudeResponse.json();
+    const content = claudeData.content?.[0]?.text;
 
     if (!content) {
       return new Response(
-        JSON.stringify({ error: "Empty response from AI" }),
+        JSON.stringify({ error: "Empty response from Claude" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -501,7 +501,7 @@ Deno.serve(async (req: Request) => {
           {
             title: content.substring(0, 100),
             description: content,
-            angle: "Généré par IA",
+            angle: "Généré par Claude AI",
           },
         ];
       }
