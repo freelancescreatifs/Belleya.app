@@ -122,6 +122,12 @@ export function getPlanFeatures(planType: string): string[] {
       'Revenus d\'affiliation',
       'Support prioritaire',
       'Visibilité premium'
+    ],
+    vip: [
+      'Tout Empire +',
+      'Accès VIP complet',
+      'Support dédié',
+      'Fonctionnalités exclusives'
     ]
   };
 
@@ -132,7 +138,8 @@ export function getPlanPrice(planType: string): { current: number; future: numbe
   const prices: Record<string, { current: number; future: number }> = {
     start: { current: 29, future: 39 },
     studio: { current: 39, future: 49 },
-    empire: { current: 59, future: 79 }
+    empire: { current: 59, future: 79 },
+    vip: { current: 0, future: 0 }
   };
 
   return prices[planType] || { current: 0, future: 0 };
@@ -187,7 +194,8 @@ export function getPlanName(planType: string): string {
   const names: Record<string, string> = {
     start: 'Belaya Start',
     studio: 'Belaya Studio',
-    empire: 'Belaya Empire'
+    empire: 'Belaya Empire',
+    vip: 'Belaya VIP'
   };
 
   return names[planType] || planType;

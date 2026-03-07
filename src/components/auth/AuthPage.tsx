@@ -37,13 +37,18 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
         console.log('[AuthPage] Starting signin process...');
         const userProfile = await signIn(email, password);
 
-        if (userProfile && userProfile.role !== role) {
-          await signOut();
-          throw new Error(
-            role === 'client'
-              ? 'Ce compte est un compte professionnel. Veuillez utiliser l\'espace pro.'
-              : 'Ce compte est un compte client. Veuillez utiliser l\'espace cliente.'
-          );
+        const proSideRoles = ['pro', 'admin', 'affiliate'];
+        if (userProfile) {
+          const isClientRole = userProfile.role === 'client';
+          const isProSide = proSideRoles.includes(userProfile.role);
+          if ((role === 'client' && !isClientRole) || (role === 'pro' && !isProSide)) {
+            await signOut();
+            throw new Error(
+              role === 'client'
+                ? 'Ce compte est un compte professionnel. Veuillez utiliser l\'espace pro.'
+                : 'Ce compte est un compte client. Veuillez utiliser l\'espace cliente.'
+            );
+          }
         }
         console.log('[AuthPage] Signin completed successfully');
       }

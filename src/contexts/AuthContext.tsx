@@ -6,7 +6,7 @@ import i18n from '../i18n';
 export interface UserProfile {
   id: string;
   user_id: string;
-  role: 'client' | 'pro' | 'admin';
+  role: 'client' | 'pro' | 'admin' | 'affiliate';
   first_name: string | null;
   last_name: string | null;
   phone: string | null;
