@@ -452,7 +452,7 @@ Deno.serve(async (req: Request) => {
         },
         body: JSON.stringify({
           model: "claude-3-5-sonnet-20241022",
-          max_tokens: mode === "ideas" ? 2000 : 4000,
+          max_tokens: mode === "ideas" ? 4096 : 8192,
           system: systemPrompt,
           messages: [
             { role: "user", content: userMessage },
@@ -484,8 +484,12 @@ Deno.serve(async (req: Request) => {
     const content = claudeData.content?.[0]?.text;
 
     if (!content) {
+      console.error("Claude empty response:", JSON.stringify(claudeData));
       return new Response(
-        JSON.stringify({ error: "Empty response from Claude" }),
+        JSON.stringify({
+          error: "Empty response from Claude",
+          details: "Aucun contenu retourné par l'IA Claude"
+        }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
