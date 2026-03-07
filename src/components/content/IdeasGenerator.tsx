@@ -106,7 +106,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     platform: 'instagram',
     objective: 'attirer',
     editorial_pillar: '',
-    target_audience: 'entrepreneurs',
+    target_audience: '',
     awareness_level: 'conscient_probleme'
   });
   const [showProductionModal, setShowProductionModal] = useState(false);
@@ -174,12 +174,10 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
     try {
       const { data, error } = await supabase
-        .from('content_calendar')
+        .from('content_ideas')
         .select('*')
         .eq('user_id', user.id)
-        .eq('status', 'script')
-        .in('source', ['manual', 'ai'])
-        .is('date_script', null)
+        .eq('status', 'saved')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -194,7 +192,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       setSavedIdeas(prev => prev.filter(idea => idea.id !== ideaId));
 
       const { error } = await supabase
-        .from('content_calendar')
+        .from('content_ideas')
         .delete()
         .eq('id', ideaId);
 
@@ -333,25 +331,25 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         user_id: user.id,
         company_id: companyData?.id || null,
         title: idea.title || 'Idee sans titre',
-        description: idea.description || '',
+        hooks_alternatives: idea.hooks_alternatives || [],
+        psychological_triggers: idea.psychological_triggers || [],
+        content_angle: idea.content_angle || '',
+        retention_structure: idea.retention_structure || [],
+        conversion_version: idea.conversion_version || '',
+        visual_alignment: idea.visual_alignment || [],
+        story_ideas: idea.story_ideas || [],
+        pro_tip: idea.pro_tip || '',
         content_type: aiIdea.content_type,
         platform: [aiIdea.platform],
-        publication_date: null,
-        publication_time: null,
-        status: 'script' as const,
-        source: 'ai' as const,
         objective: aiIdea.objective,
         editorial_pillar: aiIdea.editorial_pillar || null,
         target_audience: aiIdea.target_audience || null,
         awareness_level: aiIdea.awareness_level || null,
-        notes: idea.angle ? `Angle: ${idea.angle}` : '',
-        is_saved: false,
-        feed_order: 0,
-        image_url: ''
+        status: 'saved' as const
       }));
 
       const { data, error } = await supabase
-        .from('content_calendar')
+        .from('content_ideas')
         .insert(insertData)
         .select();
 
@@ -529,6 +527,72 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     const pillar = pillars.find(p => p.pillar_name === pillarName);
     if (!pillar) return 'bg-gray-100 text-gray-700';
     return `bg-${pillar.color}-100 text-${pillar.color}-700`;
+  }
+
+  async function handleToProduce(ideaId: string) {
+    try {
+      const idea = savedIdeas.find(i => i.id === ideaId);
+      if (!idea) return;
+
+      const { data: companyData } = await supabase
+        .from('company_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const insertData = {
+        user_id: user.id,
+        company_id: companyData?.id || null,
+        title: idea.title,
+        description: '',
+        content_type: idea.content_type,
+        platform: Array.isArray(idea.platform) ? idea.platform : [idea.platform],
+        publication_date: null,
+        publication_time: null,
+        status: 'script' as const,
+        objective: idea.objective || null,
+        editorial_pillar: idea.editorial_pillar || null,
+        target_audience: (idea as any).target_audience || null,
+        awareness_level: (idea as any).awareness_level || null,
+        notes: '',
+        is_saved: false,
+        feed_order: 0,
+        image_url: ''
+      };
+
+      const { error } = await supabase
+        .from('content_calendar')
+        .insert([insertData]);
+
+      if (error) throw error;
+
+      setSavedIdeas(prev => prev.filter(i => i.id !== ideaId));
+      alert('Idée ajoutée au calendrier !');
+    } catch (error) {
+      console.error('Error moving idea to production:', error);
+      alert('Erreur lors du déplacement de l\'idée');
+    }
+  }
+
+  async function handleToggleSave(ideaId: string, isSaved: boolean) {
+    try {
+      const { error } = await supabase
+        .from('content_ideas')
+        .update({ status: isSaved ? 'saved' : 'saved' })
+        .eq('id', ideaId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      loadSavedIdeas();
+    } catch (error) {
+      console.error('Error toggling save:', error);
+    }
+  }
+
+  async function handleDelete(ideaId: string) {
+    if (confirm('Supprimer cette idée ?')) {
+      await handleRemoveFromIdeas(ideaId);
+    }
   }
 
   function renderIdeaCard(idea: SavedIdea, cardColor: string) {
@@ -877,20 +941,14 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Cible audience *</label>
-                      <select
-                        value={aiIdea.target_audience || 'entrepreneurs'}
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Cible audience (description libre)</label>
+                      <input
+                        type="text"
+                        value={aiIdea.target_audience}
                         onChange={(e) => setAiIdea({ ...aiIdea, target_audience: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        <option value="freelances_debutants">Freelances débutants</option>
-                        <option value="freelances_experimentes">Freelances expérimentés</option>
-                        <option value="entrepreneurs">Entrepreneurs</option>
-                        <option value="createurs_contenu">Créateurs de contenu</option>
-                        <option value="independants_creatifs">Indépendants créatifs</option>
-                        <option value="dirigeants_pme">Dirigeants / PME</option>
-                        <option value="etudiants_reconversion">Étudiants / Reconversion</option>
-                      </select>
+                        placeholder="Ex: Femmes 25-40 ans, PME du secteur beauté, parents..."
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect *</label>
