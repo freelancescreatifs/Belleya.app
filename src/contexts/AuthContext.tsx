@@ -70,13 +70,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const ensureGoogleProfile = useCallback(async (userId: string) => {
+    const savedRole = localStorage.getItem('pending_google_role') as 'client' | 'pro' | null;
+    if (!savedRole) return;
+
+    const { data: existing } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (existing) {
+      localStorage.removeItem('pending_google_role');
+      await loadProfile(userId);
+      return;
+    }
+
+    console.log('[EnsureGoogleProfile] Creating profile for Google user with role:', savedRole);
+
+    const { error: insertError } = await supabase
+      .from('user_profiles')
+      .insert({
+        user_id: userId,
+        role: savedRole,
+      });
+
+    if (insertError) {
+      console.error('[EnsureGoogleProfile] Failed to create profile:', insertError.message);
+      return;
+    }
+
+    localStorage.removeItem('pending_google_role');
+    await loadProfile(userId);
+  }, [loadProfile]);
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         currentUserIdRef.current = session.user.id;
-        await loadProfile(session.user.id);
+        if (localStorage.getItem('pending_google_role')) {
+          await ensureGoogleProfile(session.user.id);
+        } else {
+          await loadProfile(session.user.id);
+        }
       } else {
         currentUserIdRef.current = null;
         setProfile(null);
@@ -100,14 +138,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const newUserId = session?.user?.id ?? null;
 
-      if (event === 'SIGNED_IN' && newUserId === currentUserIdRef.current) {
-        return;
-      }
-
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
+        const isReturningFromGoogle = event === 'SIGNED_IN' && localStorage.getItem('pending_google_role');
+
+        if (isReturningFromGoogle) {
+          currentUserIdRef.current = session.user.id;
+          (async () => {
+            await ensureGoogleProfile(session.user.id);
+          })();
+          return;
+        }
+
+        if (event === 'SIGNED_IN' && newUserId === currentUserIdRef.current) {
+          return;
+        }
+
         currentUserIdRef.current = session.user.id;
         if (!profileLoadingRef.current) {
           loadProfile(session.user.id);
@@ -119,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [loadProfile]);
+  }, [loadProfile, ensureGoogleProfile]);
 
   const signUp = async (
     email: string,
@@ -254,28 +302,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('[SignInWithGoogle] Starting Google OAuth with role:', role);
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      localStorage.setItem('pending_google_role', role);
+
+      const hostname = window.location.hostname;
+      const redirectTo =
+        hostname === 'localhost' || hostname.includes('bolt.new') || hostname.includes('stackblitz')
+          ? window.location.origin
+          : 'https://belaya.app';
+
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}`,
+          redirectTo,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
           },
-          data: {
-            role,
-          }
         }
       });
 
       if (error) {
         console.error('[SignInWithGoogle] Error:', error);
+        localStorage.removeItem('pending_google_role');
         throw error;
       }
 
-      console.log('[SignInWithGoogle] OAuth initiated successfully');
+      console.log('[SignInWithGoogle] OAuth initiated successfully, redirecting...');
     } catch (err: any) {
       console.error('[SignInWithGoogle] Exception:', err);
+      localStorage.removeItem('pending_google_role');
       throw new Error(err?.message || 'Erreur lors de la connexion avec Google');
     }
   };
@@ -285,6 +340,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setSession(null);
       setProfile(null);
+      localStorage.removeItem('pending_google_role');
 
       const { error } = await supabase.auth.signOut();
       if (error) {
