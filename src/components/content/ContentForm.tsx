@@ -27,6 +27,8 @@ interface ContentItem {
   link?: string;
   reel_url?: string;
   notes?: string;
+  target_audience?: string;
+  awareness_level?: string;
   date_script?: string;
   date_script_time?: string;
   date_script_end_time?: string;
@@ -127,6 +129,8 @@ export default function ContentForm({
     publication_time: prefillData?.publication_time || '12:00',
     editorial_pillar: prefillData?.editorial_pillar || '',
     objective: prefillData?.objective || '',
+    target_audience: prefillData?.target_audience || '',
+    awareness_level: prefillData?.awareness_level || '',
     caption: prefillData?.caption || '',
     content_structure: prefillData?.content_structure || '',
     link: prefillData?.link || '',
@@ -398,6 +402,8 @@ export default function ContentForm({
           platform: primaryPlatform,
           objective: formData.objective || 'attirer',
           editorial_pillar: formData.editorial_pillar || undefined,
+          target_audience: formData.target_audience || undefined,
+          awareness_level: formData.awareness_level || undefined,
           profession: professionType || 'nail_artist',
         }),
       });
@@ -575,6 +581,8 @@ export default function ContentForm({
         publication_time: formData.publication_time?.trim() || null,
         editorial_pillar: formData.editorial_pillar || null,
         objective: formData.objective || null,
+        target_audience: formData.target_audience || null,
+        awareness_level: formData.awareness_level || null,
         caption: formData.caption || null,
         content_structure: formData.content_structure || null,
         link: formData.link || null,
@@ -957,6 +965,46 @@ export default function ContentForm({
             {OBJECTIVES.map(obj => (
               <option key={obj.value} value={obj.value}>{obj.label}</option>
             ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Cible audience
+          </label>
+          <select
+            value={formData.target_audience}
+            onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          >
+            <option value="">Sélectionner une cible</option>
+            <option value="freelances_debutants">Freelances débutants</option>
+            <option value="freelances_experimentes">Freelances expérimentés</option>
+            <option value="entrepreneurs">Entrepreneurs</option>
+            <option value="createurs_contenu">Créateurs de contenu</option>
+            <option value="independants_creatifs">Indépendants créatifs</option>
+            <option value="dirigeants_pme">Dirigeants / PME</option>
+            <option value="etudiants_reconversion">Étudiants / Reconversion</option>
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Conscience du prospect
+          </label>
+          <select
+            value={formData.awareness_level}
+            onChange={(e) => setFormData({ ...formData, awareness_level: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          >
+            <option value="">Sélectionner un niveau</option>
+            <option value="probleme_inconscient">Problème inconscient</option>
+            <option value="conscient_probleme">Conscient du problème</option>
+            <option value="conscient_solution">Conscient de la solution</option>
+            <option value="conscient_produit">Conscient du produit</option>
+            <option value="pret_acheter">Prêt à acheter</option>
           </select>
         </div>
       </div>

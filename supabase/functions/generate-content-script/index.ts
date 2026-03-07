@@ -16,6 +16,7 @@ interface RequestPayload {
   editorial_pillar?: string;
   profession: string;
   target_audience?: string;
+  awareness_level?: string;
 }
 
 function getProfessionLabel(profession: string): string {
@@ -37,37 +38,71 @@ function getProfessionLabel(profession: string): string {
   return labels[profession] || "Professionnelle indépendante";
 }
 
+function getTargetAudienceLabel(audience: string): string {
+  const labels: Record<string, string> = {
+    freelances_debutants: "Freelances débutants",
+    freelances_experimentes: "Freelances expérimentés",
+    entrepreneurs: "Entrepreneurs",
+    createurs_contenu: "Créateurs de contenu",
+    independants_creatifs: "Indépendants créatifs",
+    dirigeants_pme: "Dirigeants / PME",
+    etudiants_reconversion: "Étudiants / Reconversion",
+  };
+  return labels[audience] || audience;
+}
+
+function getAwarenessLevelLabel(level: string): string {
+  const labels: Record<string, string> = {
+    probleme_inconscient: "Problème inconscient (ne sait pas qu'il a un problème)",
+    conscient_probleme: "Conscient du problème (sait qu'il a un souci)",
+    conscient_solution: "Conscient de la solution (sait comment le résoudre)",
+    conscient_produit: "Conscient du produit (connaît ta solution)",
+    pret_acheter: "Prêt à acheter (décision imminente)",
+  };
+  return labels[level] || level;
+}
+
 function buildIdeasSystemPrompt(params: RequestPayload): string {
   const profLabel = getProfessionLabel(params.profession);
   const pillarContext = params.editorial_pillar
     ? `\n- Pilier éditorial actif : "${params.editorial_pillar}". Chaque sujet DOIT s'inscrire dans ce pilier.`
     : "";
 
-  return `Tu es une IA experte en stratégie de contenu pour les réseaux sociaux, spécialisée dans le secteur de la beauté et des services indépendants.
+  const targetAudienceContext = params.target_audience
+    ? `\n- Cible : ${getTargetAudienceLabel(params.target_audience)}`
+    : "";
 
-CONTEXTE MÉTIER :
+  const awarenessContext = params.awareness_level
+    ? `\n- Conscience du prospect : ${getAwarenessLevelLabel(params.awareness_level)}`
+    : "";
+
+  return `Tu es une IA experte en stratégie de contenu viral et en acquisition pour les réseaux sociaux, spécialisée dans le secteur de la beauté et des services indépendants.
+
+CONTEXTE STRATÉGIQUE :
 - Profession : ${profLabel}
 - Plateforme cible : ${params.platform}
 - Format de contenu : ${params.content_type}
-- Objectif marketing : ${params.objective}${pillarContext}
+- Objectif marketing : ${params.objective}${pillarContext}${targetAudienceContext}${awarenessContext}
 
-MISSION : Génère exactement 5 idées de contenu sous forme de sujets ultra-précis.
+MISSION : Génère exactement 5 idées de contenu ultra-stratégiques et différenciantes, parfaitement adaptées à ta cible.
 
 RÈGLES STRICTES :
-1. Chaque sujet doit être SPÉCIFIQUE et centré sur UN SEUL problème concret
-2. Les sujets doivent être DIFFÉRENTS les uns des autres (angles variés)
+1. Chaque sujet doit être SPÉCIFIQUE et centré sur UN SEUL problème concret du prospect
+2. Les sujets doivent être DIFFÉRENTS les uns des autres (angles variés, pas de redondance)
 3. AUCUN sujet vague ou générique (ex: interdit "Conseils beauté")
 4. Chaque sujet doit être ACTIONNABLE et exploitable immédiatement
 5. Adapte le vocabulaire et les exemples au métier de ${profLabel}
-6. Adapte le ton à la plateforme ${params.platform}
+6. Adapte le ton et le langage à la plateforme ${params.platform}
 7. Aligne chaque sujet avec l'objectif "${params.objective}"
+8. Personnalise chaque sujet pour la cible et le niveau de conscience mentionné
+9. Pas de contenu générique : chaque sujet doit créer de la tension ou du désir
 
 FORMAT DE RÉPONSE (JSON strict) :
 Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après :
 [
   {
-    "title": "Titre du sujet (phrase accrocheuse, pas un mot-clé)",
-    "description": "2-3 phrases décrivant l'angle précis et pourquoi ce sujet fonctionne",
+    "title": "Titre du sujet (phrase accrocheuse et spécifique au métier)",
+    "description": "2-3 phrases décrivant l'angle précis, pourquoi ce sujet fonctionne pour ta cible, et quel déclencheur psychologique il utilise",
     "angle": "L'angle stratégique en une phrase"
   }
 ]`;
@@ -79,23 +114,36 @@ function buildProduceSystemPrompt(params: RequestPayload): string {
     ? `\n- Pilier éditorial : "${params.editorial_pillar}"`
     : "";
 
-  return `Tu es un expert en copywriting court format (Reels / TikTok / Shorts) spécialisé en ${profLabel}.
+  const targetAudienceContext = params.target_audience
+    ? `\n- Cible audience : ${getTargetAudienceLabel(params.target_audience)}`
+    : "";
 
-CONTEXTE MÉTIER :
+  const awarenessContext = params.awareness_level
+    ? `\n- Niveau de conscience : ${getAwarenessLevelLabel(params.awareness_level)}`
+    : "";
+
+  return `Tu es un expert en copywriting court format (Reels / TikTok / Shorts) spécialisé en ${profLabel}, avec une expertise en psychologie comportementale et acquisition.
+
+CONTEXTE STRATÉGIQUE :
 - Profession : ${profLabel}
 - Plateforme : ${params.platform}
 - Format : ${params.content_type}
-- Objectif : ${params.objective}${pillarContext}
+- Objectif : ${params.objective}${pillarContext}${targetAudienceContext}${awarenessContext}
+- Titre / Sujet : ${params.title || "À adapter librement"}
 
-MISSION : Générer du contenu vidéo prêt à tourner, concret, dense, émotionnel, sans explication stratégique.
+MISSION : Générer du contenu viral prêt à tourner, concret, dense, émotionnel, hautement ciblé sans explication stratégique.
 
 RÈGLES OBLIGATOIRES :
 ✓ Donne UNIQUEMENT du texte prêt à être dit face caméra
-✓ Écriture naturelle, orale, fluide
-✓ Ton direct, impactant, crédible
+✓ Écriture naturelle, orale, fluide, conversationnelle
+✓ Ton direct, impactant, crédible, sans artifice
 ✓ Pas de phrases molles ni de banalités
 ✓ Pas de structure théorique, pas de conseils génériques
 ✓ Pas d'explication marketing ou d'analyse
+✓ Adapte le langage et les références à la cible mentionnée
+✓ Utilise des déclencheurs psychologiques adaptés au niveau de conscience
+✓ Chaque script doit être différent en tone et approche
+✓ Aucun contenu générique : chaque ligne doit être spécifique au métier et à la cible
 
 STRUCTURE DE RÉPONSE OBLIGATOIRE :
 

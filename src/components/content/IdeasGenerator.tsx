@@ -40,6 +40,8 @@ async function callContentAI(
     objective: string;
     editorial_pillar?: string;
     profession: string;
+    target_audience?: string;
+    awareness_level?: string;
   }
 ) {
   const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-content-script`;
@@ -103,7 +105,9 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     content_type: 'reel',
     platform: 'instagram',
     objective: 'attirer',
-    editorial_pillar: ''
+    editorial_pillar: '',
+    target_audience: 'entrepreneurs',
+    awareness_level: 'conscient_probleme'
   });
   const [showProductionModal, setShowProductionModal] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState<SavedIdea | null>(null);
@@ -313,6 +317,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         platform: aiIdea.platform,
         objective: aiIdea.objective,
         editorial_pillar: aiIdea.editorial_pillar || undefined,
+        target_audience: aiIdea.target_audience,
+        awareness_level: aiIdea.awareness_level,
         profession: profession,
       });
 
@@ -336,6 +342,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         source: 'ai' as const,
         objective: aiIdea.objective,
         editorial_pillar: aiIdea.editorial_pillar || null,
+        target_audience: aiIdea.target_audience || null,
+        awareness_level: aiIdea.awareness_level || null,
         notes: idea.angle ? `Angle: ${idea.angle}` : '',
         is_saved: false,
         feed_order: 0,
@@ -863,6 +871,39 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                             {pillar.pillar_name}
                           </option>
                         ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Cible audience *</label>
+                      <select
+                        value={aiIdea.target_audience || 'entrepreneurs'}
+                        onChange={(e) => setAiIdea({ ...aiIdea, target_audience: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      >
+                        <option value="freelances_debutants">Freelances débutants</option>
+                        <option value="freelances_experimentes">Freelances expérimentés</option>
+                        <option value="entrepreneurs">Entrepreneurs</option>
+                        <option value="createurs_contenu">Créateurs de contenu</option>
+                        <option value="independants_creatifs">Indépendants créatifs</option>
+                        <option value="dirigeants_pme">Dirigeants / PME</option>
+                        <option value="etudiants_reconversion">Étudiants / Reconversion</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect *</label>
+                      <select
+                        value={aiIdea.awareness_level || 'conscient_probleme'}
+                        onChange={(e) => setAiIdea({ ...aiIdea, awareness_level: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      >
+                        <option value="probleme_inconscient">Problème inconscient</option>
+                        <option value="conscient_probleme">Conscient du problème</option>
+                        <option value="conscient_solution">Conscient de la solution</option>
+                        <option value="conscient_produit">Conscient du produit</option>
+                        <option value="pret_acheter">Prêt à acheter</option>
                       </select>
                     </div>
                   </div>
