@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Plus, FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Camera, Scissors, Eye, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, Plus, FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Camera, Scissors, Eye, EyeOff } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -399,7 +399,7 @@ function KanbanCard({
               className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
               title="Modifier"
             >
-              <Edit2 className="w-4 h-4" />
+              <Pencil className="w-4 h-4" />
             </button>
             <button
               onClick={(e) => {

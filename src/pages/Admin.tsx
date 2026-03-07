@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, CreditCard as Edit2, Trash2, Crown, X, ChevronLeft, ChevronRight, CreditCard, Gift, UserCheck, BarChart3 } from 'lucide-react';
+import { Users, UserPlus, Activity, Euro, TrendingUp, Percent, Star, Clock, Handshake, Download, Search, Shield, AlertTriangle, Pencil, Trash2, Crown, X, ChevronLeft, ChevronRight, CreditCard, Gift, UserCheck, BarChart3 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';

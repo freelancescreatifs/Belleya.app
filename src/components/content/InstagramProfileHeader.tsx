@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Camera, CreditCard as Edit2, Save, X, Globe } from 'lucide-react';
+import { Camera, Pencil, Save, X, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -265,7 +265,7 @@ export default function InstagramProfileHeader({ postsCount }: InstagramProfileH
             onClick={() => setIsEditing(true)}
             className="absolute top-0 right-0 p-2 hover:bg-gray-100 rounded-lg transition-colors z-10"
           >
-            <Edit2 className="w-4 h-4 text-gray-600" />
+            <Pencil className="w-4 h-4 text-gray-600" />
           </button>
 
           <div className="flex items-center gap-6 mb-4">

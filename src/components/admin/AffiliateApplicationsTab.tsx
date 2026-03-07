@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Clock, Search, Users, Loader2, ExternalLink, Trash2, CreditCard as Edit2, X, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Search, Users, Loader2, ExternalLink, Trash2, Pencil, X, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
@@ -327,7 +327,7 @@ export default function AffiliateApplicationsTab() {
                         className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Modifier"
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(app)}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, X, BookOpen, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, BookOpen, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -222,7 +222,7 @@ export default function EditorialPillarsManager({ professionType, onPillarsChang
                     onClick={() => handleEdit(pillar)}
                     className="p-1 hover:bg-gray-100 rounded transition-colors"
                   >
-                    <Edit2 className="w-3 h-3 text-gray-600" />
+                    <Pencil className="w-3 h-3 text-gray-600" />
                   </button>
                   <button
                     onClick={() => handleDelete(pillar.id)}

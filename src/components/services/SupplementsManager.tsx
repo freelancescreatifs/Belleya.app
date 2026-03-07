@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Clock, Euro, CreditCard as Edit2 } from 'lucide-react';
+import { Plus, Trash2, Clock, Euro, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { type ServiceType } from '../../lib/serviceTypeHelpers';
@@ -272,7 +272,7 @@ export default function SupplementsManager({ serviceId, serviceType = 'prestatio
                   className="opacity-0 group-hover:opacity-100 p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                   title="Modifier"
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Pencil className="w-4 h-4" />
                 </button>
                 <button
                   type="button"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CreditCard as Edit, Trash2, Upload, Download, FileText, Plus, X, Mail } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Upload, Download, FileText, Plus, X, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
@@ -331,7 +331,7 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
             onClick={() => setShowEditStudent(true)}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <Edit className="w-4 h-4" />
+            <Pencil className="w-4 h-4" />
             Modifier
           </button>
           <button

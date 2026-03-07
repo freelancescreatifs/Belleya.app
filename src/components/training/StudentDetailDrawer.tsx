@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CreditCard as Edit, Trash2, Upload, Mail, FileText, Plus } from 'lucide-react';
+import { X, Pencil, Trash2, Upload, Mail, FileText, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
@@ -313,7 +313,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Modifier"
             >
-              <Edit className="w-5 h-5" />
+              <Pencil className="w-5 h-5" />
             </button>
             <button
               onClick={handleDelete}
@@ -462,7 +462,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
                                     className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
                                     title="Renommer"
                                   >
-                                    <Edit className="w-4 h-4" />
+                                    <Pencil className="w-4 h-4" />
                                   </button>
                                   <a
                                     href={doc.file_path}
@@ -542,7 +542,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
                                   className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
                                   title="Renommer"
                                 >
-                                  <Edit className="w-4 h-4" />
+                                  <Pencil className="w-4 h-4" />
                                 </button>
                                 <a
                                   href={doc.file_path}

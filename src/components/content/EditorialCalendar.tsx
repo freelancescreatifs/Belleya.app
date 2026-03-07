@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Lightbulb, File as FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Hash, Instagram, Linkedin, Facebook, Youtube, Twitter, Camera, Scissors } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Calendar, Lightbulb, File as FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Hash, Instagram, Linkedin, Facebook, Youtube, Twitter, Camera, Scissors } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -1062,7 +1062,7 @@ function DraggableWeekContent({
                 }}
                 className="p-1 hover:bg-gray-100 rounded transition-colors"
               >
-                <Edit2 className="w-3 h-3 text-gray-600" />
+                <Pencil className="w-3 h-3 text-gray-600" />
               </button>
               <button
                 onClick={(e) => {
@@ -1182,7 +1182,7 @@ function ContentCard({
             onClick={() => onEdit(content)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <Edit2 className="w-4 h-4 text-gray-600" />
+            <Pencil className="w-4 h-4 text-gray-600" />
           </button>
           <button
             onClick={() => onDelete(content.id)}

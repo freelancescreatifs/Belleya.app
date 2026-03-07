@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Plus, Search, CreditCard as Edit2, Trash2, X, Save, AlertTriangle,
+  Plus, Search, Pencil, Trash2, X, Save, AlertTriangle,
   Clock, Instagram, Phone, MapPin, StickyNote, Calendar, ChevronDown,
   Loader2
 } from 'lucide-react';
@@ -429,7 +429,7 @@ export default function ProspectsCRM({ affiliateId, showToast, trialLeads = [] }
             <h3 className="font-semibold text-gray-900 text-lg">{selectedLead.name}</h3>
             <div className="flex items-center gap-2">
               <button onClick={() => openEditForm(selectedLead)} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                <Edit2 className="w-4 h-4 text-gray-500" />
+                <Pencil className="w-4 h-4 text-gray-500" />
               </button>
               <button onClick={() => setSelectedLead(null)} className="p-1.5 hover:bg-gray-100 rounded-lg">
                 <X className="w-5 h-5 text-gray-500" />
@@ -547,7 +547,7 @@ export default function ProspectsCRM({ affiliateId, showToast, trialLeads = [] }
                             onClick={() => openEditForm(lead)}
                             className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                           >
-                            <Edit2 className="w-3.5 h-3.5 text-gray-400" />
+                            <Pencil className="w-3.5 h-3.5 text-gray-400" />
                           </button>
                           <button
                             onClick={() => handleDelete(lead.id)}

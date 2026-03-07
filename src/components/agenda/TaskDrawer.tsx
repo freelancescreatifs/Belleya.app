@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Check, Calendar, CreditCard as Edit2, Trash2 } from 'lucide-react';
+import { X, Check, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { CalendarTask } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import { formatDate, formatTime } from '../../lib/calendarHelpers';
@@ -220,7 +220,7 @@ export default function TaskDrawer({ task, onClose, onUpdate, onDelete }: TaskDr
                         onClick={() => setIsEditing(true)}
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Pencil className="w-4 h-4" />
                         Modifier
                       </button>
                       {!task.completed && (

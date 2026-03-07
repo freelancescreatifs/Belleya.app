@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { GraduationCap, BookOpen, CheckCircle, Clock, AlertTriangle, Plus, Search, Filter, Settings, ArrowLeft, CreditCard as Edit2, Trash2 } from 'lucide-react';
+import { GraduationCap, BookOpen, CheckCircle, Clock, AlertTriangle, Plus, Search, Filter, Settings, ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { StudentWithDetails, TrainingDashboardStats, StudentStatus } from '../types/training';
@@ -370,7 +370,7 @@ export default function Training({ onPageChange }: TrainingProps) {
                           className="p-1.5 bg-white rounded-lg shadow-md hover:bg-blue-50 text-blue-600 transition-colors"
                           title="Modifier"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteStudent(e, student.id, `${student.first_name} ${student.last_name}`)}

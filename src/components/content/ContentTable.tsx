@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { CreditCard as Edit2, Save, X, Image as ImageIcon, Calendar, Target, Filter, Instagram, Linkedin, Facebook, Youtube, Twitter, Sparkles, AlertCircle, ChevronDown, Trash2 } from 'lucide-react';
+import { Pencil, Save, X, Image as ImageIcon, Calendar, Target, Filter, Instagram, Linkedin, Facebook, Youtube, Twitter, Sparkles, AlertCircle, ChevronDown, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import PublishDateGuardModal from './PublishDateGuardModal';
@@ -603,7 +603,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                         className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-all hover:shadow-sm"
                         title="Modifier"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         onClick={(e) => {

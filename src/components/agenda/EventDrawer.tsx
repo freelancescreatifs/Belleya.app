@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CreditCard as Edit2, Trash2, Clock, User, FileText, Calendar, Receipt, Plus, Send } from 'lucide-react';
+import { X, Pencil, Trash2, Clock, User, FileText, Calendar, Receipt, Plus, Send } from 'lucide-react';
 import { Event } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import EventForm from './EventForm';
@@ -307,7 +307,7 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                       onClick={() => setIsEditing(true)}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Pencil className="w-4 h-4" />
                       Modifier
                     </button>
                     <button

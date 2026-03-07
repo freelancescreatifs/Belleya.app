@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Play, CreditCard as Edit2, Eye, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pencil, Eye, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -182,7 +182,7 @@ export default function InstagramFeedCard({ content, onEdit, onPreview, onDelete
             className="p-1.5 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all backdrop-blur-sm pointer-events-auto"
             title="Modifier"
           >
-            <Edit2 className="w-3.5 h-3.5" />
+            <Pencil className="w-3.5 h-3.5" />
           </button>
           {onDelete && (
             <button

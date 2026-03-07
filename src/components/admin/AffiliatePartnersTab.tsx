@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Users, Loader2, Award, ChevronRight, CreditCard as Edit2, AlertTriangle, Filter, Trophy, ArrowUpDown, Mail, Download, Trash2, User, Clock } from 'lucide-react';
+import { Search, Users, Loader2, Award, ChevronRight, Pencil, AlertTriangle, Filter, Trophy, ArrowUpDown, Mail, Download, Trash2, User, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
@@ -656,7 +656,7 @@ export default function AffiliatePartnersTab() {
                                     className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
                                     title="Modifier"
                                   >
-                                    <Edit2 className="w-3.5 h-3.5" />
+                                    <Pencil className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     onClick={() => setSelectedAffiliate(aff)}
@@ -829,7 +829,7 @@ export default function AffiliatePartnersTab() {
                               className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
                               title="Modifier commission"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <Pencil className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setDeleteConfirmId(z.affiliate_id)}

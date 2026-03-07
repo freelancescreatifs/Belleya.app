@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Copy, Power, TrendingUp, X, Upload, Trash2, CheckCircle, Archive, Eye, Search } from 'lucide-react';
+import { Plus, Pencil, Copy, Power, TrendingUp, X, Upload, Trash2, CheckCircle, Archive, Eye, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import InfoTooltip from '../components/shared/InfoTooltip';
@@ -689,7 +689,7 @@ export default function Services() {
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Modifier"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Pencil className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDuplicate(service)}

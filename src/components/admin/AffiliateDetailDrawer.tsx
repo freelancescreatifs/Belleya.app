@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Award, Mail, Phone, Copy, Check, ExternalLink, Loader2, CreditCard as Edit2, Globe } from 'lucide-react';
+import { X, Award, Mail, Phone, Copy, Check, ExternalLink, Loader2, Pencil, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface AffiliateData {
@@ -285,7 +285,7 @@ export default function AffiliateDetailDrawer({ affiliate, onClose, onSave, show
                   onClick={() => setEditMode(true)}
                   className="text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1"
                 >
-                  <Edit2 className="w-3.5 h-3.5" />
+                  <Pencil className="w-3.5 h-3.5" />
                   Modifier
                 </button>
               )}

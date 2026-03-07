@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CreditCard as Edit, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake } from 'lucide-react';
+import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getClientTag } from '../../lib/clientTagHelpers';
@@ -473,7 +473,7 @@ export default function ClientDetailDrawer({
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
               title="Modifier"
             >
-              <Edit className="w-5 h-5" />
+              <Pencil className="w-5 h-5" />
             </button>
             <button
               onClick={handleDelete}

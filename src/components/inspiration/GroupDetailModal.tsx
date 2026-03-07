@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Upload, Trash2, Link as LinkIcon, Plus, CreditCard as Edit3 } from 'lucide-react';
+import { X, Upload, Trash2, Link as LinkIcon, Plus, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 type Category = 'social_media' | 'salon' | 'service';
@@ -288,7 +288,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                     <li>Ajoute des liens vers Instagram, Pinterest, TikTok, sites web...</li>
                     <li>Les photos avec lien montrent l'icône <LinkIcon className="w-3.5 h-3.5 inline-block" /></li>
                     <li>Clique sur une photo pour ouvrir son lien</li>
-                    <li>Modifie le lien à tout moment avec le bouton <Edit3 className="w-3.5 h-3.5 inline-block" /></li>
+                    <li>Modifie le lien à tout moment avec le bouton <Pencil className="w-3.5 h-3.5 inline-block" /></li>
                   </ul>
                 </div>
               </div>
@@ -527,7 +527,7 @@ export default function GroupDetailModal({ group, category, onClose, onUpdated }
                       className="p-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors mr-2 shadow-lg"
                       title="Modifier"
                     >
-                      <Edit3 className="w-5 h-5" />
+                      <Pencil className="w-5 h-5" />
                     </button>
                     <button
                       onClick={(e) => {
