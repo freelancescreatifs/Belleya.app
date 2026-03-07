@@ -137,7 +137,6 @@ export default function ContentForm({
     editorial_pillar: prefillData?.editorial_pillar || '',
     objective: prefillData?.objective || '',
     target_audience: prefillData?.target_audience || '',
-    custom_keywords: '',
     awareness_level: prefillData?.awareness_level || '',
     caption: prefillData?.caption || '',
     content_structure: prefillData?.content_structure || '',
@@ -1083,19 +1082,6 @@ export default function ContentForm({
               +
             </button>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Mots-clés personnalisés
-          </label>
-          <input
-            type="text"
-            value={formData.custom_keywords}
-            onChange={(e) => setFormData({ ...formData, custom_keywords: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            placeholder="Ex: Premium, Créatif, Économe..."
-          />
         </div>
       </div>
 

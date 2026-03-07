@@ -115,7 +115,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     objective: 'attirer',
     editorial_pillar: '',
     target_audience_id: '',
-    custom_keywords: '',
     awareness_level: 'conscient_probleme'
   });
   const [showProductionModal, setShowProductionModal] = useState(false);
@@ -396,9 +395,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         .maybeSingle();
 
       const selectedAudience = targetAudiences.find(a => a.id === aiIdea.target_audience_id);
-      const audienceLabel = selectedAudience
-        ? `${selectedAudience.audience_name}${aiIdea.custom_keywords ? ` (${aiIdea.custom_keywords})` : ''}`
-        : aiIdea.custom_keywords || undefined;
+      const audienceLabel = selectedAudience?.audience_name || undefined;
 
       const aiResponse = await callContentAI('ideas', {
         title: aiIdea.title.trim() || undefined,
@@ -998,17 +995,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                           +
                         </button>
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Mots-clés personnalisés</label>
-                      <input
-                        type="text"
-                        value={aiIdea.custom_keywords}
-                        onChange={(e) => setAiIdea({ ...aiIdea, custom_keywords: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Ex: Famille, Premium, Débutants..."
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Ajoute des mots-clés pour affiner la cible</p>
                     </div>
                   </div>
 
