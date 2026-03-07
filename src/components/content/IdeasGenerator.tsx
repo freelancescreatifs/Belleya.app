@@ -26,6 +26,13 @@ interface EditorialPillar {
   color: string;
 }
 
+interface TargetAudience {
+  id: string;
+  audience_name: string;
+  description?: string;
+  keywords: string[];
+}
+
 interface IdeasGeneratorProps {
   onClose: () => void;
   onIdeaSaved: (ideaId: string) => void;
@@ -87,6 +94,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   const { user } = useAuth();
   const [profession, setProfession] = useState<ProfessionKey | null>(null);
   const [pillars, setPillars] = useState<EditorialPillar[]>([]);
+  const [targetAudiences, setTargetAudiences] = useState<TargetAudience[]>([]);
   const [savedIdeas, setSavedIdeas] = useState<SavedIdea[]>([]);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -106,7 +114,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     platform: 'instagram',
     objective: 'attirer',
     editorial_pillar: '',
-    target_audience: '',
+    target_audience_id: '',
+    custom_keywords: '',
     awareness_level: 'conscient_probleme'
   });
   const [showProductionModal, setShowProductionModal] = useState(false);
@@ -114,11 +123,14 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   const [productionDate, setProductionDate] = useState('');
   const [productionTime, setProductionTime] = useState('09:00');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showNewAudienceModal, setShowNewAudienceModal] = useState(false);
+  const [newAudience, setNewAudience] = useState({ audience_name: '', keywords: '' });
 
   useEffect(() => {
     loadProfession();
     loadSavedIdeas();
     loadPillars();
+    loadTargetAudiences();
   }, [user]);
 
   async function loadProfession() {
@@ -169,6 +181,32 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     }
   }
 
+  async function loadTargetAudiences() {
+    if (!user) return;
+
+    try {
+      const { data: companyData } = await supabase
+        .from('company_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!companyData?.id) return;
+
+      const { data: audiencesData } = await supabase
+        .from('target_audiences')
+        .select('*')
+        .eq('company_id', companyData.id)
+        .order('created_at');
+
+      if (audiencesData) {
+        setTargetAudiences(audiencesData);
+      }
+    } catch (error) {
+      console.error('Error loading target audiences:', error);
+    }
+  }
+
   async function loadSavedIdeas() {
     if (!user) return;
 
@@ -209,6 +247,54 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   const manualIdeas = savedIdeas.filter(idea => (idea.source === 'manual' || !idea.source) && !idea.is_saved);
   const aiIdeas = savedIdeas.filter(idea => idea.source === 'ai' && !idea.is_saved);
   const starredIdeas = savedIdeas.filter(idea => idea.is_saved === true);
+
+  async function handleCreateTargetAudience() {
+    if (!user || !newAudience.audience_name.trim()) {
+      alert('Le nom du profil cible est obligatoire');
+      return;
+    }
+
+    try {
+      const { data: companyData } = await supabase
+        .from('company_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!companyData?.id) {
+        alert('Impossible de trouver votre entreprise');
+        return;
+      }
+
+      const keywordsArray = newAudience.keywords
+        .split(',')
+        .map(k => k.trim())
+        .filter(k => k);
+
+      const { data, error } = await supabase
+        .from('target_audiences')
+        .insert({
+          company_id: companyData.id,
+          audience_name: newAudience.audience_name.trim(),
+          keywords: keywordsArray
+        })
+        .select()
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setTargetAudiences(prev => [...prev, data]);
+        setAiIdea({ ...aiIdea, target_audience_id: data.id });
+        setNewAudience({ audience_name: '', keywords: '' });
+        setShowNewAudienceModal(false);
+        alert('Profil cible créé avec succès!');
+      }
+    } catch (error) {
+      console.error('Error creating target audience:', error);
+      alert('Erreur lors de la création du profil cible');
+    }
+  }
 
   async function handleCreateManualIdea() {
     if (!user || !manualIdea.title.trim()) {
@@ -309,13 +395,18 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         .eq('user_id', user.id)
         .maybeSingle();
 
+      const selectedAudience = targetAudiences.find(a => a.id === aiIdea.target_audience_id);
+      const audienceLabel = selectedAudience
+        ? `${selectedAudience.audience_name}${aiIdea.custom_keywords ? ` (${aiIdea.custom_keywords})` : ''}`
+        : aiIdea.custom_keywords || undefined;
+
       const aiResponse = await callContentAI('ideas', {
         title: aiIdea.title.trim() || undefined,
         content_type: aiIdea.content_type,
         platform: aiIdea.platform,
         objective: aiIdea.objective,
         editorial_pillar: aiIdea.editorial_pillar || undefined,
-        target_audience: aiIdea.target_audience,
+        target_audience: audienceLabel,
         awareness_level: aiIdea.awareness_level,
         profession: profession,
       });
@@ -885,29 +976,56 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Cible audience (description libre)</label>
-                      <input
-                        type="text"
-                        value={aiIdea.target_audience}
-                        onChange={(e) => setAiIdea({ ...aiIdea, target_audience: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Ex: Femmes 25-40 ans, PME du secteur beauté, parents..."
-                      />
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Profil cible</label>
+                      <div className="flex gap-2">
+                        <select
+                          value={aiIdea.target_audience_id}
+                          onChange={(e) => setAiIdea({ ...aiIdea, target_audience_id: e.target.value })}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        >
+                          <option value="">Aucun profil</option>
+                          {targetAudiences.map(audience => (
+                            <option key={audience.id} value={audience.id}>
+                              {audience.audience_name}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => setShowNewAudienceModal(true)}
+                          className="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors font-medium"
+                          title="Créer un nouveau profil cible"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Gère tes profils cibles comme les piliers éditoriaux</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect *</label>
-                      <select
-                        value={aiIdea.awareness_level || 'conscient_probleme'}
-                        onChange={(e) => setAiIdea({ ...aiIdea, awareness_level: e.target.value })}
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Mots-clés personnalisés</label>
+                      <input
+                        type="text"
+                        value={aiIdea.custom_keywords}
+                        onChange={(e) => setAiIdea({ ...aiIdea, custom_keywords: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        <option value="probleme_inconscient">Problème inconscient</option>
-                        <option value="conscient_probleme">Conscient du problème</option>
-                        <option value="conscient_solution">Conscient de la solution</option>
-                        <option value="conscient_produit">Conscient du produit</option>
-                        <option value="pret_acheter">Prêt à acheter</option>
-                      </select>
+                        placeholder="Ex: Famille, Premium, Débutants..."
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Ajoute des mots-clés pour affiner la cible</p>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect *</label>
+                    <select
+                      value={aiIdea.awareness_level || 'conscient_probleme'}
+                      onChange={(e) => setAiIdea({ ...aiIdea, awareness_level: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="probleme_inconscient">Problème inconscient</option>
+                      <option value="conscient_probleme">Conscient du problème</option>
+                      <option value="conscient_solution">Conscient de la solution</option>
+                      <option value="conscient_produit">Conscient du produit</option>
+                      <option value="pret_acheter">Prêt à acheter</option>
+                    </select>
                   </div>
 
                   {errorMessage && activeTab === 'ai' && (
@@ -1029,6 +1147,60 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               ) : (
                 'Confirmer'
               )}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showNewAudienceModal && (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[60]">
+        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Créer un profil cible</h3>
+          <p className="text-sm text-gray-600 mb-6">
+            Définis un nouveau profil cible que tu pourras réutiliser dans tes générations
+          </p>
+
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Nom du profil *</label>
+              <input
+                type="text"
+                value={newAudience.audience_name}
+                onChange={(e) => setNewAudience({ ...newAudience, audience_name: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ex: Freelances débutants, PME beauté..."
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Mots-clés (optionnel)</label>
+              <input
+                type="text"
+                value={newAudience.keywords}
+                onChange={(e) => setNewAudience({ ...newAudience, keywords: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ex: Premium, Économe, Créatif (séparés par des virgules)"
+              />
+              <p className="text-xs text-gray-500 mt-1">Ajoute des mots-clés pour affiner la description</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setShowNewAudienceModal(false);
+                setNewAudience({ audience_name: '', keywords: '' });
+              }}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleCreateTargetAudience}
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all font-medium"
+            >
+              Créer
             </button>
           </div>
         </div>
