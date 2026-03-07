@@ -407,6 +407,8 @@ export default function ContentForm({
           publication_time: data.publication_time || '12:00',
           editorial_pillar: data.editorial_pillar || '',
           objective: data.objective || '',
+          target_audience: data.target_audience || '',
+          awareness_level: data.awareness_level || '',
           caption: data.caption || '',
           content_structure: data.content_structure || '',
           link: data.link || '',

@@ -18,6 +18,8 @@ interface SavedIdea {
   editorial_pillar?: string;
   publication_date?: string;
   publication_time?: string;
+  target_audience?: string;
+  awareness_level?: string;
 }
 
 interface EditorialPillar {
@@ -431,7 +433,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         platform: [aiIdea.platform],
         objective: aiIdea.objective,
         editorial_pillar: aiIdea.editorial_pillar || null,
-        target_audience: aiIdea.target_audience || null,
+        target_audience: aiIdea.target_audience_id || null,
         awareness_level: aiIdea.awareness_level || null,
         status: 'saved' as const
       }));
@@ -465,7 +467,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         platform: 'instagram',
         objective: 'attirer',
         editorial_pillar: '',
-        target_audience: '',
+        target_audience_id: '',
         awareness_level: 'conscient_probleme'
       });
 
@@ -584,8 +586,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         status: 'script' as const,
         objective: idea.objective || null,
         editorial_pillar: idea.editorial_pillar || null,
-        target_audience: (idea as any).target_audience || null,
-        awareness_level: (idea as any).awareness_level || null,
+        target_audience: idea.target_audience || null,
+        awareness_level: idea.awareness_level || null,
         notes: '',
         is_saved: false,
         feed_order: 0,
