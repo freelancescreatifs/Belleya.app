@@ -998,21 +998,21 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                         </button>
                       </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect *</label>
-                    <select
-                      value={aiIdea.awareness_level || 'conscient_probleme'}
-                      onChange={(e) => setAiIdea({ ...aiIdea, awareness_level: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    >
-                      <option value="probleme_inconscient">Problème inconscient</option>
-                      <option value="conscient_probleme">Conscient du problème</option>
-                      <option value="conscient_solution">Conscient de la solution</option>
-                      <option value="conscient_produit">Conscient du produit</option>
-                      <option value="pret_acheter">Prêt à acheter</option>
-                    </select>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect *</label>
+                      <select
+                        value={aiIdea.awareness_level || 'conscient_probleme'}
+                        onChange={(e) => setAiIdea({ ...aiIdea, awareness_level: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      >
+                        <option value="probleme_inconscient">Problème inconscient</option>
+                        <option value="conscient_probleme">Conscient du problème</option>
+                        <option value="conscient_solution">Conscient de la solution</option>
+                        <option value="conscient_produit">Conscient du produit</option>
+                        <option value="pret_acheter">Prêt à acheter</option>
+                      </select>
+                    </div>
                   </div>
 
                   {errorMessage && activeTab === 'ai' && (
