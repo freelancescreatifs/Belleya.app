@@ -172,6 +172,25 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     }
   }
 
+  async function handleRemoveFromIdeas(ideaId: string) {
+    try {
+      setSavedIdeas(prev => prev.filter(idea => idea.id !== ideaId));
+
+      const { error } = await supabase
+        .from('content_calendar')
+        .delete()
+        .eq('id', ideaId);
+
+      if (error) {
+        await loadSavedIdeas();
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error removing from ideas:', error);
+      await loadSavedIdeas();
+    }
+  }
+
   const manualIdeas = savedIdeas.filter(idea => (idea.source === 'manual' || !idea.source) && !idea.is_saved);
   const aiIdeas = savedIdeas.filter(idea => idea.source === 'ai' && !idea.is_saved);
   const starredIdeas = savedIdeas.filter(idea => idea.is_saved === true);
@@ -457,7 +476,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
       if (error) throw error;
 
-      await loadSavedIdeas();
+      setSavedIdeas(prev => prev.filter(idea => idea.id !== selectedIdea.id));
 
       setShowProductionModal(false);
       setSelectedIdea(null);
