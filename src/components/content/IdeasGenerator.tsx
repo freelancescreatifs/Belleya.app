@@ -40,6 +40,19 @@ interface IdeasGeneratorProps {
   onIdeaSaved: (ideaId: string) => void;
 }
 
+function mapContentTypeToDbValue(formValue: string): string {
+  const mapping: { [key: string]: string } = {
+    'reel': 'video',
+    'carrousel': 'carousel',
+    'story': 'story',
+    'post': 'post',
+    'live': 'video',
+    'video': 'video',
+    'carousel': 'carousel'
+  };
+  return mapping[formValue] || 'video';
+}
+
 async function callContentAI(
   mode: 'ideas' | 'produce',
   params: {
@@ -104,7 +117,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   const [activeTab, setActiveTab] = useState<'manual' | 'ai' | 'saved'>('manual');
   const [manualIdea, setManualIdea] = useState({
     title: '',
-    content_type: 'reel',
+    content_type: 'video',
     platform: 'instagram',
     objective: 'attirer',
     notes: '',
@@ -112,7 +125,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   });
   const [aiIdea, setAiIdea] = useState({
     title: '',
-    content_type: 'reel',
+    content_type: 'video',
     platform: 'instagram',
     objective: 'attirer',
     editorial_pillar: '',
@@ -356,7 +369,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
       setManualIdea({
         title: '',
-        content_type: 'reel',
+        content_type: 'video',
         platform: 'instagram',
         objective: 'attirer',
         notes: '',
@@ -429,7 +442,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         visual_alignment: idea.visual_alignment || [],
         story_ideas: idea.story_ideas || [],
         pro_tip: idea.pro_tip || '',
-        content_type: aiIdea.content_type,
+        content_type: mapContentTypeToDbValue(aiIdea.content_type),
         platform: [aiIdea.platform],
         objective: aiIdea.objective,
         editorial_pillar: aiIdea.editorial_pillar || null,
@@ -463,7 +476,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
       setAiIdea({
         title: '',
-        content_type: 'reel',
+        content_type: 'video',
         platform: 'instagram',
         objective: 'attirer',
         editorial_pillar: '',
@@ -855,7 +868,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     <button
                       onClick={() => setManualIdea({
                         title: '',
-                        content_type: 'reel',
+                        content_type: 'video',
                         platform: 'instagram',
                         objective: 'attirer',
                         notes: '',
@@ -921,11 +934,10 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                         onChange={(e) => setAiIdea({ ...aiIdea, content_type: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       >
-                        <option value="reel">Reel</option>
-                        <option value="carrousel">Carrousel</option>
+                        <option value="video">Reel / Video</option>
+                        <option value="carousel">Carrousel</option>
                         <option value="story">Story</option>
                         <option value="post">Post Classique</option>
-                        <option value="live">Live</option>
                       </select>
                     </div>
                     <div>
@@ -1024,24 +1036,35 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                   <button
                     onClick={handleGenerateAI}
                     disabled={generating}
-                    className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50 font-medium flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
                   >
                     {generating ? (
                       <>
                         <Loader className="w-5 h-5 animate-spin" />
-                        Generation IA en cours...
+                        <span>Génération en cours... Cela peut prendre quelques secondes</span>
                       </>
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5" />
-                        Generer 5 idees strategiques
+                        Générer 5 idées stratégiques
                       </>
                     )}
                   </button>
                 </div>
               </div>
 
-              {aiIdeas.length === 0 ? (
+              {generating ? (
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+                      <Sparkles className="w-8 h-8 text-orange-500 animate-spin" />
+                    </div>
+                  </div>
+                  <p className="text-gray-600 font-medium">Génération des idées en cours...</p>
+                  <p className="text-gray-400 text-sm">Cela peut prendre 10-15 secondes</p>
+                </div>
+              ) : aiIdeas.length === 0 ? (
                 <div className="text-center py-12">
                   <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg font-medium mb-2">Aucune idee generee par IA</p>
