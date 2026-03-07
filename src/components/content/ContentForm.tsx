@@ -1059,6 +1059,49 @@ export default function ContentForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
+            Profil cible
+          </label>
+          <div className="flex gap-2">
+            <select
+              value={formData.target_audience}
+              onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            >
+              <option value="">Aucun profil</option>
+              {targetAudiences.map(audience => (
+                <option key={audience.id} value={audience.id}>
+                  {audience.audience_name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setShowNewAudienceModal(true)}
+              className="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors font-medium"
+              title="Créer un nouveau profil cible"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Mots-clés personnalisés
+          </label>
+          <input
+            type="text"
+            value={formData.custom_keywords}
+            onChange={(e) => setFormData({ ...formData, custom_keywords: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            placeholder="Ex: Premium, Créatif, Économe..."
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
             Conscience du prospect
           </label>
           <select

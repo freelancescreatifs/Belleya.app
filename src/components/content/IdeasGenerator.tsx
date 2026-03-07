@@ -998,7 +998,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                           +
                         </button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Gère tes profils cibles comme les piliers éditoriaux</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Mots-clés personnalisés</label>
