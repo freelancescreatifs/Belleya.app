@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, Trash2, Plus, FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Camera, Scissors, Eye, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, Plus, File as FileEdit, CalendarCheck, CheckCircle, Video, Image as ImageIcon, Layers, BookOpen, Camera, Scissors, Eye, EyeOff } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
