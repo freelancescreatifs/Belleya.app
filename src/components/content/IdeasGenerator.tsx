@@ -376,7 +376,9 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         content_type: 'reel',
         platform: 'instagram',
         objective: 'attirer',
-        editorial_pillar: ''
+        editorial_pillar: '',
+        target_audience: '',
+        awareness_level: 'conscient_probleme'
       });
 
       alert(`${ideas.length} idees generees avec succes !`);
@@ -388,64 +390,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     } finally {
       setGenerating(false);
     }
-  }
-
-  async function handleToggleSave(ideaId: string, currentSavedStatus: boolean) {
-    try {
-      setSavedIdeas(prev => prev.map(idea =>
-        idea.id === ideaId ? { ...idea, is_saved: !currentSavedStatus } : idea
-      ));
-
-      const { error } = await supabase
-        .from('content_calendar')
-        .update({ is_saved: !currentSavedStatus })
-        .eq('id', ideaId);
-
-      if (error) {
-        setSavedIdeas(prev => prev.map(idea =>
-          idea.id === ideaId ? { ...idea, is_saved: currentSavedStatus } : idea
-        ));
-        throw error;
-      }
-    } catch (error) {
-      console.error('Error toggling save:', error);
-      alert('Erreur lors de la sauvegarde');
-    }
-  }
-
-  async function handleDelete(ideaId: string) {
-    if (!confirm('Supprimer cette idee ?')) return;
-
-    try {
-      const deletedIdea = savedIdeas.find(idea => idea.id === ideaId);
-      setSavedIdeas(prev => prev.filter(idea => idea.id !== ideaId));
-
-      const { error } = await supabase
-        .from('content_calendar')
-        .delete()
-        .eq('id', ideaId);
-
-      if (error) {
-        if (deletedIdea) {
-          setSavedIdeas(prev => [deletedIdea, ...prev]);
-        }
-        throw error;
-      }
-    } catch (error) {
-      console.error('Error deleting idea:', error);
-      alert('Erreur lors de la suppression');
-    }
-  }
-
-  function handleToProduce(ideaId: string) {
-    const idea = savedIdeas.find(i => i.id === ideaId);
-    if (!idea) return;
-
-    setSelectedIdea(idea);
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setProductionDate(tomorrow.toISOString().split('T')[0]);
-    setShowProductionModal(true);
   }
 
   async function confirmProduction() {

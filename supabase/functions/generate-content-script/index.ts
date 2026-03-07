@@ -65,57 +65,133 @@ function getAwarenessLevelLabel(level: string): string {
 function buildIdeasSystemPrompt(params: RequestPayload): string {
   const profLabel = getProfessionLabel(params.profession);
   const pillarContext = params.editorial_pillar
-    ? `\n- Pilier éditorial actif : "${params.editorial_pillar}". Chaque sujet DOIT s'inscrire dans ce pilier.`
+    ? `\n- Pilier éditorial : "${params.editorial_pillar}"`
     : "";
 
-  const targetAudienceContext = params.target_audience
-    ? `\n- Cible : ${getTargetAudienceLabel(params.target_audience)}`
-    : "";
-
+  const contentTypeContext = getContentTypeContext(params.content_type);
+  const platformContext = getPlatformContext(params.platform);
+  const objectiveContext = getObjectiveContext(params.objective);
   const awarenessContext = params.awareness_level
-    ? `\n- Conscience du prospect : ${getAwarenessLevelLabel(params.awareness_level)}`
+    ? `\n- Conscience : ${getAwarenessLevelLabel(params.awareness_level)}`
     : "";
 
-  return `Tu es un expert en création de contenu viral, en acquisition d'audience et en conversion sur les réseaux sociaux.
+  const titleContext = params.title
+    ? `\n- Titre de post suggéré : "${params.title}". Les idées doivent s'inspirer de cet angle.`
+    : "";
 
-Ta mission est de générer une proposition de contenu complète, stratégique et directement exploitable, adaptée aux paramètres fournis.
+  return `Tu es un expert en création de contenu viral, en acquisition et en conversion.
 
-CONTEXTE STRATÉGIQUE :
+CONTEXTE DE GÉNÉRATION :
 - Profession : ${profLabel}
-- Plateforme cible : ${params.platform}
-- Format de contenu : ${params.content_type}
-- Objectif marketing : ${params.objective}${pillarContext}${targetAudienceContext}${awarenessContext}
+- Plateforme : ${params.platform} ${platformContext}
+- Format : ${params.content_type} ${contentTypeContext}
+- Objectif : ${params.objective} ${objectiveContext}${pillarContext}${awarenessContext}${titleContext}
+- Cible : ${params.target_audience || "audience générale"}
 
-MISSION : Génère exactement 5 idées de contenu complètes et ultra-détaillées, chacune prête à être produite.
+MISSION PRÉCISE :
+Génère exactement 5 idées de contenu ultra-spécifiques et exploitables IMMÉDIATEMENT.
+Chaque idée doit être différente, avec un angle unique, adaptée au format ${params.content_type}.
+ZÉRO contenu générique. ZÉRO redondance.
 
-RÈGLES STRICTES :
-1. Chaque idée doit être SPÉCIFIQUE, différenciante et exploitable immédiatement
-2. Les idées doivent être DIFFÉRENTES les unes des autres (angles variés)
-3. AUCUNE idée générique ou vague
-4. Adapte le vocabulaire et exemples au métier de ${profLabel}
-5. Personnalise pour la cible : "${params.target_audience || 'audience générale'}"
-6. Adapte le type de déclencheur psychologique au niveau "${params.awareness_level === 'probleme_inconscient' ? 'inconscient du problème' : params.awareness_level === 'conscient_probleme' ? 'conscient du problème' : params.awareness_level === 'conscient_solution' ? 'conscient de la solution' : params.awareness_level === 'conscient_produit' ? 'conscient du produit' : 'prêt à acheter'}"
-7. Chaque idée doit créer de la tension, du désir ou du besoin urgent
+ADAPTATION PAR FORMAT :
+${getFormatAdaptationGuide(params.content_type, params.platform)}
 
-FORMAT DE RÉPONSE (JSON strict) :
-Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après :
+RÈGLES CRITIQUES :
+1. Format ${params.content_type.toUpperCase()} : respecte la structure exacte du format
+2. Plateforme ${params.platform.toUpperCase()} : adapte le ton, le langage, la longueur
+3. Objectif "${params.objective}" : chaque idée doit servir cet objectif
+4. Métier "${profLabel}" : vocabulaire, exemples, contexte professionnel
+5. Cible "${params.target_audience || 'générale'}" : parle à cette personne précise
+6. Niveau de conscience : utilise les bons déclencheurs psychologiques${params.title ? `\n7. Angle similaire à "${params.title}" : inspire-toi mais reste différent` : ""}
+
+FORMAT DE RÉPONSE (JSON strict, tableau à 5 éléments) :
 [
   {
-    "title": "Hook exemple (phrase accrocheuse qui casse une croyance)",
+    "title": "Hook exemple (phrase accrocheuse spécifique au métier et à l'angle)",
     "hooks_alternatives": ["Hook alternatif 1", "Hook alternatif 2", "Hook alternatif 3"],
-    "psychological_triggers": ["Déclencheur 1 (ex: Curiosité)", "Déclencheur 2", "Déclencheur 3", "Déclencheur 4", "Déclencheur 5"],
-    "content_angle": "Angle stratégique du contenu - pourquoi cet angle fonctionne avec la cible et le niveau de conscience",
-    "retention_structure": ["Élément de rétention 1", "Élément de rétention 2", "Élément de rétention 3", "Élément de rétention 4", "Élément de rétention 5"],
-    "conversion_version": "Texte orienté conversion avec bénéfice concret, résultat attendu, urgence douce, action simplifiée",
-    "visual_alignment": ["Recommandation visuelle 1 (ex: Plan rapproché, texte écran)", "Recommandation 2", "Recommandation 3"],
+    "psychological_triggers": ["Déclencheur 1", "Déclencheur 2", "Déclencheur 3", "Déclencheur 4", "Déclencheur 5"],
+    "content_angle": "Angle stratégique unique - pourquoi cet angle fonctionne précisément pour cette cible",
+    "retention_structure": ["Élément 1", "Élément 2", "Élément 3", "Élément 4", "Élément 5"],
+    "conversion_version": "Texte conversion complet : bénéfice, résultat, urgence, CTA",
+    "visual_alignment": ["Recommandation 1", "Recommandation 2", "Recommandation 3"],
     "story_ideas": [
-      "Idée story 1 avec slide-by-slide détaillé",
-      "Idée story 2 avec approche différente",
-      "Idée story 3 avec angle alternatif"
+      "Story 1 : approche + slides détaillés",
+      "Story 2 : angle différent + slides détaillés",
+      "Story 3 : preuve sociale ou coulisses + slides"
     ],
-    "pro_tip": "Conseil stratégique ultra-actionnable pour améliorer viralité, rétention ou conversion"
+    "pro_tip": "Conseil ultra-actionnable spécifique à cet angle",
+    "script_short": "Script court (30-45s) pour ce contenu",
+    "script_long": "Script long (45-90s) version détaillée"
   }
 ]`;
+}
+
+function getContentTypeContext(contentType: string): string {
+  const contexts: Record<string, string> = {
+    reel: "(Vertical 9:16, 15-60s, hook 0-3s, rythme rapide, visuels dynamiques)",
+    carrousel: "(Slides 5-10, hook impactant slide 1, progression logique, CTA slide finale)",
+    post: "(500-2000 car, paragraphes courts, texte hook en haut, ligne de séparation, CTA bas)",
+    story: "(Slides 1-3, hook immédiat, texte court, stickers interactifs, CTA direct)",
+    live: "(Conversationnel, engagement direct, Q&A, création de tension progressive)"
+  };
+  return contexts[contentType] || "";
+}
+
+function getPlatformContext(platform: string): string {
+  const contexts: Record<string, string> = {
+    instagram: "(Plateforme algorithme, hashtags stratégiques, stories en complément, réels privilégiés)",
+    tiktok: "(Tendances, sons populaires, hook en 1-2s, suite logique, viralité max)",
+    linkedin: "(Professionnel, storytelling business, bénéfice chiffré, engagement commentaires)",
+    facebook: "(Audience mature, narratif long acceptable, hook modéré, vidéo autoplay)",
+    pinterest: "(Visual-first, longs contenus acceptés, descriptions SEO, clés stratégiques)"
+  };
+  return contexts[platform] || "";
+}
+
+function getObjectiveContext(objective: string): string {
+  const contexts: Record<string, string> = {
+    attirer: "Créer curiosité, awareness, rupture de croyance. Hook très fort.",
+    engager: "Créer interaction, commentaires, partages. Questions, dilemmes, points de vue.",
+    vendre: "Conversion directe, urgence, CTA, bénéfice concret, preuve sociale.",
+    fideliser: "Renforcer communauté, exclusivité, insider content, coulisses, remerciements."
+  };
+  return contexts[objective] || "";
+}
+
+function getFormatAdaptationGuide(contentType: string, platform: string): string {
+  if (contentType === "reel") {
+    return `FORMAT REEL (${platform === "instagram" ? "Instagram" : "TikTok"}):
+- 0-3s : Hook visuel + textuel fort (pattern interrupt)
+- 3-8s : Problème / Situation relatable
+- 8-15s : Révélation / Coulisses / Démonstration
+- 15-25s : Résultat / Transformation / Bénéfice
+- 25-30s : CTA clair + Urgence douce
+- Structure : Tension → Solution → Résultat → Action
+- Musicque : Tendance, sans voix (texte sur écran)`;
+  } else if (contentType === "carrousel") {
+    return `FORMAT CARROUSEL :
+- Slide 1 : Hook visuel + textuel très percutant (ce slide détermine le taux d'ouverture)
+- Slide 2-4 : Développement, valeur progressive
+- Slide 5-7 : Preuve, démonstration, résultat
+- Slide 8-9 : Bénéfice utilisateur final
+- Slide finale : CTA fort + Urgence + Lien/DM
+- Stratégie : Chaque slide donne envie de glisser pour découvrir`;
+  } else if (contentType === "post") {
+    return `FORMAT POST :
+- Ligne 1-2 : Hook textuel (première chose vue avant "Lire la suite")
+- Ligne 3-5 : Histoire / Contexte / Rapport personnel
+- Ligne 6-10 : Valeur principale (conseil, révélation, leçon)
+- Ligne 11-15 : Preuve, chiffre, exemple concret
+- Dernier ligne : CTA clair (Réserve / DM / Lien)
+- Emojis : Modérés, stratégiques (break paragraphes)`;
+  } else if (contentType === "story") {
+    return `FORMAT STORY (3-5 slides max) :
+- Slide 1 : Hook + Question / Sondage sticker
+- Slide 2-3 : Contenu court + Engagement
+- Slide finale : CTA + Sticker lien / Code promo`;
+  } else {
+    return "";
+  }
 }
 
 function buildProduceSystemPrompt(params: RequestPayload): string {
