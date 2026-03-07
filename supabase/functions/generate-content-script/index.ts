@@ -233,9 +233,19 @@ Deno.serve(async (req: Request) => {
 
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
-      console.error("OpenAI API error:", errorText);
+      console.error("OpenAI API error:", openaiResponse.status, errorText);
+      let errorMsg = "AI generation failed";
+
+      if (openaiResponse.status === 401) {
+        errorMsg = "OpenAI API key invalid or expired. Please check configuration.";
+      } else if (openaiResponse.status === 429) {
+        errorMsg = "OpenAI rate limit exceeded. Please try again in a moment.";
+      } else if (openaiResponse.status === 500) {
+        errorMsg = "OpenAI service error. Please try again later.";
+      }
+
       return new Response(
-        JSON.stringify({ error: "AI generation failed", details: errorText }),
+        JSON.stringify({ error: errorMsg, details: errorText.substring(0, 200) }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

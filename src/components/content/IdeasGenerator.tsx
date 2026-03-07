@@ -50,22 +50,35 @@ async function callContentAI(
     throw new Error('Session expirée, veuillez vous reconnecter.');
   }
 
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify({ mode, ...params }),
-  });
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ mode, ...params }),
+    });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(err.error || `HTTP ${response.status}`);
+    if (!response.ok) {
+      let errorMsg = `HTTP ${response.status}`;
+      try {
+        const err = await response.json();
+        errorMsg = err.error || err.details || errorMsg;
+      } catch {
+        const text = await response.text();
+        if (text) errorMsg = text.substring(0, 200);
+      }
+      throw new Error(errorMsg);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Erreur de connexion avec le serveur AI');
   }
-
-  return response.json();
 }
 
 export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorProps) {

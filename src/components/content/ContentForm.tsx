@@ -390,7 +390,6 @@ export default function ContentForm({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({
           mode: 'produce',
@@ -404,8 +403,15 @@ export default function ContentForm({
       });
 
       if (!response.ok) {
-        const err = await response.json().catch(() => ({ error: 'Erreur inconnue' }));
-        throw new Error(err.error || `Erreur HTTP ${response.status}`);
+        let errorMsg = `Erreur HTTP ${response.status}`;
+        try {
+          const err = await response.json();
+          errorMsg = err.error || err.details || errorMsg;
+        } catch {
+          const text = await response.text();
+          if (text) errorMsg = text.substring(0, 200);
+        }
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
