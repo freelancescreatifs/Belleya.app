@@ -60,6 +60,9 @@ function AppContent() {
   const [navigationLocked, setNavigationLocked] = useState(false);
   const [profileRetryCount, setProfileRetryCount] = useState(0);
   const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<string | null>(null);
+  const [awaitingGoogleProfile, setAwaitingGoogleProfile] = useState(
+    () => !!localStorage.getItem('pending_google_role')
+  );
 
   const safeNavigate = (to: string, source?: string) => {
     console.trace('[NAVIGATION TRACE] safeNavigate called →', { to, source, currentPage, navigationLocked });
@@ -79,16 +82,19 @@ function AppContent() {
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !loading) {
+      setAwaitingGoogleProfile(false);
       console.log('[NAVIGATION] User logged out, resetting to home');
       setSelectedRole(null);
       setProfileRetryCount(0);
       safeNavigate('home', 'auth-change');
     }
-  }, [user]);
+  }, [user, loading]);
 
   useEffect(() => {
     if (user && profile) {
+      setAwaitingGoogleProfile(false);
+
       const storedPlan = localStorage.getItem('pending_plan');
       if (storedPlan) {
         localStorage.removeItem('pending_plan');
@@ -330,7 +336,7 @@ function AppContent() {
     }
   }, [isSettingsRedirect, user, profile]);
 
-  if (loading) {
+  if (loading || awaitingGoogleProfile) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-gray-500">Chargement...</div>
