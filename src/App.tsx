@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './components/auth/AuthPage';
 import Landing from './pages/Landing';
@@ -63,6 +63,9 @@ function AppContent() {
   const [awaitingGoogleProfile, setAwaitingGoogleProfile] = useState(
     () => !!localStorage.getItem('pending_google_role')
   );
+  const awaitingGoogleRef = useRef(awaitingGoogleProfile);
+  const [affiliatePage, setAffiliatePage] = useState<'landing' | 'apply' | 'dashboard' | null>(null);
+  const [affiliateCodeChecked, setAffiliateCodeChecked] = useState(false);
 
   const safeNavigate = (to: string, source?: string) => {
     console.trace('[NAVIGATION TRACE] safeNavigate called →', { to, source, currentPage, navigationLocked });
@@ -83,6 +86,7 @@ function AppContent() {
 
   useEffect(() => {
     if (!user && !loading) {
+      awaitingGoogleRef.current = false;
       setAwaitingGoogleProfile(false);
       console.log('[NAVIGATION] User logged out, resetting to home');
       setSelectedRole(null);
@@ -93,12 +97,33 @@ function AppContent() {
 
   useEffect(() => {
     if (user && profile) {
+      const wasAwaitingGoogle = awaitingGoogleRef.current;
+      awaitingGoogleRef.current = false;
       setAwaitingGoogleProfile(false);
 
       const storedPlan = localStorage.getItem('pending_plan');
       if (storedPlan) {
         localStorage.removeItem('pending_plan');
         setPendingCheckoutPlan(storedPlan);
+        return;
+      }
+
+      if (wasAwaitingGoogle) {
+        const isNewSignup = localStorage.getItem('pending_google_new_signup') === '1';
+        localStorage.removeItem('pending_google_new_signup');
+
+        if (profile.role === 'affiliate') {
+          setAffiliatePage('dashboard');
+          window.history.pushState({}, '', '/partner/dashboard');
+        } else if (profile.role === 'client') {
+          setCurrentPage('home');
+        } else {
+          if (isNewSignup) {
+            setCurrentPage('settings');
+          } else {
+            setCurrentPage('dashboard');
+          }
+        }
       }
     }
   }, [user, profile]);
@@ -129,9 +154,6 @@ function AppContent() {
 
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
-
-  const [affiliatePage, setAffiliatePage] = useState<'landing' | 'apply' | 'dashboard' | null>(null);
-  const [affiliateCodeChecked, setAffiliateCodeChecked] = useState(false);
 
   useEffect(() => {
     const syncAffiliateState = () => {

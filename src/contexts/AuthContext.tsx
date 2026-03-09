@@ -100,6 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    localStorage.setItem('pending_google_new_signup', '1');
     localStorage.removeItem('pending_google_role');
     await loadProfile(userId);
   }, [loadProfile]);
