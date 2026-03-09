@@ -606,12 +606,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           onClick={() => handleDateSelect(date)}
           className={`h-12 flex items-center justify-center rounded-lg transition-all ${
             isSelected
-              ? 'bg-rose-500 text-white font-bold'
+              ? 'bg-brand-600 text-white font-bold'
               : isToday
-              ? 'bg-rose-100 text-rose-900 font-semibold'
+              ? 'bg-brand-100 text-brand-900 font-semibold'
               : isPast
               ? 'text-gray-300 cursor-not-allowed'
-              : 'hover:bg-rose-50 text-gray-700'
+              : 'hover:bg-brand-50 text-gray-700'
           }`}
         >
           {day}
@@ -624,7 +624,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center">
         <div className="text-gray-600">Chargement...</div>
       </div>
     );
@@ -632,13 +632,13 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   if (!proProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Profil introuvable</h1>
           <p className="text-gray-600 mb-6">Ce lien de réservation n'existe pas ou n'est plus actif.</p>
           <a
             href="/"
-            className="inline-block px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+            className="inline-block px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
           >
             Retour à l'accueil
           </a>
@@ -649,7 +649,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   if (!proProfile.is_accepting_bookings) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Réservations fermées</h1>
           <p className="text-gray-600 mb-6">
@@ -657,7 +657,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           </p>
           <a
             href="/"
-            className="inline-block px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+            className="inline-block px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
           >
             Retour à l'accueil
           </a>
@@ -668,7 +668,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   if (bookingStep === 'deposit' && createdBookingId && proProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
           <DepositPayment
             bookingId={createdBookingId}
@@ -690,7 +690,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   if (bookingStep === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -703,7 +703,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
             </p>
             <a
               href="/"
-              className="block w-full px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-center"
+              className="block w-full px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg hover:from-brand-700 hover:to-brand-100 transition-all font-medium text-center"
             >
               Retour à l'accueil
             </a>
@@ -714,9 +714,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
       {/* Header Profile */}
-      <div className="bg-gradient-to-r from-rose-400 to-pink-500 text-white">
+      <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white">
         <div className="container mx-auto px-4 py-6">
           <a
             href="/"
@@ -732,7 +732,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 <img
                   src={proProfile.profile_photo}
                   alt={proProfile.company_name}
-                  className="w-24 h-24 rounded-2xl object-cover border-4 border-white/30 shadow-lg"
+                  className="w-24 h-24 rounded-2xl object-cover border-4 border-white/30"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center border-4 border-white/30">
@@ -751,7 +751,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 {proProfile.reviews_count > 0 && (
-                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full">
                     <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
                     <span className="font-bold">{proProfile.average_rating.toFixed(1)}</span>
                     <span className="text-sm">({proProfile.reviews_count})</span>
@@ -759,7 +759,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 )}
 
                 {proProfile.followers_count > 0 && (
-                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+                  <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
                     <Heart className="w-4 h-4" />
                     <span>{proProfile.followers_count} abonné{proProfile.followers_count > 1 ? 's' : ''}</span>
                   </div>
@@ -808,7 +808,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
               }}
               className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
                 activeTab === 'services'
-                  ? 'text-rose-600 border-b-2 border-rose-600'
+                  ? 'text-brand-600 border-b-2 border-brand-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -822,7 +822,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
               onClick={() => setActiveTab('gallery')}
               className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
                 activeTab === 'gallery'
-                  ? 'text-rose-600 border-b-2 border-rose-600'
+                  ? 'text-brand-600 border-b-2 border-brand-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -836,7 +836,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
               onClick={() => setActiveTab('reviews')}
               className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
                 activeTab === 'reviews'
-                  ? 'text-rose-600 border-b-2 border-rose-600'
+                  ? 'text-brand-600 border-b-2 border-brand-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -850,7 +850,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
               onClick={() => setActiveTab('institute')}
               className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
                 activeTab === 'institute'
-                  ? 'text-rose-600 border-b-2 border-rose-600'
+                  ? 'text-brand-600 border-b-2 border-brand-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -883,7 +883,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         <button
                           key={service.id}
                           onClick={() => handleServiceSelect(service)}
-                          className="border-2 border-gray-200 rounded-xl hover:border-rose-500 hover:bg-rose-50 transition-all text-left overflow-hidden relative"
+                          className="border-2 border-gray-200 rounded-xl hover:border-brand-300 hover:bg-brand-50/30 transition-all text-left overflow-hidden relative"
                         >
                           {hasOffer && (
                             <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
@@ -906,8 +906,8 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                 />
                               </div>
                             ) : (
-                              <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
-                                <Scissors className="w-10 h-10 text-rose-400" />
+                              <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center">
+                                <Scissors className="w-10 h-10 text-brand-300" />
                               </div>
                             )}
 
@@ -932,7 +932,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                       {pricing.original.toFixed(2)} €
                                     </div>
                                   )}
-                                  <span className="font-bold text-rose-500 text-sm whitespace-nowrap">
+                                  <span className="font-bold text-brand-600 text-sm whitespace-nowrap">
                                     {(hasOffer ? pricing.discounted! : pricing.original).toFixed(2)} €
                                   </span>
                                 </div>
@@ -941,7 +941,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                               {hasSupplements && (
                                 <div className="mt-3 pt-3 border-t border-gray-100">
                                   <p className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3 text-rose-400" />
+                                    <Sparkles className="w-3 h-3 text-brand-300" />
                                     Options disponibles:
                                   </p>
                                   <div className="space-y-1">
@@ -955,7 +955,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                           {supplement.duration_minutes && (
                                             <span className="text-gray-500">{supplement.duration_minutes} min</span>
                                           )}
-                                          <span className="font-semibold text-rose-500">
+                                          <span className="font-semibold text-brand-600">
                                             +{Number(supplement.price).toFixed(2)} €
                                           </span>
                                         </div>
@@ -983,7 +983,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   <ArrowLeft className="w-4 h-4" />
                   Changer de prestation
                 </button>
-                <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
+                <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
                   <p className="text-sm font-medium text-gray-900">{selectedService.name}</p>
                   <p className="text-sm text-gray-600">
                     {calculateTotalDuration()} min - {calculateTotalPrice().toFixed(2)} €
@@ -991,22 +991,22 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 </div>
 
                 {selectedService.supplements && selectedService.supplements.length > 0 && (
-                  <div className="mb-6 bg-white border-2 border-rose-200 rounded-xl p-5">
+                  <div className="mb-6 bg-white border-2 border-brand-200 rounded-xl p-5">
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Plus className="w-5 h-5 text-rose-500" />
+                      <Plus className="w-5 h-5 text-brand-600" />
                       Suppléments disponibles
                     </h3>
                     <div className="space-y-3">
                       {selectedService.supplements.map((supplement) => (
                         <label
                           key={supplement.id}
-                          className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-rose-50 cursor-pointer transition-colors"
+                          className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-brand-50 cursor-pointer transition-colors"
                         >
                           <input
                             type="checkbox"
                             checked={selectedSupplements.includes(supplement.id)}
                             onChange={() => toggleSupplement(supplement.id)}
-                            className="mt-1 w-5 h-5 text-rose-500 rounded focus:ring-2 focus:ring-rose-600"
+                            className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-2 focus:ring-brand-500"
                           />
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{supplement.name}</p>
@@ -1017,7 +1017,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                   +{supplement.duration_minutes} min
                                 </span>
                               )}
-                              <span className="font-semibold text-rose-600">+{Number(supplement.price).toFixed(2)} €</span>
+                              <span className="font-semibold text-brand-600">+{Number(supplement.price).toFixed(2)} €</span>
                             </div>
                           </div>
                         </label>
@@ -1068,7 +1068,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   <ArrowLeft className="w-4 h-4" />
                   Changer de date
                 </button>
-                <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
+                <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
                   <p className="text-sm font-medium text-gray-900">{selectedService.name}</p>
                   <p className="text-sm text-gray-600">
                     {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -1087,7 +1087,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         onClick={() => handleTimeSelect(slot.time)}
                         className={`w-full p-3 rounded-lg font-medium transition-all ${
                           slot.available
-                            ? 'bg-rose-100 text-rose-900 hover:bg-rose-500 hover:text-white'
+                            ? 'bg-brand-100 text-brand-900 hover:bg-brand-600 hover:text-white'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
                       >
@@ -1109,18 +1109,18 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   Changer d'heure
                 </button>
 
-                <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
+                <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
                   <p className="text-sm font-medium text-gray-900 mb-2">{selectedService.name}</p>
                   <p className="text-sm text-gray-600">
                     {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à {selectedTime}
                   </p>
-                  <div className="mt-2 pt-2 border-t border-rose-200 flex justify-between items-center">
+                  <div className="mt-2 pt-2 border-t border-brand-200 flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Total</span>
-                    <span className="text-lg font-bold text-rose-600">{calculateTotalPrice().toFixed(2)} €</span>
+                    <span className="text-lg font-bold text-brand-600">{calculateTotalPrice().toFixed(2)} €</span>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-orange-200 rounded-xl p-6 mb-6">
+                <div className="bg-gradient-to-r from-brand-50 to-brand-100 border-2 border-brand-200 rounded-xl p-6 mb-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-2">Inscription obligatoire</h3>
                   <p className="text-sm text-gray-700">
                     Pour valider votre rendez-vous, vous devez créer un compte ou vous connecter.
@@ -1132,7 +1132,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                     onClick={() => setHasAccount(false)}
                     className={`flex-1 py-3 rounded-lg font-medium transition-all ${
                       !hasAccount
-                        ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white'
+                        ? 'bg-gradient-to-r from-brand-600 to-brand-50 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -1142,7 +1142,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                     onClick={() => setHasAccount(true)}
                     className={`flex-1 py-3 rounded-lg font-medium transition-all ${
                       hasAccount
-                        ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white'
+                        ? 'bg-gradient-to-r from-brand-600 to-brand-50 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -1163,7 +1163,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                           required
                           value={clientInfo.firstName}
                           onChange={(e) => setClientInfo({ ...clientInfo, firstName: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -1176,7 +1176,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                           required
                           value={clientInfo.lastName}
                           onChange={(e) => setClientInfo({ ...clientInfo, lastName: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -1192,7 +1192,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                       required
                       value={clientInfo.email}
                       onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       placeholder="votre@email.com"
                     />
                   </div>
@@ -1207,7 +1207,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         type="tel"
                         value={clientInfo.phone}
                         onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         placeholder="06 12 34 56 78"
                       />
                     </div>
@@ -1223,7 +1223,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                       required
                       value={clientInfo.password}
                       onChange={(e) => setClientInfo({ ...clientInfo, password: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       placeholder="Minimum 6 caractères"
                       minLength={6}
                     />
@@ -1236,7 +1236,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         value={bookingNotes}
                         onChange={(e) => setBookingNotes(e.target.value)}
                         rows={3}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         placeholder="Informations supplémentaires..."
                       />
                     </div>
@@ -1251,7 +1251,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                   <button
                     type="submit"
                     disabled={authLoading || submitting}
-                    className="w-full py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg disabled:opacity-50"
+                    className="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-lg disabled:opacity-50"
                   >
                     {authLoading || submitting
                       ? 'Validation en cours...'
@@ -1314,12 +1314,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 {!showReviewForm ? (
                   <button
                     onClick={() => setShowReviewForm(true)}
-                    className="w-full py-3 border-2 border-rose-300 text-rose-600 rounded-xl font-semibold hover:bg-rose-50 transition-all"
+                    className="w-full py-3 border-2 border-brand-300 text-brand-600 rounded-xl font-semibold hover:bg-brand-50 transition-all"
                   >
                     Laisser un avis
                   </button>
                 ) : (
-                  <form onSubmit={handleSubmitReview} className="p-4 border-2 border-rose-300 rounded-xl">
+                  <form onSubmit={handleSubmitReview} className="p-4 border-2 border-brand-300 rounded-xl">
                     <h3 className="font-bold text-gray-900 mb-4">Votre avis</h3>
 
                     <div className="mb-4">
@@ -1350,7 +1350,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                         value={reviewForm.comment}
                         onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                         rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         placeholder="Partagez votre expérience..."
                       />
                     </div>
@@ -1363,7 +1363,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             <img
                               src={URL.createObjectURL(reviewForm.photo)}
                               alt="Preview"
-                              className="w-24 h-24 object-cover rounded-lg border-2 border-rose-300"
+                              className="w-24 h-24 object-cover rounded-lg border-2 border-brand-300"
                             />
                             <button
                               type="button"
@@ -1374,7 +1374,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             </button>
                           </div>
                         ) : (
-                          <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 hover:bg-rose-50 transition-all">
+                          <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-all">
                             <Upload className="w-5 h-5 text-gray-400" />
                             <span className="text-sm text-gray-600">Ajouter une photo</span>
                             <input
@@ -1404,7 +1404,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="flex-1 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50"
+                        className="flex-1 py-2 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all disabled:opacity-50"
                       >
                         {submitting ? 'Publication...' : 'Publier'}
                       </button>

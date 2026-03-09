@@ -47,7 +47,7 @@ export default function InstituteTabContent({
       {hasPhotos && (
         <div>
           <h4 className={`font-bold text-gray-900 mb-3 flex items-center gap-2 ${titleSize}`}>
-            <ImageIcon className="w-4 h-4 text-rose-500" />
+            <ImageIcon className="w-4 h-4 text-brand-500" />
             Photos de l'institut
           </h4>
           <div className={`grid ${photoGridCols} ${photoGap}`}>
@@ -66,9 +66,9 @@ export default function InstituteTabContent({
       )}
 
       {hasWelcome && (
-        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
+        <div className="bg-brand-50 border border-brand-200 rounded-xl p-4">
           <h4 className={`font-bold text-gray-900 mb-2 flex items-center gap-2 ${titleSize}`}>
-            <MessageSquare className="w-4 h-4 text-rose-500" />
+            <MessageSquare className="w-4 h-4 text-brand-500" />
             Message d'accueil
           </h4>
           <p className={`text-gray-700 leading-relaxed ${textSize}`}>{welcomeMessage}</p>
@@ -132,7 +132,7 @@ export default function InstituteTabContent({
                 key={condition.id}
                 className={`flex items-start gap-2 ${compact ? 'p-2' : 'p-3'} bg-gray-50 border border-gray-200 rounded-lg`}
               >
-                <span className="text-rose-400 mt-0.5">&#8226;</span>
+                <span className="text-brand-400 mt-0.5">&#8226;</span>
                 <p className={`text-gray-700 ${textSize}`}>{condition.text}</p>
               </div>
             ))}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Star, MapPin, Heart, Calendar, Scissors, Image as ImageIcon, Sparkles, Upload, X } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles, Upload, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -11,7 +11,7 @@ import {
   createReview,
   Review,
 } from '../../lib/socialHelpers';
-import BookingAvailabilityModal from '../../components/client/BookingAvailabilityModal';
+import InstituteTabContent from '../../components/public-profile/InstituteTabContent';
 
 interface ProviderProfilePageProps {
   slug: string;
@@ -51,13 +51,19 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
   const [photos, setPhotos] = useState<ClientPhoto[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'services' | 'gallery' | 'reviews'>('services');
+  const [activeTab, setActiveTab] = useState<'services' | 'gallery' | 'reviews' | 'institute'>('services');
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', photo: null as File | null });
   const [submitting, setSubmitting] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedSupplements, setSelectedSupplements] = useState<{ [serviceId: string]: string[] }>({});
+  const [instituteData, setInstituteData] = useState({
+    institute_photos: [] as Array<{ id: string; url: string; order: number }>,
+    diplomas: [] as Array<{ id: string; name: string; year?: string }>,
+    conditions: [] as Array<{ id: string; text: string }>,
+    welcome_message: '',
+    booking_instructions: '',
+    cancellation_policy: '',
+  });
 
   useEffect(() => {
     if (slug) {
@@ -76,7 +82,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id')
+        .select('user_id, booking_slug, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy')
         .eq('booking_slug', slug)
         .maybeSingle();
 
@@ -99,6 +105,14 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
       }
 
       setProvider(providerData);
+      setInstituteData({
+        institute_photos: Array.isArray(companyData.institute_photos) ? companyData.institute_photos : [],
+        diplomas: Array.isArray(companyData.diplomas) ? companyData.diplomas : [],
+        conditions: Array.isArray(companyData.conditions) ? companyData.conditions : [],
+        welcome_message: companyData.welcome_message || '',
+        booking_instructions: companyData.booking_instructions || '',
+        cancellation_policy: companyData.cancellation_policy || '',
+      });
       await Promise.all([
         loadServices(companyData.user_id),
         loadPhotos(companyData.user_id),
@@ -207,12 +221,6 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
       alert('Erreur lors de la publication de l\'avis');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleBooking = () => {
-    if (provider?.booking_slug) {
-      window.location.href = `/booking/${provider.booking_slug}`;
     }
   };
 
@@ -364,6 +372,20 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                 <span>Avis</span>
               </div>
             </button>
+
+            <button
+              onClick={() => setActiveTab('institute')}
+              className={`flex-1 py-4 px-4 font-semibold transition-all ${
+                activeTab === 'institute'
+                  ? 'text-brand-600 border-b-2 border-brand-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <ImageIcon className="w-5 h-5" />
+                <span>Institut</span>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -496,15 +518,12 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                               </div>
                             )}
 
-                            <button
-                              onClick={() => {
-                                setSelectedService(service);
-                                setShowBookingModal(true);
-                              }}
-                              className="mt-4 w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-sm hover:shadow-md"
+                            <a
+                              href={`/book/${slug}`}
+                              className="mt-4 w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-sm hover:shadow-md block text-center"
                             >
                               Réserver
-                            </button>
+                            </a>
                           </div>
                         </div>
                       </div>
@@ -691,27 +710,22 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
               )}
             </div>
           )}
+
+          {activeTab === 'institute' && (
+            <div>
+              <InstituteTabContent
+                institutePhotos={instituteData.institute_photos}
+                diplomas={instituteData.diplomas}
+                conditions={instituteData.conditions}
+                welcomeMessage={instituteData.welcome_message}
+                bookingInstructions={instituteData.booking_instructions}
+                cancellationPolicy={instituteData.cancellation_policy}
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {showBookingModal && selectedService && provider && (
-        <BookingAvailabilityModal
-          service={selectedService}
-          provider={{
-            user_id: provider.user_id,
-            company_name: provider.company_name,
-            profile_photo: provider.profile_photo,
-            address: provider.address,
-          }}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedService(null);
-          }}
-          onSuccess={() => {
-            window.location.href = '#client-bookings';
-          }}
-        />
-      )}
     </div>
   );
 }
