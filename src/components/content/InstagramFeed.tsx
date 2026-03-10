@@ -6,6 +6,7 @@ import { canSwapContent } from '../../lib/publicationHelpers';
 import InstagramFeedCard from './InstagramFeedCard';
 import InstagramProfileHeader from './InstagramProfileHeader';
 import InstagramPreviewModal from './InstagramPreviewModal';
+import PublishModal from './PublishModal';
 import {
   DndContext,
   closestCenter,
@@ -56,6 +57,7 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
   const { user } = useAuth();
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewContent, setPreviewContent] = useState<ContentItem | null>(null);
+  const [publishContent, setPublishContent] = useState<ContentItem | null>(null);
   const [profile, setProfile] = useState<InstagramProfile>({
     instagram_profile_photo: null,
     instagram_username: null,
@@ -264,6 +266,7 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
                     onEdit={handleEdit}
                     onPreview={handlePreview}
                     onDelete={handleDelete}
+                    onPublish={(c) => setPublishContent(c)}
                     isPublished={isPublished}
                   />
                 );
@@ -282,6 +285,14 @@ export default function InstagramFeed({ contents, onContentUpdated, onContentEdi
             setShowPreviewModal(false);
             setPreviewContent(null);
           }}
+        />
+      )}
+
+      {publishContent && (
+        <PublishModal
+          content={publishContent}
+          onClose={() => setPublishContent(null)}
+          onPublished={onContentUpdated}
         />
       )}
     </div>

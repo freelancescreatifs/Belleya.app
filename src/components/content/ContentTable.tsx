@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Pencil, Save, X, Image as ImageIcon, Calendar, Target, Filter, Instagram, Linkedin, Facebook, Youtube, Twitter, Sparkles, AlertCircle, ChevronDown, Trash2 } from 'lucide-react';
+import { Pencil, Save, X, Image as ImageIcon, Calendar, Target, Filter, Instagram, Linkedin, Facebook, Youtube, Twitter, Sparkles, AlertCircle, ChevronDown, Trash2, Send } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import PublishDateGuardModal from './PublishDateGuardModal';
+import PublishModal from './PublishModal';
+import PublishStatusBadge from './PublishStatusBadge';
 import { forcePublishContent, updateProductionStepCompleted, getRelevantSteps, type ProductionStep } from '../../lib/productionHelpers';
 
 interface ContentItem {
@@ -31,6 +33,7 @@ interface ContentItem {
   tournage_checked?: boolean;
   montage_checked?: boolean;
   planifie_checked?: boolean;
+  is_published?: boolean;
   is_published_status?: string;
 }
 
@@ -64,6 +67,7 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
 
   const [showDateGuardModal, setShowDateGuardModal] = useState(false);
   const [pendingPublishContent, setPendingPublishContent] = useState<ContentItem | null>(null);
+  const [publishContent, setPublishContent] = useState<ContentItem | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -560,15 +564,18 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                   </td>
 
                   <td className="px-4 py-3">
-                    {content.is_published ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-belaya-300">
-                        Publié
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-300">
-                        Non publié
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {content.is_published ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-belaya-300">
+                          Publie
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-300">
+                          Non publie
+                        </span>
+                      )}
+                      <PublishStatusBadge status={content.is_published_status} compact />
+                    </div>
                   </td>
 
                   <td className="px-4 py-3">
@@ -605,6 +612,18 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
+                      {content.status !== 'idea' && (content.image_url || (content.media_urls && content.media_urls.length > 0)) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPublishContent(content);
+                          }}
+                          className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all hover:shadow-sm"
+                          title="Publier sur les réseaux"
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -643,6 +662,14 @@ export default function ContentTable({ contents, pillars, onContentUpdated, onCo
             setShowDateGuardModal(false);
             setPendingPublishContent(null);
           }}
+        />
+      )}
+
+      {publishContent && (
+        <PublishModal
+          content={publishContent}
+          onClose={() => setPublishContent(null)}
+          onPublished={onContentUpdated}
         />
       )}
     </div>

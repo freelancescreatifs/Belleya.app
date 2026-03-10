@@ -9,6 +9,7 @@ import SocialMediaSettings from '../components/settings/SocialMediaSettings';
 import LanguageSettings from '../components/settings/LanguageSettings';
 import SubscriptionStatus from '../components/settings/SubscriptionStatus';
 import GoogleCalendarIntegration from '../components/settings/GoogleCalendarIntegration';
+import SocialAccountConnections from '../components/settings/SocialAccountConnections';
 import { useSubscription } from '../hooks/useSubscription';
 import UpgradeOverlay from '../components/shared/UpgradeOverlay';
 
@@ -145,7 +146,12 @@ export default function Settings() {
           )}
 
           {activeTab === 'integrations' && user && (
-            <GoogleCalendarIntegration />
+            <div className="space-y-10">
+              <SocialAccountConnections />
+              <div className="border-t border-gray-200 pt-10">
+                <GoogleCalendarIntegration />
+              </div>
+            </div>
           )}
 
           {activeTab === 'subscription' && user && (

@@ -20,6 +20,7 @@ import {
 import { updateProductionStepCompleted, forcePublishContent, type ProductionStep } from '../../lib/productionHelpers';
 import ProductionStepsCheckboxes from './ProductionStepsCheckboxes';
 import PublishedStatusTag from './PublishedStatusTag';
+import PublishStatusBadge from './PublishStatusBadge';
 
 interface ContentItem {
   id: string;
@@ -941,6 +942,7 @@ function DraggableContent({
             contentType={content.content_type}
             className="!px-1 !py-0.5 !text-[10px] !gap-0.5"
           />
+          <PublishStatusBadge status={content.is_published_status} compact />
           <div className="flex gap-0.5 flex-shrink-0">
             {(Array.isArray(content.platform) ? content.platform : [content.platform]).map((platform) => (
               <span key={platform} className={`px-1 py-0.5 rounded text-xs flex items-center gap-0.5 border ${getPlatformColor(platform)}`}>

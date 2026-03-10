@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Play, Pencil, Eye, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pencil, Eye, Trash2, Send } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -26,10 +26,11 @@ interface InstagramFeedCardProps {
   onEdit: (content: ContentItem) => void;
   onPreview: (content: ContentItem) => void;
   onDelete?: (contentId: string) => void;
+  onPublish?: (content: ContentItem) => void;
   isPublished?: boolean;
 }
 
-export default function InstagramFeedCard({ content, onEdit, onPreview, onDelete, isPublished = false }: InstagramFeedCardProps) {
+export default function InstagramFeedCard({ content, onEdit, onPreview, onDelete, onPublish, isPublished = false }: InstagramFeedCardProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const {
@@ -86,6 +87,15 @@ export default function InstagramFeedCard({ content, onEdit, onPreview, onDelete
       onDelete(content.id);
     }
   }
+
+  function handlePublish(e: React.MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    onPublish?.(content);
+  }
+
+  const hasMedia = mediaUrls.length > 0;
+  const canPublish = !isPublished && hasMedia && onPublish && content.status !== 'idea';
 
   return (
     <div
@@ -184,6 +194,15 @@ export default function InstagramFeedCard({ content, onEdit, onPreview, onDelete
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
+          {canPublish && (
+            <button
+              onClick={handlePublish}
+              className="p-1.5 bg-emerald-500/80 hover:bg-emerald-600/90 text-white rounded-full transition-all backdrop-blur-sm pointer-events-auto"
+              title="Publier sur les réseaux"
+            >
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          )}
           {onDelete && (
             <button
               onClick={handleDelete}

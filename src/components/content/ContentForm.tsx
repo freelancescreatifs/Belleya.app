@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { normalizeTime } from '../../lib/timeHelpers';
 import { generateContentAI } from '../../lib/contentAIGenerator';
 import MediaUploader from './MediaUploader';
+import PublishModal from './PublishModal';
 import { MediaFile, uploadMultipleMedia, getMediaType, urlsToMediaFiles } from '../../lib/mediaHelpers';
 import InfoTooltip from '../shared/InfoTooltip';
 
@@ -182,6 +183,7 @@ export default function ContentForm({
   const [useAI, setUseAI] = useState(false);
   const [showProductionDates, setShowProductionDates] = useState(false);
   const [showAddPillar, setShowAddPillar] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [newPillarName, setNewPillarName] = useState('');
   const [newPillarColor, setNewPillarColor] = useState('#EC4899');
   const [productionDefaults, setProductionDefaults] = useState({
@@ -1356,6 +1358,16 @@ export default function ContentForm({
         >
           Annuler
         </button>
+        {mode === 'edit' && contentId && mediaFiles.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowPublishModal(true)}
+            className="flex items-center gap-1.5 md:gap-2 px-4 py-2 md:px-6 md:py-3 text-sm md:text-base bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all"
+          >
+            <Send className="w-4 h-4 md:w-5 md:h-5" />
+            Publier
+          </button>
+        )}
         <button
           type="submit"
           disabled={saving}
@@ -1419,6 +1431,27 @@ export default function ContentForm({
           </div>
         </div>
       </div>
+    )}
+
+    {showPublishModal && contentId && (
+      <PublishModal
+        content={{
+          id: contentId,
+          title: formData.title,
+          caption: formData.caption,
+          description: formData.description,
+          content_type: formData.content_type,
+          platform: selectedPlatforms,
+          publication_date: formData.publication_date,
+          publication_time: formData.publication_time,
+          media_urls: mediaFiles.map(f => f.preview),
+        }}
+        onClose={() => setShowPublishModal(false)}
+        onPublished={() => {
+          setShowPublishModal(false);
+          onSuccess();
+        }}
+      />
     )}
     </>
   );
