@@ -13,6 +13,7 @@ const UP_BASE = "https://api.upload-post.com/api";
 function upHeaders() {
   return {
     Authorization: `Apikey ${Deno.env.get("UPLOAD_POST_API_KEY")}`,
+    "Content-Type": "application/json",
   };
 }
 
