@@ -33,13 +33,13 @@ export default function SendReceiptModal({
 
   const clientName = `${clientDetails.first_name} ${clientDetails.last_name}`.trim();
   const serviceName = event.service?.name || event.title;
-  const servicePrice = event.service?.price != null ? `${Number(event.service.price).toFixed(2)}\u20AC` : 'N/A';
+  const servicePrice = event.service?.price != null ? `${Number(event.service.price).toFixed(2)}€` : 'N/A';
   const eventDate = formatDate(new Date(event.start_at));
   const eventTime = `${formatTime(new Date(event.start_at))} - ${formatTime(new Date(event.end_at))}`;
 
   const handleSend = async () => {
     if (!sendEmail && !sendSms) {
-      showToast('error', 'Veuillez s\u00e9lectionner au moins un canal');
+      showToast('error', 'Veuillez sélectionner au moins un canal');
       return;
     }
 
@@ -68,7 +68,7 @@ export default function SendReceiptModal({
       }
 
       if (data.success) {
-        showToast('success', 'Re\u00e7u envoy\u00e9 avec succ\u00e8s !');
+        showToast('success', 'Reçu envoyé avec succès !');
         onSuccess?.();
         onClose();
       } else {
@@ -85,11 +85,11 @@ export default function SendReceiptModal({
         }
 
         if (succeededChannels.length > 0) {
-          showToast('warning', `Envoi partiel : \u00e9chec pour ${failedChannels.join(', ')}`);
+          showToast('warning', `Envoi partiel : échec pour ${failedChannels.join(', ')}`);
           onSuccess?.();
           onClose();
         } else {
-          showToast('error', '\u00c9chec de l\'envoi du re\u00e7u');
+          showToast('error', 'Échec de l\'envoi du reçu');
         }
       }
     } catch (error) {
@@ -104,7 +104,7 @@ export default function SendReceiptModal({
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Envoyer le re\u00e7u</h2>
+          <h2 className="text-lg font-bold text-gray-900">Envoyer le reçu</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -115,7 +115,7 @@ export default function SendReceiptModal({
 
         <div className="p-6 space-y-5">
           <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">D\u00e9tails du rendez-vous</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Détails du rendez-vous</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Cliente</span>
@@ -150,8 +150,8 @@ export default function SendReceiptModal({
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800">
-                <p className="font-medium">Aucune coordonn\u00e9e disponible</p>
-                <p className="mt-1">Cette cliente n'a ni email ni t\u00e9l\u00e9phone enregistr\u00e9.</p>
+                <p className="font-medium">Aucune coordonnée disponible</p>
+                <p className="mt-1">Cette cliente n'a ni email ni téléphone enregistré.</p>
               </div>
             </div>
           )}
@@ -183,7 +183,7 @@ export default function SendReceiptModal({
                   ) : (
                     <p className="text-sm text-gray-500 flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" />
-                      Email non renseign\u00e9
+                      Email non renseigné
                     </p>
                   )}
                 </div>
@@ -211,7 +211,7 @@ export default function SendReceiptModal({
                   ) : (
                     <p className="text-sm text-gray-500 flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" />
-                      T\u00e9l\u00e9phone non renseign\u00e9
+                      Téléphone non renseigné
                     </p>
                   )}
                 </div>

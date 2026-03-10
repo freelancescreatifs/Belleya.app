@@ -16,6 +16,18 @@ interface InvoiceSMSPayload {
   customMessage?: string;
 }
 
+function normalizePhoneToE164(phone: string): string {
+  let cleaned = phone.replace(/[\s\-\.\(\)]/g, "");
+  if (cleaned.startsWith("0")) {
+    cleaned = "+33" + cleaned.substring(1);
+  } else if (cleaned.startsWith("33") && !cleaned.startsWith("+")) {
+    cleaned = "+" + cleaned;
+  } else if (!cleaned.startsWith("+")) {
+    cleaned = "+33" + cleaned;
+  }
+  return cleaned;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -37,7 +49,6 @@ Deno.serve(async (req: Request) => {
       customMessage,
     } = payload;
 
-    // Validate required fields
     if (!invoiceId || !clientPhone || !clientName || !providerName) {
       return new Response(
         JSON.stringify({
@@ -46,72 +57,88 @@ Deno.serve(async (req: Request) => {
         }),
         {
           status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
-    // Build SMS content (max 160 characters for standard SMS)
+    const twilioSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+    const twilioToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+    const twilioPhone = Deno.env.get("TWILIO_PHONE_NUMBER");
+
+    if (!twilioSid || !twilioToken || !twilioPhone) {
+      return new Response(
+        JSON.stringify({
+          error: "Twilio credentials not configured",
+          details: "TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER are required",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const dateText = appointmentDate ? ` le ${appointmentDate}` : "";
 
     let smsBody = "";
-
     if (customMessage) {
       smsBody = customMessage;
     } else {
-      smsBody = `Bonjour ${clientName}, merci d'être venue chez ${providerName}${dateText}. Total : ${total.toFixed(2)}€. À bientôt ! 💗`;
+      smsBody = `Bonjour ${clientName}, merci pour votre visite chez ${providerName}${dateText}. Total: ${total.toFixed(2)}EUR. A bientot!`;
     }
 
-    // Ensure SMS is not too long (160 chars max for single SMS)
     if (smsBody.length > 160) {
       smsBody = smsBody.substring(0, 157) + "...";
     }
 
-    // TODO: Integrate with actual SMS service (Twilio, Vonage, etc.)
-    // For now, we'll log the SMS content and return success
-    console.log("=== SMS TO SEND ===");
-    console.log("To:", clientPhone);
-    console.log("Body:", smsBody);
-    console.log("Length:", smsBody.length, "characters");
-    console.log("===================");
+    const normalizedPhone = normalizePhoneToE164(clientPhone);
+    const credentials = btoa(`${twilioSid}:${twilioToken}`);
 
-    // Simulate SMS sending
-    // In production, replace with actual SMS service integration:
-    // const response = await fetch('https://api.twilio.com/2010-04-01/Accounts/YOUR_ACCOUNT_SID/Messages.json', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Basic ${btoa(`${Deno.env.get('TWILIO_ACCOUNT_SID')}:${Deno.env.get('TWILIO_AUTH_TOKEN')}`)}`,
-    //     'Content-Type': 'application/x-www-form-urlencoded',
-    //   },
-    //   body: new URLSearchParams({
-    //     To: clientPhone,
-    //     From: Deno.env.get('TWILIO_PHONE_NUMBER'),
-    //     Body: smsBody,
-    //   }),
-    // });
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "SMS sent successfully",
-        invoiceId,
-        recipient: clientPhone,
-        preview: {
-          body: smsBody,
-          length: smsBody.length,
-        },
-      }),
+    const res = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`,
       {
-        status: 200,
+        method: "POST",
         headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
+          Authorization: `Basic ${credentials}`,
+          "Content-Type": "application/x-www-form-urlencoded",
         },
+        body: new URLSearchParams({
+          To: normalizedPhone,
+          From: twilioPhone,
+          Body: smsBody,
+        }),
       }
     );
+
+    if (res.ok) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "SMS sent successfully",
+          invoiceId,
+          recipient: normalizedPhone,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    } else {
+      const errBody = await res.text();
+      console.error("Twilio API error:", errBody);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Failed to send SMS via Twilio",
+          details: errBody,
+        }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
   } catch (error) {
     console.error("Error sending invoice SMS:", error);
 
@@ -122,10 +149,7 @@ Deno.serve(async (req: Request) => {
       }),
       {
         status: 500,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }

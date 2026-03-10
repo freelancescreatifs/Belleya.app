@@ -110,6 +110,18 @@ function buildReceiptHtml(
 </html>`;
 }
 
+function normalizePhoneToE164(phone: string): string {
+  let cleaned = phone.replace(/[\s\-\.\(\)]/g, "");
+  if (cleaned.startsWith("0")) {
+    cleaned = "+33" + cleaned.substring(1);
+  } else if (cleaned.startsWith("33") && !cleaned.startsWith("+")) {
+    cleaned = "+" + cleaned;
+  } else if (!cleaned.startsWith("+")) {
+    cleaned = "+33" + cleaned;
+  }
+  return cleaned;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -230,7 +242,7 @@ Deno.serve(async (req: Request) => {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                from: `Belaya <onboarding@resend.dev>`,
+                from: `Belaya <support@belaya.app>`,
                 to: [clientEmail],
                 subject: `Votre recu - ${companyName}`,
                 html,
@@ -302,7 +314,7 @@ Deno.serve(async (req: Request) => {
                   "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: new URLSearchParams({
-                  To: clientPhone,
+                  To: normalizePhoneToE164(clientPhone),
                   From: twilioPhone,
                   Body: smsBody,
                 }),
