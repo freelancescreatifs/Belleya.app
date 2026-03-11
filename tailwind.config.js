@@ -28,7 +28,7 @@ export default {
         'brand': {
           'from': '#ffeee4',
           'to': '#ffeee4',
-          '50': '#ffad7d',
+          '50': '#ffaf81',
           '100': '#ffdcc4',
           '200': '#ffcfaf',
           '300': '#ffb89a',
