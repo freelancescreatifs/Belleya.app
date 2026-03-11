@@ -482,7 +482,9 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         editorial_pillar: aiIdea.editorial_pillar || null,
         target_audience: aiIdea.target_audience_id || null,
         awareness_level: aiIdea.awareness_level || null,
-        status: 'saved' as const
+        status: 'saved' as const,
+        source: 'ai' as const,
+        is_saved: false
       }));
 
       const { data, error } = await supabase
@@ -655,11 +657,11 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
     }
   }
 
-  async function handleToggleSave(ideaId: string, isSaved: boolean) {
+  async function handleToggleSave(ideaId: string, currentlySaved: boolean) {
     try {
       const { error } = await supabase
         .from('content_ideas')
-        .update({ status: isSaved ? 'saved' : 'saved' })
+        .update({ is_saved: !currentlySaved })
         .eq('id', ideaId)
         .eq('user_id', user.id);
 
