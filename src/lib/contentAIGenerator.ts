@@ -129,11 +129,22 @@ function generateRetentionStructure(title: string, seed: number): string {
 }
 
 function generatePsychologicalTriggers(title: string, seed: number): string {
-  return `✓ Identification personnelle
-✓ Déculpabilisation
-✓ Révélation d'une cause cachée
-✓ Projection positive
-✓ Solution concrète`;
+  const allTriggers = [
+    '✓ Rupture de croyance',
+    '✓ Curiosité immédiate',
+    '✓ Autorité implicite',
+    '✓ Soulagement émotionnel',
+    "✓ Désir d'amélioration",
+    '✓ Peur de continuer à faire faux',
+    '✓ Projection du résultat',
+  ];
+  const start = seed % allTriggers.length;
+  const count = 4 + (seed % 3);
+  const selected = [];
+  for (let i = 0; i < count; i++) {
+    selected.push(allTriggers[(start + i) % allTriggers.length]);
+  }
+  return selected.join('\n');
 }
 
 function generateContentAngle(title: string, profession: string, objective: string, seed: number): string {

@@ -40,6 +40,60 @@ interface IdeasGeneratorProps {
   onIdeaSaved: (ideaId: string) => void;
 }
 
+function buildIdeaDescription(idea: any, contentType: string): string {
+  const sections: string[] = [];
+
+  if (idea.hooks_alternatives?.length) {
+    sections.push(`🔥 3 HOOKS PERCUTANTS\n\n${idea.hooks_alternatives.map((h: string, i: number) => `${i + 1}. ${h}`).join('\n')}`);
+  }
+
+  if (idea.psychological_triggers?.length) {
+    sections.push(`🧠 DECLENCHEURS PSYCHOLOGIQUES\n\n${idea.psychological_triggers.map((t: string) => `✓ ${t}`).join('\n')}`);
+  }
+
+  if (idea.content_angle) {
+    sections.push(`🎯 ANGLE DU CONTENU\n\n${idea.content_angle}`);
+  }
+
+  const normalized = contentType === 'video' ? 'reel' : contentType === 'carousel' ? 'carrousel' : contentType;
+
+  if (normalized === 'reel' && idea.script_reel_1) {
+    sections.push(`🎬 SCRIPT PROPOSITION 1 — Angle autorité\n\n${idea.script_reel_1}`);
+    if (idea.script_reel_2) {
+      sections.push(`🎬 SCRIPT PROPOSITION 2 — Angle émotion\n\n${idea.script_reel_2}`);
+    }
+  }
+
+  if (normalized === 'carrousel' && idea.carousel_slides?.length) {
+    const slidesText = idea.carousel_slides.map((s: any) =>
+      `Slide ${s.slide} :\nTexte : ${s.text}\nVisuel : ${s.visual}`
+    ).join('\n\n');
+    sections.push(`📱 CARROUSEL — Slide par slide\n\n${slidesText}`);
+  }
+
+  if (normalized === 'post' && idea.post_structure) {
+    sections.push(`📸 POST COMPLET\n\n${idea.post_structure}`);
+  }
+
+  if (idea.retention_structure?.length) {
+    sections.push(`📈 STRUCTURE RÉTENTION 3 SECONDES\n\n${idea.retention_structure.map((r: string, i: number) => `${i + 1}. ${r}`).join('\n')}`);
+  }
+
+  if (idea.conversion_version) {
+    sections.push(`💰 VERSION CONVERSION\n\n${idea.conversion_version}`);
+  }
+
+  if (idea.story_ideas?.length) {
+    sections.push(`💡 STORY IDEAS\n\n${idea.story_ideas.map((s: string, i: number) => `Story ${i + 1} : ${s}`).join('\n\n')}`);
+  }
+
+  if (idea.pro_tip) {
+    sections.push(`💡 CONSEIL PRO\n\n${idea.pro_tip}`);
+  }
+
+  return sections.join('\n\n⸻\n\n');
+}
+
 function mapContentTypeToDbValue(formValue: string): string {
   const mapping: { [key: string]: string } = {
     'reel': 'video',
@@ -434,6 +488,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         user_id: user.id,
         company_id: companyData?.id || null,
         title: idea.title || 'Idee sans titre',
+        description: buildIdeaDescription(idea, aiIdea.content_type),
         hooks_alternatives: idea.hooks_alternatives || [],
         psychological_triggers: idea.psychological_triggers || [],
         content_angle: idea.content_angle || '',
