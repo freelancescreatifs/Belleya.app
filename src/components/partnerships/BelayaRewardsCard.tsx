@@ -87,7 +87,7 @@ export default function BelayaRewardsCard() {
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg overflow-hidden border border-belaya-200">
-                  <img src="/belaya_logo.png" alt="Belaya" className="w-full h-full object-cover" />
+                  <img src="/logo.png" alt="Belaya" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Programme Belaya.app</h3>
@@ -283,7 +283,7 @@ export default function BelayaRewardsCard() {
       >
         <div className="flex items-start gap-4 mb-4">
           <div className="w-16 h-16 rounded-xl overflow-hidden border border-belaya-200 flex-shrink-0">
-            <img src="/belaya_logo.png" alt="Belaya" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="Belaya" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
