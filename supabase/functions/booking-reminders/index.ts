@@ -30,7 +30,7 @@ Deno.serve(async (req: Request) => {
 
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    const dayAfterTomorrow = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+    const dayAfterTomorrow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     const { data: bookings, error: bookingsError } = await supabase
       .from("bookings")
