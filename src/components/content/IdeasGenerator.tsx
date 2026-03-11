@@ -40,58 +40,26 @@ interface IdeasGeneratorProps {
   onIdeaSaved: (ideaId: string) => void;
 }
 
-function buildIdeaDescription(idea: any, contentType: string): string {
+function buildIdeaDescription(idea: any): string {
   const sections: string[] = [];
 
   if (idea.hooks_alternatives?.length) {
-    sections.push(`🔥 3 HOOKS PERCUTANTS\n\n${idea.hooks_alternatives.map((h: string, i: number) => `${i + 1}. ${h}`).join('\n')}`);
+    sections.push(`HOOKS PERCUTANTS\n\n${idea.hooks_alternatives.map((h: string, i: number) => `${i + 1}. ${h}`).join('\n')}`);
   }
 
   if (idea.psychological_triggers?.length) {
-    sections.push(`🧠 DECLENCHEURS PSYCHOLOGIQUES\n\n${idea.psychological_triggers.map((t: string) => `✓ ${t}`).join('\n')}`);
+    sections.push(`DECLENCHEURS PSYCHOLOGIQUES\n\n${idea.psychological_triggers.map((t: string) => `- ${t}`).join('\n')}`);
   }
 
   if (idea.content_angle) {
-    sections.push(`🎯 ANGLE DU CONTENU\n\n${idea.content_angle}`);
-  }
-
-  const normalized = contentType === 'video' ? 'reel' : contentType === 'carousel' ? 'carrousel' : contentType;
-
-  if (normalized === 'reel' && idea.script_reel_1) {
-    sections.push(`🎬 SCRIPT PROPOSITION 1 — Angle autorité\n\n${idea.script_reel_1}`);
-    if (idea.script_reel_2) {
-      sections.push(`🎬 SCRIPT PROPOSITION 2 — Angle émotion\n\n${idea.script_reel_2}`);
-    }
-  }
-
-  if (normalized === 'carrousel' && idea.carousel_slides?.length) {
-    const slidesText = idea.carousel_slides.map((s: any) =>
-      `Slide ${s.slide} :\nTexte : ${s.text}\nVisuel : ${s.visual}`
-    ).join('\n\n');
-    sections.push(`📱 CARROUSEL — Slide par slide\n\n${slidesText}`);
-  }
-
-  if (normalized === 'post' && idea.post_structure) {
-    sections.push(`📸 POST COMPLET\n\n${idea.post_structure}`);
-  }
-
-  if (idea.retention_structure?.length) {
-    sections.push(`📈 STRUCTURE RÉTENTION 3 SECONDES\n\n${idea.retention_structure.map((r: string, i: number) => `${i + 1}. ${r}`).join('\n')}`);
-  }
-
-  if (idea.conversion_version) {
-    sections.push(`💰 VERSION CONVERSION\n\n${idea.conversion_version}`);
-  }
-
-  if (idea.story_ideas?.length) {
-    sections.push(`💡 STORY IDEAS\n\n${idea.story_ideas.map((s: string, i: number) => `Story ${i + 1} : ${s}`).join('\n\n')}`);
+    sections.push(`ANGLE DU CONTENU\n\n${idea.content_angle}`);
   }
 
   if (idea.pro_tip) {
-    sections.push(`💡 CONSEIL PRO\n\n${idea.pro_tip}`);
+    sections.push(`CONSEIL PRO\n\n${idea.pro_tip}`);
   }
 
-  return sections.join('\n\n⸻\n\n');
+  return sections.join('\n\n---\n\n');
 }
 
 function mapContentTypeToDbValue(formValue: string): string {
@@ -128,6 +96,10 @@ async function callContentAI(
     throw new Error('Session expirée, veuillez vous reconnecter.');
   }
 
+  const controller = new AbortController();
+  const timeoutMs = mode === 'ideas' ? 30000 : 60000;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -136,7 +108,10 @@ async function callContentAI(
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ mode, ...params }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       let errorMsg = `HTTP ${response.status}`;
@@ -152,6 +127,10 @@ async function callContentAI(
 
     return response.json();
   } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('La generation a pris trop de temps. Veuillez reessayer.');
+    }
     if (error instanceof Error) {
       throw error;
     }
@@ -488,14 +467,14 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         user_id: user.id,
         company_id: companyData?.id || null,
         title: idea.title || 'Idee sans titre',
-        description: buildIdeaDescription(idea, aiIdea.content_type),
+        description: buildIdeaDescription(idea),
         hooks_alternatives: idea.hooks_alternatives || [],
         psychological_triggers: idea.psychological_triggers || [],
         content_angle: idea.content_angle || '',
-        retention_structure: idea.retention_structure || [],
-        conversion_version: idea.conversion_version || '',
-        visual_alignment: idea.visual_alignment || [],
-        story_ideas: idea.story_ideas || [],
+        retention_structure: [],
+        conversion_version: '',
+        visual_alignment: [],
+        story_ideas: [],
         pro_tip: idea.pro_tip || '',
         content_type: mapContentTypeToDbValue(aiIdea.content_type),
         platform: [aiIdea.platform],
@@ -968,7 +947,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
             <div className="space-y-4">
               <div className="p-5 bg-white border-2 border-orange-300 rounded-xl shadow-lg">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Generateur d'idees strategiques</h3>
-                <p className="text-sm text-gray-600 mb-4">L'IA va creer 5 idees strategiques avec hooks, angles et justifications</p>
+                <p className="text-sm text-gray-600 mb-4">L'IA va creer 3 idees strategiques avec hooks, angles et justifications</p>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Theme ou sujet (optionnel)</label>
@@ -1101,7 +1080,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5" />
-                        Générer 5 idées stratégiques
+                        Générer 3 idées stratégiques
                       </>
                     )}
                   </button>
@@ -1117,7 +1096,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     </div>
                   </div>
                   <p className="text-gray-600 font-medium">Génération des idées en cours...</p>
-                  <p className="text-gray-400 text-sm">Cela peut prendre 10-15 secondes</p>
+                  <p className="text-gray-400 text-sm">Quelques secondes...</p>
                 </div>
               ) : aiIdeas.length === 0 ? (
                 <div className="text-center py-12">

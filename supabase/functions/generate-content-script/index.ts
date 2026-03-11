@@ -40,11 +40,11 @@ function getProfessionLabel(profession: string): string {
 
 function getAwarenessLevelLabel(level: string): string {
   const labels: Record<string, string> = {
-    probleme_inconscient: "Probleme inconscient (ne sait pas qu'il a un probleme)",
-    conscient_probleme: "Conscient du probleme (sait qu'il a un souci)",
-    conscient_solution: "Conscient de la solution (sait comment le resoudre)",
-    conscient_produit: "Conscient du produit (connait ta solution)",
-    pret_acheter: "Pret a acheter (decision imminente)",
+    probleme_inconscient: "Probleme inconscient",
+    conscient_probleme: "Conscient du probleme",
+    conscient_solution: "Conscient de la solution",
+    conscient_produit: "Conscient du produit",
+    pret_acheter: "Pret a acheter",
   };
   return labels[level] || level;
 }
@@ -65,118 +65,12 @@ function normalizeContentType(ct: string): string {
 function getContentTypeLabel(ct: string): string {
   const normalized = normalizeContentType(ct);
   const labels: Record<string, string> = {
-    reel: "Reel / TikTok (Video courte verticale)",
-    carrousel: "Carrousel (Slides swipeable)",
-    post: "Post classique (Texte + Image)",
-    story: "Story (Format ephemere)",
+    reel: "Reel / TikTok",
+    carrousel: "Carrousel",
+    post: "Post classique",
+    story: "Story",
   };
   return labels[normalized] || ct;
-}
-
-function buildContentTypeInstructions(ct: string): string {
-  const normalized = normalizeContentType(ct);
-
-  if (normalized === "reel") {
-    return `
-TYPE DE CONTENU SELECTIONNE : REEL / TIKTOK
-
-Tu DOIS generer 2 scripts video complets.
-
-SCRIPT PROPOSITION 1 -- Angle autorite professionnelle
-Structure obligatoire :
-- 0-3s : HOOK (phrase choc immediate, pattern interrupt)
-- 3-8s : PROBLEME (identification du vrai probleme)
-- 8-15s : COULISSES / EXPERTISE (montrer le savoir-faire, les etapes cles)
-- 15-22s : PREUVE DE RESULTAT (avant/apres, demonstration, transformation)
-- 22-30s : BENEFICE (ce que le client gagne concretement)
-- 30-38s : CTA (appel a l'action simple et direct)
-
-Pour chaque section, inclure :
-- Le texte exact a dire face camera
-- [Suggestion visuelle entre crochets]
-- [Texte a afficher sur ecran entre crochets si pertinent]
-
-SCRIPT PROPOSITION 2 -- Angle emotion client
-Structure obligatoire :
-- 0-3s : HOOK (accroche emotionnelle)
-- 3-8s : IDENTIFICATION (le spectateur se reconnait)
-- 8-14s : RUPTURE DE CROYANCE (deconstruire une idee recue)
-- 14-22s : EXPLICATION (montrer la vraie raison/solution)
-- 22-30s : TRANSFORMATION (resultat emotionnel et concret)
-- 30-38s : CTA (action simple)
-
-Pour chaque section, inclure :
-- Le texte exact a dire face camera
-- [Suggestion visuelle entre crochets]
-- Progression emotionnelle claire`;
-  }
-
-  if (normalized === "carrousel") {
-    return `
-TYPE DE CONTENU SELECTIONNE : CARROUSEL
-
-Tu DOIS generer une structure slide par slide (8 slides minimum).
-
-Structure obligatoire :
-- Slide 1 : HOOK -- Titre accrocheur qui donne envie de swiper. Doit creer curiosite ou tension.
-- Slide 2 : PROBLEME -- Identifier le probleme que l'audience rencontre.
-- Slide 3 : RUPTURE DE CROYANCE -- Deconstruire une idee recue liee au probleme.
-- Slide 4 : EXPLICATION -- Reveler la vraie cause ou la vraie solution.
-- Slide 5 : INSIGHT PROFESSIONNEL -- Montrer ton expertise, tes coulisses, ta methode.
-- Slide 6 : TRANSFORMATION -- Le changement concret que le client vit.
-- Slide 7 : RESULTAT -- Preuve tangible (chiffres, temoignages, avant/apres).
-- Slide 8 : CTA -- Appel a l'action clair et direct.
-
-Pour CHAQUE slide, fournir :
-- "text": Le texte exact a afficher sur la slide (court, impactant)
-- "visual": La suggestion visuelle (photo, illustration, couleur de fond, mise en page)
-
-NE PAS generer de scripts video. Generer UNIQUEMENT la structure slide par slide.`;
-  }
-
-  if (normalized === "post") {
-    return `
-TYPE DE CONTENU SELECTIONNE : POST CLASSIQUE
-
-Tu DOIS generer une structure de post complete.
-
-Structure obligatoire :
-- LIGNE D'ACCROCHE : Les 2 premieres lignes visibles avant "Voir plus" (hook textuel fort)
-- PARAGRAPHE EMOTIONNEL : 2-3 lignes qui creent identification et empathie
-- MESSAGE PRINCIPAL : Le coeur du contenu (conseil, revelation, lecon) en 3-5 lignes
-- POSITIONNEMENT AUTORITE : 1-2 lignes qui montrent ton expertise
-- CTA : Appel a l'action clair (question, invitation a commenter, lien)
-- HASHTAGS : 5-10 hashtags strategiques adaptes au sujet et a la plateforme
-
-NE PAS generer de scripts video ni de slides. Generer UNIQUEMENT le texte du post complet.`;
-  }
-
-  if (normalized === "story") {
-    return `
-TYPE DE CONTENU SELECTIONNE : STORY
-
-Tu DOIS generer 3 sequences de stories avec 3 slides chacune.
-
-STORY 1 -- Interaction
-- Slide 1 : Question/sondage engageant (avec sticker sondage)
-- Slide 2 : Teaser du contenu ou revelation
-- Slide 3 : CTA ou partage du contenu principal
-
-STORY 2 -- Coulisses
-- Slide 1 : Video/photo coulisses avec texte overlay court
-- Slide 2 : Zoom detail ou etape cle
-- Slide 3 : CTA vers reservation ou profil
-
-STORY 3 -- Preuve sociale
-- Slide 1 : Avis client ou temoignage
-- Slide 2 : Photo du resultat
-- Slide 3 : Disponibilites + sticker lien
-
-Pour chaque slide, fournir le texte et la suggestion visuelle.
-NE PAS generer de scripts video longs. Generer UNIQUEMENT les sequences de stories.`;
-  }
-
-  return "";
 }
 
 function buildIdeasSystemPrompt(params: RequestPayload): string {
@@ -185,140 +79,42 @@ function buildIdeasSystemPrompt(params: RequestPayload): string {
     ? `\n- Pilier editorial : "${params.editorial_pillar}"`
     : "";
   const awarenessContext = params.awareness_level
-    ? `\n- Niveau de conscience : ${getAwarenessLevelLabel(params.awareness_level)}`
+    ? `\n- Conscience : ${getAwarenessLevelLabel(params.awareness_level)}`
     : "";
   const titleContext = params.title
-    ? `\n- Titre de post suggere : "${params.title}". Les idees doivent s'inspirer de cet angle.`
+    ? `\n- Theme suggere : "${params.title}"`
     : "";
   const contentTypeLabel = getContentTypeLabel(params.content_type);
-  const contentTypeInstructions = buildContentTypeInstructions(params.content_type);
 
-  return `You are a high-level social media content strategist specialized in lead generation for local service businesses (beauty, freelancers, coaching, wellness, etc.).
+  return `Tu es un stratege contenu social media specialise en ${profLabel}.
 
-Your job is to generate high-converting content ideas, not generic scripts.
-
-The output must be structured, strategic, and adapted to the selected content type.
-
-The content must adapt based on:
-- Editorial pillar
-- Content objective
-- Selected profession
-- Post title
-- Platform
-- Content type (Reel / Carousel / Post / Story)
-
-Never generate generic advice.
-
-GENERATION CONTEXT:
+CONTEXTE :
 - Profession : ${profLabel}
-- Platform : ${params.platform}
+- Plateforme : ${params.platform}
 - Format : ${contentTypeLabel}
-- Objective : ${params.objective}${pillarContext}${awarenessContext}${titleContext}
-- Target audience : ${params.target_audience || "audience generale"}
+- Objectif : ${params.objective}${pillarContext}${awarenessContext}${titleContext}
+- Cible : ${params.target_audience || "audience generale"}
 
----
+Genere 3 idees de contenu strategiques en francais. Chaque idee doit etre unique, non generique, adaptee au metier.
 
-OUTPUT STRUCTURE (MANDATORY)
-
-The response must ALWAYS follow this structure for EACH of the 5 ideas.
-
-SECTION 1 -- HOOK EXAMPLE (Pattern Interrupt)
-Provide 1 pattern interrupt hook that creates immediate curiosity.
-Example style: "Ce moment ou tu realises que tu faisais tout a l'envers."
-
-SECTION 2 -- 3 HIGH-CONVERTING HOOKS
-Generate 3 scroll-stopping hooks based on:
-- belief breaking
-- curiosity
-- tension
-- strong statement
-Example style:
-1. "Si tes ongles ne tiennent pas, ce n'est PAS a cause du gel."
-2. "Le probleme, c'est pas tes ongles. C'est ce que tu fais avant."
-3. "Tu crois que ca ne tient pas a cause de ta nature d'ongle ? Faux."
-
-SECTION 3 -- PSYCHOLOGICAL TRIGGERS USED
-List the psychological triggers used among:
-- belief breaking (rupture de croyance)
-- immediate curiosity (curiosite immediate)
-- implicit authority (autorite implicite)
-- emotional relief (soulagement emotionnel)
-- desire for improvement (desir d'amelioration)
-- fear of doing it wrong (peur de continuer a faire faux)
-- projection of result (projection du resultat)
-
-SECTION 4 -- CONTENT ANGLE
-Explain the strategic angle:
-- what belief is broken
-- what problem is revealed
-- how the professional expertise is shown
-- why the viewer should trust the creator
-- how the content leads to booking or lead generation
-
-${contentTypeInstructions}
-
-SECTION 5 -- 3 SECOND RETENTION STRUCTURE
-Explain how the content keeps attention:
-1. Pattern interrupt
-2. Belief break
-3. Problem reveal
-4. Demonstration
-5. Result projection
-6. Emotional reward
-7. CTA
-
-SECTION 6 -- CONVERSION VERSION
-Optimize for lead generation:
-- tangible result (ex: "3 a 4 semaines sans decollement")
-- concrete benefit (ex: "Moins de retouches, plus d'economies")
-- soft urgency (ex: "Places limitees cette semaine")
-- simplified action (ex: "Reserve via le lien en bio")
-- DM option (ex: "Envoie RESERVATION en DM")
-
-SECTION 7 -- 3 STORY IDEAS TO SUPPORT THE CONTENT
-Provide 3 story sequences with 3 slides each.
-Include: poll, behind the scenes, social proof, CTA.
-
-SECTION 8 -- PRO STRATEGY TIP
-Provide 1 advanced content strategy insight explaining why this content converts.
-Focus on: psychology, positioning, lead generation.
-
----
-
-IMPORTANT RULES:
-- The AI MUST adapt to the selected profession: ${profLabel}
-- The AI MUST adapt to the platform: ${params.platform}
-- The AI MUST adapt to the content type: ${contentTypeLabel}
-- Avoid generic content at all costs
-- Prioritize attention, retention, and conversion
-- All content MUST be in French
-- Objective "${params.objective}" must drive every idea
-
-RESPONSE FORMAT (strict JSON, array of 5 elements):
+REPONSE JSON STRICTE (array de 3 objets) :
 [
   {
-    "title": "The pattern interrupt hook (used as idea title)",
+    "title": "Hook pattern interrupt accrocheur (titre de l'idee)",
     "hooks_alternatives": ["Hook 1", "Hook 2", "Hook 3"],
-    "psychological_triggers": ["Trigger 1", "Trigger 2", ...],
-    "content_angle": "Detailed strategic angle explanation",
-    "retention_structure": ["Element 1", "Element 2", "Element 3", "Element 4", "Element 5", "Element 6", "Element 7"],
-    "conversion_version": "Complete conversion text with tangible result, benefit, urgency, CTA",
-    "story_ideas": ["Story 1: title and 3 detailed slides", "Story 2: title and 3 detailed slides", "Story 3: title and 3 detailed slides"],
-    "pro_tip": "Ultra-actionable strategic tip",
-    "script_reel_1": "Full script proposition 1 (ONLY if content type is Reel/Video, otherwise empty string)",
-    "script_reel_2": "Full script proposition 2 (ONLY if content type is Reel/Video, otherwise empty string)",
-    "carousel_slides": [{"slide": 1, "text": "...", "visual": "..."}, ...],
-    "post_structure": "Complete post structure with all sections (ONLY if content type is Post, otherwise empty string)"
+    "psychological_triggers": ["Declencheur 1", "Declencheur 2"],
+    "content_angle": "Explication strategique courte : croyance brisee, probleme revele, comment ca convertit",
+    "pro_tip": "1 conseil pro actionnable"
   }
 ]
 
-CRITICAL:
-- If content type is Reel/Video: populate script_reel_1 and script_reel_2 with FULL timestamped scripts. carousel_slides should be empty array. post_structure should be empty string.
-- If content type is Carrousel: populate carousel_slides with 8 slide objects. script_reel_1 and script_reel_2 should be empty strings. post_structure should be empty string.
-- If content type is Post: populate post_structure with the full post text. script_reel_1 and script_reel_2 should be empty strings. carousel_slides should be empty array.
-- If content type is Story: populate story_ideas with 3 detailed story sequences (3 slides each). script_reel_1 and script_reel_2 should be empty strings. carousel_slides should be empty array. post_structure should be empty string.
-
-Return ONLY the JSON array, no other text.`;
+REGLES :
+- Tout en francais, ton naturel et oral
+- Hooks percutants qui arretent le scroll
+- Angles specifiques au metier ${profLabel}
+- Objectif "${params.objective}" doit guider chaque idee
+- Declencheurs parmi : rupture de croyance, curiosite immediate, autorite implicite, soulagement emotionnel, desir d'amelioration, peur de faire faux, projection du resultat
+- Retourne UNIQUEMENT le JSON, rien d'autre`;
 }
 
 function buildProduceSystemPrompt(params: RequestPayload): string {
@@ -346,8 +142,6 @@ HOOK EXEMPLE (Pattern Interrupt)
 
 3 HOOKS PERCUTANTS
 
-Courts. Directs. Impact immediat.
-
 1. [Hook 1 : premiere version percutante]
 2. [Hook 2 : approche differente]
 3. [Hook 3 : angle different]
@@ -355,12 +149,12 @@ Courts. Directs. Impact immediat.
 ---
 
 DECLENCHEURS PSYCHOLOGIQUES UTILISES
-Liste les declencheurs utilises parmi : rupture de croyance, curiosite immediate, autorite implicite, soulagement emotionnel, desir d'amelioration, peur de continuer a faire faux, projection du resultat.
+Liste les declencheurs utilises.
 
 ---
 
 ANGLE DU CONTENU
-Explique brievement : quelle croyance est brisee, quel probleme est revele, comment l'expertise est montree, pourquoi le spectateur doit faire confiance, comment ca mene a la reservation.
+Quelle croyance est brisee, quel probleme est revele, comment ca mene a la reservation.
 
 ---
 
@@ -391,7 +185,7 @@ SCRIPT PROPOSITION 1 -- Angle autorite professionnelle
 
 SCRIPT PROPOSITION 2 -- Angle emotion client
 
-Ton DIFFERENT (si V1 etait educative, celle-ci est confrontante ou empathique). Meme qualite de detail.
+Ton DIFFERENT. Meme qualite de detail.
 
 -> 0-3s HOOK
 [Texte exact a dire]
@@ -413,31 +207,12 @@ Ton DIFFERENT (si V1 etait educative, celle-ci est confrontante ou empathique). 
 
 ---
 
-STRUCTURE RETENTION 3 SECONDES
-1. Phrase choc immediate
-2. Croyance detruite
-3. Designation du vrai probleme
-4. Demonstration visuelle rapide
-5. Resultat clair
-6. Projection emotionnelle
-7. CTA simple et direct
-
----
-
 VERSION ORIENTEE CONVERSION
 - Resultat tangible
 - Benefice concret
 - Urgence douce
 - Action simplifiee
 - Option DM
-
----
-
-3 PROPOSITIONS DE STORIES A FAIRE AUTOUR DU REEL
-
-Story 1 -- Interaction (3 slides avec sondage)
-Story 2 -- Coulisses (3 slides)
-Story 3 -- Preuve sociale (3 slides avec sticker lien)
 
 ---
 
@@ -507,18 +282,8 @@ Visuel : [Suggestion visuelle]
 
 ---
 
-STRUCTURE RETENTION 3 SECONDES
-Comment chaque slide donne envie de swiper.
-
----
-
 VERSION ORIENTEE CONVERSION
 Resultat tangible, benefice, urgence, CTA.
-
----
-
-3 PROPOSITIONS DE STORIES AUTOUR DU CARROUSEL
-3 sequences de 3 slides chacune.
 
 ---
 
@@ -582,11 +347,6 @@ POST COMPLET -- VERSION 2 (ton different)
 
 VERSION ORIENTEE CONVERSION
 Post optimise pour la conversion avec urgence et CTA.
-
----
-
-3 PROPOSITIONS DE STORIES AUTOUR DU POST
-3 sequences de 3 slides chacune.
 
 ---
 
@@ -694,17 +454,8 @@ REGLES OBLIGATOIRES :
 - Pas de phrases molles ni de banalites
 - Pas de contenu generique
 - Adapte le langage et les references a la cible mentionnee
-- Utilise des declencheurs psychologiques adaptes
 - Tout en francais
-- Chaque section doit etre specifique au metier ${profLabel} et a la cible
-- Aligné 100% avec le sujet fourni
-
-SECTIONS OBLIGATOIRES DANS TOUTE REPONSE :
-1. HOOK EXEMPLE (Pattern Interrupt)
-2. 3 HOOKS PERCUTANTS (scroll-stopping)
-3. DECLENCHEURS PSYCHOLOGIQUES UTILISES
-4. ANGLE DU CONTENU (strategie)
-Puis le contenu adapte au format selectionne ci-dessous.
+- Chaque section doit etre specifique au metier ${profLabel}
 
 ${formatInstructions}
 
@@ -712,7 +463,6 @@ IMPORTANT :
 - Tout en francais
 - Naturel et oral
 - Pret a produire immediatement
-- Pas de theorie, uniquement du contenu actif
 - Contexte metier : ${profLabel} sur ${params.platform}`;
 }
 
@@ -742,36 +492,60 @@ Deno.serve(async (req: Request) => {
 
     let systemPrompt: string;
     let userMessage: string;
+    let model: string;
+    let maxTokens: number;
 
     if (mode === "ideas") {
       systemPrompt = buildIdeasSystemPrompt(payload);
+      model = "claude-3-5-haiku-20241022";
+      maxTokens = 4096;
       userMessage = payload.title
-        ? `Genere 5 idees de contenu strategiques sur le theme : "${payload.title}". Format: ${getContentTypeLabel(payload.content_type)}. Chaque idee doit suivre la structure imposee.`
-        : `Genere 5 idees de contenu strategiques adaptees a mon profil. Format: ${getContentTypeLabel(payload.content_type)}. Chaque idee doit suivre la structure imposee.`;
+        ? `Genere 3 idees de contenu strategiques sur le theme : "${payload.title}". Format: ${getContentTypeLabel(payload.content_type)}.`
+        : `Genere 3 idees de contenu strategiques adaptees a mon profil. Format: ${getContentTypeLabel(payload.content_type)}.`;
     } else {
       systemPrompt = buildProduceSystemPrompt(payload);
+      model = "claude-sonnet-4-20250514";
+      maxTokens = 8192;
       userMessage = `Produis le contenu complet et detaille pour ce sujet : "${payload.title}". Format obligatoire : ${getContentTypeLabel(payload.content_type)}. Inclus TOUTES les sections obligatoires.`;
     }
 
-    const claudeResponse = await fetch(
-      "https://api.anthropic.com/v1/messages",
-      {
-        method: "POST",
-        headers: {
-          "x-api-key": anthropicKey,
-          "Content-Type": "application/json",
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: mode === "ideas" ? 8192 : 8192,
-          system: systemPrompt,
-          messages: [
-            { role: "user", content: userMessage },
-          ],
-        }),
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 50000);
+
+    let claudeResponse: Response;
+    try {
+      claudeResponse = await fetch(
+        "https://api.anthropic.com/v1/messages",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": anthropicKey,
+            "Content-Type": "application/json",
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: maxTokens,
+            system: systemPrompt,
+            messages: [
+              { role: "user", content: userMessage },
+            ],
+          }),
+          signal: controller.signal,
+        }
+      );
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
+        return new Response(
+          JSON.stringify({ error: "La generation a pris trop de temps. Veuillez reessayer." }),
+          { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
-    );
+      throw fetchError;
+    }
+
+    clearTimeout(timeoutId);
 
     if (!claudeResponse.ok) {
       const errorText = await claudeResponse.text();
@@ -816,8 +590,10 @@ Deno.serve(async (req: Request) => {
         responseData = [
           {
             title: content.substring(0, 100),
-            description: content,
-            angle: "Genere par Claude AI",
+            hooks_alternatives: [],
+            psychological_triggers: [],
+            content_angle: content,
+            pro_tip: "",
           },
         ];
       }
