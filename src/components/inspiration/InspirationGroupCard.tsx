@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MoreVertical, Trash2, Edit2, FolderOpen, Image as ImageIcon, Check, X } from 'lucide-react';
+import { MoreVertical, Trash2, CreditCard as Edit2, FolderOpen, Image as ImageIcon, Check, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import GroupDetailModal from './GroupDetailModal';
 
