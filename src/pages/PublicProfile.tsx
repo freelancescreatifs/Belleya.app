@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Save, Upload, X, Plus, Trash2, MapPin, Instagram, Heart, Star, Sparkles, AlertCircle, Image as ImageIcon, Scissors, Clock, ChevronDown, ChevronUp, Share2, Check, CreditCard, MessageSquare, Building2, Calendar, Info } from 'lucide-react';
+import { Eye, Save, Upload, X, Plus, Trash2, MapPin, Instagram, Heart, Star, Sparkles, AlertCircle, Image as ImageIcon, Scissors, Clock, ChevronDown, ChevronUp, Share2, Check, Pencil, Download, MessageSquare, Building2, Calendar, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { GeocodeResult } from '../lib/geocodingHelpers';
@@ -56,6 +56,7 @@ interface ClientPhoto {
   id: string;
   photo_url: string;
   service_name: string;
+  service_category: string | null;
   created_at: string;
 }
 
@@ -104,6 +105,39 @@ function MapSizeHandler() {
   return null;
 }
 
+function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, _points: number) {
+  const outerR = r;
+  const innerR = r * 0.4;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const radius = i % 2 === 0 ? outerR : innerR;
+    const angle = (Math.PI / 5) * i - Math.PI / 2;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let line = '';
+  for (const word of words) {
+    const testLine = line ? `${line} ${word}` : word;
+    if (ctx.measureText(testLine).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = testLine;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 export default function PublicProfile() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -145,6 +179,9 @@ export default function PublicProfile() {
   const [selectedGalleryCategory, setSelectedGalleryCategory] = useState<string>('');
   const [userCategoryNames, setUserCategoryNames] = useState<string[]>([]);
   const [clients, setClients] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
+  const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
+  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
+  const [editingPhotoCategory, setEditingPhotoCategory] = useState('');
   const [weeklyAvailability, setWeeklyAvailability] = useState({
     monday: [],
     tuesday: [],
@@ -330,12 +367,10 @@ export default function PublicProfile() {
 
       const { data: photosData } = await supabase
         .from('client_results_photos')
-        .select('id, photo_url, service_name, created_at')
+        .select('id, photo_url, service_name, service_category, created_at')
         .eq('company_id', companyData?.id)
         .eq('show_in_gallery', true)
-        .not('service_name', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(12);
+        .order('created_at', { ascending: false });
 
       if (photosData) {
         setClientPhotos(photosData);
@@ -820,18 +855,15 @@ export default function PublicProfile() {
 
       console.log('[PublicProfile] Photo inserted successfully');
 
-      const { data: photosData } = await supabase
+      const { data: reloadedPhotos } = await supabase
         .from('client_results_photos')
-        .select('id, photo_url, service_name, created_at')
+        .select('id, photo_url, service_name, service_category, created_at')
         .eq('company_id', companyId)
         .eq('show_in_gallery', true)
-        .not('service_name', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(12);
+        .order('created_at', { ascending: false });
 
-      if (photosData) {
-        console.log('[PublicProfile] Loaded photos:', photosData.length);
-        setClientPhotos(photosData);
+      if (reloadedPhotos) {
+        setClientPhotos(reloadedPhotos);
       }
 
       handleCancelGalleryUpload();
@@ -847,6 +879,140 @@ export default function PublicProfile() {
     } finally {
       setUploadingGallery(false);
     }
+  };
+
+  const handleDeleteGalleryPhoto = async (photoId: string) => {
+    if (!confirm('Supprimer cette photo de la galerie ?')) return;
+    const { error } = await supabase
+      .from('client_results_photos')
+      .update({ show_in_gallery: false })
+      .eq('id', photoId);
+
+    if (!error) {
+      setClientPhotos(prev => prev.filter(p => p.id !== photoId));
+    }
+  };
+
+  const handleUpdatePhotoCategory = async (photoId: string, newCategory: string) => {
+    const { error } = await supabase
+      .from('client_results_photos')
+      .update({ service_name: newCategory, service_category: newCategory })
+      .eq('id', photoId);
+
+    if (!error) {
+      setClientPhotos(prev => prev.map(p =>
+        p.id === photoId ? { ...p, service_name: newCategory, service_category: newCategory } : p
+      ));
+      setEditingPhotoId(null);
+      setEditingPhotoCategory('');
+    }
+  };
+
+  const generateReviewImage = async (review: Review) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const gradient = ctx.createLinearGradient(0, 0, 1080, 1080);
+    gradient.addColorStop(0, '#FFF1F2');
+    gradient.addColorStop(1, '#FCE7F3');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1080, 1080);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.roundRect(60, 60, 960, 960, 40);
+    ctx.fill();
+    ctx.strokeStyle = '#F9A8D4';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    let yPos = 140;
+
+    const logo = new Image();
+    logo.crossOrigin = 'anonymous';
+
+    await new Promise<void>((resolve) => {
+      logo.onload = () => {
+        const logoSize = 80;
+        ctx.drawImage(logo, 500, yPos - 20, logoSize, logoSize);
+        resolve();
+      };
+      logo.onerror = () => resolve();
+      logo.src = '/logo.png';
+    });
+
+    yPos += 90;
+
+    const starSize = 36;
+    const totalStarsWidth = 5 * starSize + 4 * 8;
+    let starX = (1080 - totalStarsWidth) / 2;
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = i < review.rating ? '#F59E0B' : '#D1D5DB';
+      drawStar(ctx, starX + starSize / 2, yPos + starSize / 2, starSize / 2, 5);
+      starX += starSize + 8;
+    }
+
+    yPos += starSize + 40;
+
+    if (review.comment) {
+      ctx.fillStyle = '#1F2937';
+      ctx.font = 'italic 28px system-ui, -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      const lines = wrapText(ctx, `"${review.comment}"`, 800);
+      for (const line of lines) {
+        if (yPos > 850) break;
+        ctx.fillText(line, 540, yPos);
+        yPos += 40;
+      }
+    }
+
+    yPos += 20;
+
+    if (review.photo_url && yPos < 700) {
+      const reviewImg = new Image();
+      reviewImg.crossOrigin = 'anonymous';
+      await new Promise<void>((resolve) => {
+        reviewImg.onload = () => {
+          const maxH = Math.min(300, 900 - yPos);
+          const ratio = reviewImg.width / reviewImg.height;
+          const imgW = Math.min(400, maxH * ratio);
+          const imgH = imgW / ratio;
+          const imgX = (1080 - imgW) / 2;
+          ctx.save();
+          ctx.beginPath();
+          ctx.roundRect(imgX, yPos, imgW, imgH, 16);
+          ctx.clip();
+          ctx.drawImage(reviewImg, imgX, yPos, imgW, imgH);
+          ctx.restore();
+          yPos += imgH + 30;
+          resolve();
+        };
+        reviewImg.onerror = () => resolve();
+        reviewImg.src = review.photo_url!;
+      });
+    }
+
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = '22px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`- ${review.client_name}`, 540, Math.min(yPos + 10, 960));
+
+    ctx.fillStyle = '#D1D5DB';
+    ctx.font = '18px system-ui, -apple-system, sans-serif';
+    ctx.fillText('belaya.app', 540, 1000);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `avis-${review.client_name.replace(/\s+/g, '_')}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
   };
 
   if (loading) {
@@ -1572,7 +1738,15 @@ export default function PublicProfile() {
                     </div>
                   )}
 
-                  {previewTab === 'gallery' && (
+                  {previewTab === 'gallery' && (() => {
+                    const galleryCategories = [...new Set(
+                      clientPhotos.map(p => p.service_category || p.service_name).filter(Boolean)
+                    )].sort();
+                    const filteredGalleryPhotos = galleryCategoryFilter === 'all'
+                      ? clientPhotos
+                      : clientPhotos.filter(p => p.service_category === galleryCategoryFilter || p.service_name === galleryCategoryFilter);
+
+                    return (
                     <div>
                       <div className="mb-4">
                         <label className="cursor-pointer">
@@ -1600,25 +1774,77 @@ export default function PublicProfile() {
                           <p className="text-xs text-gray-500 mt-2">Ajoutez des photos depuis vos fiches clients ou directement ici</p>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-3 gap-2">
-                          {clientPhotos.map((photo) => (
-                            <div key={photo.id} className="relative aspect-square">
-                              <img
-                                src={photo.photo_url}
-                                alt={photo.service_name || 'Photo'}
-                                className="w-full h-full object-cover rounded-lg"
-                              />
-                              {photo.service_name && (
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg">
-                                  <p className="text-white text-xs font-medium">{photo.service_name}</p>
-                                </div>
-                              )}
+                        <>
+                          {galleryCategories.length > 1 && (
+                            <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1">
+                              <button
+                                onClick={() => setGalleryCategoryFilter('all')}
+                                className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                                  galleryCategoryFilter === 'all'
+                                    ? 'bg-rose-500 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                Toutes ({clientPhotos.length})
+                              </button>
+                              {galleryCategories.map(cat => {
+                                const count = clientPhotos.filter(p => p.service_category === cat || p.service_name === cat).length;
+                                return (
+                                  <button
+                                    key={cat}
+                                    onClick={() => setGalleryCategoryFilter(cat)}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                                      galleryCategoryFilter === cat
+                                        ? 'bg-rose-500 text-white shadow-sm'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {cat} ({count})
+                                  </button>
+                                );
+                              })}
                             </div>
-                          ))}
-                        </div>
+                          )}
+                          <div className="grid grid-cols-3 gap-2">
+                            {filteredGalleryPhotos.map((photo) => (
+                              <div key={photo.id} className="relative aspect-square group">
+                                <img
+                                  src={photo.photo_url}
+                                  alt={photo.service_name || 'Photo'}
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={() => {
+                                      setEditingPhotoId(photo.id);
+                                      setEditingPhotoCategory(photo.service_category || photo.service_name || '');
+                                    }}
+                                    className="p-1 bg-white/90 rounded text-gray-700 hover:bg-white shadow-sm"
+                                    title="Modifier la categorie"
+                                  >
+                                    <Pencil className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteGalleryPhoto(photo.id)}
+                                    className="p-1 bg-white/90 rounded text-red-600 hover:bg-white shadow-sm"
+                                    title="Retirer de la galerie"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                                {photo.service_name && (
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg">
+                                    <p className="text-white text-xs font-medium">{photo.service_name}</p>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </>
                       )}
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {previewTab === 'reviews' && (
                     <div className="space-y-3">
@@ -1688,10 +1914,11 @@ export default function PublicProfile() {
                                 {review.is_visible ? 'Masquer' : 'Afficher'}
                               </button>
                               <button
-                                onClick={() => shareReviewOnSocial(review)}
+                                onClick={() => generateReviewImage(review)}
                                 className="px-2 py-1.5 text-xs font-medium bg-belaya-100 text-belaya-deep rounded-lg hover:bg-belaya-200 transition-colors"
+                                title="Telecharger l'image pour Instagram"
                               >
-                                <Share2 className="w-3 h-3 inline mr-1" />
+                                <Download className="w-3 h-3 inline mr-1" />
                               </button>
                             </div>
                           </div>
@@ -1808,6 +2035,53 @@ export default function PublicProfile() {
                 className="px-6 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50"
               >
                 {uploadingGallery ? 'Publication...' : 'Publier'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingPhotoId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full">
+            <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-base font-bold text-gray-900">Modifier la categorie</h3>
+              <button
+                onClick={() => { setEditingPhotoId(null); setEditingPhotoCategory(''); }}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <select
+                value={editingPhotoCategory}
+                onChange={(e) => setEditingPhotoCategory(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-belaya-primary focus:border-transparent"
+              >
+                <option value="">Selectionner une categorie</option>
+                {userCategoryNames.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            <div className="p-5 border-t border-gray-200 flex gap-3 justify-end bg-gray-50 rounded-b-xl">
+              <button
+                onClick={() => { setEditingPhotoId(null); setEditingPhotoCategory(''); }}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => {
+                  if (editingPhotoId && editingPhotoCategory) {
+                    handleUpdatePhotoCategory(editingPhotoId, editingPhotoCategory);
+                  }
+                }}
+                disabled={!editingPhotoCategory}
+                className="px-5 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg font-semibold disabled:opacity-50"
+              >
+                Enregistrer
               </button>
             </div>
           </div>

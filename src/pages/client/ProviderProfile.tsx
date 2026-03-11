@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles, Upload, X, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles, Upload, X, ChevronDown, Instagram } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -65,6 +65,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
   const [photosDisplayCount, setPhotosDisplayCount] = useState(PHOTOS_PER_PAGE);
   const [loadingMorePhotos, setLoadingMorePhotos] = useState(false);
   const [providerCategories, setProviderCategories] = useState<string[]>([]);
+  const [instagramUrl, setInstagramUrl] = useState<string | null>(null);
   const [instituteData, setInstituteData] = useState({
     institute_photos: [] as Array<{ id: string; url: string; order: number }>,
     diplomas: [] as Array<{ id: string; name: string; year?: string }>,
@@ -91,7 +92,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id, booking_slug, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy')
+        .select('user_id, booking_slug, instagram_url, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy')
         .eq('booking_slug', slug)
         .maybeSingle();
 
@@ -114,6 +115,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
       }
 
       setProvider(providerData);
+      setInstagramUrl(companyData.instagram_url || null);
       setInstituteData({
         institute_photos: Array.isArray(companyData.institute_photos) ? companyData.institute_photos : [],
         diplomas: Array.isArray(companyData.diplomas) ? companyData.diplomas : [],
@@ -340,6 +342,18 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                   </div>
                 )}
               </div>
+
+              {instagramUrl && (
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full text-sm hover:bg-white/30 transition-colors mb-3"
+                >
+                  <Instagram className="w-4 h-4" />
+                  <span>{instagramUrl.replace(/^https?:\/\/(www\.)?instagram\.com\//, '@').replace(/\/$/, '')}</span>
+                </a>
+              )}
 
               {provider.bio && (
                 <p className="text-white mb-4">{provider.bio}</p>
