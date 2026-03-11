@@ -182,7 +182,6 @@ export default function BelayaRewardsCard() {
               </div>
 
               <div className={`bg-white rounded-lg p-5 border-2 ${
-                !mission1Approved ? 'border-gray-200 opacity-60' :
                 mission2Approved ? 'border-green-200' : 'border-gray-200'
               }`}>
                 <div className="flex items-start justify-between mb-4">
@@ -191,13 +190,8 @@ export default function BelayaRewardsCard() {
                       <Video className="w-5 h-5 text-rose-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                      <h4 className="font-semibold text-gray-900">
                         Mission #2
-                        {!mission1Approved && (
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                            Bloqué
-                          </span>
-                        )}
                       </h4>
                       <p className="text-sm text-gray-600">Vidéo Avis</p>
                     </div>
@@ -238,13 +232,7 @@ export default function BelayaRewardsCard() {
                   </div>
                 )}
 
-                {!mission1Approved && (
-                  <p className="text-sm text-gray-500 italic">
-                    Complétez d'abord la Mission #1 pour débloquer
-                  </p>
-                )}
-
-                {mission1Approved && (!mission2 || mission2.status === 'rejected') && (
+                {(!mission2 || mission2.status === 'rejected') && (
                   <button
                     onClick={() => {
                       setShowDetail(false);

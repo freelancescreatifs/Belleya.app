@@ -90,7 +90,7 @@ export default function PartnershipCard({ partnership, sales, onClick, onEdit }:
       <div className="flex items-start gap-4 mb-4">
         {partnership.is_default ? (
           <div className="w-16 h-16 rounded-xl overflow-hidden border border-belaya-200 flex-shrink-0">
-            <img src="/belaya_logo.png" alt="Belaya" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="Belaya" className="w-full h-full object-cover" />
           </div>
         ) : partnership.logo_url ? (
           <img
