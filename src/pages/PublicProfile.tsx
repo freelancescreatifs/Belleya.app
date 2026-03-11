@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Save, Upload, X, Plus, Trash2, MapPin, Instagram, Heart, Star, Sparkles, AlertCircle, Image as ImageIcon, Scissors, Clock, ChevronDown, ChevronUp, Share2, Check, Pencil, Download, MessageSquare, Building2, Calendar, Info } from 'lucide-react';
+import { Eye, Save, Upload, X, Plus, Trash2, MapPin, Instagram, Heart, Star, Sparkles, AlertCircle, Image as ImageIcon, Scissors, Clock, ChevronDown, ChevronUp, Share2, Check, Pencil, Download, MessageSquare, MessageCircle, Building2, Calendar, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { GeocodeResult } from '../lib/geocodingHelpers';
@@ -45,6 +45,7 @@ interface Service {
   price: number;
   duration: number;
   status: 'active' | 'inactive';
+  category?: string;
   service_type?: string;
   photo_url?: string | null;
   special_offer?: string | null;
@@ -57,7 +58,18 @@ interface ClientPhoto {
   photo_url: string;
   service_name: string;
   service_category: string | null;
+  caption: string | null;
+  comments_count: number;
   created_at: string;
+}
+
+interface PhotoComment {
+  id: string;
+  comment_text: string;
+  created_at: string;
+  is_approved: boolean;
+  user_id: string;
+  user_name?: string;
 }
 
 interface Review {
@@ -180,8 +192,13 @@ export default function PublicProfile() {
   const [userCategoryNames, setUserCategoryNames] = useState<string[]>([]);
   const [clients, setClients] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
   const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
+  const [serviceCategoryFilter, setServiceCategoryFilter] = useState('all');
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [editingPhotoCategory, setEditingPhotoCategory] = useState('');
+  const [selectedPhotoForComments, setSelectedPhotoForComments] = useState<ClientPhoto | null>(null);
+  const [photoComments, setPhotoComments] = useState<PhotoComment[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [editingCaption, setEditingCaption] = useState<{ id: string; text: string } | null>(null);
   const [weeklyAvailability, setWeeklyAvailability] = useState({
     monday: [],
     tuesday: [],
@@ -367,7 +384,7 @@ export default function PublicProfile() {
 
       const { data: photosData } = await supabase
         .from('client_results_photos')
-        .select('id, photo_url, service_name, service_category, created_at')
+        .select('id, photo_url, service_name, service_category, caption, comments_count, created_at')
         .eq('company_id', companyData?.id)
         .eq('show_in_gallery', true)
         .order('created_at', { ascending: false });
@@ -857,7 +874,7 @@ export default function PublicProfile() {
 
       const { data: reloadedPhotos } = await supabase
         .from('client_results_photos')
-        .select('id, photo_url, service_name, service_category, created_at')
+        .select('id, photo_url, service_name, service_category, caption, comments_count, created_at')
         .eq('company_id', companyId)
         .eq('show_in_gallery', true)
         .order('created_at', { ascending: false });
@@ -908,6 +925,78 @@ export default function PublicProfile() {
     }
   };
 
+  const loadPhotoComments = async (photoId: string) => {
+    setLoadingComments(true);
+    const { data } = await supabase
+      .from('content_comments')
+      .select('id, comment_text, created_at, is_approved, user_id')
+      .eq('content_id', photoId)
+      .eq('content_type', 'client_photo')
+      .order('created_at', { ascending: false });
+
+    if (data) {
+      const commentsWithNames = await Promise.all(
+        data.map(async (c) => {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name')
+            .eq('user_id', c.user_id)
+            .maybeSingle();
+          return {
+            ...c,
+            user_name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Utilisateur' : 'Utilisateur',
+          };
+        })
+      );
+      setPhotoComments(commentsWithNames);
+    }
+    setLoadingComments(false);
+  };
+
+  const toggleCommentApproval = async (commentId: string, currentApproval: boolean) => {
+    const { error } = await supabase
+      .from('content_comments')
+      .update({ is_approved: !currentApproval })
+      .eq('id', commentId);
+
+    if (!error) {
+      setPhotoComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, is_approved: !currentApproval } : c
+      ));
+    }
+  };
+
+  const deleteComment = async (commentId: string) => {
+    if (!confirm('Supprimer ce commentaire ?')) return;
+    const { error } = await supabase
+      .from('content_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (!error) {
+      setPhotoComments(prev => prev.filter(c => c.id !== commentId));
+      if (selectedPhotoForComments) {
+        setClientPhotos(prev => prev.map(p =>
+          p.id === selectedPhotoForComments.id ? { ...p, comments_count: Math.max(0, p.comments_count - 1) } : p
+        ));
+      }
+    }
+  };
+
+  const updatePhotoCaption = async (photoId: string, caption: string) => {
+    const { error } = await supabase
+      .from('client_results_photos')
+      .update({ caption })
+      .eq('id', photoId);
+
+    if (!error) {
+      setClientPhotos(prev => prev.map(p =>
+        p.id === photoId ? { ...p, caption } : p
+      ));
+      setEditingCaption(null);
+    }
+  };
+
   const generateReviewImage = async (review: Review) => {
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
@@ -929,22 +1018,43 @@ export default function PublicProfile() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    let yPos = 140;
+    let yPos = 130;
 
-    const logo = new Image();
-    logo.crossOrigin = 'anonymous';
+    if (profileData.profile_photo) {
+      const providerImg = new Image();
+      providerImg.crossOrigin = 'anonymous';
+      await new Promise<void>((resolve) => {
+        providerImg.onload = () => {
+          const size = 100;
+          const cx = 540;
+          const cy = yPos + size / 2;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(providerImg, cx - size / 2, cy - size / 2, size, size);
+          ctx.restore();
+          ctx.strokeStyle = '#F9A8D4';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+          ctx.stroke();
+          yPos += size + 16;
+          resolve();
+        };
+        providerImg.onerror = () => resolve();
+        providerImg.src = profileData.profile_photo!;
+      });
+    }
 
-    await new Promise<void>((resolve) => {
-      logo.onload = () => {
-        const logoSize = 80;
-        ctx.drawImage(logo, 500, yPos - 20, logoSize, logoSize);
-        resolve();
-      };
-      logo.onerror = () => resolve();
-      logo.src = '/logo.png';
-    });
-
-    yPos += 90;
+    if (companyName) {
+      ctx.fillStyle = '#1F2937';
+      ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(companyName, 540, yPos);
+      yPos += 40;
+    }
 
     const starSize = 36;
     const totalStarsWidth = 5 * starSize + 4 * 8;
@@ -955,30 +1065,30 @@ export default function PublicProfile() {
       starX += starSize + 8;
     }
 
-    yPos += starSize + 40;
+    yPos += starSize + 36;
 
     if (review.comment) {
-      ctx.fillStyle = '#1F2937';
-      ctx.font = 'italic 28px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = '#374151';
+      ctx.font = 'italic 26px system-ui, -apple-system, sans-serif';
       ctx.textAlign = 'center';
-      const lines = wrapText(ctx, `"${review.comment}"`, 800);
+      const lines = wrapText(ctx, `"${review.comment}"`, 780);
       for (const line of lines) {
-        if (yPos > 850) break;
+        if (yPos > 820) break;
         ctx.fillText(line, 540, yPos);
-        yPos += 40;
+        yPos += 38;
       }
     }
 
-    yPos += 20;
+    yPos += 16;
 
-    if (review.photo_url && yPos < 700) {
+    if (review.photo_url && yPos < 680) {
       const reviewImg = new Image();
       reviewImg.crossOrigin = 'anonymous';
       await new Promise<void>((resolve) => {
         reviewImg.onload = () => {
-          const maxH = Math.min(300, 900 - yPos);
+          const maxH = Math.min(280, 870 - yPos);
           const ratio = reviewImg.width / reviewImg.height;
-          const imgW = Math.min(400, maxH * ratio);
+          const imgW = Math.min(380, maxH * ratio);
           const imgH = imgW / ratio;
           const imgX = (1080 - imgW) / 2;
           ctx.save();
@@ -987,7 +1097,7 @@ export default function PublicProfile() {
           ctx.clip();
           ctx.drawImage(reviewImg, imgX, yPos, imgW, imgH);
           ctx.restore();
-          yPos += imgH + 30;
+          yPos += imgH + 24;
           resolve();
         };
         reviewImg.onerror = () => resolve();
@@ -995,14 +1105,36 @@ export default function PublicProfile() {
       });
     }
 
-    ctx.fillStyle = '#9CA3AF';
+    ctx.fillStyle = '#6B7280';
     ctx.font = '22px system-ui, -apple-system, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`- ${review.client_name}`, 540, Math.min(yPos + 10, 960));
+    ctx.fillText(`- ${review.client_name}`, 540, Math.min(yPos + 8, 940));
 
-    ctx.fillStyle = '#D1D5DB';
-    ctx.font = '18px system-ui, -apple-system, sans-serif';
-    ctx.fillText('belaya.app', 540, 1000);
+    const bottomY = 1000;
+    const logo = new Image();
+    logo.crossOrigin = 'anonymous';
+    await new Promise<void>((resolve) => {
+      logo.onload = () => {
+        const logoH = 32;
+        const logoW = (logo.width / logo.height) * logoH;
+        ctx.globalAlpha = 0.6;
+        ctx.drawImage(logo, 540 - logoW / 2 - 60, bottomY - logoH / 2, logoW, logoH);
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = '20px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('belaya.app', 540 - logoW / 2 + logoW - 40, bottomY + 7);
+        resolve();
+      };
+      logo.onerror = () => {
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = '20px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('belaya.app', 540, bottomY + 7);
+        resolve();
+      };
+      logo.src = '/logo.png';
+    });
 
     canvas.toBlob((blob) => {
       if (!blob) return;
@@ -1656,13 +1788,50 @@ export default function PublicProfile() {
 
                 {/* Preview Content */}
                 <div className="p-4 space-y-4">
-                  {previewTab === 'services' && (
+                  {previewTab === 'services' && (() => {
+                    const activeServices = services.filter(s => s.status === 'active');
+                    const serviceCategories = [...new Set(activeServices.map(s => s.category).filter(Boolean))].sort() as string[];
+                    const filteredServices = serviceCategoryFilter === 'all'
+                      ? activeServices
+                      : activeServices.filter(s => s.category === serviceCategoryFilter);
+
+                    return (
                     <div className="space-y-4">
-                      {services.filter(s => s.status === 'active').length > 0 && (
+                      {activeServices.length > 0 && (
                         <div>
                           <h4 className="font-bold text-gray-900 mb-2 text-sm">Mes services</h4>
+                          {serviceCategories.length > 1 && (
+                            <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1">
+                              <button
+                                onClick={() => setServiceCategoryFilter('all')}
+                                className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                                  serviceCategoryFilter === 'all'
+                                    ? 'bg-rose-500 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                Tous ({activeServices.length})
+                              </button>
+                              {serviceCategories.map(cat => {
+                                const count = activeServices.filter(s => s.category === cat).length;
+                                return (
+                                  <button
+                                    key={cat}
+                                    onClick={() => setServiceCategoryFilter(cat)}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                                      serviceCategoryFilter === cat
+                                        ? 'bg-rose-500 text-white shadow-sm'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {cat} ({count})
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                           <div className="space-y-2">
-                            {services.filter(s => s.status === 'active').map((service) => (
+                            {filteredServices.map((service) => (
                               <div key={service.id} className="border border-gray-200 rounded-lg overflow-hidden">
                                 <div className="flex gap-3">
                                   {service.photo_url ? (
@@ -1736,7 +1905,8 @@ export default function PublicProfile() {
                       )}
 
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {previewTab === 'gallery' && (() => {
                     const galleryCategories = [...new Set(
@@ -1816,6 +1986,16 @@ export default function PublicProfile() {
                                 <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button
                                     onClick={() => {
+                                      setSelectedPhotoForComments(photo);
+                                      loadPhotoComments(photo.id);
+                                    }}
+                                    className="p-1 bg-white/90 rounded text-gray-700 hover:bg-white shadow-sm"
+                                    title="Commentaires"
+                                  >
+                                    <MessageCircle className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => {
                                       setEditingPhotoId(photo.id);
                                       setEditingPhotoCategory(photo.service_category || photo.service_name || '');
                                     }}
@@ -1832,11 +2012,19 @@ export default function PublicProfile() {
                                     <Trash2 className="w-3 h-3" />
                                   </button>
                                 </div>
-                                {photo.service_name && (
-                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg">
-                                    <p className="text-white text-xs font-medium">{photo.service_name}</p>
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg">
+                                  <div className="flex items-center justify-between">
+                                    {photo.service_name && (
+                                      <p className="text-white text-xs font-medium">{photo.service_name}</p>
+                                    )}
+                                    {photo.comments_count > 0 && (
+                                      <div className="flex items-center gap-1 text-white/80 text-xs">
+                                        <MessageCircle className="w-3 h-3" />
+                                        <span>{photo.comments_count}</span>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -2083,6 +2271,143 @@ export default function PublicProfile() {
               >
                 Enregistrer
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedPhotoForComments && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col">
+            <div className="p-5 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+              <h3 className="text-base font-bold text-gray-900">
+                <MessageCircle className="w-4 h-4 inline mr-2" />
+                Commentaires
+              </h3>
+              <button
+                onClick={() => { setSelectedPhotoForComments(null); setPhotoComments([]); setEditingCaption(null); }}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4 flex gap-4">
+                <div className="w-28 h-28 flex-shrink-0 rounded-lg overflow-hidden">
+                  <img
+                    src={selectedPhotoForComments.photo_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  {selectedPhotoForComments.service_name && (
+                    <p className="text-sm font-medium text-gray-900 mb-1">{selectedPhotoForComments.service_name}</p>
+                  )}
+                  {editingCaption && editingCaption.id === selectedPhotoForComments.id ? (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={editingCaption.text}
+                        onChange={(e) => setEditingCaption({ ...editingCaption, text: e.target.value })}
+                        className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-belaya-primary"
+                        placeholder="Legende de la photo..."
+                      />
+                      <button
+                        onClick={() => updatePhotoCaption(selectedPhotoForComments.id, editingCaption.text)}
+                        className="p-1 bg-rose-500 text-white rounded hover:bg-rose-600"
+                      >
+                        <Check className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => setEditingCaption(null)}
+                        className="p-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setEditingCaption({
+                        id: selectedPhotoForComments.id,
+                        text: selectedPhotoForComments.caption || ''
+                      })}
+                      className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      {selectedPhotoForComments.caption || 'Ajouter une legende...'}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 px-4 py-3">
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3">
+                  {photoComments.length} commentaire{photoComments.length > 1 ? 's' : ''}
+                </p>
+
+                {loadingComments ? (
+                  <div className="text-center py-6">
+                    <p className="text-sm text-gray-500">Chargement...</p>
+                  </div>
+                ) : photoComments.length === 0 ? (
+                  <div className="text-center py-6">
+                    <MessageCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Aucun commentaire</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {photoComments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className={`p-3 rounded-lg border ${
+                          comment.is_approved
+                            ? 'border-gray-200 bg-white'
+                            : 'border-amber-200 bg-amber-50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium text-gray-900">{comment.user_name}</span>
+                              {!comment.is_approved && (
+                                <span className="px-1.5 py-0.5 bg-amber-200 text-amber-800 text-xs rounded font-medium">
+                                  En attente
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-700">{comment.comment_text}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {new Date(comment.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              onClick={() => toggleCommentApproval(comment.id, comment.is_approved)}
+                              className={`p-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                comment.is_approved
+                                  ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+                              }`}
+                              title={comment.is_approved ? 'Masquer' : 'Approuver'}
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => deleteComment(comment.id)}
+                              className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
