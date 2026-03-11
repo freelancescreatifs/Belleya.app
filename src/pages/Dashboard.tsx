@@ -542,16 +542,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   const revenueExpenseCards = [
     {
-      label: t('dashboard.monthRevenue'),
-      value: `${stats.currentMonthRevenue.toFixed(2)} €`,
-      icon: TrendingUp,
-      color: 'from-green-400 to-green-600',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
-      tooltip: t('dashboard.avgMonthlyTooltip', { amount: stats.avgMonthlyRevenue.toFixed(2) }),
-      link: 'finances',
-    },
-    {
       label: t('dashboard.periodRevenue', { period: getPeriodLabel() }),
       value: `${stats.revenue.toFixed(2)} €`,
       icon: TrendingUp,
