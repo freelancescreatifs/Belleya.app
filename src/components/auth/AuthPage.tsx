@@ -98,7 +98,7 @@ export default function AuthPage({ role, selectedPlan, onBack }: AuthPageProps) 
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
             <img
-              src="/logo.png"
+              src="/belaya_logo.png"
               alt="Belaya"
               className="h-16 w-auto"
             />

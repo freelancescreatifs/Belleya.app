@@ -23,7 +23,7 @@ export default function CGV() {
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
           <div className="mb-8">
             <img
-              src="/logo.png"
+              src="/belaya_logo.png"
               alt="Belaya"
               className="h-16 w-auto mb-6"
             />

@@ -754,7 +754,7 @@ export default function Landing({ onSelectRole }: LandingProps) {
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-3">
               <img
-                src="/logo.png"
+                src="/belaya_logo.png"
                 alt="Belaya"
                 className="h-12 w-auto"
               />

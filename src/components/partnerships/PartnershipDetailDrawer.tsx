@@ -189,7 +189,7 @@ export default function PartnershipDetailDrawer({ partnership, sales, onClose, o
           <div className="flex items-center gap-3">
             {partnership.is_default ? (
               <div className="w-10 h-10 rounded-lg overflow-hidden border border-belaya-200">
-                <img src="/belayaa.webp" alt="Belaya" className="w-full h-full object-cover" />
+                <img src="/belaya_logo.png" alt="Belaya" className="w-full h-full object-cover" />
               </div>
             ) : partnership.logo_url ? (
               <img src={partnership.logo_url} alt={partnership.company_name} className="w-10 h-10 rounded-lg object-cover" />

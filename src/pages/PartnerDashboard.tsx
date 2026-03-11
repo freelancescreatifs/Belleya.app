@@ -1147,7 +1147,7 @@ function PartnerAuthForm({ onBack }: { onBack: () => void }) {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <a href="/" className="inline-block mb-4">
-            <img src="/logo.png" alt="Belaya" className="h-14 w-auto mx-auto" />
+            <img src="/belaya_logo.png" alt="Belaya" className="h-14 w-auto mx-auto" />
           </a>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Espace Partenaire</h1>
           <p className="text-gray-500 text-sm">Connecte-toi pour acceder a ton dashboard</p>

@@ -157,7 +157,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
       <header className="bg-white/90 backdrop-blur-xl border-b border-gray-100/50 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3.5 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Belaya" className="h-10 w-auto" />
+            <img src="/belaya_logo.png" alt="Belaya" className="h-10 w-auto" />
             <span className="hidden sm:inline-block text-xs font-medium text-belaya-deep bg-belaya-50 px-2.5 py-1 rounded-full border border-belaya-100">
               Partenaire
             </span>
