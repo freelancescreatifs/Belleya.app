@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Upload, X, Image as ImageIcon, Info } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { SERVICE_CATEGORIES } from '../../lib/categoryHelpers';
+import { fetchUserCategories } from '../../lib/categoryHelpers';
 import InfoTooltip from '../shared/InfoTooltip';
 
 interface ClientGalleryProps {
@@ -48,12 +48,31 @@ export default function ClientGallery({ clientId, companyId: propCompanyId }: Cl
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [uploadCaption, setUploadCaption] = useState('');
   const [companyId, setCompanyId] = useState<string | null>(propCompanyId);
+  const [userCategories, setUserCategories] = useState<string[]>([]);
 
   useEffect(() => {
     loadCompanyId();
     loadMedia();
     loadServices();
+    loadUserCategories();
   }, [clientId]);
+
+  const loadUserCategories = async () => {
+    if (!user) return;
+    const cats = await fetchUserCategories(user.id);
+    if (cats.length > 0) {
+      setUserCategories(cats.map(c => c.name));
+    } else {
+      const { data } = await supabase
+        .from('services')
+        .select('category')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+      if (data) {
+        setUserCategories([...new Set(data.map(s => s.category).filter(Boolean))].sort());
+      }
+    }
+  };
 
   const loadCompanyId = async () => {
     if (!user) return;
@@ -419,7 +438,7 @@ export default function ClientGallery({ clientId, companyId: propCompanyId }: Cl
                   required
                 >
                   <option value="">Sélectionner une catégorie</option>
-                  {SERVICE_CATEGORIES.map((category) => (
+                  {userCategories.map((category) => (
                     <option key={category} value={category}>
                       {category}
                     </option>

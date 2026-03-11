@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import InfoTooltip from '../components/shared/InfoTooltip';
 import ErrorBoundary from '../components/shared/ErrorBoundary';
 import { getServiceTypeTag, SERVICE_TYPES, type ServiceType } from '../lib/serviceTypeHelpers';
+import { fetchUserCategories, createCategory, type CustomCategory } from '../lib/categoryHelpers';
 import SupplementsManager from '../components/services/SupplementsManager';
 import SupplementsDisplay from '../components/shared/SupplementsDisplay';
 
@@ -64,35 +65,35 @@ export default function Services() {
     offer_type: '' as '' | 'percentage' | 'fixed',
   });
 
-  const prestationCategories = [
-    'Ongles',
-    'Cils',
-    'Soins',
-    'Manucure',
-    'Pédicure',
-    'Pose',
-    'Remplissage',
-    'Autre'
-  ];
+  const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
-  const formationCategories = [
-    'Ongles',
-    'Cils',
-    'Pédicure',
-    'Manucure',
-    'Business',
-    'Marketing',
-    'Technique',
-    'Autre'
-  ];
-
-  const categories = formData.service_type === 'formation' ? formationCategories : prestationCategories;
+  const categoryNames = customCategories.map(c => c.name);
 
   useEffect(() => {
     if (user) {
       fetchServices();
+      loadCategories();
     }
   }, [user]);
+
+  const loadCategories = async () => {
+    if (!user) return;
+    const cats = await fetchUserCategories(user.id);
+    setCustomCategories(cats);
+  };
+
+  const handleCreateCategory = async () => {
+    if (!user || !newCategoryName.trim()) return;
+    const cat = await createCategory(user.id, newCategoryName.trim());
+    if (cat) {
+      setCustomCategories(prev => [...prev, cat]);
+      setFormData({ ...formData, category: cat.name });
+    }
+    setNewCategoryName('');
+    setShowNewCategoryInput(false);
+  };
 
   useEffect(() => {
     if (!editingService && formData.service_type === 'formation' && tempSupplements.length > 0) {
@@ -291,6 +292,11 @@ export default function Services() {
         special_offer: formData.special_offer && formData.offer_type ? formData.special_offer : null,
         offer_type: formData.special_offer && formData.offer_type ? formData.offer_type : null,
       };
+
+      if (formData.category && !categoryNames.includes(formData.category)) {
+        await createCategory(user!.id, formData.category);
+        await loadCategories();
+      }
 
       if (editingService) {
         const { error } = await supabase
@@ -759,17 +765,54 @@ export default function Services() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Catégorie *
                   </label>
-                  <select
-                    required
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Sélectionner...</option>
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      required
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Sélectionner...</option>
+                      {categoryNames.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewCategoryInput(true)}
+                      className="px-3 py-2 bg-belaya-500 text-white rounded-lg hover:bg-belaya-600 transition-colors flex items-center gap-1"
+                      title="Nouvelle catégorie"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {showNewCategoryInput && (
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        type="text"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreateCategory(); } }}
+                        placeholder="Nom de la catégorie..."
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCreateCategory}
+                        className="px-4 py-2 bg-belaya-bright text-white rounded-lg hover:opacity-90 transition-colors text-sm font-medium"
+                      >
+                        Ajouter
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setShowNewCategoryInput(false); setNewCategoryName(''); }}
+                        className="px-3 py-2 text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="col-span-2">

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { GeocodeResult } from '../lib/geocodingHelpers';
 import { convertWeeklyAvailabilityToSchedule, convertWeekScheduleToAvailability } from '../lib/availabilityHelpers';
-import { SERVICE_CATEGORIES } from '../lib/categoryHelpers';
+import { fetchUserCategories } from '../lib/categoryHelpers';
 import AddressInput from '../components/settings/AddressInput';
 import CompactWeeklySchedule from '../components/settings/CompactWeeklySchedule';
 import BookingSettings from '../components/settings/BookingSettings';
@@ -143,6 +143,7 @@ export default function PublicProfile() {
   const [pendingGalleryPreview, setPendingGalleryPreview] = useState<string | null>(null);
   const [selectedGalleryClient, setSelectedGalleryClient] = useState<string>('');
   const [selectedGalleryCategory, setSelectedGalleryCategory] = useState<string>('');
+  const [userCategoryNames, setUserCategoryNames] = useState<string[]>([]);
   const [clients, setClients] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
   const [weeklyAvailability, setWeeklyAvailability] = useState({
     monday: [],
@@ -311,6 +312,20 @@ export default function PublicProfile() {
 
       if (clientsData) {
         setClients(clientsData);
+      }
+
+      const cats = await fetchUserCategories(user.id);
+      if (cats.length > 0) {
+        setUserCategoryNames(cats.map(c => c.name));
+      } else {
+        const { data: svcData } = await supabase
+          .from('services')
+          .select('category')
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+        if (svcData) {
+          setUserCategoryNames([...new Set(svcData.map(s => s.category).filter(Boolean))].sort());
+        }
       }
 
       const { data: photosData } = await supabase
@@ -1737,7 +1752,7 @@ export default function PublicProfile() {
                   required
                 >
                   <option value="">Sélectionner une catégorie</option>
-                  {SERVICE_CATEGORIES.map((category) => (
+                  {userCategoryNames.map((category) => (
                     <option key={category} value={category}>
                       {category}
                     </option>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles, Upload, X } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles, Upload, X, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -21,6 +21,7 @@ interface Service {
   id: string;
   name: string;
   description: string;
+  category?: string;
   duration: number;
   price: number;
   service_type: string;
@@ -39,9 +40,12 @@ interface ClientPhoto {
   id: string;
   photo_url: string;
   service_name: string;
+  service_category: string | null;
   created_at: string;
   is_favorite: boolean;
 }
+
+const PHOTOS_PER_PAGE = 12;
 
 export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) {
   const { user } = useAuth();
@@ -56,6 +60,11 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', photo: null as File | null });
   const [submitting, setSubmitting] = useState(false);
   const [selectedSupplements, setSelectedSupplements] = useState<{ [serviceId: string]: string[] }>({});
+  const [serviceCategoryFilter, setServiceCategoryFilter] = useState('all');
+  const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
+  const [photosDisplayCount, setPhotosDisplayCount] = useState(PHOTOS_PER_PAGE);
+  const [loadingMorePhotos, setLoadingMorePhotos] = useState(false);
+  const [providerCategories, setProviderCategories] = useState<string[]>([]);
   const [instituteData, setInstituteData] = useState({
     institute_photos: [] as Array<{ id: string; url: string; order: number }>,
     diplomas: [] as Array<{ id: string; name: string; year?: string }>,
@@ -117,6 +126,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
         loadServices(companyData.user_id),
         loadPhotos(companyData.user_id),
         loadReviews(companyData.user_id),
+        loadProviderCategories(companyData.user_id),
       ]);
     } catch (error) {
       console.error('Error:', error);
@@ -141,6 +151,31 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
     }
   };
 
+  const loadProviderCategories = async (userId: string) => {
+    const { data: catData } = await supabase
+      .from('service_categories')
+      .select('name')
+      .eq('user_id', userId)
+      .order('display_order')
+      .order('name');
+
+    if (catData && catData.length > 0) {
+      setProviderCategories(catData.map(c => c.name));
+      return;
+    }
+
+    const { data: serviceData } = await supabase
+      .from('services')
+      .select('category')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (serviceData) {
+      const unique = [...new Set(serviceData.map(s => s.category).filter(Boolean))].sort();
+      setProviderCategories(unique);
+    }
+  };
+
   const loadPhotos = async (userId: string) => {
     const { data: companyData } = await supabase
       .from('company_profiles')
@@ -152,7 +187,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
 
     const { data, error } = await supabase
       .from('client_results_photos')
-      .select('id, photo_url, service_name, created_at')
+      .select('id, photo_url, service_name, service_category, created_at')
       .eq('company_id', companyData.id)
       .eq('show_in_gallery', true)
       .order('created_at', { ascending: false });
@@ -398,7 +433,34 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {services.map((service) => {
+                  {providerCategories.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                      <button
+                        onClick={() => setServiceCategoryFilter('all')}
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                          serviceCategoryFilter === 'all'
+                            ? 'bg-brand-600 text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Tous
+                      </button>
+                      {providerCategories.map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => setServiceCategoryFilter(cat)}
+                          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                            serviceCategoryFilter === cat
+                              ? 'bg-brand-600 text-white shadow-sm'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {(serviceCategoryFilter === 'all' ? services : services.filter(s => s.category === serviceCategoryFilter)).map((service) => {
                     const calculatedPrice = service.special_offer && service.offer_type
                       ? service.offer_type === 'percentage'
                         ? service.price * (1 - parseFloat(service.special_offer) / 100)
@@ -534,33 +596,106 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
             </div>
           )}
 
-          {activeTab === 'gallery' && (
-            <div>
-              {photos.length === 0 ? (
-                <div className="text-center py-12">
-                  <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">Aucune photo disponible</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {photos.map((photo) => (
-                    <div key={photo.id} className="relative group aspect-square">
-                      <img
-                        src={photo.photo_url}
-                        alt={photo.service_name || 'Photo'}
-                        className="w-full h-full object-cover rounded-xl"
-                      />
-                      {photo.service_name && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl">
-                          <p className="text-white text-sm font-medium">{photo.service_name}</p>
+          {activeTab === 'gallery' && (() => {
+            const galleryCategories = [...new Set(
+              photos.map(p => p.service_category || p.service_name).filter(Boolean)
+            )].sort();
+            const filteredPhotos = galleryCategoryFilter === 'all'
+              ? photos
+              : photos.filter(p => p.service_category === galleryCategoryFilter || p.service_name === galleryCategoryFilter);
+            const displayedPhotos = filteredPhotos.slice(0, photosDisplayCount);
+            const hasMore = filteredPhotos.length > photosDisplayCount;
+
+            return (
+              <div>
+                {photos.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">Aucune photo disponible</p>
+                  </div>
+                ) : (
+                  <>
+                    {galleryCategories.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto pb-4 -mx-1 px-1">
+                        <button
+                          onClick={() => { setGalleryCategoryFilter('all'); setPhotosDisplayCount(PHOTOS_PER_PAGE); }}
+                          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                            galleryCategoryFilter === 'all'
+                              ? 'bg-brand-600 text-white shadow-sm'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Toutes ({photos.length})
+                        </button>
+                        {galleryCategories.map(cat => {
+                          const count = photos.filter(p => p.service_category === cat || p.service_name === cat).length;
+                          return (
+                            <button
+                              key={cat}
+                              onClick={() => { setGalleryCategoryFilter(cat); setPhotosDisplayCount(PHOTOS_PER_PAGE); }}
+                              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                                galleryCategoryFilter === cat
+                                  ? 'bg-brand-600 text-white shadow-sm'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {cat} ({count})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {displayedPhotos.map((photo) => (
+                        <div key={photo.id} className="relative group aspect-square">
+                          <img
+                            src={photo.photo_url}
+                            alt={photo.service_name || 'Photo'}
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                          {photo.service_name && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl">
+                              <p className="text-white text-sm font-medium">{photo.service_name}</p>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+
+                    {hasMore && (
+                      <div className="text-center mt-6">
+                        <button
+                          onClick={() => {
+                            setLoadingMorePhotos(true);
+                            setTimeout(() => {
+                              setPhotosDisplayCount(prev => prev + PHOTOS_PER_PAGE);
+                              setLoadingMorePhotos(false);
+                            }, 300);
+                          }}
+                          disabled={loadingMorePhotos}
+                          className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-all disabled:opacity-50"
+                        >
+                          {loadingMorePhotos ? (
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                          Voir plus
+                        </button>
+                      </div>
+                    )}
+
+                    {filteredPhotos.length === 0 && galleryCategoryFilter !== 'all' && (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">Aucune photo dans cette categorie</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })()}
 
           {activeTab === 'reviews' && (
             <div>
