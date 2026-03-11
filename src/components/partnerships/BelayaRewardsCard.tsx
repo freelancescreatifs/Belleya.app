@@ -86,8 +86,8 @@ export default function BelayaRewardsCard() {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center border border-belaya-200">
-                  <span className="text-xl font-bold text-belaya-primary">B</span>
+                <div className="w-10 h-10 rounded-lg overflow-hidden border border-belaya-200">
+                  <img src="/belaya_logo.png" alt="Belaya" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Programme Belaya.app</h3>
@@ -294,8 +294,8 @@ export default function BelayaRewardsCard() {
         className="bg-white rounded-xl border-2 border-belaya-300 bg-gradient-to-br from-rose-50/50 to-pink-50/50 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
       >
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center border border-belaya-200 flex-shrink-0">
-            <span className="text-2xl font-bold text-belaya-primary">B</span>
+          <div className="w-16 h-16 rounded-xl overflow-hidden border border-belaya-200 flex-shrink-0">
+            <img src="/belaya_logo.png" alt="Belaya" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">

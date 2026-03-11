@@ -74,7 +74,13 @@ export default function Partnerships() {
       if (partnershipsResult.error) throw partnershipsResult.error;
       if (salesResult.error) throw salesResult.error;
 
-      const partnershipsData = partnershipsResult.data || [];
+      let partnershipsData = partnershipsResult.data || [];
+
+      const defaultCards = partnershipsData.filter(p => p.is_default);
+      if (defaultCards.length > 1) {
+        const keepId = (defaultCards.find(p => p.company_name === 'Belaya') || defaultCards[0]).id;
+        partnershipsData = partnershipsData.filter(p => !p.is_default || p.id === keepId);
+      }
 
       const hasBelaya = partnershipsData.some(p => p.is_default && p.company_name === 'Belaya');
 
