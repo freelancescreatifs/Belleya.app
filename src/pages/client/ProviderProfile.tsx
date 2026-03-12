@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles, Upload, X, ChevronDown, Instagram } from 'lucide-react';
+import {
+  ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles,
+  Upload, X, ChevronDown, Instagram, Clock, Check, Plus
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -12,6 +15,9 @@ import {
   Review,
 } from '../../lib/socialHelpers';
 import InstituteTabContent from '../../components/public-profile/InstituteTabContent';
+import TimeSlotPicker from '../../components/public-profile/TimeSlotPicker';
+import BookingSummary from '../../components/public-profile/BookingSummary';
+import AuthGate from '../../components/public-profile/AuthGate';
 
 interface ProviderProfilePageProps {
   slug: string;
@@ -24,6 +30,7 @@ interface Service {
   category?: string;
   duration: number;
   price: number;
+  is_on_quote?: boolean;
   service_type: string;
   photo_url?: string | null;
   special_offer?: string | null;
@@ -45,12 +52,16 @@ interface ClientPhoto {
   is_favorite: boolean;
 }
 
+type BookingStep = 'browse' | 'datetime' | 'summary' | 'auth' | 'success';
+
 const PHOTOS_PER_PAGE = 12;
 
 export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) {
-  const { user } = useAuth();
+  const { user, profile: authProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [provider, setProvider] = useState<ProviderProfile | null>(null);
+  const [providerId, setProviderId] = useState<string>('');
+  const [companyId, setCompanyId] = useState<string>('');
   const [services, setServices] = useState<Service[]>([]);
   const [photos, setPhotos] = useState<ClientPhoto[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -59,7 +70,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', photo: null as File | null });
   const [submitting, setSubmitting] = useState(false);
-  const [selectedSupplements, setSelectedSupplements] = useState<{ [serviceId: string]: string[] }>({});
+  const [selectedSupplements, setSelectedSupplements] = useState<string[]>([]);
   const [serviceCategoryFilter, setServiceCategoryFilter] = useState('all');
   const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
   const [photosDisplayCount, setPhotosDisplayCount] = useState(PHOTOS_PER_PAGE);
@@ -74,6 +85,14 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
     booking_instructions: '',
     cancellation_policy: '',
   });
+
+  const [bookingStep, setBookingStep] = useState<BookingStep>('browse');
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [creatingBooking, setCreatingBooking] = useState(false);
+
+  const isClientLoggedIn = !!user && authProfile?.role === 'client';
 
   useEffect(() => {
     if (slug) {
@@ -92,15 +111,17 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id, booking_slug, instagram_url, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy')
+        .select('user_id, id, booking_slug, instagram_url, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy')
         .eq('booking_slug', slug)
         .maybeSingle();
 
       if (companyError || !companyData) {
-        console.error('Error loading company:', companyError);
         setLoading(false);
         return;
       }
+
+      setProviderId(companyData.user_id);
+      setCompanyId(companyData.id);
 
       const { data: providerData, error: providerError } = await supabase
         .from('public_provider_profiles')
@@ -109,7 +130,6 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
         .maybeSingle();
 
       if (providerError || !providerData) {
-        console.error('Error loading provider:', providerError);
         setLoading(false);
         return;
       }
@@ -179,18 +199,18 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
   };
 
   const loadPhotos = async (userId: string) => {
-    const { data: companyData } = await supabase
+    const { data: compData } = await supabase
       .from('company_profiles')
       .select('id')
       .eq('user_id', userId)
       .maybeSingle();
 
-    if (!companyData) return;
+    if (!compData) return;
 
     const { data, error } = await supabase
       .from('client_results_photos')
       .select('id, photo_url, service_name, service_category, created_at')
-      .eq('company_id', companyData.id)
+      .eq('company_id', compData.id)
       .eq('show_in_gallery', true)
       .order('created_at', { ascending: false });
 
@@ -211,30 +231,126 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
   };
 
   const handleFollowToggle = async () => {
-    if (!provider || !user) {
-      alert('Vous devez être connecté pour suivre un prestataire');
-      return;
-    }
+    if (!provider || !user) return;
 
     if (isFollowing) {
       const result = await unfollowProvider(provider.user_id);
-      if (result.success) {
-        setIsFollowing(false);
-      }
+      if (result.success) setIsFollowing(false);
     } else {
       const result = await followProvider(provider.user_id);
-      if (result.success) {
-        setIsFollowing(true);
-      }
+      if (result.success) setIsFollowing(true);
     }
+  };
+
+  const handleSelectService = (service: Service) => {
+    setSelectedService(service);
+    setSelectedSupplements([]);
+    setBookingStep('datetime');
+  };
+
+  const handleSelectTimeSlot = (date: Date, time: string) => {
+    setSelectedDate(date);
+    setSelectedTime(time);
+    setBookingStep('summary');
+  };
+
+  const handleConfirmBooking = () => {
+    if (isClientLoggedIn) {
+      proceedWithBooking(user!.id, '');
+    } else {
+      setBookingStep('auth');
+    }
+  };
+
+  const handleAuthenticated = async (userId: string, clientId: string) => {
+    await proceedWithBooking(userId, clientId);
+  };
+
+  const proceedWithBooking = async (userId: string, clientId: string) => {
+    if (!selectedService || !selectedDate || !selectedTime || !provider) return;
+
+    setCreatingBooking(true);
+    try {
+      if (!clientId) {
+        const { data: existingClient } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', providerId)
+          .eq('client_user_id', userId)
+          .maybeSingle();
+
+        if (existingClient) {
+          clientId = existingClient.id;
+        }
+      }
+
+      const [hours, minutes] = selectedTime.split(':').map(Number);
+      const startDateTime = new Date(selectedDate);
+      startDateTime.setHours(hours, minutes, 0, 0);
+
+      const supplementsDuration = selectedSupplements.reduce((sum, suppId) => {
+        const supp = selectedService.supplements?.find(s => s.id === suppId);
+        return sum + (supp?.duration_minutes || 0);
+      }, 0);
+      const totalDuration = selectedService.duration + supplementsDuration;
+
+      const serviceFinalPrice = selectedService.special_offer && selectedService.offer_type
+        ? selectedService.offer_type === 'percentage'
+          ? selectedService.price * (1 - parseFloat(selectedService.special_offer) / 100)
+          : selectedService.price - parseFloat(selectedService.special_offer)
+        : selectedService.price;
+
+      const supplementsTotal = selectedSupplements.reduce((sum, suppId) => {
+        const supp = selectedService.supplements?.find(s => s.id === suppId);
+        return sum + (supp?.price || 0);
+      }, 0);
+      const totalPrice = serviceFinalPrice + supplementsTotal;
+
+      const { error: bookingError } = await supabase.from('booking_requests').insert({
+        user_id: providerId,
+        client_id: clientId || null,
+        client_name: 'Client',
+        client_email: '',
+        service_name: selectedService.name,
+        service_duration: totalDuration,
+        service_price: totalPrice,
+        requested_date: startDateTime.toISOString().split('T')[0],
+        requested_time: selectedTime,
+        status: 'pending',
+        type: 'pro',
+        source: 'public_booking',
+        supplements: selectedSupplements.map(suppId => {
+          const supp = selectedService.supplements?.find(s => s.id === suppId);
+          return {
+            id: suppId,
+            name: supp?.name || '',
+            price: supp?.price || 0,
+            duration_minutes: supp?.duration_minutes || 0,
+          };
+        }),
+      });
+
+      if (bookingError) throw bookingError;
+      setBookingStep('success');
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      alert('Erreur lors de la reservation');
+    } finally {
+      setCreatingBooking(false);
+    }
+  };
+
+  const resetBooking = () => {
+    setBookingStep('browse');
+    setSelectedService(null);
+    setSelectedSupplements([]);
+    setSelectedDate(null);
+    setSelectedTime(null);
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!provider || !user) {
-      alert('Vous devez être connecté pour laisser un avis');
-      return;
-    }
+    if (!provider || !user) return;
 
     setSubmitting(true);
     try {
@@ -250,12 +366,12 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
         setShowReviewForm(false);
         setReviewForm({ rating: 5, comment: '', photo: null });
         await loadReviews(provider.user_id);
-        alert('Votre avis a été publié avec succès !');
+        alert('Votre avis a ete publie avec succes !');
       } else {
-        alert(result.error || 'Erreur lors de la publication de l\'avis');
+        alert(result.error || 'Erreur lors de la publication');
       }
-    } catch (error) {
-      alert('Erreur lors de la publication de l\'avis');
+    } catch {
+      alert('Erreur lors de la publication');
     } finally {
       setSubmitting(false);
     }
@@ -264,7 +380,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center">
-        <div className="text-gray-600">Chargement...</div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -331,7 +447,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                 {provider.followers_count > 0 && (
                   <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
                     <Heart className="w-4 h-4" />
-                    <span>{provider.followers_count} abonné{provider.followers_count > 1 ? 's' : ''}</span>
+                    <span>{provider.followers_count} abonne{provider.followers_count > 1 ? 's' : ''}</span>
                   </div>
                 )}
 
@@ -369,7 +485,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                   }`}
                 >
                   <Heart className={`w-5 h-5 ${isFollowing ? 'fill-current' : ''}`} />
-                  {isFollowing ? 'Abonné' : 'S\'abonner'}
+                  {isFollowing ? 'Abonne' : 'S\'abonner'}
                 </button>
               )}
             </div>
@@ -380,61 +496,27 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
       <div className="container mx-auto px-4 py-6">
         <div className="bg-white rounded-t-2xl border-b border-gray-200 sticky top-0 z-10">
           <div className="flex gap-1">
-            <button
-              onClick={() => setActiveTab('services')}
-              className={`flex-1 py-4 px-4 font-semibold transition-all ${
-                activeTab === 'services'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Scissors className="w-5 h-5" />
-                <span>Services</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('gallery')}
-              className={`flex-1 py-4 px-4 font-semibold transition-all ${
-                activeTab === 'gallery'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <ImageIcon className="w-5 h-5" />
-                <span>Galerie</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`flex-1 py-4 px-4 font-semibold transition-all ${
-                activeTab === 'reviews'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Star className="w-5 h-5" />
-                <span>Avis</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('institute')}
-              className={`flex-1 py-4 px-4 font-semibold transition-all ${
-                activeTab === 'institute'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <ImageIcon className="w-5 h-5" />
-                <span>Institut</span>
-              </div>
-            </button>
+            {(['services', 'gallery', 'reviews', 'institute'] as const).map(tab => {
+              const icons = { services: Scissors, gallery: ImageIcon, reviews: Star, institute: ImageIcon };
+              const labels = { services: 'Services', gallery: 'Galerie', reviews: 'Avis', institute: 'Institut' };
+              const Icon = icons[tab];
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex-1 py-4 px-4 font-semibold transition-all ${
+                    activeTab === tab
+                      ? 'text-brand-600 border-b-2 border-brand-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Icon className="w-5 h-5" />
+                    <span>{labels[tab]}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -481,18 +563,6 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                         : service.price - parseFloat(service.special_offer)
                       : service.price;
 
-                    const selectedSupps = selectedSupplements[service.id] || [];
-                    const totalSupplementPrice = service.supplements
-                      ? service.supplements
-                          .filter(s => selectedSupps.includes(s.id))
-                          .reduce((sum, s) => sum + s.price, 0)
-                      : 0;
-                    const totalSupplementTime = service.supplements
-                      ? service.supplements
-                          .filter(s => selectedSupps.includes(s.id))
-                          .reduce((sum, s) => sum + s.duration_minutes, 0)
-                      : 0;
-
                     return (
                       <div
                         key={service.id}
@@ -501,11 +571,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                         <div className="flex gap-3 p-4">
                           {service.photo_url ? (
                             <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
-                              <img
-                                src={service.photo_url}
-                                alt={service.name}
-                                className="w-full h-full object-cover"
-                              />
+                              <img src={service.photo_url} alt={service.name} className="w-full h-full object-cover" />
                             </div>
                           ) : (
                             <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-50 rounded-lg flex items-center justify-center">
@@ -521,7 +587,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                                   {service.special_offer && service.offer_type && (
                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-300 whitespace-nowrap">
                                       <Sparkles className="w-3 h-3 mr-1" />
-                                      -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '€'}
+                                      -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '\u20AC'}
                                     </span>
                                   )}
                                 </div>
@@ -529,16 +595,17 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                                   <p className="text-xs text-gray-500">{service.service_type}</p>
                                 )}
                               </div>
-
                               <div className="text-right">
-                                {service.special_offer && service.offer_type && (
-                                  <div className="text-xs text-gray-400 line-through">
-                                    {service.price.toFixed(2)} €
-                                  </div>
+                                {service.is_on_quote ? (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">Sur devis</span>
+                                ) : (
+                                  <>
+                                    {service.special_offer && service.offer_type && (
+                                      <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} \u20AC</div>
+                                    )}
+                                    <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} \u20AC</span>
+                                  </>
                                 )}
-                                <span className="font-bold text-brand-600 text-lg">
-                                  {calculatedPrice.toFixed(2)} €
-                                </span>
                               </div>
                             </div>
 
@@ -547,59 +614,32 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                             )}
 
                             <p className="text-gray-500 text-xs mb-3">
-                              {service.duration + totalSupplementTime} minutes
+                              <Clock className="w-3 h-3 inline mr-1" />{service.duration} minutes
                             </p>
 
                             {service.supplements && service.supplements.length > 0 && (
                               <div className="border-t border-gray-100 pt-3 mt-3">
                                 <p className="text-xs font-semibold text-gray-700 mb-2">Options disponibles:</p>
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                   {service.supplements.map((supplement) => (
-                                    <label
-                                      key={supplement.id}
-                                      className="flex items-center justify-between p-2 rounded-lg border border-gray-200 hover:border-brand-300 hover:bg-brand-50/30 cursor-pointer transition-all"
-                                    >
-                                      <div className="flex items-center gap-2 flex-1">
-                                        <input
-                                          type="checkbox"
-                                          checked={selectedSupps.includes(supplement.id)}
-                                          onChange={(e) => {
-                                            const newSupps = e.target.checked
-                                              ? [...selectedSupps, supplement.id]
-                                              : selectedSupps.filter(id => id !== supplement.id);
-                                            setSelectedSupplements({
-                                              ...selectedSupplements,
-                                              [service.id]: newSupps
-                                            });
-                                          }}
-                                          className="w-4 h-4 text-brand-600 rounded focus:ring-2 focus:ring-brand-500"
-                                        />
-                                        <span className="text-sm text-gray-700">{supplement.name}</span>
-                                      </div>
-                                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                                    <div key={supplement.id} className="flex items-center justify-between text-xs">
+                                      <span className="text-gray-600">+ {supplement.name}</span>
+                                      <div className="flex items-center gap-2 text-gray-500">
                                         <span>{supplement.duration_minutes} min</span>
-                                        <span className="font-semibold text-brand-600">+{supplement.price.toFixed(2)} €</span>
+                                        <span className="font-semibold text-brand-600">+{supplement.price.toFixed(2)} \u20AC</span>
                                       </div>
-                                    </label>
+                                    </div>
                                   ))}
                                 </div>
-                                {selectedSupps.length > 0 && (
-                                  <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-sm">
-                                    <span className="font-semibold text-gray-900">Total:</span>
-                                    <span className="font-bold text-brand-600">
-                                      {(calculatedPrice + totalSupplementPrice).toFixed(2)} €
-                                    </span>
-                                  </div>
-                                )}
                               </div>
                             )}
 
-                            <a
-                              href={`/book/${slug}`}
-                              className="mt-4 w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-sm hover:shadow-md block text-center"
+                            <button
+                              onClick={() => handleSelectService(service)}
+                              className="mt-4 w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-sm hover:shadow-md"
                             >
-                              Réserver
-                            </a>
+                              Reserver
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -663,11 +703,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {displayedPhotos.map((photo) => (
                         <div key={photo.id} className="relative group aspect-square">
-                          <img
-                            src={photo.photo_url}
-                            alt={photo.service_name || 'Photo'}
-                            className="w-full h-full object-cover rounded-xl"
-                          />
+                          <img src={photo.photo_url} alt={photo.service_name || 'Photo'} className="w-full h-full object-cover rounded-xl" />
                           {photo.service_name && (
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl">
                               <p className="text-white text-sm font-medium">{photo.service_name}</p>
@@ -725,7 +761,6 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                   ) : (
                     <form onSubmit={handleSubmitReview} className="p-4 border-2 border-brand-300 rounded-xl">
                       <h3 className="font-bold text-gray-900 mb-4">Votre avis</h3>
-
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
                         <div className="flex gap-2">
@@ -736,18 +771,11 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                               onClick={() => setReviewForm({ ...reviewForm, rating: star })}
                               className="focus:outline-none"
                             >
-                              <Star
-                                className={`w-8 h-8 ${
-                                  star <= reviewForm.rating
-                                    ? 'text-amber-500 fill-amber-500'
-                                    : 'text-gray-300'
-                                }`}
-                              />
+                              <Star className={`w-8 h-8 ${star <= reviewForm.rating ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`} />
                             </button>
                           ))}
                         </div>
                       </div>
-
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Commentaire</label>
                         <textarea
@@ -755,20 +783,15 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                           onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                           rows={4}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                          placeholder="Partagez votre expérience..."
+                          placeholder="Partagez votre experience..."
                         />
                       </div>
-
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Photo (optionnelle)</label>
                         <div className="flex items-center gap-4">
                           {reviewForm.photo ? (
                             <div className="relative">
-                              <img
-                                src={URL.createObjectURL(reviewForm.photo)}
-                                alt="Preview"
-                                className="w-24 h-24 object-cover rounded-lg border-2 border-brand-300"
-                              />
+                              <img src={URL.createObjectURL(reviewForm.photo)} alt="Preview" className="w-24 h-24 object-cover rounded-lg border-2 border-brand-300" />
                               <button
                                 type="button"
                                 onClick={() => setReviewForm({ ...reviewForm, photo: null })}
@@ -786,9 +809,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                                 accept="image/*"
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
-                                  if (file) {
-                                    setReviewForm({ ...reviewForm, photo: file });
-                                  }
+                                  if (file) setReviewForm({ ...reviewForm, photo: file });
                                 }}
                                 className="hidden"
                               />
@@ -796,7 +817,6 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                           )}
                         </div>
                       </div>
-
                       <div className="flex gap-3">
                         <button
                           type="button"
@@ -822,7 +842,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                 <div className="text-center py-12">
                   <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">Aucun avis pour le moment</p>
-                  <p className="text-sm text-gray-500 mt-2">Soyez le premier à laisser un avis !</p>
+                  <p className="text-sm text-gray-500 mt-2">Soyez le premier a laisser un avis !</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -831,9 +851,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <p className="font-semibold text-gray-900">{review.client_name}</p>
-                          <p className="text-sm text-gray-500">
-                            {new Date(review.created_at).toLocaleDateString('fr-FR')}
-                          </p>
+                          <p className="text-sm text-gray-500">{new Date(review.created_at).toLocaleDateString('fr-FR')}</p>
                         </div>
                         <div className="flex items-center gap-1">
                           {Array.from({ length: review.rating }).map((_, i) => (
@@ -841,17 +859,9 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                           ))}
                         </div>
                       </div>
-                      {review.comment && (
-                        <p className="text-gray-700 mb-3">{review.comment}</p>
-                      )}
+                      {review.comment && <p className="text-gray-700 mb-3">{review.comment}</p>}
                       {review.photo_url && (
-                        <div className="mt-3">
-                          <img
-                            src={review.photo_url}
-                            alt="Photo de l'avis"
-                            className="w-full max-w-xs rounded-lg border border-gray-200"
-                          />
-                        </div>
+                        <img src={review.photo_url} alt="Photo de l'avis" className="w-full max-w-xs rounded-lg border border-gray-200 mt-3" />
                       )}
                     </div>
                   ))}
@@ -861,20 +871,80 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
           )}
 
           {activeTab === 'institute' && (
-            <div>
-              <InstituteTabContent
-                institutePhotos={instituteData.institute_photos}
-                diplomas={instituteData.diplomas}
-                conditions={instituteData.conditions}
-                welcomeMessage={instituteData.welcome_message}
-                bookingInstructions={instituteData.booking_instructions}
-                cancellationPolicy={instituteData.cancellation_policy}
-              />
-            </div>
+            <InstituteTabContent
+              institutePhotos={instituteData.institute_photos}
+              diplomas={instituteData.diplomas}
+              conditions={instituteData.conditions}
+              welcomeMessage={instituteData.welcome_message}
+              bookingInstructions={instituteData.booking_instructions}
+              cancellationPolicy={instituteData.cancellation_policy}
+            />
           )}
         </div>
       </div>
 
+      {bookingStep !== 'browse' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="my-8">
+            {bookingStep === 'datetime' && selectedService && (
+              <TimeSlotPicker
+                providerId={providerId}
+                serviceId={selectedService.id}
+                serviceDuration={selectedService.duration}
+                supplementsDuration={selectedSupplements.reduce((sum, suppId) => {
+                  const supp = selectedService.supplements?.find(s => s.id === suppId);
+                  return sum + (supp?.duration_minutes || 0);
+                }, 0)}
+                onSelectSlot={handleSelectTimeSlot}
+                onClose={resetBooking}
+              />
+            )}
+
+            {bookingStep === 'summary' && selectedService && selectedDate && selectedTime && (
+              <BookingSummary
+                service={selectedService}
+                selectedSupplements={selectedService.supplements?.filter(s => selectedSupplements.includes(s.id)) || []}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                onConfirm={handleConfirmBooking}
+                onCancel={resetBooking}
+              />
+            )}
+
+            {bookingStep === 'auth' && selectedService && selectedDate && selectedTime && (
+              <AuthGate
+                onAuthenticated={handleAuthenticated}
+                bookingContext={{
+                  service: selectedService,
+                  selectedSupplements: selectedService.supplements?.filter(s => selectedSupplements.includes(s.id)) || [],
+                  selectedDate,
+                  selectedTime,
+                }}
+                providerId={providerId}
+                companyId={companyId}
+              />
+            )}
+
+            {bookingStep === 'success' && (
+              <div className="bg-white rounded-xl max-w-md w-full p-8 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8 text-belaya-bright" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Reservation envoyee !</h3>
+                <p className="text-gray-600 mb-6">
+                  Votre demande de reservation a ete envoyee au prestataire. Vous recevrez une confirmation par email.
+                </p>
+                <button
+                  onClick={resetBooking}
+                  className="w-full px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all"
+                >
+                  Fermer
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

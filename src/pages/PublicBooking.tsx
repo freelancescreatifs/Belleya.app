@@ -1,36 +1,20 @@
 import { useState, useEffect } from 'react';
 import {
-  Calendar,
-  Clock,
-  MapPin,
-  ArrowLeft,
-  Check,
-  Tag,
-  Plus,
-  Star,
-  Heart,
-  Scissors,
-  Image as ImageIcon,
-  Sparkles,
-  X,
-  Upload,
-  User,
-  Mail,
-  Phone as PhoneIcon,
-  Lock
+  ArrowLeft, Star, MapPin, Heart, Scissors, Image as ImageIcon, Sparkles,
+  Upload, X, ChevronDown, Clock, Check, Plus, Instagram
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Event } from '../types/agenda';
-import { formatMonthYear, getDaysInMonth, getFirstDayOfMonth } from '../lib/calendarHelpers';
-import { generateTimeSlots } from '../lib/availabilityHelpers';
 import {
   getProviderReviews,
   createReview,
-  Review
+  Review,
 } from '../lib/socialHelpers';
-import DepositPayment from '../components/client/DepositPayment';
 import InstituteTabContent from '../components/public-profile/InstituteTabContent';
+import TimeSlotPicker from '../components/public-profile/TimeSlotPicker';
+import BookingSummary from '../components/public-profile/BookingSummary';
+import AuthGate from '../components/public-profile/AuthGate';
+import DepositPayment from '../components/client/DepositPayment';
 
 interface PublicBookingProps {
   slug: string;
@@ -40,11 +24,13 @@ interface ProProfile {
   user_id: string;
   slug: string;
   company_name: string;
+  company_id: string;
   activity_type: string;
   bio: string;
   city: string;
   address: string | null;
   profile_photo: string | null;
+  instagram_url: string | null;
   is_accepting_bookings: boolean;
   average_rating: number;
   reviews_count: number;
@@ -59,69 +45,62 @@ interface ProProfile {
   cancellation_policy: string;
 }
 
-interface Supplement {
-  id: string;
-  name: string;
-  price: number;
-  duration_minutes: number | null;
-}
-
 interface Service {
   id: string;
   name: string;
   description: string;
+  category?: string;
   duration: number;
   price: number;
-  special_offer: string | null;
-  offer_type: string | null;
-  photo_url?: string | null;
+  is_on_quote?: boolean;
   service_type?: string;
-  supplements?: Supplement[];
+  photo_url?: string | null;
+  special_offer?: string | null;
+  offer_type?: 'percentage' | 'fixed' | null;
+  supplements?: Array<{
+    id: string;
+    name: string;
+    price: number;
+    duration_minutes: number;
+  }>;
 }
 
 interface ClientPhoto {
   id: string;
   photo_url: string;
   service_name: string;
+  service_category: string | null;
   created_at: string;
 }
 
-interface TimeSlot {
-  time: string;
-  available: boolean;
-  reason?: string;
-}
+type BookingStep = 'browse' | 'datetime' | 'summary' | 'auth' | 'deposit' | 'success';
 
-interface WeeklyAvailability {
-  [key: string]: Array<{
-    start: string;
-    end: string;
-    available: boolean;
-  }>;
-}
+const PHOTOS_PER_PAGE = 12;
 
 export default function PublicBooking({ slug }: PublicBookingProps) {
-  const { user, signUp, signIn } = useAuth();
+  const { user, profile: authProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [proProfile, setProProfile] = useState<ProProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [photos, setPhotos] = useState<ClientPhoto[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [weeklyAvailability, setWeeklyAvailability] = useState<WeeklyAvailability | null>(null);
+  const [providerCategories, setProviderCategories] = useState<string[]>([]);
 
-  // Tab state
   const [activeTab, setActiveTab] = useState<'services' | 'gallery' | 'reviews' | 'institute'>('services');
+  const [serviceCategoryFilter, setServiceCategoryFilter] = useState('all');
+  const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
+  const [photosDisplayCount, setPhotosDisplayCount] = useState(PHOTOS_PER_PAGE);
+  const [loadingMorePhotos, setLoadingMorePhotos] = useState(false);
 
-  // Booking state
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [bookingStep, setBookingStep] = useState<BookingStep>('browse');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [bookingStep, setBookingStep] = useState<'service' | 'date' | 'time' | 'account' | 'deposit' | 'success'>('service');
   const [selectedSupplements, setSelectedSupplements] = useState<string[]>([]);
-  const [bookingNotes, setBookingNotes] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [creatingBooking, setCreatingBooking] = useState(false);
   const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
+  const [clientEmail, setClientEmail] = useState('');
+  const [clientName, setClientName] = useState('');
 
   const [depositSettings, setDepositSettings] = useState({
     deposit_required: false,
@@ -131,49 +110,25 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     paypal_available: false,
   });
 
-  // Client info & auth state
-  const [clientInfo, setClientInfo] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    password: '',
-  });
-  const [hasAccount, setHasAccount] = useState(false);
-  const [authError, setAuthError] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  // Review state
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', photo: null as File | null });
+  const [submitting, setSubmitting] = useState(false);
+
+  const isClientLoggedIn = !!user && authProfile?.role === 'client';
 
   useEffect(() => {
-    if (slug) {
-      loadProProfile();
-    }
+    if (slug) loadProProfile();
   }, [slug]);
-
-  useEffect(() => {
-    if (proProfile) {
-      loadServices();
-      loadAllEvents();
-      loadWeeklyAvailability();
-      loadPhotos();
-      loadReviews();
-    }
-  }, [proProfile]);
 
   const loadProProfile = async () => {
     try {
       const { data: companyData, error: companyError } = await supabase
         .from('company_profiles')
-        .select('user_id, company_name, is_accepting_bookings, id, address, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy, deposit_required, deposit_amount, deposit_fee_payer')
+        .select('user_id, company_name, is_accepting_bookings, id, address, instagram_url, institute_photos, diplomas, conditions, welcome_message, booking_instructions, cancellation_policy, deposit_required, deposit_amount, deposit_fee_payer')
         .eq('booking_slug', slug)
         .maybeSingle();
 
       if (companyError || !companyData) {
-        console.error('Error loading profile:', companyError);
         setLoading(false);
         return;
       }
@@ -185,7 +140,6 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         .maybeSingle();
 
       if (providerError || !providerData) {
-        console.error('Error loading provider:', providerError);
         setLoading(false);
         return;
       }
@@ -220,11 +174,13 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         });
       }
 
-      setProProfile({
+      const profile: ProProfile = {
         ...providerData,
-        slug: slug,
+        slug,
+        company_id: companyData.id,
         is_accepting_bookings: companyData.is_accepting_bookings ?? true,
         address: companyData.address,
+        instagram_url: companyData.instagram_url || null,
         likesCount: likesData?.length || 0,
         photosCount: photosCount || 0,
         institute_photos: Array.isArray(companyData.institute_photos) ? companyData.institute_photos : [],
@@ -233,7 +189,16 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         welcome_message: companyData.welcome_message || '',
         booking_instructions: companyData.booking_instructions || '',
         cancellation_policy: companyData.cancellation_policy || '',
-      });
+      };
+
+      setProProfile(profile);
+
+      await Promise.all([
+        loadServices(companyData.user_id),
+        loadPhotos(companyData.id),
+        loadReviews(companyData.user_id),
+        loadProviderCategories(companyData.user_id),
+      ]);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -241,313 +206,195 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     }
   };
 
-  const loadServices = async () => {
-    if (!proProfile) return;
-
+  const loadServices = async (userId: string) => {
     const { data, error } = await supabase
       .from('services')
       .select(`
         *,
         supplements:service_supplements(id, name, price, duration_minutes)
       `)
-      .eq('user_id', proProfile.user_id)
+      .eq('user_id', userId)
       .eq('status', 'active')
       .order('name');
 
-    if (!error && data) {
-      setServices(data);
+    if (!error && data) setServices(data);
+  };
+
+  const loadProviderCategories = async (userId: string) => {
+    const { data: catData } = await supabase
+      .from('service_categories')
+      .select('name')
+      .eq('user_id', userId)
+      .order('display_order')
+      .order('name');
+
+    if (catData && catData.length > 0) {
+      setProviderCategories(catData.map(c => c.name));
+      return;
+    }
+
+    const { data: serviceData } = await supabase
+      .from('services')
+      .select('category')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (serviceData) {
+      const unique = [...new Set(serviceData.map(s => s.category).filter(Boolean))].sort();
+      setProviderCategories(unique);
     }
   };
 
-  const loadPhotos = async () => {
-    if (!proProfile) return;
-
-    const { data: companyData } = await supabase
-      .from('company_profiles')
-      .select('id')
-      .eq('user_id', proProfile.user_id)
-      .maybeSingle();
-
-    if (!companyData) return;
-
+  const loadPhotos = async (companyId: string) => {
     const { data, error } = await supabase
       .from('client_results_photos')
-      .select('id, photo_url, service_name, created_at')
-      .eq('company_id', companyData.id)
+      .select('id, photo_url, service_name, service_category, created_at')
+      .eq('company_id', companyId)
       .eq('show_in_gallery', true)
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setPhotos(data);
-    }
+    if (!error && data) setPhotos(data);
   };
 
-  const loadReviews = async () => {
-    if (!proProfile) return;
-    const reviewsData = await getProviderReviews(proProfile.user_id);
+  const loadReviews = async (userId: string) => {
+    const reviewsData = await getProviderReviews(userId);
     setReviews(reviewsData);
   };
 
-  const loadAllEvents = async () => {
-    if (!proProfile) return;
-    const [internalEvents, googleBusySlots] = await Promise.all([
-      loadInternalEvents(),
-      loadGoogleBusySlots(),
-    ]);
-    setEvents([...internalEvents, ...googleBusySlots]);
-  };
-
-  const loadInternalEvents = async (): Promise<Event[]> => {
-    if (!proProfile) return [];
-
-    const threeMonthsFromNow = new Date();
-    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-
-    const { data, error } = await supabase
-      .from('events')
-      .select('start_at, end_at, type')
-      .eq('user_id', proProfile.user_id)
-      .gte('start_at', new Date().toISOString())
-      .lte('start_at', threeMonthsFromNow.toISOString())
-      .order('start_at');
-
-    if (!error && data) {
-      return data as Event[];
-    }
-    return [];
-  };
-
-  const loadGoogleBusySlots = async (): Promise<Event[]> => {
-    if (!proProfile) return [];
-
-    try {
-      const now = new Date();
-      const threeMonthsFromNow = new Date();
-      threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-google-availability`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          proUserId: proProfile.user_id,
-          timeMin: now.toISOString(),
-          timeMax: threeMonthsFromNow.toISOString(),
-        }),
-      });
-
-      const result = await response.json();
-      return (result.busySlots || []) as Event[];
-    } catch {
-      return [];
-    }
-  };
-
-  const loadWeeklyAvailability = async () => {
-    if (!proProfile) return;
-
-    const { data: companyData } = await supabase
-      .from('company_profiles')
-      .select('weekly_availability')
-      .eq('user_id', proProfile.user_id)
-      .maybeSingle();
-
-    if (companyData?.weekly_availability) {
-      setWeeklyAvailability(companyData.weekly_availability as WeeklyAvailability);
-    }
-  };
-
-  const getAvailableTimeSlots = (date: Date): TimeSlot[] => {
-    if (!selectedService) return [];
-    return generateTimeSlots(date, calculateTotalDuration(), weeklyAvailability, events);
-  };
-
-  const calculateServicePrice = (service: Service): { original: number; discounted: number | null } => {
-    const basePrice = Number(service.price);
-
-    if (!service.special_offer || !service.offer_type) {
-      return { original: basePrice, discounted: null };
-    }
-
-    const offerValue = Number(service.special_offer);
-    let discountedPrice = basePrice;
-
-    if (service.offer_type === 'percentage') {
-      discountedPrice = basePrice * (1 - offerValue / 100);
-    } else if (service.offer_type === 'fixed') {
-      discountedPrice = basePrice - offerValue;
-    }
-
-    return { original: basePrice, discounted: Math.max(0, discountedPrice) };
-  };
-
-  const calculateTotalPrice = (): number => {
-    if (!selectedService) return 0;
-
-    const servicePrice = calculateServicePrice(selectedService);
-    const basePrice = servicePrice.discounted !== null ? servicePrice.discounted : servicePrice.original;
-
-    const supplementsPrice = selectedSupplements.reduce((total, supplementId) => {
-      const supplement = selectedService.supplements?.find(s => s.id === supplementId);
-      return total + (supplement ? Number(supplement.price) : 0);
-    }, 0);
-
-    return basePrice + supplementsPrice;
-  };
-
-  const calculateTotalDuration = (): number => {
-    if (!selectedService) return 0;
-
-    const baseDuration = selectedService.duration;
-
-    const supplementsDuration = selectedSupplements.reduce((total, supplementId) => {
-      const supplement = selectedService.supplements?.find(s => s.id === supplementId);
-      return total + (supplement?.duration_minutes || 0);
-    }, 0);
-
-    return baseDuration + supplementsDuration;
-  };
-
-  const handleServiceSelect = (service: Service) => {
+  const handleSelectService = (service: Service) => {
     setSelectedService(service);
     setSelectedSupplements([]);
-    setBookingStep('date');
-    setActiveTab('services');
+    setBookingStep('datetime');
   };
 
-  const toggleSupplement = (supplementId: string) => {
-    setSelectedSupplements(prev =>
-      prev.includes(supplementId)
-        ? prev.filter(id => id !== supplementId)
-        : [...prev, supplementId]
-    );
-  };
-
-  const handleDateSelect = (date: Date) => {
+  const handleSelectTimeSlot = (date: Date, time: string) => {
     setSelectedDate(date);
-    setBookingStep('time');
-  };
-
-  const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
-    setBookingStep('account');
+    setBookingStep('summary');
   };
 
-  const handleAccountSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError('');
-    setAuthLoading(true);
-
-    try {
-      if (hasAccount) {
-        await signIn(clientInfo.email, clientInfo.password);
-      } else {
-        if (clientInfo.password.length < 6) {
-          setAuthError('Le mot de passe doit contenir au moins 6 caractères');
-          setAuthLoading(false);
-          return;
-        }
-
-        await signUp(
-          clientInfo.email,
-          clientInfo.password,
-          'client',
-          clientInfo.firstName,
-          clientInfo.lastName
-        );
-      }
-
-      await handleSubmitBooking();
-    } catch (error: any) {
-      if (hasAccount) {
-        setAuthError('Email ou mot de passe incorrect');
-      } else {
-        if (error.message?.includes('already registered')) {
-          setAuthError('Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.');
-        } else {
-          setAuthError('Erreur lors de la création du compte');
-        }
-      }
-    } finally {
-      setAuthLoading(false);
+  const handleConfirmBooking = () => {
+    if (isClientLoggedIn) {
+      proceedWithBooking(user!.id, '');
+    } else {
+      setBookingStep('auth');
     }
   };
 
-  const handleSubmitBooking = async () => {
-    if (!selectedDate || !selectedTime || !selectedService || !proProfile) return;
+  const handleAuthenticated = async (userId: string, clientId: string) => {
+    await proceedWithBooking(userId, clientId);
+  };
 
-    setSubmitting(true);
+  const proceedWithBooking = async (userId: string, clientId: string) => {
+    if (!selectedService || !selectedDate || !selectedTime || !proProfile) return;
 
+    setCreatingBooking(true);
     try {
-      const [hours, minutes] = selectedTime.split(':').map(Number);
-      const appointmentDate = new Date(selectedDate);
-      appointmentDate.setHours(hours, minutes, 0, 0);
+      let userEmail = '';
+      let userName = '';
 
-      const selectedSupplementsData = selectedSupplements.map(suppId => {
-        const supp = selectedService.supplements?.find(s => s.id === suppId);
-        return supp ? {
-          id: supp.id,
-          name: supp.name,
-          price: Number(supp.price),
-          duration_minutes: supp.duration_minutes
-        } : null;
-      }).filter(Boolean);
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('email, first_name, last_name')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/public-booking`;
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          proSlug: slug,
-          serviceId: selectedService.id,
-          appointmentDate: appointmentDate.toISOString(),
-          duration: calculateTotalDuration(),
-          price: calculateTotalPrice(),
-          notes: bookingNotes,
-          supplements: selectedSupplementsData,
-          clientInfo: {
-            firstName: clientInfo.firstName,
-            lastName: clientInfo.lastName,
-            email: clientInfo.email,
-            phone: clientInfo.phone,
-          },
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Erreur lors de la réservation');
+      if (userProfile) {
+        userEmail = userProfile.email || '';
+        userName = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
       }
 
+      if (!clientId) {
+        const { data: existingClient } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', proProfile.user_id)
+          .eq('client_user_id', userId)
+          .maybeSingle();
+
+        if (existingClient) {
+          clientId = existingClient.id;
+        }
+      }
+
+      const [hours, minutes] = selectedTime.split(':').map(Number);
+      const startDateTime = new Date(selectedDate);
+      startDateTime.setHours(hours, minutes, 0, 0);
+
+      const supplementsDuration = selectedSupplements.reduce((sum, suppId) => {
+        const supp = selectedService.supplements?.find(s => s.id === suppId);
+        return sum + (supp?.duration_minutes || 0);
+      }, 0);
+      const totalDuration = selectedService.duration + supplementsDuration;
+
+      const serviceFinalPrice = selectedService.special_offer && selectedService.offer_type
+        ? selectedService.offer_type === 'percentage'
+          ? selectedService.price * (1 - parseFloat(selectedService.special_offer) / 100)
+          : selectedService.price - parseFloat(selectedService.special_offer)
+        : selectedService.price;
+
+      const supplementsTotal = selectedSupplements.reduce((sum, suppId) => {
+        const supp = selectedService.supplements?.find(s => s.id === suppId);
+        return sum + (supp?.price || 0);
+      }, 0);
+      const totalPrice = serviceFinalPrice + supplementsTotal;
+
+      const { data: booking, error: bookingError } = await supabase.from('booking_requests').insert({
+        user_id: proProfile.user_id,
+        client_id: clientId || null,
+        client_name: userName || 'Client',
+        client_email: userEmail,
+        service_name: selectedService.name,
+        service_duration: totalDuration,
+        service_price: totalPrice,
+        requested_date: startDateTime.toISOString().split('T')[0],
+        requested_time: selectedTime,
+        status: 'pending',
+        type: 'pro',
+        source: 'public_booking',
+        supplements: selectedSupplements.map(suppId => {
+          const supp = selectedService.supplements?.find(s => s.id === suppId);
+          return {
+            id: suppId,
+            name: supp?.name || '',
+            price: supp?.price || 0,
+            duration_minutes: supp?.duration_minutes || 0,
+          };
+        }),
+      }).select('id').single();
+
+      if (bookingError) throw bookingError;
+
+      setClientEmail(userEmail);
+      setClientName(userName);
+
       const hasPaymentMethod = depositSettings.stripe_available || depositSettings.paypal_available;
-      if (depositSettings.deposit_required && hasPaymentMethod && result.bookingId) {
-        setCreatedBookingId(result.bookingId);
+      if (depositSettings.deposit_required && hasPaymentMethod && booking?.id) {
+        setCreatedBookingId(booking.id);
         setBookingStep('deposit');
       } else {
         setBookingStep('success');
       }
     } catch (error) {
-      console.error('Error submitting booking:', error);
-      alert(error instanceof Error ? error.message : 'Erreur lors de la réservation. Veuillez réessayer.');
+      console.error('Error creating booking:', error);
+      alert('Erreur lors de la reservation. Veuillez reessayer.');
     } finally {
-      setSubmitting(false);
+      setCreatingBooking(false);
     }
+  };
+
+  const resetBooking = () => {
+    setBookingStep('browse');
+    setSelectedService(null);
+    setSelectedSupplements([]);
+    setSelectedDate(null);
+    setSelectedTime(null);
+    setCreatedBookingId(null);
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!proProfile || !user) {
-      alert('Vous devez être connecté pour laisser un avis');
-      return;
-    }
+    if (!proProfile || !user) return;
 
     setSubmitting(true);
     try {
@@ -562,70 +409,22 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       if (result.success) {
         setShowReviewForm(false);
         setReviewForm({ rating: 5, comment: '', photo: null });
-        await loadReviews();
-        alert('Votre avis a été publié avec succès !');
+        await loadReviews(proProfile.user_id);
+        alert('Votre avis a ete publie avec succes !');
       } else {
-        alert(result.error || 'Erreur lors de la publication de l\'avis');
+        alert(result.error || 'Erreur lors de la publication');
       }
-    } catch (error) {
-      alert('Erreur lors de la publication de l\'avis');
+    } catch {
+      alert('Erreur lors de la publication');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const renderCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentMonth);
-    const firstDay = getFirstDayOfMonth(currentMonth);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const days = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-12" />);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-      const isToday =
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear();
-      const isSelected =
-        selectedDate &&
-        date.getDate() === selectedDate.getDate() &&
-        date.getMonth() === selectedDate.getMonth() &&
-        date.getFullYear() === selectedDate.getFullYear();
-      const isPast = date < today;
-
-      days.push(
-        <button
-          key={day}
-          type="button"
-          disabled={isPast}
-          onClick={() => handleDateSelect(date)}
-          className={`h-12 flex items-center justify-center rounded-lg transition-all ${
-            isSelected
-              ? 'bg-brand-600 text-white font-bold'
-              : isToday
-              ? 'bg-brand-100 text-brand-900 font-semibold'
-              : isPast
-              ? 'text-gray-300 cursor-not-allowed'
-              : 'hover:bg-brand-50 text-gray-700'
-          }`}
-        >
-          {day}
-        </button>
-      );
-    }
-
-    return days;
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center">
-        <div className="text-gray-600">Chargement...</div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
       </div>
     );
   }
@@ -635,12 +434,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Profil introuvable</h1>
-          <p className="text-gray-600 mb-6">Ce lien de réservation n'existe pas ou n'est plus actif.</p>
-          <a
-            href="/"
-            className="inline-block px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-          >
-            Retour à l'accueil
+          <p className="text-gray-600 mb-6">Ce lien de reservation n'existe pas ou n'est plus actif.</p>
+          <a href="/" className="inline-block px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+            Retour a l'accueil
           </a>
         </div>
       </div>
@@ -651,63 +447,13 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Réservations fermées</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Reservations fermees</h1>
           <p className="text-gray-600 mb-6">
-            {proProfile.company_name} n'accepte pas de réservations en ligne pour le moment.
+            {proProfile.company_name} n'accepte pas de reservations en ligne pour le moment.
           </p>
-          <a
-            href="/"
-            className="inline-block px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-          >
-            Retour à l'accueil
+          <a href="/" className="inline-block px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+            Retour a l'accueil
           </a>
-        </div>
-      </div>
-    );
-  }
-
-  if (bookingStep === 'deposit' && createdBookingId && proProfile) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
-          <DepositPayment
-            bookingId={createdBookingId}
-            amount={depositSettings.deposit_amount}
-            companyName={proProfile.company_name}
-            serviceName={selectedService?.name || 'Service'}
-            clientEmail={clientInfo.email}
-            clientName={`${clientInfo.firstName} ${clientInfo.lastName}`.trim()}
-            stripeAvailable={depositSettings.stripe_available}
-            paypalAvailable={depositSettings.paypal_available}
-            feePayedByClient={depositSettings.deposit_fee_payer === 'client'}
-            onSuccess={() => setBookingStep('success')}
-            onCancel={() => setBookingStep('success')}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (bookingStep === 'success') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-belaya-bright" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Réservation envoyée</h2>
-            <p className="text-gray-600 mb-8">
-              Votre demande de réservation a été transmise à {proProfile.company_name}. Vous recevrez une
-              confirmation par email à {clientInfo.email}.
-            </p>
-            <a
-              href="/"
-              className="block w-full px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg hover:from-brand-700 hover:to-brand-100 transition-all font-medium text-center"
-            >
-              Retour à l'accueil
-            </a>
-          </div>
         </div>
       </div>
     );
@@ -715,7 +461,6 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
-      {/* Header Profile */}
       <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white">
         <div className="container mx-auto px-4 py-6">
           <a
@@ -761,21 +506,29 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 {proProfile.followers_count > 0 && (
                   <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
                     <Heart className="w-4 h-4" />
-                    <span>{proProfile.followers_count} abonné{proProfile.followers_count > 1 ? 's' : ''}</span>
+                    <span>{proProfile.followers_count} abonne{proProfile.followers_count > 1 ? 's' : ''}</span>
                   </div>
                 )}
 
-                {(proProfile.likesCount > 0 || proProfile.photosCount > 0) && (
-                  <div className="flex items-center gap-1 text-xs text-white/90">
-                    <Sparkles className="w-3 h-3" />
-                    <span>
-                      {proProfile.likesCount > 0 && `${proProfile.likesCount} likes`}
-                      {proProfile.likesCount > 0 && proProfile.photosCount > 0 && ' • '}
-                      {proProfile.photosCount > 0 && `${proProfile.photosCount} photos`}
-                    </span>
+                {proProfile.city && (
+                  <div className="flex items-center gap-1 text-sm">
+                    <MapPin className="w-4 h-4" />
+                    <span>{proProfile.city}</span>
                   </div>
                 )}
               </div>
+
+              {proProfile.instagram_url && (
+                <a
+                  href={proProfile.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full text-sm hover:bg-white/30 transition-colors mb-3"
+                >
+                  <Instagram className="w-4 h-4" />
+                  <span>{proProfile.instagram_url.replace(/^https?:\/\/(www\.)?instagram\.com\//, '@').replace(/\/$/, '')}</span>
+                </a>
+              )}
 
               {proProfile.bio && (
                 <p className="text-white mb-3">{proProfile.bio}</p>
@@ -792,510 +545,384 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto">
-            <button
-              onClick={() => {
-                setActiveTab('services');
-                if (bookingStep !== 'service' && bookingStep !== 'success') {
-                  setBookingStep('service');
-                  setSelectedService(null);
-                  setSelectedDate(null);
-                  setSelectedTime(null);
-                }
-              }}
-              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
-                activeTab === 'services'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Scissors className="w-5 h-5" />
-                <span>Services</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('gallery')}
-              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
-                activeTab === 'gallery'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <ImageIcon className="w-5 h-5" />
-                <span>Galerie</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
-                activeTab === 'reviews'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Star className="w-5 h-5" />
-                <span>Avis</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('institute')}
-              className={`flex-1 min-w-fit py-4 px-4 font-semibold transition-all ${
-                activeTab === 'institute'
-                  ? 'text-brand-600 border-b-2 border-brand-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <ImageIcon className="w-5 h-5" />
-                <span>Institut</span>
-              </div>
-            </button>
+      <div className="container mx-auto px-4 py-6">
+        <div className="bg-white rounded-t-2xl border-b border-gray-200 sticky top-0 z-10">
+          <div className="flex gap-1">
+            {(['services', 'gallery', 'reviews', 'institute'] as const).map(tab => {
+              const icons = { services: Scissors, gallery: ImageIcon, reviews: Star, institute: ImageIcon };
+              const labels = { services: 'Services', gallery: 'Galerie', reviews: 'Avis', institute: 'Institut' };
+              const Icon = icons[tab];
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex-1 py-4 px-4 font-semibold transition-all ${
+                    activeTab === tab
+                      ? 'text-brand-600 border-b-2 border-brand-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Icon className="w-5 h-5" />
+                    <span>{labels[tab]}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        {activeTab === 'services' && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            {bookingStep === 'service' && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Choisissez une prestation</h2>
-                {services.length === 0 ? (
-                  <p className="text-gray-600 text-center py-8">Aucune prestation disponible pour le moment.</p>
-                ) : (
-                  <div className="grid gap-4">
-                    {services.map((service) => {
-                      const pricing = calculateServicePrice(service);
-                      const hasOffer = pricing.discounted !== null;
-                      const hasSupplements = service.supplements && service.supplements.length > 0;
-
-                      return (
+        <div className="bg-white rounded-b-2xl p-6 shadow-sm">
+          {activeTab === 'services' && (
+            <div>
+              {services.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-600">Aucune prestation disponible</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {providerCategories.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                      <button
+                        onClick={() => setServiceCategoryFilter('all')}
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                          serviceCategoryFilter === 'all'
+                            ? 'bg-brand-600 text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Tous
+                      </button>
+                      {providerCategories.map(cat => (
                         <button
-                          key={service.id}
-                          onClick={() => handleServiceSelect(service)}
-                          className="border-2 border-gray-200 rounded-xl hover:border-brand-300 hover:bg-brand-50/30 transition-all text-left overflow-hidden relative"
+                          key={cat}
+                          onClick={() => setServiceCategoryFilter(cat)}
+                          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                            serviceCategoryFilter === cat
+                              ? 'bg-brand-600 text-white shadow-sm'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
                         >
-                          {hasOffer && (
-                            <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
-                              <Sparkles className="w-3 h-3" />
-                              {service.offer_type === 'percentage'
-                                ? `-${service.special_offer}%`
-                                : `-${service.special_offer}€`
-                              }
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {(serviceCategoryFilter === 'all' ? services : services.filter(s => s.category === serviceCategoryFilter)).map((service) => {
+                    const calculatedPrice = service.special_offer && service.offer_type
+                      ? service.offer_type === 'percentage'
+                        ? service.price * (1 - parseFloat(service.special_offer) / 100)
+                        : service.price - parseFloat(service.special_offer)
+                      : service.price;
+
+                    return (
+                      <div
+                        key={service.id}
+                        className="border border-gray-200 rounded-xl overflow-hidden hover:border-brand-300 hover:shadow-lg transition-all bg-white"
+                      >
+                        <div className="flex gap-3 p-4">
+                          {service.photo_url ? (
+                            <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                              <img src={service.photo_url} alt={service.name} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-50 rounded-lg flex items-center justify-center">
+                              <Scissors className="w-8 h-8 text-brand-300" />
                             </div>
                           )}
 
-                          <div className="flex gap-3">
-                            {service.photo_url ? (
-                              <div className="w-24 h-24 flex-shrink-0">
-                                <img
-                                  src={service.photo_url}
-                                  alt={service.name}
-                                  className="w-full h-full object-cover"
-                                  loading="lazy"
-                                />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-bold text-gray-900">{service.name}</h3>
+                                  {service.special_offer && service.offer_type && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-300 whitespace-nowrap">
+                                      <Sparkles className="w-3 h-3 mr-1" />
+                                      -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '\u20AC'}
+                                    </span>
+                                  )}
+                                </div>
+                                {service.service_type && (
+                                  <p className="text-xs text-gray-500">{service.service_type}</p>
+                                )}
                               </div>
-                            ) : (
-                              <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center">
-                                <Scissors className="w-10 h-10 text-brand-300" />
+                              <div className="text-right">
+                                {service.is_on_quote ? (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">Sur devis</span>
+                                ) : (
+                                  <>
+                                    {service.special_offer && service.offer_type && (
+                                      <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} {'\u20AC'}</div>
+                                    )}
+                                    <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} {'\u20AC'}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            {service.description && (
+                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{service.description}</p>
+                            )}
+
+                            <p className="text-gray-500 text-xs mb-3">
+                              <Clock className="w-3 h-3 inline mr-1" />{service.duration} minutes
+                            </p>
+
+                            {service.supplements && service.supplements.length > 0 && (
+                              <div className="border-t border-gray-100 pt-3 mt-3">
+                                <p className="text-xs font-semibold text-gray-700 mb-2">Options disponibles:</p>
+                                <div className="space-y-1">
+                                  {service.supplements.map((supplement) => (
+                                    <div key={supplement.id} className="flex items-center justify-between text-xs">
+                                      <span className="text-gray-600">+ {supplement.name}</span>
+                                      <div className="flex items-center gap-2 text-gray-500">
+                                        <span>{supplement.duration_minutes} min</span>
+                                        <span className="font-semibold text-brand-600">+{supplement.price.toFixed(2)} {'\u20AC'}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             )}
 
-                            <div className="flex-1 p-3 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{service.name}</h3>
-                                  {service.service_type && <p className="text-xs text-gray-500 mb-2">{service.service_type}</p>}
-                                  {service.description && <p className="text-gray-600 text-sm mb-2">{service.description}</p>}
-
-                                  <div className="flex items-center gap-4 text-sm text-gray-700">
-                                    <span className="flex items-center gap-1">
-                                      <Clock className="w-4 h-4" />
-                                      {service.duration} min
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div className="text-right">
-                                  {hasOffer && (
-                                    <div className="text-xs text-gray-400 line-through mb-0.5">
-                                      {pricing.original.toFixed(2)} €
-                                    </div>
-                                  )}
-                                  <span className="font-bold text-brand-600 text-sm whitespace-nowrap">
-                                    {(hasOffer ? pricing.discounted! : pricing.original).toFixed(2)} €
-                                  </span>
-                                </div>
-                              </div>
-
-                              {hasSupplements && (
-                                <div className="mt-3 pt-3 border-t border-gray-100">
-                                  <p className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3 text-brand-300" />
-                                    Options disponibles:
-                                  </p>
-                                  <div className="space-y-1">
-                                    {service.supplements!.map((supplement) => (
-                                      <div
-                                        key={supplement.id}
-                                        className="flex items-center justify-between text-xs"
-                                      >
-                                        <span className="text-gray-600">+ {supplement.name}</span>
-                                        <div className="flex items-center gap-2">
-                                          {supplement.duration_minutes && (
-                                            <span className="text-gray-500">{supplement.duration_minutes} min</span>
-                                          )}
-                                          <span className="font-semibold text-brand-600">
-                                            +{Number(supplement.price).toFixed(2)} €
-                                          </span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                            <button
+                              onClick={() => handleSelectService(service)}
+                              className="mt-4 w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-sm hover:shadow-md"
+                            >
+                              Reserver
+                            </button>
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {bookingStep === 'date' && selectedService && (
-              <div>
-                <button
-                  onClick={() => setBookingStep('service')}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Changer de prestation
-                </button>
-                <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm font-medium text-gray-900">{selectedService.name}</p>
-                  <p className="text-sm text-gray-600">
-                    {calculateTotalDuration()} min - {calculateTotalPrice().toFixed(2)} €
-                  </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              )}
+            </div>
+          )}
 
-                {selectedService.supplements && selectedService.supplements.length > 0 && (
-                  <div className="mb-6 bg-white border-2 border-brand-200 rounded-xl p-5">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Plus className="w-5 h-5 text-brand-600" />
-                      Suppléments disponibles
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedService.supplements.map((supplement) => (
-                        <label
-                          key={supplement.id}
-                          className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-brand-50 cursor-pointer transition-colors"
+          {activeTab === 'gallery' && (() => {
+            const galleryCategories = [...new Set(
+              photos.map(p => p.service_category || p.service_name).filter(Boolean)
+            )].sort();
+            const filteredPhotos = galleryCategoryFilter === 'all'
+              ? photos
+              : photos.filter(p => p.service_category === galleryCategoryFilter || p.service_name === galleryCategoryFilter);
+            const displayedPhotos = filteredPhotos.slice(0, photosDisplayCount);
+            const hasMore = filteredPhotos.length > photosDisplayCount;
+
+            return (
+              <div>
+                {photos.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">Aucune photo disponible</p>
+                  </div>
+                ) : (
+                  <>
+                    {galleryCategories.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto pb-4 -mx-1 px-1">
+                        <button
+                          onClick={() => { setGalleryCategoryFilter('all'); setPhotosDisplayCount(PHOTOS_PER_PAGE); }}
+                          className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                            galleryCategoryFilter === 'all'
+                              ? 'bg-brand-600 text-white shadow-sm'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
                         >
-                          <input
-                            type="checkbox"
-                            checked={selectedSupplements.includes(supplement.id)}
-                            onChange={() => toggleSupplement(supplement.id)}
-                            className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-2 focus:ring-brand-500"
-                          />
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900">{supplement.name}</p>
-                            <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
-                              {supplement.duration_minutes && (
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  +{supplement.duration_minutes} min
-                                </span>
-                              )}
-                              <span className="font-semibold text-brand-600">+{Number(supplement.price).toFixed(2)} €</span>
+                          Toutes ({photos.length})
+                        </button>
+                        {galleryCategories.map(cat => {
+                          const count = photos.filter(p => p.service_category === cat || p.service_name === cat).length;
+                          return (
+                            <button
+                              key={cat}
+                              onClick={() => { setGalleryCategoryFilter(cat); setPhotosDisplayCount(PHOTOS_PER_PAGE); }}
+                              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                                galleryCategoryFilter === cat
+                                  ? 'bg-brand-600 text-white shadow-sm'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {cat} ({count})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {displayedPhotos.map((photo) => (
+                        <div key={photo.id} className="relative group aspect-square">
+                          <img src={photo.photo_url} alt={photo.service_name || 'Photo'} className="w-full h-full object-cover rounded-xl" />
+                          {photo.service_name && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl">
+                              <p className="text-white text-sm font-medium">{photo.service_name}</p>
                             </div>
-                          </div>
-                        </label>
+                          )}
+                        </div>
                       ))}
                     </div>
-                  </div>
-                )}
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Choisissez une date</h2>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <button
-                      onClick={() =>
-                        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
-                      }
-                      className="p-2 hover:bg-gray-100 rounded-lg"
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <h3 className="text-lg font-semibold">{formatMonthYear(currentMonth)}</h3>
-                    <button
-                      onClick={() =>
-                        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
-                      }
-                      className="p-2 hover:bg-gray-100 rounded-lg"
-                    >
-                      <ArrowLeft className="w-5 h-5 rotate-180" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-7 gap-2 mb-2">
-                    {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
-                      <div key={day} className="text-center text-sm font-medium text-gray-600">
-                        {day}
+                    {hasMore && (
+                      <div className="text-center mt-6">
+                        <button
+                          onClick={() => {
+                            setLoadingMorePhotos(true);
+                            setTimeout(() => {
+                              setPhotosDisplayCount(prev => prev + PHOTOS_PER_PAGE);
+                              setLoadingMorePhotos(false);
+                            }, 300);
+                          }}
+                          disabled={loadingMorePhotos}
+                          className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-all disabled:opacity-50"
+                        >
+                          {loadingMorePhotos ? (
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                          Voir plus
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7 gap-2">{renderCalendar()}</div>
-                </div>
+                    )}
+
+                    {filteredPhotos.length === 0 && galleryCategoryFilter !== 'all' && (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">Aucune photo dans cette categorie</p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
+            );
+          })()}
 
-            {bookingStep === 'time' && selectedDate && selectedService && (
-              <div>
-                <button
-                  onClick={() => setBookingStep('date')}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Changer de date
-                </button>
-                <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm font-medium text-gray-900">{selectedService.name}</p>
-                  <p className="text-sm text-gray-600">
-                    {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {calculateTotalDuration()} min - {calculateTotalPrice().toFixed(2)} €
-                  </p>
+          {activeTab === 'reviews' && (
+            <div>
+              {user && (
+                <div className="mb-6">
+                  {!showReviewForm ? (
+                    <button
+                      onClick={() => setShowReviewForm(true)}
+                      className="w-full py-3 border-2 border-brand-300 text-brand-600 rounded-xl font-semibold hover:bg-brand-50 transition-all"
+                    >
+                      Laisser un avis
+                    </button>
+                  ) : (
+                    <form onSubmit={handleSubmitReview} className="p-4 border-2 border-brand-300 rounded-xl">
+                      <h3 className="font-bold text-gray-900 mb-4">Votre avis</h3>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                        <div className="flex gap-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                              className="focus:outline-none"
+                            >
+                              <Star className={`w-8 h-8 ${star <= reviewForm.rating ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Commentaire</label>
+                        <textarea
+                          value={reviewForm.comment}
+                          onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                          rows={4}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                          placeholder="Partagez votre experience..."
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Photo (optionnelle)</label>
+                        <div className="flex items-center gap-4">
+                          {reviewForm.photo ? (
+                            <div className="relative">
+                              <img src={URL.createObjectURL(reviewForm.photo)} alt="Preview" className="w-24 h-24 object-cover rounded-lg border-2 border-brand-300" />
+                              <button
+                                type="button"
+                                onClick={() => setReviewForm({ ...reviewForm, photo: null })}
+                                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-all">
+                              <Upload className="w-5 h-5 text-gray-400" />
+                              <span className="text-sm text-gray-600">Ajouter une photo</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) setReviewForm({ ...reviewForm, photo: file });
+                                }}
+                                className="hidden"
+                              />
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setShowReviewForm(false)}
+                          className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="flex-1 py-2 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all disabled:opacity-50"
+                        >
+                          {submitting ? 'Publication...' : 'Publier'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Choisissez une heure</h2>
+              )}
 
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {getAvailableTimeSlots(selectedDate).map((slot) => (
-                    <div key={slot.time} className="relative group">
-                      <button
-                        disabled={!slot.available}
-                        onClick={() => handleTimeSelect(slot.time)}
-                        className={`w-full p-3 rounded-lg font-medium transition-all ${
-                          slot.available
-                            ? 'bg-brand-100 text-brand-900 hover:bg-brand-600 hover:text-white'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
-                      >
-                        {slot.time}
-                      </button>
+              {reviews.length === 0 ? (
+                <div className="text-center py-12">
+                  <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">Aucun avis pour le moment</p>
+                  <p className="text-sm text-gray-500 mt-2">Soyez le premier a laisser un avis !</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="p-4 border border-gray-200 rounded-xl">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="font-semibold text-gray-900">{review.client_name}</p>
+                          <p className="text-sm text-gray-500">{new Date(review.created_at).toLocaleDateString('fr-FR')}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-amber-500 fill-amber-500" />
+                          ))}
+                        </div>
+                      </div>
+                      {review.comment && <p className="text-gray-700 mb-3">{review.comment}</p>}
+                      {review.photo_url && (
+                        <img src={review.photo_url} alt="Photo de l'avis" className="w-full max-w-xs rounded-lg border border-gray-200 mt-3" />
+                      )}
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
-            {bookingStep === 'account' && selectedDate && selectedService && selectedTime && (
-              <div>
-                <button
-                  onClick={() => setBookingStep('time')}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Changer d'heure
-                </button>
-
-                <div className="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm font-medium text-gray-900 mb-2">{selectedService.name}</p>
-                  <p className="text-sm text-gray-600">
-                    {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à {selectedTime}
-                  </p>
-                  <div className="mt-2 pt-2 border-t border-brand-200 flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">Total</span>
-                    <span className="text-lg font-bold text-brand-600">{calculateTotalPrice().toFixed(2)} €</span>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-brand-50 to-brand-100 border-2 border-brand-200 rounded-xl p-6 mb-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Inscription obligatoire</h3>
-                  <p className="text-sm text-gray-700">
-                    Pour valider votre rendez-vous, vous devez créer un compte ou vous connecter.
-                  </p>
-                </div>
-
-                <div className="flex gap-2 mb-6">
-                  <button
-                    onClick={() => setHasAccount(false)}
-                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                      !hasAccount
-                        ? 'bg-gradient-to-r from-brand-600 to-brand-50 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Créer un compte
-                  </button>
-                  <button
-                    onClick={() => setHasAccount(true)}
-                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                      hasAccount
-                        ? 'bg-gradient-to-r from-brand-600 to-brand-50 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    J'ai un compte
-                  </button>
-                </div>
-
-                <form onSubmit={handleAccountSubmit} className="space-y-4">
-                  {!hasAccount && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <User className="w-4 h-4 inline mr-1" />
-                          Prénom *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={clientInfo.firstName}
-                          onChange={(e) => setClientInfo({ ...clientInfo, firstName: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <User className="w-4 h-4 inline mr-1" />
-                          Nom *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={clientInfo.lastName}
-                          onChange={(e) => setClientInfo({ ...clientInfo, lastName: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <Mail className="w-4 h-4 inline mr-1" />
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={clientInfo.email}
-                      onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                      placeholder="votre@email.com"
-                    />
-                  </div>
-
-                  {!hasAccount && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <PhoneIcon className="w-4 h-4 inline mr-1" />
-                        Téléphone
-                      </label>
-                      <input
-                        type="tel"
-                        value={clientInfo.phone}
-                        onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                        placeholder="06 12 34 56 78"
-                      />
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <Lock className="w-4 h-4 inline mr-1" />
-                      Mot de passe *
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={clientInfo.password}
-                      onChange={(e) => setClientInfo({ ...clientInfo, password: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                      placeholder="Minimum 6 caractères"
-                      minLength={6}
-                    />
-                  </div>
-
-                  {!hasAccount && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Notes (optionnel)</label>
-                      <textarea
-                        value={bookingNotes}
-                        onChange={(e) => setBookingNotes(e.target.value)}
-                        rows={3}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                        placeholder="Informations supplémentaires..."
-                      />
-                    </div>
-                  )}
-
-                  {authError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
-                      {authError}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={authLoading || submitting}
-                    className="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-lg disabled:opacity-50"
-                  >
-                    {authLoading || submitting
-                      ? 'Validation en cours...'
-                      : hasAccount
-                      ? 'Se connecter et réserver'
-                      : 'Créer mon compte et réserver'
-                    }
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'gallery' && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            {photos.length === 0 ? (
-              <div className="text-center py-12">
-                <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Aucune photo disponible</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {photos.map((photo) => (
-                  <div key={photo.id} className="relative group aspect-square">
-                    <img
-                      src={photo.photo_url}
-                      alt={photo.service_name || 'Photo'}
-                      className="w-full h-full object-cover rounded-xl"
-                    />
-                    {photo.service_name && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl">
-                        <p className="text-white text-sm font-medium">{photo.service_name}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'institute' && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
+          {activeTab === 'institute' && (
             <InstituteTabContent
               institutePhotos={proProfile.institute_photos}
               diplomas={proProfile.diplomas}
@@ -1304,158 +931,98 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
               bookingInstructions={proProfile.booking_instructions}
               cancellationPolicy={proProfile.cancellation_policy}
             />
-          </div>
-        )}
-
-        {activeTab === 'reviews' && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            {user && (
-              <div className="mb-6">
-                {!showReviewForm ? (
-                  <button
-                    onClick={() => setShowReviewForm(true)}
-                    className="w-full py-3 border-2 border-brand-300 text-brand-600 rounded-xl font-semibold hover:bg-brand-50 transition-all"
-                  >
-                    Laisser un avis
-                  </button>
-                ) : (
-                  <form onSubmit={handleSubmitReview} className="p-4 border-2 border-brand-300 rounded-xl">
-                    <h3 className="font-bold text-gray-900 mb-4">Votre avis</h3>
-
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
-                      <div className="flex gap-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setReviewForm({ ...reviewForm, rating: star })}
-                            className="focus:outline-none"
-                          >
-                            <Star
-                              className={`w-8 h-8 ${
-                                star <= reviewForm.rating
-                                  ? 'text-amber-500 fill-amber-500'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Commentaire</label>
-                      <textarea
-                        value={reviewForm.comment}
-                        onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                        rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                        placeholder="Partagez votre expérience..."
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Photo (optionnelle)</label>
-                      <div className="flex items-center gap-4">
-                        {reviewForm.photo ? (
-                          <div className="relative">
-                            <img
-                              src={URL.createObjectURL(reviewForm.photo)}
-                              alt="Preview"
-                              className="w-24 h-24 object-cover rounded-lg border-2 border-brand-300"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setReviewForm({ ...reviewForm, photo: null })}
-                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-all">
-                            <Upload className="w-5 h-5 text-gray-400" />
-                            <span className="text-sm text-gray-600">Ajouter une photo</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setReviewForm({ ...reviewForm, photo: file });
-                                }
-                              }}
-                              className="hidden"
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setShowReviewForm(false)}
-                        className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="flex-1 py-2 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all disabled:opacity-50"
-                      >
-                        {submitting ? 'Publication...' : 'Publier'}
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            )}
-
-            {reviews.length === 0 ? (
-              <div className="text-center py-12">
-                <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Aucun avis pour le moment</p>
-                <p className="text-sm text-gray-500 mt-2">Soyez le premier à laisser un avis !</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div key={review.id} className="p-4 border border-gray-200 rounded-xl">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-semibold text-gray-900">{review.client_name}</p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(review.created_at).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <Star key={i} className="w-4 h-4 text-amber-500 fill-amber-500" />
-                        ))}
-                      </div>
-                    </div>
-                    {review.comment && (
-                      <p className="text-gray-700 mb-3">{review.comment}</p>
-                    )}
-                    {review.photo_url && (
-                      <div className="mt-3">
-                        <img
-                          src={review.photo_url}
-                          alt="Photo de l'avis"
-                          className="w-full max-w-xs rounded-lg border border-gray-200"
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {bookingStep !== 'browse' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="my-8">
+            {bookingStep === 'datetime' && selectedService && (
+              <TimeSlotPicker
+                providerId={proProfile.user_id}
+                serviceId={selectedService.id}
+                serviceDuration={selectedService.duration}
+                supplementsDuration={selectedSupplements.reduce((sum, suppId) => {
+                  const supp = selectedService.supplements?.find(s => s.id === suppId);
+                  return sum + (supp?.duration_minutes || 0);
+                }, 0)}
+                onSelectSlot={handleSelectTimeSlot}
+                onClose={resetBooking}
+              />
+            )}
+
+            {bookingStep === 'summary' && selectedService && selectedDate && selectedTime && (
+              <BookingSummary
+                service={selectedService}
+                selectedSupplements={selectedService.supplements?.filter(s => selectedSupplements.includes(s.id)) || []}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                onConfirm={handleConfirmBooking}
+                onCancel={resetBooking}
+              />
+            )}
+
+            {bookingStep === 'auth' && selectedService && selectedDate && selectedTime && (
+              <AuthGate
+                onAuthenticated={handleAuthenticated}
+                bookingContext={{
+                  service: selectedService,
+                  selectedSupplements: selectedService.supplements?.filter(s => selectedSupplements.includes(s.id)) || [],
+                  selectedDate,
+                  selectedTime,
+                }}
+                providerId={proProfile.user_id}
+                companyId={proProfile.company_id}
+              />
+            )}
+
+            {bookingStep === 'deposit' && createdBookingId && (
+              <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
+                <DepositPayment
+                  bookingId={createdBookingId}
+                  amount={depositSettings.deposit_amount}
+                  companyName={proProfile.company_name}
+                  serviceName={selectedService?.name || 'Service'}
+                  clientEmail={clientEmail}
+                  clientName={clientName}
+                  stripeAvailable={depositSettings.stripe_available}
+                  paypalAvailable={depositSettings.paypal_available}
+                  feePayedByClient={depositSettings.deposit_fee_payer === 'client'}
+                  onSuccess={() => setBookingStep('success')}
+                  onCancel={() => setBookingStep('success')}
+                />
+              </div>
+            )}
+
+            {bookingStep === 'success' && (
+              <div className="bg-white rounded-xl max-w-md w-full p-8 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8 text-belaya-bright" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Reservation envoyee !</h3>
+                <p className="text-gray-600 mb-6">
+                  Votre demande de reservation a ete envoyee a {proProfile.company_name}. Vous recevrez une confirmation par email.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={resetBooking}
+                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Fermer
+                  </button>
+                  <a
+                    href="/"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all text-center"
+                  >
+                    Accueil
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

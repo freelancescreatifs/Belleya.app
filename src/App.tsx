@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './components/auth/AuthPage';
 import Landing from './pages/Landing';
 import PublicBooking from './pages/PublicBooking';
+import BookingDirectory from './pages/BookingDirectory';
 import Sidebar from './components/layout/Sidebar';
 import BottomNavigation from './components/layout/BottomNavigation';
 import Dashboard from './pages/Dashboard';
@@ -189,7 +190,7 @@ function AppContent() {
   const isPartnerDashboardPage = pathname === '/partner/dashboard';
 
   const KNOWN_ROUTES = [
-    '/', '/partenaire', '/partenaire/apply', '/partner/dashboard',
+    '/', '/book', '/partenaire', '/partenaire/apply', '/partner/dashboard',
     '/pricing', '/subscription-success', '/subscription-cancel',
     '/mentions-legales', '/cgv', '/settings', '/diag-auth',
   ];
@@ -231,6 +232,15 @@ function AppContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
       </div>
+    );
+  }
+
+  if (pathname === '/book') {
+    return (
+      <>
+        <BookingDirectory />
+        <ChatBot />
+      </>
     );
   }
 
