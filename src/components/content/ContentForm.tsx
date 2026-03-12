@@ -472,23 +472,9 @@ export default function ContentForm({
     setGeneratingCaption(true);
     try {
       const primaryPlatform = selectedPlatforms[0] || 'instagram';
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
 
-      if (!token) {
-        showToast('error', 'Session expirée, veuillez vous reconnecter.');
-        return;
-      }
-
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-content-script`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('generate-content-script', {
+        body: {
           mode: 'produce',
           title: formData.title,
           content_type: formData.content_type,
@@ -498,24 +484,14 @@ export default function ContentForm({
           target_audience: formData.target_audience || undefined,
           awareness_level: formData.awareness_level || undefined,
           profession: professionType || 'nail_artist',
-        }),
+        },
       });
 
-      if (!response.ok) {
-        let errorMsg = `Erreur HTTP ${response.status}`;
-        try {
-          const err = await response.json();
-          errorMsg = err.error || err.details || errorMsg;
-        } catch {
-          const text = await response.text();
-          if (text) errorMsg = text.substring(0, 200);
-        }
-        throw new Error(errorMsg);
+      if (error) {
+        throw new Error(error.message || 'Erreur lors de la génération');
       }
 
-      const data = await response.json();
-
-      if (data.script) {
+      if (data?.script) {
         setFormData({ ...formData, description: data.script });
         showToast('success', 'Script stratégique IA généré avec succès !');
       } else {

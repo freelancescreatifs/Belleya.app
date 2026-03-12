@@ -90,55 +90,15 @@ async function callContentAI(
     awareness_level?: string;
   }
 ) {
-  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-content-script`;
-  const session = await supabase.auth.getSession();
-  const token = session.data.session?.access_token;
+  const { data, error } = await supabase.functions.invoke('generate-content-script', {
+    body: { mode, ...params },
+  });
 
-  if (!token) {
-    throw new Error('Session expirée, veuillez vous reconnecter.');
+  if (error) {
+    throw new Error(error.message || 'Erreur de connexion avec le serveur AI');
   }
 
-  const controller = new AbortController();
-  const timeoutMs = mode === 'ideas' ? 30000 : 60000;
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({ mode, ...params }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      let errorMsg = `HTTP ${response.status}`;
-      try {
-        const err = await response.json();
-        errorMsg = err.error || err.details || errorMsg;
-      } catch {
-        const text = await response.text();
-        if (text) errorMsg = text.substring(0, 200);
-      }
-      throw new Error(errorMsg);
-    }
-
-    return response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('La generation a pris trop de temps. Veuillez reessayer.');
-    }
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('Erreur de connexion avec le serveur AI');
-  }
+  return data;
 }
 
 export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorProps) {
