@@ -275,6 +275,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
 
       if (error) throw error;
       loadTemplates();
+      onUpdated();
     } catch (error) {
       console.error('Error toggling template:', error);
     }
@@ -301,6 +302,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
       if (error) throw error;
       setNewTemplateLabel('');
       loadTemplates();
+      onUpdated();
       showToast('success', 'Document ajoute');
     } catch (error) {
       console.error('Error adding template:', error);
@@ -319,6 +321,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
 
       if (error) throw error;
       loadTemplates();
+      onUpdated();
       showToast('success', 'Document supprime');
     } catch (error) {
       console.error('Error deleting template:', error);
