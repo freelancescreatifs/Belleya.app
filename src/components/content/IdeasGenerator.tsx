@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { X, Sparkles, Calendar, Target, Loader, Trash2, Star, StarOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
 import { type ProfessionKey } from '../../lib/professionHelpers';
+import ToastContainer from '../shared/ToastContainer';
 
 interface SavedIdea {
   id: string;
@@ -106,6 +108,7 @@ async function callContentAI(
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
       },
       body: JSON.stringify({ mode, ...params }),
       signal: controller.signal,
@@ -140,6 +143,7 @@ async function callContentAI(
 
 export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorProps) {
   const { user } = useAuth();
+  const { toasts, showToast, dismissToast } = useToast();
   const [profession, setProfession] = useState<ProfessionKey | null>(null);
   const [pillars, setPillars] = useState<EditorialPillar[]>([]);
   const [targetAudiences, setTargetAudiences] = useState<TargetAudience[]>([]);
@@ -297,7 +301,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
   async function handleCreateTargetAudience() {
     if (!user || !newAudience.audience_name.trim()) {
-      alert('Le nom du profil cible est obligatoire');
+      showToast('error', 'Le nom du profil cible est obligatoire');
       return;
     }
 
@@ -309,7 +313,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         .maybeSingle();
 
       if (!companyData?.id) {
-        alert('Impossible de trouver votre entreprise');
+        showToast('error', 'Impossible de trouver votre entreprise');
         return;
       }
 
@@ -335,17 +339,17 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         setAiIdea({ ...aiIdea, target_audience_id: data.id });
         setNewAudience({ audience_name: '', keywords: '' });
         setShowNewAudienceModal(false);
-        alert('Profil cible créé avec succès!');
+        showToast('success', 'Profil cible créé avec succès !');
       }
     } catch (error) {
       console.error('Error creating target audience:', error);
-      alert('Erreur lors de la création du profil cible');
+      showToast('error', 'Erreur lors de la création du profil cible');
     }
   }
 
   async function handleCreateManualIdea() {
     if (!user || !manualIdea.title.trim()) {
-      alert('Le titre est obligatoire');
+      showToast('error', 'Le titre est obligatoire');
       return;
     }
 
@@ -386,14 +390,14 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       if (error) {
         console.error('Error creating manual idea:', error);
         setErrorMessage(`Erreur: ${error.message}`);
-        alert(`Erreur lors de la creation: ${error.message}`);
+        showToast('error', `Erreur lors de la creation: ${error.message}`);
         return;
       }
 
       if (!data || data.length === 0) {
         console.error('No data returned after insert');
         setErrorMessage('Aucune donnee retournee');
-        alert('Erreur: Aucune donnee retournee');
+        showToast('error', 'Erreur: Aucune donnee retournee');
         return;
       }
 
@@ -409,12 +413,12 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         editorial_pillar: ''
       });
 
-      alert('Idee creee avec succes !');
+      showToast('success', 'Idee creee avec succes !');
     } catch (error: any) {
       console.error('Exception creating manual idea:', error);
       const errorMsg = error?.message || 'Erreur inconnue';
       setErrorMessage(errorMsg);
-      alert(`Erreur: ${errorMsg}`);
+      showToast('error', `Erreur: ${errorMsg}`);
     } finally {
       setSaving(false);
     }
@@ -422,13 +426,13 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
   async function handleGenerateAI() {
     if (!user) {
-      alert('Vous devez etre connecte');
+      showToast('error', 'Vous devez etre connecte');
       return;
     }
 
     if (!profession) {
       setErrorMessage('Veuillez d\'abord configurer votre profession dans les parametres');
-      alert('Veuillez d\'abord configurer votre profession dans les parametres');
+      showToast('error', 'Veuillez d\'abord configurer votre profession dans les parametres');
       return;
     }
 
@@ -459,7 +463,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       const ideas = Array.isArray(aiResponse) ? aiResponse : [];
 
       if (ideas.length === 0) {
-        alert('Aucune idee generee. Essayez avec d\'autres parametres.');
+        showToast('error', 'Aucune idee generee. Essayez avec d\'autres parametres.');
         return;
       }
 
@@ -495,13 +499,13 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       if (error) {
         console.error('Error generating AI ideas:', error);
         setErrorMessage(`Erreur: ${error.message}`);
-        alert(`Erreur lors de la generation: ${error.message}`);
+        showToast('error', `Erreur lors de la generation: ${error.message}`);
         return;
       }
 
       if (!data || data.length === 0) {
         console.error('No data returned after AI insert');
-        alert('Erreur: Aucune donnee retournee');
+        showToast('error', 'Erreur: Aucune donnee retournee');
         return;
       }
 
@@ -520,12 +524,12 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         awareness_level: 'conscient_probleme'
       });
 
-      alert(`${ideas.length} idees generees avec succes !`);
+      showToast('success', `${ideas.length} idees generees avec succes !`);
     } catch (error: any) {
       console.error('Exception generating AI ideas:', error);
       const errorMsg = error?.message || 'Erreur inconnue';
       setErrorMessage(errorMsg);
-      alert(`Erreur: ${errorMsg}`);
+      showToast('error', `Erreur: ${errorMsg}`);
     } finally {
       setGenerating(false);
     }
@@ -582,11 +586,11 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
 
       setShowProductionModal(false);
       setSelectedIdea(null);
-      alert('Idee ajoutee a la production !');
+      showToast('success', 'Idee ajoutee a la production !');
       onIdeaSaved(selectedIdea.id);
     } catch (error) {
       console.error('Error converting to production:', error);
-      alert('Erreur lors de la conversion');
+      showToast('error', 'Erreur lors de la conversion');
       await loadSavedIdeas();
     } finally {
       setProducing(false);
@@ -650,10 +654,10 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
       if (error) throw error;
 
       setSavedIdeas(prev => prev.filter(i => i.id !== ideaId));
-      alert('Idée ajoutée au calendrier !');
+      showToast('success', 'Idée ajoutée au calendrier !');
     } catch (error) {
       console.error('Error moving idea to production:', error);
-      alert('Erreur lors du déplacement de l\'idée');
+      showToast('error', 'Erreur lors du déplacement de l\'idée');
     }
   }
 
@@ -1198,6 +1202,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         </div>
       </div>
     )}
+
+    <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
     {showNewAudienceModal && (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[60]">

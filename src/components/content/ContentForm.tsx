@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Save, Calendar, Clock, Image as ImageIcon, Upload, Sparkles, Info, Link as LinkIcon, Trash2, Wand2, FileText, Video, Scissors, CheckCircle, Send, File as FileEdit, AlertTriangle, Plus, X, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
 import { normalizeTime } from '../../lib/timeHelpers';
 import { generateContentAI } from '../../lib/contentAIGenerator';
 import MediaUploader from './MediaUploader';
 import PublishModal from './PublishModal';
 import { MediaFile, uploadMultipleMedia, getMediaType, urlsToMediaFiles } from '../../lib/mediaHelpers';
 import InfoTooltip from '../shared/InfoTooltip';
+import ToastContainer from '../shared/ToastContainer';
 
 interface ContentItem {
   id: string;
@@ -127,6 +129,7 @@ export default function ContentForm({
   onCancel
 }: ContentFormProps) {
   const { user, profile } = useAuth();
+  const { toasts, showToast, dismissToast } = useToast();
   const [formData, setFormData] = useState({
     title: prefillData?.title || '',
     description: prefillData?.description || '',
@@ -287,7 +290,7 @@ export default function ContentForm({
 
   async function handleCreateTargetAudience() {
     if (!user || !newAudience.audience_name.trim()) {
-      alert('Le nom du profil cible est obligatoire');
+      showToast('error', 'Le nom du profil cible est obligatoire');
       return;
     }
 
@@ -299,7 +302,7 @@ export default function ContentForm({
         .maybeSingle();
 
       if (!companyData?.id) {
-        alert('Impossible de trouver votre entreprise');
+        showToast('error', 'Impossible de trouver votre entreprise');
         return;
       }
 
@@ -325,11 +328,11 @@ export default function ContentForm({
         setFormData({ ...formData, target_audience: data.id });
         setNewAudience({ audience_name: '', keywords: '' });
         setShowNewAudienceModal(false);
-        alert('Profil cible créé avec succès!');
+        showToast('success', 'Profil cible créé avec succès !');
       }
     } catch (error) {
       console.error('Error creating target audience:', error);
-      alert('Erreur lors de la création du profil cible');
+      showToast('error', 'Erreur lors de la création du profil cible');
     }
   }
 
@@ -358,7 +361,7 @@ export default function ContentForm({
       setShowAddPillar(false);
     } catch (error) {
       console.error('Error adding pillar:', error);
-      alert('Erreur lors de l\'ajout du pilier');
+      showToast('error', 'Erreur lors de l\'ajout du pilier');
     }
   }
 
@@ -380,7 +383,7 @@ export default function ContentForm({
       await loadProfessionAndPillars();
     } catch (error) {
       console.error('Error deleting pillar:', error);
-      alert('Erreur lors de la suppression du pilier');
+      showToast('error', 'Erreur lors de la suppression du pilier');
     }
   }
 
@@ -454,7 +457,7 @@ export default function ContentForm({
       }
     } catch (error) {
       console.error('Error loading content:', error);
-      alert('Erreur lors du chargement du contenu');
+      showToast('error', 'Erreur lors du chargement du contenu');
     } finally {
       setLoading(false);
     }
@@ -462,7 +465,7 @@ export default function ContentForm({
 
   async function handleGenerateAI() {
     if (!formData.title) {
-      alert('Veuillez d\'abord saisir un titre');
+      showToast('error', 'Veuillez d\'abord saisir un titre');
       return;
     }
 
@@ -473,7 +476,7 @@ export default function ContentForm({
       const token = session.data.session?.access_token;
 
       if (!token) {
-        alert('Session expirée, veuillez vous reconnecter.');
+        showToast('error', 'Session expirée, veuillez vous reconnecter.');
         return;
       }
 
@@ -483,6 +486,7 @@ export default function ContentForm({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({
           mode: 'produce',
@@ -513,13 +517,13 @@ export default function ContentForm({
 
       if (data.script) {
         setFormData({ ...formData, description: data.script });
-        alert('Script stratégique IA généré avec succès !');
+        showToast('success', 'Script stratégique IA généré avec succès !');
       } else {
-        alert('Aucun script généré. Réessayez.');
+        showToast('error', 'Aucun script généré. Réessayez.');
       }
     } catch (error: any) {
       console.error('Error generating AI content:', error);
-      alert(error.message || 'Erreur lors de la génération du contenu');
+      showToast('error', error.message || 'Erreur lors de la génération du contenu');
     } finally {
       setGeneratingCaption(false);
     }
@@ -527,7 +531,7 @@ export default function ContentForm({
 
   async function handleGenerateCaption() {
     if (!formData.description) {
-      alert('Veuillez d\'abord générer ou saisir un script détaillé');
+      showToast('error', 'Veuillez d\'abord générer ou saisir un script détaillé');
       return;
     }
 
@@ -570,10 +574,10 @@ export default function ContentForm({
         caption: finalCaption
       });
 
-      alert('Légende générée avec succès !');
+      showToast('success', 'Légende générée avec succès !');
     } catch (error) {
       console.error('Error generating caption:', error);
-      alert('Erreur lors de la génération de la légende');
+      showToast('error', 'Erreur lors de la génération de la légende');
     } finally {
       setGeneratingScript(false);
     }
@@ -583,7 +587,7 @@ export default function ContentForm({
     const publicationDate = formData.publication_date;
 
     if (!publicationDate) {
-      alert('Veuillez d\'abord définir une date de publication');
+      showToast('error', 'Veuillez d\'abord définir une date de publication');
       return;
     }
 
@@ -613,7 +617,7 @@ export default function ContentForm({
     if (!user) return;
 
     if (selectedPlatforms.length === 0) {
-      alert('Veuillez sélectionner au moins une plateforme');
+      showToast('error', 'Veuillez sélectionner au moins une plateforme');
       return;
     }
 
@@ -742,7 +746,7 @@ export default function ContentForm({
         error: error
       });
 
-      alert(errorMessage);
+      showToast('error', errorMessage);
     } finally {
       setSaving(false);
     }
@@ -1432,6 +1436,8 @@ export default function ContentForm({
         </div>
       </div>
     )}
+
+    <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
     {showPublishModal && contentId && (
       <PublishModal

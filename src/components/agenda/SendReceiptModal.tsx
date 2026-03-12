@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Mail, MessageSquare, Send, AlertCircle, Calendar, Clock } from 'lucide-react';
 import { Event } from '../../types/agenda';
+import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 import { formatDate, formatTime } from '../../lib/calendarHelpers';
 
@@ -46,13 +47,23 @@ export default function SendReceiptModal({
     setLoading(true);
 
     try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+
+      if (!token) {
+        showToast('error', 'Session expirée, veuillez vous reconnecter.');
+        setLoading(false);
+        return;
+      }
+
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-receipt`;
 
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({
           eventId: event.id,
