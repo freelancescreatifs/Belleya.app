@@ -229,8 +229,8 @@ export default function TimeSlotPicker({
     onSelectSlot(selectedDate, time);
   }
 
-  const daysInMonth = getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth());
-  const firstDay = getFirstDayOfMonth(currentMonth.getFullYear(), currentMonth.getMonth());
+  const daysInMonth = getDaysInMonth(currentMonth);
+  const firstDay = getFirstDayOfMonth(currentMonth);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 

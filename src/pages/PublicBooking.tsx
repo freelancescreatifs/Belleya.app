@@ -653,9 +653,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                 ) : (
                                   <>
                                     {service.special_offer && service.offer_type && (
-                                      <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} {'\u20AC'}</div>
+                                      <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} €</div>
                                     )}
-                                    <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} {'\u20AC'}</span>
+                                    <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} €</span>
                                   </>
                                 )}
                               </div>
@@ -678,7 +678,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                       <span className="text-gray-600">+ {supplement.name}</span>
                                       <div className="flex items-center gap-2 text-gray-500">
                                         <span>{supplement.duration_minutes} min</span>
-                                        <span className="font-semibold text-brand-600">+{supplement.price.toFixed(2)} {'\u20AC'}</span>
+                                        <span className="font-semibold text-brand-600">+{supplement.price.toFixed(2)} €</span>
                                       </div>
                                     </div>
                                   ))}

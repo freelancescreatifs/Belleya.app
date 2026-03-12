@@ -587,7 +587,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                                   {service.special_offer && service.offer_type && (
                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-300 whitespace-nowrap">
                                       <Sparkles className="w-3 h-3 mr-1" />
-                                      -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '\u20AC'}
+                                      -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '€'}
                                     </span>
                                   )}
                                 </div>
@@ -601,9 +601,9 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                                 ) : (
                                   <>
                                     {service.special_offer && service.offer_type && (
-                                      <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} \u20AC</div>
+                                      <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} €</div>
                                     )}
-                                    <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} \u20AC</span>
+                                    <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} €</span>
                                   </>
                                 )}
                               </div>
@@ -626,7 +626,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                                       <span className="text-gray-600">+ {supplement.name}</span>
                                       <div className="flex items-center gap-2 text-gray-500">
                                         <span>{supplement.duration_minutes} min</span>
-                                        <span className="font-semibold text-brand-600">+{supplement.price.toFixed(2)} \u20AC</span>
+                                        <span className="font-semibold text-brand-600">+{supplement.price.toFixed(2)} €</span>
                                       </div>
                                     </div>
                                   ))}
