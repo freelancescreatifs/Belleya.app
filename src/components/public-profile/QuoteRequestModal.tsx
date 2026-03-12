@@ -52,7 +52,6 @@ export default function QuoteRequestModal({
   const [clientPhone, setClientPhone] = useState('');
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
-  const [existingPhone, setExistingPhone] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'form' | 'success'>('form');
 
@@ -62,15 +61,19 @@ export default function QuoteRequestModal({
 
   async function loadData() {
     try {
-      const { data: profile } = await supabase
+      let name = '';
+      let email = '';
+      let phone = '';
+
+      const { data: profileData } = await supabase
         .from('user_profiles')
         .select('first_name, last_name, email')
         .eq('user_id', clientUserId)
         .maybeSingle();
 
-      if (profile) {
-        setClientName(`${profile.first_name || ''} ${profile.last_name || ''}`.trim());
-        setClientEmail(profile.email || '');
+      if (profileData) {
+        name = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
+        email = profileData.email || '';
       }
 
       const { data: clientRecord } = await supabase
@@ -82,16 +85,19 @@ export default function QuoteRequestModal({
 
       if (clientRecord) {
         if (clientRecord.phone) {
-          setClientPhone(clientRecord.phone);
-          setExistingPhone(true);
+          phone = clientRecord.phone;
         }
-        if (!clientName && clientRecord.first_name) {
-          setClientName(`${clientRecord.first_name} ${clientRecord.last_name || ''}`.trim());
+        if (!name && clientRecord.first_name) {
+          name = `${clientRecord.first_name} ${clientRecord.last_name || ''}`.trim();
         }
-        if (!clientEmail && clientRecord.email) {
-          setClientEmail(clientRecord.email);
+        if (!email && clientRecord.email) {
+          email = clientRecord.email;
         }
       }
+
+      setClientName(name);
+      setClientEmail(email);
+      setClientPhone(phone);
 
       const { data: questionnaires } = await supabase
         .from('service_questionnaires')
@@ -177,15 +183,15 @@ export default function QuoteRequestModal({
         company_id: companyId,
       });
 
-      if (!existingPhone && clientPhone) {
+      if (clientPhone) {
         const { data: existingClient } = await supabase
           .from('clients')
-          .select('id')
+          .select('id, phone')
           .eq('user_id', providerId)
           .eq('belaya_user_id', clientUserId)
           .maybeSingle();
 
-        if (existingClient) {
+        if (existingClient && !existingClient.phone) {
           await supabase
             .from('clients')
             .update({ phone: clientPhone })
@@ -319,8 +325,8 @@ export default function QuoteRequestModal({
     <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl flex flex-col max-h-[90vh]">
       <div className="p-5 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
-            <FileText className="w-5 h-5 text-teal-600" />
+          <div className="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center">
+            <FileText className="w-5 h-5 text-brand-600" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-gray-900">Demande de devis</h3>
@@ -372,27 +378,27 @@ export default function QuoteRequestModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Nom <span className="text-gray-400 text-xs">(pre-rempli)</span>
+                Nom
               </label>
               <input
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-gray-50"
-                readOnly={!!clientName}
+                placeholder="Votre nom complet"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Email <span className="text-gray-400 text-xs">(pre-rempli)</span>
+                Email
               </label>
               <input
                 type="email"
                 value={clientEmail}
                 onChange={(e) => setClientEmail(e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-gray-50"
-                readOnly={!!clientEmail}
+                placeholder="votre@email.com"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               />
             </div>
 
@@ -407,16 +413,10 @@ export default function QuoteRequestModal({
                   value={clientPhone}
                   onChange={(e) => setClientPhone(e.target.value)}
                   placeholder="06 12 34 56 78"
-                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm ${
-                    existingPhone ? 'border-gray-200 bg-gray-50' : 'border-gray-300 bg-white'
-                  }`}
-                  readOnly={existingPhone}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
                   required
                 />
               </div>
-              {existingPhone && (
-                <p className="text-xs text-gray-400 mt-1">Telephone deja enregistre sur votre fiche</p>
-              )}
             </div>
 
             {questionnaire && (
@@ -443,7 +443,7 @@ export default function QuoteRequestModal({
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-lg font-semibold hover:from-teal-700 hover:to-teal-600 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>

@@ -282,7 +282,11 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     setSelectedService(service);
     setSelectedSupplements([]);
     if (service.is_on_quote || service.has_questionnaire) {
-      setBookingStep('quote_auth');
+      if (isClientLoggedIn) {
+        setBookingStep('quote');
+      } else {
+        setBookingStep('quote_auth');
+      }
     } else {
       setBookingStep('datetime');
     }
@@ -692,11 +696,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
                             <button
                               onClick={() => handleSelectService(service)}
-                              className={`mt-4 w-full py-2.5 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow-md ${
-                                service.is_on_quote || service.has_questionnaire
-                                  ? 'bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600'
-                                  : 'bg-gradient-to-r from-brand-600 to-brand-50 hover:from-brand-700 hover:to-brand-100'
-                              }`}
+                              className="mt-4 w-full py-2.5 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow-md bg-gradient-to-r from-brand-600 to-brand-50 hover:from-brand-700 hover:to-brand-100"
                             >
                               {service.is_on_quote || service.has_questionnaire ? 'Demander un devis' : 'Reserver'}
                             </button>
