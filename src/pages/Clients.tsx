@@ -101,6 +101,14 @@ export default function Clients() {
   }, [user, clientFilter]);
 
   useEffect(() => {
+    const pendingClientId = localStorage.getItem('belaya_open_client');
+    if (pendingClientId) {
+      localStorage.removeItem('belaya_open_client');
+      setSelectedClientId(pendingClientId);
+    }
+  }, []);
+
+  useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }

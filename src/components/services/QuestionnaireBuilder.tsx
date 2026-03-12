@@ -182,8 +182,8 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         <div className="p-5 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-teal-100 rounded-lg">
-              <ClipboardList className="w-5 h-5 text-teal-700" />
+            <div className="p-2 bg-brand-100 rounded-lg">
+              <ClipboardList className="w-5 h-5 text-brand-700" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">Questionnaires du service</h3>
@@ -209,12 +209,12 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
               )}
 
               {questionnaires.map((q) => (
-                <div key={q.id} className={`border rounded-xl p-4 transition-all ${q.is_active ? 'border-teal-200 bg-teal-50/50' : 'border-gray-200 bg-gray-50'}`}>
+                <div key={q.id} className={`border rounded-xl p-4 transition-all ${q.is_active ? 'border-brand-200 bg-brand-50/50' : 'border-gray-200 bg-gray-50'}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-semibold text-gray-900 text-sm">{q.title}</h4>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${q.is_active ? 'bg-teal-200 text-teal-800' : 'bg-gray-200 text-gray-600'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${q.is_active ? 'bg-brand-200 text-brand-800' : 'bg-gray-200 text-gray-600'}`}>
                           {q.is_active ? 'Actif' : 'Inactif'}
                         </span>
                         {q.send_once_only && (
@@ -227,7 +227,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         onClick={() => toggleActive(q.id, q.is_active)}
-                        className={`p-1.5 rounded-lg transition-colors ${q.is_active ? 'text-teal-600 hover:bg-teal-100' : 'text-gray-400 hover:bg-gray-100'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${q.is_active ? 'text-brand-600 hover:bg-brand-100' : 'text-gray-400 hover:bg-gray-100'}`}
                         title={q.is_active ? 'Desactiver' : 'Activer'}
                       >
                         {q.is_active ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
@@ -253,7 +253,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
 
               <button
                 onClick={() => setShowNewForm(true)}
-                className="w-full py-3 border-2 border-dashed border-teal-300 rounded-xl text-teal-700 font-medium hover:bg-teal-50 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 border-2 border-dashed border-brand-300 rounded-xl text-brand-700 font-medium hover:bg-brand-50 transition-all flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Creer un questionnaire
@@ -268,7 +268,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="Ex: Fiche client - Soins du visage"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
               </div>
 
@@ -279,7 +279,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                   onChange={(e) => setFormDescription(e.target.value)}
                   rows={2}
                   placeholder="Informations pour la cliente..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
               </div>
 
@@ -302,7 +302,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                   <button
                     type="button"
                     onClick={addField}
-                    className="px-3 py-1.5 text-xs font-medium bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 text-xs font-medium bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition-colors flex items-center gap-1"
                   >
                     <Plus className="w-3 h-3" />
                     Ajouter
@@ -365,7 +365,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                               value={field.label}
                               onChange={(e) => updateField(field.id, { label: e.target.value })}
                               placeholder="Ex: Avez-vous des allergies ?"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                             />
                           </div>
 
@@ -375,7 +375,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                               <select
                                 value={field.type}
                                 onChange={(e) => updateField(field.id, { type: e.target.value as QuestionField['type'] })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                               >
                                 {FIELD_TYPES.map(t => (
                                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -388,7 +388,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                                   type="checkbox"
                                   checked={field.required}
                                   onChange={(e) => updateField(field.id, { required: e.target.checked })}
-                                  className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                                  className="w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
                                 />
                                 <span className="text-sm text-gray-700">Obligatoire</span>
                               </label>
@@ -403,7 +403,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                                 value={field.placeholder || ''}
                                 onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                                 placeholder="Texte d'aide..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                               />
                             </div>
                           )}
@@ -413,11 +413,13 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
                               <label className="block text-xs font-medium text-gray-600 mb-1">Options (une par ligne)</label>
                               <textarea
                                 value={(field.options || []).join('\n')}
-                                onChange={(e) => updateField(field.id, { options: e.target.value.split('\n').filter(o => o.trim()) })}
-                                rows={3}
+                                onChange={(e) => updateField(field.id, { options: e.target.value.split('\n') })}
+                                onBlur={(e) => updateField(field.id, { options: e.target.value.split('\n').filter(o => o.trim()) })}
+                                rows={4}
                                 placeholder={"Option 1\nOption 2\nOption 3"}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                               />
+                              <p className="text-xs text-gray-400 mt-1">Appuyez sur Entree pour ajouter une nouvelle option</p>
                             </div>
                           )}
                         </div>
@@ -442,7 +444,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
               <button
                 onClick={handleSave}
                 disabled={saving || !formTitle.trim() || formFields.filter(f => f.label.trim()).length === 0}
-                className="px-6 py-2 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-2 bg-brand-600 text-white rounded-lg font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 {saving ? 'Enregistrement...' : editingId ? 'Mettre a jour' : 'Creer'}

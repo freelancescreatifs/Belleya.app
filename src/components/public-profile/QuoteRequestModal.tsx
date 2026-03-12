@@ -175,28 +175,33 @@ export default function QuoteRequestModal({
 
       if (insertError) throw insertError;
 
+      const { data: clientRecord } = await supabase
+        .from('clients')
+        .select('id, phone')
+        .eq('user_id', providerId)
+        .eq('belaya_user_id', clientUserId)
+        .maybeSingle();
+
       await supabase.from('notifications').insert({
         user_id: providerId,
         type: 'quote_request',
         title: 'Nouvelle demande de devis',
         message: `${clientName || 'Un client'} a fait une demande de devis pour "${service.name}".`,
         company_id: companyId,
+        entity_type: 'client',
+        entity_id: clientRecord?.id || null,
+        metadata: {
+          client_id: clientRecord?.id || null,
+          client_name: clientName,
+          service_name: service.name,
+        },
       });
 
-      if (clientPhone) {
-        const { data: existingClient } = await supabase
+      if (clientRecord && clientPhone && !clientRecord.phone) {
+        await supabase
           .from('clients')
-          .select('id, phone')
-          .eq('user_id', providerId)
-          .eq('belaya_user_id', clientUserId)
-          .maybeSingle();
-
-        if (existingClient && !existingClient.phone) {
-          await supabase
-            .from('clients')
-            .update({ phone: clientPhone })
-            .eq('id', existingClient.id);
-        }
+          .update({ phone: clientPhone })
+          .eq('id', clientRecord.id);
       }
 
       setStep('success');

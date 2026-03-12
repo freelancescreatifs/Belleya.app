@@ -970,7 +970,7 @@ export default function ClientDetailDrawer({
               {quoteRequests.length > 0 && (
                 <div className="mt-6 space-y-3">
                   <h3 className="font-bold text-gray-900 flex items-center gap-2 text-sm">
-                    <FileText className="w-4 h-4 text-teal-600" />
+                    <FileText className="w-4 h-4 text-brand-600" />
                     Demandes de devis ({quoteRequests.length})
                   </h3>
                   {quoteRequests.map((quote) => (
@@ -1014,7 +1014,7 @@ export default function ClientDetailDrawer({
 
                           {quote.questionnaire_title && quote.questionnaire_fields.length > 0 && (
                             <div className="space-y-2">
-                              <p className="text-xs font-semibold text-teal-700">{quote.questionnaire_title}</p>
+                              <p className="text-xs font-semibold text-brand-700">{quote.questionnaire_title}</p>
                               {quote.questionnaire_fields.map((field) => {
                                 const response = quote.questionnaire_responses[field.id];
                                 return (
@@ -1024,7 +1024,7 @@ export default function ClientDetailDrawer({
                                       Array.isArray(response) ? (
                                         <div className="flex flex-wrap gap-1">
                                           {response.map((val: string, i: number) => (
-                                            <span key={i} className="px-2 py-0.5 bg-teal-100 text-teal-800 rounded text-xs">{val}</span>
+                                            <span key={i} className="px-2 py-0.5 bg-brand-100 text-brand-800 rounded text-xs">{val}</span>
                                           ))}
                                         </div>
                                       ) : (
@@ -1213,12 +1213,12 @@ export default function ClientDetailDrawer({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4 text-teal-600" />
+                  <ClipboardList className="w-4 h-4 text-brand-600" />
                   Documents & Questionnaires
                 </h3>
                 <button
                   onClick={loadAvailableQuestionnaires}
-                  className="px-3 py-1.5 text-xs font-medium bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors flex items-center gap-1"
+                  className="px-3 py-1.5 text-xs font-medium bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition-colors flex items-center gap-1"
                 >
                   <Send className="w-3 h-3" />
                   Envoyer
@@ -1276,7 +1276,7 @@ export default function ClientDetailDrawer({
                                   Array.isArray(response) ? (
                                     <div className="flex flex-wrap gap-1">
                                       {response.map((val: string, i: number) => (
-                                        <span key={i} className="px-2 py-0.5 bg-teal-100 text-teal-800 rounded text-xs">{val}</span>
+                                        <span key={i} className="px-2 py-0.5 bg-brand-100 text-brand-800 rounded text-xs">{val}</span>
                                       ))}
                                     </div>
                                   ) : (
@@ -1329,16 +1329,16 @@ export default function ClientDetailDrawer({
                     <button
                       key={q.id}
                       onClick={() => sendQuestionnaireManually(q.id, q.service_id)}
-                      className="w-full p-3 border border-gray-200 rounded-lg hover:bg-teal-50 hover:border-teal-300 transition-all text-left flex items-center gap-3"
+                      className="w-full p-3 border border-gray-200 rounded-lg hover:bg-brand-50 hover:border-brand-300 transition-all text-left flex items-center gap-3"
                     >
-                      <div className="p-2 bg-teal-100 rounded-lg flex-shrink-0">
-                        <ClipboardList className="w-4 h-4 text-teal-700" />
+                      <div className="p-2 bg-brand-100 rounded-lg flex-shrink-0">
+                        <ClipboardList className="w-4 h-4 text-brand-700" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">{q.title}</p>
                         <p className="text-xs text-gray-500">Service: {q.service_name}</p>
                       </div>
-                      <Send className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                      <Send className="w-4 h-4 text-brand-600 flex-shrink-0" />
                     </button>
                   ))}
                 </div>

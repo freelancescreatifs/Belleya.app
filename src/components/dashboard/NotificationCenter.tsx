@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Check, X, Calendar, Star, Heart, Users, Eye, Repeat, Share2, CheckCircle, MessageCircle } from 'lucide-react';
+import { Bell, Check, X, Calendar, Star, Heart, Users, Eye, Repeat, Share2, CheckCircle, MessageCircle, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { autoSendQuestionnairesOnBooking } from '../../lib/questionnaireHelpers';
@@ -255,6 +255,8 @@ export default function NotificationCenter({ compact = true }: NotificationCente
         return <Star className="w-5 h-5 text-amber-500" />;
       case 'comment_received':
         return <MessageCircle className="w-5 h-5 text-rose-500" />;
+      case 'quote_request':
+        return <FileText className="w-5 h-5 text-brand-500" />;
       case 'new_follower':
         return <Users className="w-5 h-5 text-belaya-500" />;
       case 'new_like':
@@ -379,6 +381,28 @@ export default function NotificationCenter({ compact = true }: NotificationCente
             </button>
           </div>
         );
+
+      case 'quote_request': {
+        const clientId = notification.metadata?.client_id || notification.entity_id;
+        if (!clientId) return null;
+        return (
+          <div className="flex gap-2 mt-3 flex-wrap">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                markAsRead(notification.id);
+                localStorage.setItem('belaya_open_client', clientId);
+                window.dispatchEvent(new CustomEvent('belaya_navigate', { detail: { page: 'clients' } }));
+                setShowDropdown(false);
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 bg-brand-500 text-white rounded-lg text-xs font-medium hover:bg-brand-600 transition-colors"
+            >
+              <Eye className="w-3 h-3" />
+              Voir la fiche client
+            </button>
+          </div>
+        );
+      }
 
       default:
         return null;

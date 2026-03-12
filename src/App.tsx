@@ -153,7 +153,18 @@ function AppContent() {
     window.addEventListener('hashchange', handleHashChange);
     handleHashChange();
 
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    const handleBelayaNavigate = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.page) {
+        safeNavigate(detail.page, 'custom-event');
+      }
+    };
+    window.addEventListener('belaya_navigate', handleBelayaNavigate);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('belaya_navigate', handleBelayaNavigate);
+    };
   }, []);
 
   useEffect(() => {
