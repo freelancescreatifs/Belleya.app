@@ -3,7 +3,6 @@ import { GraduationCap, BookOpen, CheckCircle, Clock, AlertTriangle, Plus, Searc
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { StudentWithDetails, TrainingDashboardStats, StudentStatus } from '../types/training';
-import { ALL_REQUIRED_DOCUMENT_TYPES } from '../types/training';
 import { calculateStudentStatus, getStatusLabel, getStatusColor } from '../lib/studentHelpers';
 import StudentForm from '../components/training/StudentForm';
 import StudentDetailDrawer from '../components/training/StudentDetailDrawer';
@@ -49,24 +48,39 @@ export default function Training({ onPageChange }: TrainingProps) {
     setLoading(true);
     setError(null);
     try {
-      const { data: studentsData, error: studentsError } = await supabase
-        .from('students')
-        .select(`
-          *,
-          trainings:student_trainings(
+      await supabase.rpc('seed_default_training_templates', { p_company_id: profile.company_id });
+
+      const [studentsRes, templatesRes] = await Promise.all([
+        supabase
+          .from('students')
+          .select(`
             *,
-            training_program:training_programs(*)
-          ),
-          documents:student_documents(*)
-        `)
-        .eq('company_id', profile.company_id)
-        .order('created_at', { ascending: false });
+            trainings:student_trainings(
+              *,
+              training_program:training_programs(*)
+            ),
+            documents:student_documents(*)
+          `)
+          .eq('company_id', profile.company_id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('training_document_templates')
+          .select('id')
+          .eq('company_id', profile.company_id)
+          .eq('is_required', true),
+      ]);
 
-      if (studentsError) throw studentsError;
+      if (studentsRes.error) throw studentsRes.error;
 
-      const studentsWithDetails: StudentWithDetails[] = (studentsData || []).map(student => {
-        const existingDocTypes = new Set(student.documents?.map((d: any) => d.document_type) || []);
-        const missingCount = ALL_REQUIRED_DOCUMENT_TYPES.filter(type => !existingDocTypes.has(type)).length;
+      const requiredTemplateIds = new Set((templatesRes.data || []).map((t: any) => t.id));
+
+      const studentsWithDetails: StudentWithDetails[] = (studentsRes.data || []).map(student => {
+        const uploadedTemplateIds = new Set(
+          (student.documents || [])
+            .filter((d: any) => d.template_id)
+            .map((d: any) => d.template_id)
+        );
+        const missingCount = [...requiredTemplateIds].filter(id => !uploadedTemplateIds.has(id)).length;
 
         const calculatedStatus = calculateStudentStatus(student.training_start_date, student.training_end_date);
 

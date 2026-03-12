@@ -14,7 +14,9 @@ export type DocumentType =
   | 'skills_assessment'
   | 'satisfaction_survey'
   | 'completion_certificate'
-  | 'invoice';
+  | 'invoice'
+  | 'other'
+  | 'custom';
 
 export interface Student {
   id: string;
@@ -61,7 +63,19 @@ export interface StudentDocument {
   document_stage: DocumentStage;
   file_path: string;
   custom_name?: string;
+  template_id?: string;
   uploaded_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentTemplate {
+  id: string;
+  company_id: string;
+  label: string;
+  stage: DocumentStage;
+  is_required: boolean;
+  position: number;
   created_at: string;
   updated_at: string;
 }
@@ -83,14 +97,14 @@ export interface TrainingDashboardStats {
 export const DOCUMENT_TYPES_BY_STAGE: Record<DocumentStage, { type: DocumentType; label: string }[]> = {
   before: [
     { type: 'contract', label: 'Contrat / Convention de formation' },
-    { type: 'signed_quote', label: 'Devis signé' },
+    { type: 'signed_quote', label: 'Devis signe' },
     { type: 'training_program_doc', label: 'Programme de formation' },
-    { type: 'signed_rules', label: 'Règlement intérieur signé' },
+    { type: 'signed_rules', label: 'Reglement interieur signe' },
   ],
   during: [
-    { type: 'attendance_sheets', label: "Feuilles d'émargement" },
+    { type: 'attendance_sheets', label: "Feuilles d'emargement" },
     { type: 'training_materials', label: 'Supports de formation' },
-    { type: 'skills_assessment', label: 'Évaluation des acquis' },
+    { type: 'skills_assessment', label: 'Evaluation des acquis' },
     { type: 'satisfaction_survey', label: 'Questionnaire de satisfaction' },
   ],
   after: [
