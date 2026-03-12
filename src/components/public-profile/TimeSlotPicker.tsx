@@ -91,10 +91,10 @@ export default function TimeSlotPicker({
 
       const { data, error } = await supabase
         .from('events')
-        .select('start, end')
+        .select('start_at, end_at')
         .eq('user_id', providerId)
-        .gte('start', startOfMonth.toISOString())
-        .lte('start', endOfMonth.toISOString());
+        .gte('start_at', startOfMonth.toISOString())
+        .lte('start_at', endOfMonth.toISOString());
 
       if (error) throw error;
 
@@ -180,8 +180,8 @@ export default function TimeSlotPicker({
           const slotEnd = new Date(slotDateTime.getTime() + (totalDuration + bufferTime) * 60 * 1000);
 
           const hasConflict = events.some((event) => {
-            const eventStart = new Date(event.start);
-            const eventEnd = new Date(event.end);
+            const eventStart = new Date(event.start_at);
+            const eventEnd = new Date(event.end_at);
 
             return (
               (slotDateTime >= eventStart && slotDateTime < eventEnd) ||

@@ -266,24 +266,11 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
     await proceedWithBooking(userId, clientId);
   };
 
-  const proceedWithBooking = async (userId: string, clientId: string) => {
+  const proceedWithBooking = async (userId: string, _clientId: string) => {
     if (!selectedService || !selectedDate || !selectedTime || !provider) return;
 
     setCreatingBooking(true);
     try {
-      if (!clientId) {
-        const { data: existingClient } = await supabase
-          .from('clients')
-          .select('id')
-          .eq('user_id', providerId)
-          .eq('client_user_id', userId)
-          .maybeSingle();
-
-        if (existingClient) {
-          clientId = existingClient.id;
-        }
-      }
-
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const startDateTime = new Date(selectedDate);
       startDateTime.setHours(hours, minutes, 0, 0);
@@ -306,19 +293,14 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
       }, 0);
       const totalPrice = serviceFinalPrice + supplementsTotal;
 
-      const { error: bookingError } = await supabase.from('booking_requests').insert({
-        user_id: providerId,
-        client_id: clientId || null,
-        client_name: 'Client',
-        client_email: '',
-        service_name: selectedService.name,
-        service_duration: totalDuration,
-        service_price: totalPrice,
-        requested_date: startDateTime.toISOString().split('T')[0],
-        requested_time: selectedTime,
+      const { error: bookingError } = await supabase.from('bookings').insert({
+        client_id: userId,
+        pro_id: providerId,
+        service_id: selectedService.id,
+        appointment_date: startDateTime.toISOString(),
+        duration: totalDuration,
+        price: totalPrice,
         status: 'pending',
-        type: 'pro',
-        source: 'public_booking',
         supplements: selectedSupplements.map(suppId => {
           const supp = selectedService.supplements?.find(s => s.id === suppId);
           return {

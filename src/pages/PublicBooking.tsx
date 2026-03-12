@@ -304,19 +304,6 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         userName = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
       }
 
-      if (!clientId) {
-        const { data: existingClient } = await supabase
-          .from('clients')
-          .select('id')
-          .eq('user_id', proProfile.user_id)
-          .eq('client_user_id', userId)
-          .maybeSingle();
-
-        if (existingClient) {
-          clientId = existingClient.id;
-        }
-      }
-
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const startDateTime = new Date(selectedDate);
       startDateTime.setHours(hours, minutes, 0, 0);
@@ -339,19 +326,15 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       }, 0);
       const totalPrice = serviceFinalPrice + supplementsTotal;
 
-      const { data: booking, error: bookingError } = await supabase.from('booking_requests').insert({
-        user_id: proProfile.user_id,
-        client_id: clientId || null,
-        client_name: userName || 'Client',
-        client_email: userEmail,
-        service_name: selectedService.name,
-        service_duration: totalDuration,
-        service_price: totalPrice,
-        requested_date: startDateTime.toISOString().split('T')[0],
-        requested_time: selectedTime,
+      const { data: booking, error: bookingError } = await supabase.from('bookings').insert({
+        client_id: userId,
+        pro_id: proProfile.user_id,
+        service_id: selectedService.id,
+        appointment_date: startDateTime.toISOString(),
+        duration: totalDuration,
+        price: totalPrice,
         status: 'pending',
-        type: 'pro',
-        source: 'public_booking',
+        notes: `Reserv. par ${userName || 'Client'} (${userEmail})`,
         supplements: selectedSupplements.map(suppId => {
           const supp = selectedService.supplements?.find(s => s.id === suppId);
           return {
@@ -361,7 +344,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
             duration_minutes: supp?.duration_minutes || 0,
           };
         }),
-      }).select('id').single();
+      }).select('id').maybeSingle();
 
       if (bookingError) throw bookingError;
 
