@@ -32,6 +32,11 @@ interface TimeSlot {
   available: boolean;
 }
 
+interface BusySlot {
+  start_at: string;
+  end_at: string;
+}
+
 interface WeekSchedule {
   [key: string]: {
     is_open: boolean;
@@ -39,6 +44,8 @@ interface WeekSchedule {
     end_time: string;
   };
 }
+
+const BLOCKING_EVENT_TYPES = ['client', 'personal', 'pro', 'formation', 'google', 'planity'];
 
 export default function BookingAvailabilityModal({
   service,
@@ -53,6 +60,7 @@ export default function BookingAvailabilityModal({
   const [loading, setLoading] = useState(false);
   const [weekSchedule, setWeekSchedule] = useState<WeekSchedule | null>(null);
   const [bookingNote, setBookingNote] = useState('');
+  const [googleBusySlots, setGoogleBusySlots] = useState<BusySlot[]>([]);
 
   useEffect(() => {
     loadWeekSchedule();
@@ -125,19 +133,28 @@ export default function BookingAvailabilityModal({
     }
 
     const dateStr = selectedDate.toISOString().split('T')[0];
-    const { data: existingEvents } = await supabase
-      .from('events')
-      .select('start_at, end_at')
-      .eq('user_id', provider.user_id)
-      .gte('start_at', `${dateStr}T00:00:00`)
-      .lte('start_at', `${dateStr}T23:59:59`)
-      .in('type', ['pro', 'personal']);
+    const startOfDay = `${dateStr}T00:00:00`;
+    const endOfDay = `${dateStr}T23:59:59`;
+
+    const [eventsResult, googleResult] = await Promise.all([
+      supabase
+        .from('events')
+        .select('start_at, end_at')
+        .eq('user_id', provider.user_id)
+        .gte('start_at', startOfDay)
+        .lte('start_at', endOfDay)
+        .in('type', BLOCKING_EVENT_TYPES),
+      fetchGoogleBusySlots(startOfDay, endOfDay),
+    ]);
+
+    const existingEvents = eventsResult.data || [];
+    const busySlots = googleResult;
 
     const updatedSlots = slots.map(slot => {
       const slotDateTime = new Date(`${dateStr}T${slot.time}:00`);
       const slotEndTime = new Date(slotDateTime.getTime() + service.duration * 60000);
 
-      const hasConflict = existingEvents?.some(event => {
+      const hasEventConflict = existingEvents.some(event => {
         const eventStart = new Date(event.start_at);
         const eventEnd = new Date(event.end_at);
         return (
@@ -147,13 +164,52 @@ export default function BookingAvailabilityModal({
         );
       });
 
+      const hasGoogleConflict = busySlots.some(busy => {
+        const busyStart = new Date(busy.start_at);
+        const busyEnd = new Date(busy.end_at);
+        return (
+          (slotDateTime >= busyStart && slotDateTime < busyEnd) ||
+          (slotEndTime > busyStart && slotEndTime <= busyEnd) ||
+          (slotDateTime <= busyStart && slotEndTime >= busyEnd)
+        );
+      });
+
       return {
         ...slot,
-        available: !hasConflict,
+        available: !(hasEventConflict || hasGoogleConflict),
       };
     });
 
     setAvailableSlots(updatedSlots);
+  };
+
+  const fetchGoogleBusySlots = async (timeMin: string, timeMax: string): Promise<BusySlot[]> => {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/get-google-availability`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`,
+          'apikey': anonKey,
+        },
+        body: JSON.stringify({
+          proUserId: provider.user_id,
+          timeMin,
+          timeMax,
+        }),
+      });
+
+      if (!response.ok) return [];
+
+      const result = await response.json();
+      return result.busySlots || [];
+    } catch (error) {
+      console.error('Error fetching Google Calendar availability:', error);
+      return [];
+    }
   };
 
   const handleBooking = async () => {

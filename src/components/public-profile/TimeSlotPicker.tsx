@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, Clock, X, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatMonthYear, getDaysInMonth, getFirstDayOfMonth } from '../../lib/calendarHelpers';
@@ -13,6 +13,11 @@ interface TimeSlot {
 interface Event {
   start: string;
   end: string;
+}
+
+interface BusySlot {
+  start_at: string;
+  end_at: string;
 }
 
 interface WeeklyAvailability {
@@ -45,22 +50,30 @@ export default function TimeSlotPicker({
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [weeklyAvailability, setWeeklyAvailability] = useState<WeeklyAvailability | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
+  const [googleBusySlots, setGoogleBusySlots] = useState<BusySlot[]>([]);
   const [bufferTime, setBufferTime] = useState(15);
   const [advanceBookingHours, setAdvanceBookingHours] = useState(24);
   const [loading, setLoading] = useState(true);
+  const googleFetchedMonths = useRef<Set<string>>(new Set());
 
   const totalDuration = serviceDuration + supplementsDuration;
 
   useEffect(() => {
     loadProviderSettings();
     loadEvents();
+    loadGoogleBusySlots();
   }, [providerId]);
+
+  useEffect(() => {
+    loadEvents();
+    loadGoogleBusySlots();
+  }, [currentMonth]);
 
   useEffect(() => {
     if (selectedDate && weeklyAvailability) {
       calculateTimeSlots(selectedDate);
     }
-  }, [selectedDate, weeklyAvailability, events]);
+  }, [selectedDate, weeklyAvailability, events, googleBusySlots]);
 
   async function loadProviderSettings() {
     try {
@@ -101,6 +114,48 @@ export default function TimeSlotPicker({
       setEvents(data || []);
     } catch (error) {
       console.error('Error loading events:', error);
+    }
+  }
+
+  async function loadGoogleBusySlots() {
+    const monthKey = `${currentMonth.getFullYear()}-${currentMonth.getMonth()}`;
+    if (googleFetchedMonths.current.has(monthKey)) return;
+
+    try {
+      const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+      const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0, 23, 59, 59);
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/get-google-availability`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`,
+          'apikey': anonKey,
+        },
+        body: JSON.stringify({
+          proUserId: providerId,
+          timeMin: startOfMonth.toISOString(),
+          timeMax: endOfMonth.toISOString(),
+        }),
+      });
+
+      if (!response.ok) return;
+
+      const result = await response.json();
+      const slots: BusySlot[] = result.busySlots || [];
+
+      googleFetchedMonths.current.add(monthKey);
+
+      setGoogleBusySlots(prev => {
+        const existingKeys = new Set(prev.map(s => `${s.start_at}-${s.end_at}`));
+        const newSlots = slots.filter(s => !existingKeys.has(`${s.start_at}-${s.end_at}`));
+        return [...prev, ...newSlots];
+      });
+    } catch (error) {
+      console.error('Error loading Google Calendar availability:', error);
     }
   }
 
@@ -179,7 +234,7 @@ export default function TimeSlotPicker({
         } else {
           const slotEnd = new Date(slotDateTime.getTime() + (totalDuration + bufferTime) * 60 * 1000);
 
-          const hasConflict = events.some((event) => {
+          const hasEventConflict = events.some((event) => {
             const eventStart = new Date(event.start_at);
             const eventEnd = new Date(event.end_at);
 
@@ -189,6 +244,19 @@ export default function TimeSlotPicker({
               (slotDateTime <= eventStart && slotEnd >= eventEnd)
             );
           });
+
+          const hasGoogleConflict = googleBusySlots.some((busy) => {
+            const busyStart = new Date(busy.start_at);
+            const busyEnd = new Date(busy.end_at);
+
+            return (
+              (slotDateTime >= busyStart && slotDateTime < busyEnd) ||
+              (slotEnd > busyStart && slotEnd <= busyEnd) ||
+              (slotDateTime <= busyStart && slotEnd >= busyEnd)
+            );
+          });
+
+          const hasConflict = hasEventConflict || hasGoogleConflict;
 
           slots.push({
             time: timeString,
