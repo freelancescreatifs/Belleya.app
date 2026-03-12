@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Copy, Power, TrendingUp, X, Upload, Trash2, CheckCircle, Archive, Eye, Search } from 'lucide-react';
+import { Plus, Pencil, Copy, Power, TrendingUp, X, Upload, Trash2, CheckCircle, Archive, Eye, Search, FileText, ClipboardList } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import InfoTooltip from '../components/shared/InfoTooltip';
@@ -8,6 +8,7 @@ import { getServiceTypeTag, SERVICE_TYPES, type ServiceType } from '../lib/servi
 import { fetchUserCategories, createCategory, type CustomCategory } from '../lib/categoryHelpers';
 import SupplementsManager from '../components/services/SupplementsManager';
 import SupplementsDisplay from '../components/shared/SupplementsDisplay';
+import QuestionnaireBuilder from '../components/services/QuestionnaireBuilder';
 
 interface Service {
   id: string;
@@ -20,6 +21,7 @@ interface Service {
   status: string;
   recommended_frequency: number | null;
   has_vat: boolean;
+  is_on_quote: boolean;
   photo_url: string | null;
   special_offer: string | null;
   offer_type: 'percentage' | 'fixed' | null;
@@ -29,6 +31,11 @@ interface Service {
     name: string;
     price: number;
     duration_minutes: number;
+  }>;
+  questionnaires?: Array<{
+    id: string;
+    title: string;
+    is_active: boolean;
   }>;
 }
 
@@ -60,10 +67,13 @@ export default function Services() {
     status: 'active',
     recommended_frequency: '',
     has_vat: false,
+    is_on_quote: false,
     photo_url: '',
     special_offer: '',
     offer_type: '' as '' | 'percentage' | 'fixed',
   });
+  const [showQuestionnaireBuilder, setShowQuestionnaireBuilder] = useState(false);
+  const [questionnaireServiceId, setQuestionnaireServiceId] = useState<string | null>(null);
 
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
@@ -108,7 +118,7 @@ export default function Services() {
     if (!user) return;
 
     try {
-      const [servicesRes, supplementsRes] = await Promise.all([
+      const [servicesRes, supplementsRes, questionnairesRes] = await Promise.all([
         supabase
           .from('services')
           .select('*')
@@ -118,7 +128,11 @@ export default function Services() {
           .from('service_supplements')
           .select('service_id, id, name, price, duration_minutes')
           .eq('user_id', user.id)
-          .order('created_at')
+          .order('created_at'),
+        supabase
+          .from('service_questionnaires')
+          .select('service_id, id, title, is_active')
+          .eq('user_id', user.id)
       ]);
 
       if (servicesRes.error) throw servicesRes.error;
@@ -137,12 +151,20 @@ export default function Services() {
         return acc;
       }, {} as Record<string, any[]>);
 
-      const servicesWithSupplements = (servicesRes.data || []).map(service => ({
+      const questionnairesData = questionnairesRes.data || [];
+      const questionnairesByService = questionnairesData.reduce((acc, q: any) => {
+        if (!acc[q.service_id]) acc[q.service_id] = [];
+        acc[q.service_id].push({ id: q.id, title: q.title, is_active: q.is_active });
+        return acc;
+      }, {} as Record<string, any[]>);
+
+      const servicesWithExtras = (servicesRes.data || []).map(service => ({
         ...service,
-        supplements: supplementsByService[service.id] || []
+        supplements: supplementsByService[service.id] || [],
+        questionnaires: questionnairesByService[service.id] || []
       }));
 
-      setServices(servicesWithSupplements);
+      setServices(servicesWithExtras);
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
@@ -284,10 +306,11 @@ export default function Services() {
         service_type: formData.service_type,
         category: formData.category,
         duration: durationValue,
-        price: priceValue,
+        price: formData.is_on_quote ? 0 : priceValue,
         status: formData.status,
         recommended_frequency: recommendedFrequencyValue,
         has_vat: formData.has_vat,
+        is_on_quote: formData.is_on_quote,
         photo_url: photoUrl,
         special_offer: formData.special_offer && formData.offer_type ? formData.special_offer : null,
         offer_type: formData.special_offer && formData.offer_type ? formData.offer_type : null,
@@ -377,6 +400,7 @@ export default function Services() {
       status: service.status,
       recommended_frequency: service.recommended_frequency ? service.recommended_frequency.toString() : '',
       has_vat: service.has_vat,
+      is_on_quote: service.is_on_quote || false,
       photo_url: service.photo_url || '',
       special_offer: service.special_offer || '',
       offer_type: service.offer_type || '',
@@ -407,6 +431,7 @@ export default function Services() {
           status: service.status,
           recommended_frequency: service.recommended_frequency,
           has_vat: service.has_vat,
+          is_on_quote: service.is_on_quote,
           photo_url: service.photo_url,
           special_offer: service.special_offer,
           offer_type: service.offer_type,
@@ -665,9 +690,18 @@ export default function Services() {
                           {service.duration || 0} min
                         </td>
                         <td className="py-3 px-4">
-                          <div className="font-semibold text-gray-900">{service.price || 0}€</div>
-                          {service.has_vat && (
-                            <div className="text-xs text-gray-500">TVA incluse</div>
+                          {service.is_on_quote ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
+                              <FileText className="w-3 h-3" />
+                              Sur devis
+                            </span>
+                          ) : (
+                            <>
+                              <div className="font-semibold text-gray-900">{service.price || 0}€</div>
+                              {service.has_vat && (
+                                <div className="text-xs text-gray-500">TVA incluse</div>
+                              )}
+                            </>
                           )}
                           {service.supplements && service.supplements.length > 0 && (
                             <div className="mt-1.5">
@@ -676,6 +710,14 @@ export default function Services() {
                                 serviceType={service.service_type}
                                 variant="compact"
                               />
+                            </div>
+                          )}
+                          {service.questionnaires && service.questionnaires.length > 0 && (
+                            <div className="mt-1">
+                              <span className="inline-flex items-center gap-1 text-xs text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">
+                                <ClipboardList className="w-3 h-3" />
+                                {service.questionnaires.length} questionnaire{service.questionnaires.length > 1 ? 's' : ''}
+                              </span>
                             </div>
                           )}
                         </td>
@@ -690,6 +732,16 @@ export default function Services() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setQuestionnaireServiceId(service.id);
+                                setShowQuestionnaireBuilder(true);
+                              }}
+                              className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                              title="Questionnaires"
+                            >
+                              <ClipboardList className="w-4 h-4" />
+                            </button>
                             <button
                               onClick={() => handleEdit(service)}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -854,28 +906,44 @@ export default function Services() {
                 )}
 
                 <div className={formData.service_type === 'prestation' ? '' : 'col-span-2'}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prix (€) *
+                  <label className="flex items-center gap-3 mb-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_on_quote}
+                      onChange={(e) => setFormData({ ...formData, is_on_quote: e.target.checked, price: e.target.checked ? '' : formData.price })}
+                      className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-amber-600" />
+                      Sur devis
+                    </span>
                   </label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    required
-                    value={formData.price}
-                    onChange={(e) => {
-                      let value = e.target.value.replace(/[^0-9.]/g, '');
-                      const parts = value.split('.');
-                      if (parts.length > 2) {
-                        value = parts[0] + '.' + parts.slice(1).join('');
-                      }
-                      if (value.startsWith('0') && value.length > 1 && !value.startsWith('0.')) {
-                        value = value.replace(/^0+/, '');
-                      }
-                      setFormData({ ...formData, price: value });
-                    }}
-                    placeholder="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+                  {!formData.is_on_quote && (
+                    <>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Prix ({'\u20AC'}) *
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        required
+                        value={formData.price}
+                        onChange={(e) => {
+                          let value = e.target.value.replace(/[^0-9.]/g, '');
+                          const parts = value.split('.');
+                          if (parts.length > 2) {
+                            value = parts[0] + '.' + parts.slice(1).join('');
+                          }
+                          if (value.startsWith('0') && value.length > 1 && !value.startsWith('0.')) {
+                            value = value.replace(/^0+/, '');
+                          }
+                          setFormData({ ...formData, price: value });
+                        }}
+                        placeholder="0"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </>
+                  )}
                 </div>
 
                 {formData.service_type === 'prestation' && (
@@ -1221,6 +1289,13 @@ export default function Services() {
             </form>
           </div>
         </div>
+      )}
+      {showQuestionnaireBuilder && questionnaireServiceId && (
+        <QuestionnaireBuilder
+          serviceId={questionnaireServiceId}
+          onClose={() => { setShowQuestionnaireBuilder(false); setQuestionnaireServiceId(null); }}
+          onUpdate={fetchServices}
+        />
       )}
       </div>
     </ErrorBoundary>

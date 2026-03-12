@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, Check, X, Calendar, Star, Heart, Users, Eye, Repeat, Share2, CheckCircle, MessageCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { autoSendQuestionnairesOnBooking } from '../../lib/questionnaireHelpers';
 
 interface Notification {
   id: string;
@@ -22,7 +23,7 @@ interface NotificationCenterProps {
 }
 
 export default function NotificationCenter({ compact = true }: NotificationCenterProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -119,6 +120,23 @@ export default function NotificationCenter({ compact = true }: NotificationCente
       if (rpcError) throw rpcError;
       if (!data || !data.success) {
         throw new Error(data?.error || 'Erreur lors de l\'acceptation');
+      }
+
+      if (profile?.company_id) {
+        const { data: bookingInfo } = await supabase
+          .from('bookings')
+          .select('service_id')
+          .eq('id', bookingId)
+          .maybeSingle();
+
+        if (bookingInfo?.service_id) {
+          autoSendQuestionnairesOnBooking(
+            bookingId,
+            bookingInfo.service_id,
+            profile.company_id,
+            user!.id
+          );
+        }
       }
 
       await supabase

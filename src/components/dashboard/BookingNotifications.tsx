@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { autoSendQuestionnairesOnBooking } from '../../lib/questionnaireHelpers';
 import { Bell, X, Check, Calendar, Clock, User } from 'lucide-react';
 
 interface Notification {
@@ -32,7 +33,7 @@ interface Booking {
 }
 
 export default function BookingNotifications() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [bookingDetails, setBookingDetails] = useState<{ [key: string]: Booking }>({});
   const [loading, setLoading] = useState(true);
@@ -159,6 +160,23 @@ export default function BookingNotifications() {
       }
 
       console.log('Booking accepted successfully:', data);
+
+      if (profile?.company_id) {
+        const { data: bookingInfo } = await supabase
+          .from('bookings')
+          .select('service_id')
+          .eq('id', bookingId)
+          .maybeSingle();
+
+        if (bookingInfo?.service_id) {
+          autoSendQuestionnairesOnBooking(
+            bookingId,
+            bookingInfo.service_id,
+            profile.company_id,
+            user!.id
+          );
+        }
+      }
 
       const { error: notifError } = await supabase
         .from('notifications')

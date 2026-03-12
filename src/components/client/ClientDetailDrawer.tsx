@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake } from 'lucide-react';
+import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getClientTag } from '../../lib/clientTagHelpers';
@@ -67,6 +67,26 @@ interface RevenueBreakdown {
   count: number;
 }
 
+interface QuestionnaireSubmission {
+  id: string;
+  questionnaire_id: string;
+  service_id: string;
+  status: 'sent' | 'pending' | 'completed';
+  responses: Record<string, any>;
+  sent_at: string;
+  completed_at: string | null;
+  questionnaire_title: string;
+  questionnaire_fields: Array<{ id: string; label: string; type: string; required: boolean; options?: string[] }>;
+  service_name: string;
+}
+
+interface AvailableQuestionnaire {
+  id: string;
+  title: string;
+  service_id: string;
+  service_name: string;
+}
+
 interface ClientDetailDrawerProps {
   clientId: string;
   onClose: () => void;
@@ -104,7 +124,11 @@ export default function ClientDetailDrawer({
   });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'info' | 'gallery' | 'history' | 'appointments'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'gallery' | 'history' | 'appointments' | 'questionnaires'>('info');
+  const [submissions, setSubmissions] = useState<QuestionnaireSubmission[]>([]);
+  const [availableQuestionnaires, setAvailableQuestionnaires] = useState<AvailableQuestionnaire[]>([]);
+  const [expandedSubmission, setExpandedSubmission] = useState<string | null>(null);
+  const [showSendModal, setShowSendModal] = useState(false);
 
   useEffect(() => {
     if (clientId) {
@@ -113,6 +137,7 @@ export default function ClientDetailDrawer({
       loadRevenues();
       loadAppointments();
       loadStats();
+      loadSubmissions();
     }
   }, [clientId]);
 
@@ -323,6 +348,83 @@ export default function ClientDetailDrawer({
       setStats(calculatedStats);
     } catch (error) {
       console.error('[ClientDetailDrawer] Error loading stats:', error);
+    }
+  }
+
+  async function loadSubmissions() {
+    if (!user || !profile?.company_id) return;
+    try {
+      const { data } = await supabase
+        .from('client_questionnaire_submissions')
+        .select(`
+          id, questionnaire_id, service_id, status, responses,
+          sent_at, completed_at,
+          service_questionnaires(title, fields),
+          services(name)
+        `)
+        .eq('client_id', clientId)
+        .eq('company_id', profile.company_id)
+        .order('sent_at', { ascending: false });
+
+      if (data) {
+        setSubmissions(data.map((s: any) => ({
+          id: s.id,
+          questionnaire_id: s.questionnaire_id,
+          service_id: s.service_id,
+          status: s.status,
+          responses: s.responses || {},
+          sent_at: s.sent_at,
+          completed_at: s.completed_at,
+          questionnaire_title: s.service_questionnaires?.title || 'Questionnaire',
+          questionnaire_fields: s.service_questionnaires?.fields || [],
+          service_name: s.services?.name || 'Service',
+        })));
+      }
+    } catch (error) {
+      console.error('[ClientDetailDrawer] Error loading submissions:', error);
+    }
+  }
+
+  async function loadAvailableQuestionnaires() {
+    if (!user) return;
+    const { data } = await supabase
+      .from('service_questionnaires')
+      .select('id, title, service_id, services(name)')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+
+    if (data) {
+      const existingPairs = submissions.map(s => `${s.questionnaire_id}`);
+      setAvailableQuestionnaires(
+        data
+          .filter((q: any) => !existingPairs.includes(q.id))
+          .map((q: any) => ({
+            id: q.id,
+            title: q.title,
+            service_id: q.service_id,
+            service_name: q.services?.name || 'Service',
+          }))
+      );
+    }
+    setShowSendModal(true);
+  }
+
+  async function sendQuestionnaireManually(questionnaireId: string, svcId: string) {
+    if (!user || !profile?.company_id) return;
+
+    const { error } = await supabase
+      .from('client_questionnaire_submissions')
+      .insert({
+        questionnaire_id: questionnaireId,
+        client_id: clientId,
+        service_id: svcId,
+        company_id: profile.company_id,
+        status: 'sent',
+      });
+
+    if (!error) {
+      setShowSendModal(false);
+      loadSubmissions();
     }
   }
 
@@ -698,6 +800,17 @@ export default function ClientDetailDrawer({
                 <span className="hidden sm:inline">Rendez-vous ({appointments.length})</span>
                 <span className="sm:hidden">RDV ({appointments.length})</span>
               </button>
+              <button
+                onClick={() => setActiveTab('questionnaires')}
+                className={`px-3 md:px-4 py-2 font-medium border-b-2 transition-colors whitespace-nowrap text-sm md:text-base touch-manipulation ${
+                  activeTab === 'questionnaires'
+                    ? 'border-brand-500 text-brand-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="hidden sm:inline">Documents ({submissions.length})</span>
+                <span className="sm:hidden">Docs ({submissions.length})</span>
+              </button>
             </div>
           </div>
 
@@ -883,8 +996,145 @@ export default function ClientDetailDrawer({
               )}
             </div>
           )}
+
+          {activeTab === 'questionnaires' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-teal-600" />
+                  Documents & Questionnaires
+                </h3>
+                <button
+                  onClick={loadAvailableQuestionnaires}
+                  className="px-3 py-1.5 text-xs font-medium bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors flex items-center gap-1"
+                >
+                  <Send className="w-3 h-3" />
+                  Envoyer
+                </button>
+              </div>
+
+              {submissions.length === 0 ? (
+                <div className="text-center py-8">
+                  <ClipboardList className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">Aucun document envoye</p>
+                  <p className="text-xs text-gray-400 mt-1">Les questionnaires lies aux services seront envoyes automatiquement lors de la reservation</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {submissions.map((sub) => (
+                    <div key={sub.id} className={`border rounded-xl overflow-hidden ${
+                      sub.status === 'completed' ? 'border-green-200' : sub.status === 'pending' ? 'border-amber-200' : 'border-gray-200'
+                    }`}>
+                      <div
+                        className={`flex items-center gap-3 p-3 cursor-pointer ${
+                          sub.status === 'completed' ? 'bg-green-50' : sub.status === 'pending' ? 'bg-amber-50' : 'bg-gray-50'
+                        }`}
+                        onClick={() => setExpandedSubmission(expandedSubmission === sub.id ? null : sub.id)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{sub.questionnaire_title}</p>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              sub.status === 'completed' ? 'bg-green-200 text-green-800'
+                              : sub.status === 'pending' ? 'bg-amber-200 text-amber-800'
+                              : 'bg-gray-200 text-gray-700'
+                            }`}>
+                              {sub.status === 'completed' ? 'Complete' : sub.status === 'pending' ? 'En cours' : 'Envoye'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Service: {sub.service_name} - Envoye le {new Date(sub.sent_at).toLocaleDateString('fr-FR')}
+                            {sub.completed_at && ` - Complete le ${new Date(sub.completed_at).toLocaleDateString('fr-FR')}`}
+                          </p>
+                        </div>
+                        {expandedSubmission === sub.id ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                      </div>
+
+                      {expandedSubmission === sub.id && sub.status === 'completed' && (
+                        <div className="p-4 border-t border-gray-100 space-y-3">
+                          {sub.questionnaire_fields.map((field) => {
+                            const response = sub.responses[field.id];
+                            return (
+                              <div key={field.id} className="p-3 bg-white rounded-lg border border-gray-100">
+                                <p className="text-xs font-medium text-gray-600 mb-1">
+                                  {field.label}
+                                  {field.required && <span className="text-red-500 ml-0.5">*</span>}
+                                </p>
+                                {response !== undefined && response !== null && response !== '' ? (
+                                  Array.isArray(response) ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {response.map((val: string, i: number) => (
+                                        <span key={i} className="px-2 py-0.5 bg-teal-100 text-teal-800 rounded text-xs">{val}</span>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-gray-900">{String(response)}</p>
+                                  )
+                                ) : (
+                                  <p className="text-sm text-gray-400 italic">Non renseigne</p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {expandedSubmission === sub.id && sub.status !== 'completed' && (
+                        <div className="p-4 border-t border-gray-100">
+                          <p className="text-sm text-gray-500 text-center">
+                            En attente de la reponse du client
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {showSendModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[10000] p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[70vh] flex flex-col">
+            <div className="p-5 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+              <h3 className="text-base font-bold text-gray-900">Envoyer un questionnaire</h3>
+              <button onClick={() => setShowSendModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {availableQuestionnaires.length === 0 ? (
+                <div className="text-center py-6">
+                  <ClipboardList className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">Aucun questionnaire disponible</p>
+                  <p className="text-xs text-gray-400 mt-1">Tous les questionnaires ont deja ete envoyes ou aucun n'a ete cree</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {availableQuestionnaires.map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() => sendQuestionnaireManually(q.id, q.service_id)}
+                      className="w-full p-3 border border-gray-200 rounded-lg hover:bg-teal-50 hover:border-teal-300 transition-all text-left flex items-center gap-3"
+                    >
+                      <div className="p-2 bg-teal-100 rounded-lg flex-shrink-0">
+                        <ClipboardList className="w-4 h-4 text-teal-700" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{q.title}</p>
+                        <p className="text-xs text-gray-500">Service: {q.service_name}</p>
+                      </div>
+                      <Send className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

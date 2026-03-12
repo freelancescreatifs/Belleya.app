@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Star, Clock, Bell, X } from 'lucide-react';
+import { Calendar, MapPin, Star, Clock, Bell, X, ClipboardList, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import AppointmentDetailModal from '../../components/client/AppointmentDetailModal';
+import QuestionnaireFormModal from '../../components/client/QuestionnaireFormModal';
 
 interface Booking {
   id: string;
@@ -30,6 +31,17 @@ interface Notification {
   created_at: string;
 }
 
+interface PendingQuestionnaire {
+  id: string;
+  questionnaire_title: string;
+  questionnaire_description?: string;
+  questionnaire_fields: { id: string; label: string; type: string; required: boolean; options?: string[]; placeholder?: string }[];
+  service_name: string;
+  company_id: string;
+  status: string;
+  sent_at: string;
+}
+
 export default function ClientBookings() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -38,10 +50,13 @@ export default function ClientBookings() {
   const [loading, setLoading] = useState(true);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [pendingQuestionnaires, setPendingQuestionnaires] = useState<PendingQuestionnaire[]>([]);
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<PendingQuestionnaire | null>(null);
 
   useEffect(() => {
     loadBookings();
     loadNotifications();
+    loadPendingQuestionnaires();
   }, [user, activeTab]);
 
   const loadBookings = async () => {
@@ -117,6 +132,50 @@ export default function ClientBookings() {
 
     if (!error && data) {
       setNotifications(data);
+    }
+  };
+
+  const loadPendingQuestionnaires = async () => {
+    if (!user) return;
+
+    try {
+      const { data: clientRecords } = await supabase
+        .from('clients')
+        .select('id, user_id')
+        .eq('belaya_user_id', user.id);
+
+      if (!clientRecords || clientRecords.length === 0) return;
+
+      const clientIds = clientRecords.map(c => c.id);
+
+      const { data: submissions } = await supabase
+        .from('client_questionnaire_submissions')
+        .select(`
+          id, status, sent_at, company_id,
+          service_questionnaires(title, description, fields),
+          services(name)
+        `)
+        .in('client_id', clientIds)
+        .in('status', ['sent', 'pending'])
+        .order('sent_at', { ascending: false });
+
+      if (submissions) {
+        const mapped: PendingQuestionnaire[] = submissions
+          .filter((s: any) => s.service_questionnaires && s.services)
+          .map((s: any) => ({
+            id: s.id,
+            questionnaire_title: s.service_questionnaires.title,
+            questionnaire_description: s.service_questionnaires.description,
+            questionnaire_fields: s.service_questionnaires.fields || [],
+            service_name: s.services.name,
+            company_id: s.company_id,
+            status: s.status,
+            sent_at: s.sent_at,
+          }));
+        setPendingQuestionnaires(mapped);
+      }
+    } catch (error) {
+      console.error('Error loading pending questionnaires:', error);
     }
   };
 
@@ -206,6 +265,35 @@ export default function ClientBookings() {
       </div>
 
       <div className="px-4 -mt-6 space-y-4">
+        {pendingQuestionnaires.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg p-5 border-l-4 border-teal-500">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <ClipboardList className="w-5 h-5 text-teal-700" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900">Questionnaires a completer</h3>
+                <p className="text-xs text-gray-500">{pendingQuestionnaires.length} questionnaire{pendingQuestionnaires.length > 1 ? 's' : ''} en attente</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {pendingQuestionnaires.map((q) => (
+                <button
+                  key={q.id}
+                  onClick={() => setSelectedQuestionnaire(q)}
+                  className="w-full flex items-center gap-3 p-3 bg-teal-50 hover:bg-teal-100 rounded-xl transition-colors text-left"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm">{q.questionnaire_title}</p>
+                    <p className="text-xs text-gray-500 truncate">Service: {q.service_name}</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {notifications.length > 0 && (
           <div className="space-y-3">
             {notifications.map((notification) => (
@@ -381,6 +469,17 @@ export default function ClientBookings() {
             </button>
           </div>
         </div>
+      )}
+
+      {selectedQuestionnaire && (
+        <QuestionnaireFormModal
+          submission={selectedQuestionnaire}
+          onClose={() => setSelectedQuestionnaire(null)}
+          onCompleted={() => {
+            setSelectedQuestionnaire(null);
+            setPendingQuestionnaires(prev => prev.filter(q => q.id !== selectedQuestionnaire.id));
+          }}
+        />
       )}
     </div>
   );
