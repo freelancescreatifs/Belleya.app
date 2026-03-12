@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getClientTag } from '../../lib/clientTagHelpers';
@@ -80,6 +80,21 @@ interface QuestionnaireSubmission {
   service_name: string;
 }
 
+interface QuoteRequest {
+  id: string;
+  service_id: string;
+  service_name: string;
+  preferred_date: string | null;
+  preferred_time: string | null;
+  client_phone: string;
+  questionnaire_responses: Record<string, any>;
+  questionnaire_fields: Array<{ id: string; label: string; type: string; required: boolean; options?: string[] }>;
+  questionnaire_title: string | null;
+  status: string;
+  provider_notes: string | null;
+  created_at: string;
+}
+
 interface AvailableQuestionnaire {
   id: string;
   title: string;
@@ -126,8 +141,10 @@ export default function ClientDetailDrawer({
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<'info' | 'gallery' | 'history' | 'appointments' | 'questionnaires'>('info');
   const [submissions, setSubmissions] = useState<QuestionnaireSubmission[]>([]);
+  const [quoteRequests, setQuoteRequests] = useState<QuoteRequest[]>([]);
   const [availableQuestionnaires, setAvailableQuestionnaires] = useState<AvailableQuestionnaire[]>([]);
   const [expandedSubmission, setExpandedSubmission] = useState<string | null>(null);
+  const [expandedQuote, setExpandedQuote] = useState<string | null>(null);
   const [showSendModal, setShowSendModal] = useState(false);
 
   useEffect(() => {
@@ -138,6 +155,7 @@ export default function ClientDetailDrawer({
       loadAppointments();
       loadStats();
       loadSubmissions();
+      loadQuoteRequests();
     }
   }, [clientId]);
 
@@ -382,6 +400,97 @@ export default function ClientDetailDrawer({
       }
     } catch (error) {
       console.error('[ClientDetailDrawer] Error loading submissions:', error);
+    }
+  }
+
+  async function loadQuoteRequests() {
+    if (!user || !profile?.company_id) return;
+    try {
+      const clientData = await supabase
+        .from('clients')
+        .select('belaya_user_id')
+        .eq('id', clientId)
+        .maybeSingle();
+
+      if (!clientData.data?.belaya_user_id) return;
+
+      const { data } = await supabase
+        .from('quote_requests')
+        .select(`
+          id, service_id, preferred_date, preferred_time,
+          client_phone, questionnaire_responses, questionnaire_id,
+          status, provider_notes, created_at,
+          services(name),
+          service_questionnaires(title, fields)
+        `)
+        .eq('client_user_id', clientData.data.belaya_user_id)
+        .eq('company_id', profile.company_id)
+        .order('created_at', { ascending: false });
+
+      if (data) {
+        setQuoteRequests(data.map((q: any) => ({
+          id: q.id,
+          service_id: q.service_id,
+          service_name: q.services?.name || 'Service',
+          preferred_date: q.preferred_date,
+          preferred_time: q.preferred_time,
+          client_phone: q.client_phone || '',
+          questionnaire_responses: q.questionnaire_responses || {},
+          questionnaire_fields: q.service_questionnaires?.fields || [],
+          questionnaire_title: q.service_questionnaires?.title || null,
+          status: q.status,
+          provider_notes: q.provider_notes,
+          created_at: q.created_at,
+        })));
+      }
+    } catch (error) {
+      console.error('[ClientDetailDrawer] Error loading quote requests:', error);
+    }
+  }
+
+  async function handleValidateQuote(quoteId: string) {
+    try {
+      const { error } = await supabase
+        .from('quote_requests')
+        .update({ status: 'validated', updated_at: new Date().toISOString() })
+        .eq('id', quoteId);
+
+      if (error) throw error;
+
+      const quote = quoteRequests.find(q => q.id === quoteId);
+
+      const clientData = await supabase
+        .from('clients')
+        .select('belaya_user_id')
+        .eq('id', clientId)
+        .maybeSingle();
+
+      if (clientData.data?.belaya_user_id) {
+        await supabase.from('client_notifications').insert({
+          user_id: clientData.data.belaya_user_id,
+          notification_type: 'info',
+          title: 'Devis valide',
+          message: `Votre devis pour "${quote?.service_name || 'Service'}" a ete valide. Votre prestataire vous contactera pour confirmer un rendez-vous.`,
+        });
+      }
+
+      await loadQuoteRequests();
+    } catch (error) {
+      console.error('[ClientDetailDrawer] Error validating quote:', error);
+    }
+  }
+
+  async function handleRejectQuote(quoteId: string) {
+    try {
+      const { error } = await supabase
+        .from('quote_requests')
+        .update({ status: 'rejected', updated_at: new Date().toISOString() })
+        .eq('id', quoteId);
+
+      if (error) throw error;
+      await loadQuoteRequests();
+    } catch (error) {
+      console.error('[ClientDetailDrawer] Error rejecting quote:', error);
     }
   }
 
@@ -855,6 +964,109 @@ export default function ClientDetailDrawer({
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs md:text-sm text-gray-600 font-medium mb-1">Notes</p>
                   <p className="text-sm md:text-base text-gray-900 whitespace-pre-wrap">{client.notes}</p>
+                </div>
+              )}
+
+              {quoteRequests.length > 0 && (
+                <div className="mt-6 space-y-3">
+                  <h3 className="font-bold text-gray-900 flex items-center gap-2 text-sm">
+                    <FileText className="w-4 h-4 text-teal-600" />
+                    Demandes de devis ({quoteRequests.length})
+                  </h3>
+                  {quoteRequests.map((quote) => (
+                    <div key={quote.id} className={`border rounded-xl overflow-hidden ${
+                      quote.status === 'validated' ? 'border-green-200' : quote.status === 'rejected' ? 'border-red-200' : 'border-amber-200'
+                    }`}>
+                      <div
+                        className={`flex items-center gap-3 p-3 cursor-pointer ${
+                          quote.status === 'validated' ? 'bg-green-50' : quote.status === 'rejected' ? 'bg-red-50' : 'bg-amber-50'
+                        }`}
+                        onClick={() => setExpandedQuote(expandedQuote === quote.id ? null : quote.id)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{quote.service_name}</p>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              quote.status === 'validated' ? 'bg-green-200 text-green-800'
+                              : quote.status === 'rejected' ? 'bg-red-200 text-red-800'
+                              : 'bg-amber-200 text-amber-800'
+                            }`}>
+                              {quote.status === 'validated' ? 'Valide' : quote.status === 'rejected' ? 'Refuse' : 'En attente'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Recu le {new Date(quote.created_at).toLocaleDateString('fr-FR')}
+                            {quote.preferred_date && ` - Date souhaitee: ${new Date(quote.preferred_date).toLocaleDateString('fr-FR')}`}
+                            {quote.preferred_time && ` a ${quote.preferred_time}`}
+                          </p>
+                        </div>
+                        {expandedQuote === quote.id ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                      </div>
+
+                      {expandedQuote === quote.id && (
+                        <div className="p-4 border-t border-gray-100 space-y-3">
+                          {quote.client_phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="w-4 h-4 text-gray-400" />
+                              <a href={`tel:${quote.client_phone}`} className="text-gray-900 hover:text-brand-600">{quote.client_phone}</a>
+                            </div>
+                          )}
+
+                          {quote.questionnaire_title && quote.questionnaire_fields.length > 0 && (
+                            <div className="space-y-2">
+                              <p className="text-xs font-semibold text-teal-700">{quote.questionnaire_title}</p>
+                              {quote.questionnaire_fields.map((field) => {
+                                const response = quote.questionnaire_responses[field.id];
+                                return (
+                                  <div key={field.id} className="p-2.5 bg-white rounded-lg border border-gray-100">
+                                    <p className="text-xs font-medium text-gray-600 mb-0.5">{field.label}</p>
+                                    {response !== undefined && response !== null && response !== '' ? (
+                                      Array.isArray(response) ? (
+                                        <div className="flex flex-wrap gap-1">
+                                          {response.map((val: string, i: number) => (
+                                            <span key={i} className="px-2 py-0.5 bg-teal-100 text-teal-800 rounded text-xs">{val}</span>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <p className="text-sm text-gray-900">{String(response)}</p>
+                                      )
+                                    ) : (
+                                      <p className="text-sm text-gray-400 italic">Non renseigne</p>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {quote.status === 'pending' && (
+                            <div className="flex gap-2 pt-2">
+                              <button
+                                onClick={() => handleValidateQuote(quote.id)}
+                                className="flex-1 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-1.5"
+                              >
+                                <Check className="w-4 h-4" />
+                                Valider le devis
+                              </button>
+                              <button
+                                onClick={() => handleRejectQuote(quote.id)}
+                                className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-colors"
+                              >
+                                Refuser
+                              </button>
+                            </div>
+                          )}
+
+                          {quote.status === 'validated' && (
+                            <div className="flex items-center gap-2 p-2 bg-green-100 rounded-lg">
+                              <Check className="w-4 h-4 text-green-600" />
+                              <p className="text-xs text-green-800 font-medium">Devis valide - le client a ete notifie</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

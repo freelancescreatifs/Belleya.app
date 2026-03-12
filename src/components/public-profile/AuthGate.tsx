@@ -77,7 +77,7 @@ export default function AuthGate({
       .from('clients')
       .select('id')
       .eq('user_id', providerId)
-      .eq('client_user_id', data.user.id)
+      .eq('belaya_user_id', data.user.id)
       .maybeSingle();
 
     if (clientError) throw clientError;
@@ -87,7 +87,7 @@ export default function AuthGate({
     } else {
       const insertPayload: any = {
         user_id: providerId,
-        client_user_id: data.user.id,
+        belaya_user_id: data.user.id,
         first_name: formData.firstName || 'Client',
         last_name: formData.lastName || '',
         email: formData.email,
@@ -138,7 +138,7 @@ export default function AuthGate({
 
     const signUpPayload: any = {
       user_id: providerId,
-      client_user_id: userId,
+      belaya_user_id: userId,
       first_name: formData.firstName,
       last_name: formData.lastName,
       email: formData.email,

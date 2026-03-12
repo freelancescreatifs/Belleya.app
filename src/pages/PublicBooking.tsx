@@ -14,6 +14,7 @@ import InstituteTabContent from '../components/public-profile/InstituteTabConten
 import TimeSlotPicker from '../components/public-profile/TimeSlotPicker';
 import BookingSummary from '../components/public-profile/BookingSummary';
 import AuthGate from '../components/public-profile/AuthGate';
+import QuoteRequestModal from '../components/public-profile/QuoteRequestModal';
 import DepositPayment from '../components/client/DepositPayment';
 
 interface PublicBookingProps {
@@ -57,6 +58,7 @@ interface Service {
   photo_url?: string | null;
   special_offer?: string | null;
   offer_type?: 'percentage' | 'fixed' | null;
+  has_questionnaire?: boolean;
   supplements?: Array<{
     id: string;
     name: string;
@@ -73,7 +75,7 @@ interface ClientPhoto {
   created_at: string;
 }
 
-type BookingStep = 'browse' | 'datetime' | 'summary' | 'auth' | 'deposit' | 'success';
+type BookingStep = 'browse' | 'datetime' | 'summary' | 'auth' | 'deposit' | 'success' | 'quote' | 'quote_auth';
 
 const PHOTOS_PER_PAGE = 12;
 
@@ -207,17 +209,32 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   };
 
   const loadServices = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('services')
-      .select(`
-        *,
-        supplements:service_supplements(id, name, price, duration_minutes)
-      `)
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .order('name');
+    const [servicesRes, questionnairesRes] = await Promise.all([
+      supabase
+        .from('services')
+        .select(`
+          *,
+          supplements:service_supplements(id, name, price, duration_minutes)
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('name'),
+      supabase
+        .from('service_questionnaires')
+        .select('service_id')
+        .eq('user_id', userId)
+        .eq('is_active', true),
+    ]);
 
-    if (!error && data) setServices(data);
+    if (!servicesRes.error && servicesRes.data) {
+      const serviceIdsWithQ = new Set(
+        (questionnairesRes.data || []).map((q: any) => q.service_id)
+      );
+      setServices(servicesRes.data.map((s: any) => ({
+        ...s,
+        has_questionnaire: serviceIdsWithQ.has(s.id),
+      })));
+    }
   };
 
   const loadProviderCategories = async (userId: string) => {
@@ -264,7 +281,11 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const handleSelectService = (service: Service) => {
     setSelectedService(service);
     setSelectedSupplements([]);
-    setBookingStep('datetime');
+    if (service.is_on_quote || service.has_questionnaire) {
+      setBookingStep('quote_auth');
+    } else {
+      setBookingStep('datetime');
+    }
   };
 
   const handleSelectTimeSlot = (date: Date, time: string) => {
@@ -671,9 +692,13 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
                             <button
                               onClick={() => handleSelectService(service)}
-                              className="mt-4 w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-sm hover:shadow-md"
+                              className={`mt-4 w-full py-2.5 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow-md ${
+                                service.is_on_quote || service.has_questionnaire
+                                  ? 'bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600'
+                                  : 'bg-gradient-to-r from-brand-600 to-brand-50 hover:from-brand-700 hover:to-brand-100'
+                              }`}
                             >
-                              Reserver
+                              {service.is_on_quote || service.has_questionnaire ? 'Demander un devis' : 'Reserver'}
                             </button>
                           </div>
                         </div>
@@ -957,6 +982,35 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 }}
                 providerId={proProfile.user_id}
                 companyId={proProfile.company_id}
+              />
+            )}
+
+            {bookingStep === 'quote_auth' && selectedService && (
+              <AuthGate
+                onAuthenticated={(userId) => {
+                  setBookingStep('quote');
+                }}
+                bookingContext={{
+                  service: selectedService,
+                  selectedSupplements: [],
+                  selectedDate: selectedDate || new Date(),
+                  selectedTime: selectedTime || '09:00',
+                }}
+                providerId={proProfile.user_id}
+                companyId={proProfile.company_id}
+              />
+            )}
+
+            {bookingStep === 'quote' && selectedService && user && (
+              <QuoteRequestModal
+                service={selectedService}
+                providerId={proProfile.user_id}
+                companyId={proProfile.company_id}
+                clientUserId={user.id}
+                preferredDate={selectedDate}
+                preferredTime={selectedTime}
+                onSuccess={resetBooking}
+                onClose={resetBooking}
               />
             )}
 
