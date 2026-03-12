@@ -142,8 +142,19 @@ function AppContent() {
   }, [user, profile, loading, profileRetryCount, refreshProfile]);
 
   useEffect(() => {
+    const isSupabaseAuthHash = (hash: string) => {
+      return hash.includes('access_token=') ||
+        hash.includes('refresh_token=') ||
+        hash.includes('error_description=') ||
+        hash.includes('type=recovery');
+    };
+
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
+      const rawHash = window.location.hash;
+      if (isSupabaseAuthHash(rawHash)) {
+        return;
+      }
+      const hash = rawHash.replace('#', '');
       if (hash) {
         safeNavigate(hash, 'hashchange');
         window.location.hash = '';

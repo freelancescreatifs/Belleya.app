@@ -1,4 +1,4 @@
-const CACHE_NAME = 'belaya-v3';
+const CACHE_NAME = 'belaya-v4';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -30,6 +30,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
