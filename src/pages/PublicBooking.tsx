@@ -75,7 +75,7 @@ interface ClientPhoto {
   created_at: string;
 }
 
-type BookingStep = 'browse' | 'datetime' | 'summary' | 'auth' | 'deposit' | 'success' | 'quote' | 'quote_auth';
+type BookingStep = 'browse' | 'supplements' | 'datetime' | 'summary' | 'auth' | 'deposit' | 'success' | 'quote' | 'quote_auth';
 
 const PHOTOS_PER_PAGE = 12;
 
@@ -281,7 +281,10 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const handleSelectService = (service: Service) => {
     setSelectedService(service);
     setSelectedSupplements([]);
-    if (service.is_on_quote || service.has_questionnaire) {
+    const hasSupplements = service.supplements && service.supplements.length > 0;
+    if (hasSupplements) {
+      setBookingStep('supplements');
+    } else if (service.is_on_quote || service.has_questionnaire) {
       if (isClientLoggedIn) {
         setBookingStep('quote');
       } else {
@@ -290,6 +293,25 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
     } else {
       setBookingStep('datetime');
     }
+  };
+
+  const handleConfirmSupplements = () => {
+    if (!selectedService) return;
+    if (selectedService.is_on_quote || selectedService.has_questionnaire) {
+      if (isClientLoggedIn) {
+        setBookingStep('quote');
+      } else {
+        setBookingStep('quote_auth');
+      }
+    } else {
+      setBookingStep('datetime');
+    }
+  };
+
+  const toggleSupplement = (suppId: string) => {
+    setSelectedSupplements(prev =>
+      prev.includes(suppId) ? prev.filter(id => id !== suppId) : [...prev, suppId]
+    );
   };
 
   const handleSelectTimeSlot = (date: Date, time: string) => {
@@ -635,7 +657,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                             </div>
                           ) : (
                             <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-50 rounded-lg flex items-center justify-center">
-                              <Scissors className="w-8 h-8 text-brand-300" />
+                              <Scissors className="w-8 h-8 text-white" />
                             </div>
                           )}
 
@@ -946,6 +968,86 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       {bookingStep !== 'browse' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="my-8">
+            {bookingStep === 'supplements' && selectedService && selectedService.supplements && (
+              <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
+                <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Options disponibles</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">{selectedService.name}</p>
+                  </div>
+                  <button onClick={resetBooking} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <X className="w-5 h-5 text-gray-500" />
+                  </button>
+                </div>
+
+                <div className="p-5 space-y-3">
+                  <p className="text-sm text-gray-600 mb-4">
+                    Souhaitez-vous ajouter des options a votre prestation ?
+                  </p>
+
+                  {selectedService.supplements.map((supplement) => {
+                    const isSelected = selectedSupplements.includes(supplement.id);
+                    return (
+                      <button
+                        key={supplement.id}
+                        onClick={() => toggleSupplement(supplement.id)}
+                        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                          isSelected
+                            ? 'border-brand-600 bg-brand-100/30'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded flex-shrink-0 flex items-center justify-center border-2 transition-colors ${
+                          isSelected ? 'bg-brand-600 border-brand-600' : 'border-gray-300'
+                        }`}>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm">{supplement.name}</p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                            <Clock className="w-3 h-3" />
+                            <span>+{supplement.duration_minutes} min</span>
+                          </div>
+                        </div>
+                        <span className="font-bold text-brand-600 text-sm whitespace-nowrap">
+                          +{supplement.price.toFixed(2)} €
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  {selectedSupplements.length > 0 && (
+                    <div className="pt-3 border-t border-gray-200 flex items-center justify-between text-sm">
+                      <span className="text-gray-600">
+                        {selectedSupplements.length} option{selectedSupplements.length > 1 ? 's' : ''} selectionnee{selectedSupplements.length > 1 ? 's' : ''}
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        +{selectedSupplements.reduce((sum, suppId) => {
+                          const supp = selectedService.supplements?.find(s => s.id === suppId);
+                          return sum + (supp?.price || 0);
+                        }, 0).toFixed(2)} €
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-5 border-t border-gray-200 bg-gray-50 flex gap-3 rounded-b-2xl">
+                  <button
+                    onClick={handleConfirmSupplements}
+                    className="flex-1 py-3 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Continuer sans option
+                  </button>
+                  <button
+                    onClick={handleConfirmSupplements}
+                    className="flex-1 py-3 bg-gradient-to-r from-brand-600 to-brand-50 text-white rounded-lg font-semibold hover:from-brand-700 hover:to-brand-100 transition-all shadow-md"
+                  >
+                    {selectedSupplements.length > 0 ? 'Valider les options' : 'Continuer'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {bookingStep === 'datetime' && selectedService && (
               <TimeSlotPicker
                 providerId={proProfile.user_id}

@@ -580,7 +580,7 @@ export default function ProviderProfilePage({ slug }: ProviderProfilePageProps) 
                             </div>
                           ) : (
                             <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-50 rounded-lg flex items-center justify-center">
-                              <Scissors className="w-8 h-8 text-brand-300" />
+                              <Scissors className="w-8 h-8 text-white" />
                             </div>
                           )}
 
