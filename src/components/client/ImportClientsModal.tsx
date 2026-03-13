@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Download } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { invokeProtectedFunction } from '../../lib/api';
+
 import { useAuth } from '../../contexts/AuthContext';
 
 interface ImportClientsModalProps {
@@ -193,10 +193,12 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
           .maybeSingle();
 
         if (company) {
-          const { data: emailResult, error: emailError } = await invokeProtectedFunction('send-welcome-email', {
-            clients: importedWithEmail,
-            providerName: company.company_name || 'Votre professionnel(le)',
-            bookingSlug: company.booking_slug || null,
+          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+            body: {
+              clients: importedWithEmail,
+              providerName: company.company_name || 'Votre professionnel(le)',
+              bookingSlug: company.booking_slug || null,
+            },
           });
 
           if (emailError || emailResult?.failed > 0) {

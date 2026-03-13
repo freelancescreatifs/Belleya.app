@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText, Loader, MailCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { invokeProtectedFunction } from '../../lib/api';
+
 import { useAuth } from '../../contexts/AuthContext';
 import { getClientTag } from '../../lib/clientTagHelpers';
 import SupplementsDisplay from '../shared/SupplementsDisplay';
@@ -641,10 +641,12 @@ export default function ClientDetailDrawer({
         return;
       }
 
-      const { data: result, error } = await invokeProtectedFunction('send-welcome-email', {
-        clients: [{ email: client.email, firstName: client.first_name }],
-        providerName: company.company_name || 'Votre professionnel(le)',
-        bookingSlug: company.booking_slug || null,
+      const { data: result, error } = await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          clients: [{ email: client.email, firstName: client.first_name }],
+          providerName: company.company_name || 'Votre professionnel(le)',
+          bookingSlug: company.booking_slug || null,
+        },
       });
 
       if (error || result?.failed > 0) {
