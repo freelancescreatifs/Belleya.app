@@ -152,7 +152,7 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `Belaya <support@send.belaya.app>`,
+        from: `Belaya <support@belaya.app>`,
         to: [to],
         subject,
         html,
