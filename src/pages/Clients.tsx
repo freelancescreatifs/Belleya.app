@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Plus, Search, User, Phone, Mail, Instagram, Star, Pencil, X, Calendar, Scissors, Trash2, Archive, ArchiveRestore, TrendingUp, Users, AlertCircle, DollarSign, UserPlus, Info, Upload, Loader2, XCircle, PackageX } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { invokeProtectedFunction } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import BelayaLoader from '../components/shared/BelayaLoader';
 import ClientDetailDrawer from '../components/client/ClientDetailDrawer';
@@ -713,12 +714,10 @@ export default function Clients() {
             .maybeSingle();
 
           if (company) {
-            const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-welcome-email', {
-              body: {
-                clients: [{ email: formData.email, firstName: formData.first_name }],
-                providerName: company.company_name || 'Votre professionnel(le)',
-                bookingSlug: company.booking_slug || null,
-              },
+            const { data: emailResult, error: emailError } = await invokeProtectedFunction('send-welcome-email', {
+              clients: [{ email: formData.email, firstName: formData.first_name }],
+              providerName: company.company_name || 'Votre professionnel(le)',
+              bookingSlug: company.booking_slug || null,
             });
 
             if (emailError) {
