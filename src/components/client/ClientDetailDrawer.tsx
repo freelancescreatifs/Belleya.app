@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText } from 'lucide-react';
+import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText, Loader, MailCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getClientTag } from '../../lib/clientTagHelpers';
@@ -147,6 +147,8 @@ export default function ClientDetailDrawer({
   const [expandedSubmission, setExpandedSubmission] = useState<string | null>(null);
   const [expandedQuote, setExpandedQuote] = useState<string | null>(null);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [sendingWelcome, setSendingWelcome] = useState(false);
+  const [welcomeStatus, setWelcomeStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     if (clientId) {
@@ -622,6 +624,45 @@ export default function ClientDetailDrawer({
     }
   }
 
+  async function handleResendWelcomeEmail() {
+    if (!client?.email || !user) return;
+    setSendingWelcome(true);
+    setWelcomeStatus('idle');
+    try {
+      const { data: company } = await supabase
+        .from('company_profiles')
+        .select('company_name, booking_slug')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!company) {
+        setWelcomeStatus('error');
+        return;
+      }
+
+      const { data: result, error } = await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          clients: [{ email: client.email, firstName: client.first_name }],
+          providerName: company.company_name || 'Votre professionnel(le)',
+          bookingSlug: company.booking_slug || null,
+        },
+      });
+
+      if (error || result?.failed > 0) {
+        console.error('Resend welcome email error:', error || result);
+        setWelcomeStatus('error');
+      } else {
+        setWelcomeStatus('success');
+      }
+    } catch (e) {
+      console.error('Resend welcome email failed:', e);
+      setWelcomeStatus('error');
+    } finally {
+      setSendingWelcome(false);
+      setTimeout(() => setWelcomeStatus('idle'), 4000);
+    }
+  }
+
   const computedClientTag = getClientTag({
     appointmentCount: stats.completedAppointments,
     createdAt: stats.clientSince || new Date().toISOString()
@@ -933,9 +974,38 @@ export default function ClientDetailDrawer({
                 </div>
               )}
               {client.email && (
-                <div className="flex items-center gap-2 md:gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="w-4 h-4 md:w-5 md:h-5 text-gray-400 flex-shrink-0" />
-                  <a href={`mailto:${client.email}`} className="text-sm md:text-base text-gray-900 hover:text-brand-600 transition-colors break-all">{client.email}</a>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 md:gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Mail className="w-4 h-4 md:w-5 md:h-5 text-gray-400 flex-shrink-0" />
+                    <a href={`mailto:${client.email}`} className="text-sm md:text-base text-gray-900 hover:text-brand-600 transition-colors break-all flex-1">{client.email}</a>
+                    <button
+                      onClick={handleResendWelcomeEmail}
+                      disabled={sendingWelcome}
+                      title="Renvoyer l'email de bienvenue"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed border-brand-200 text-brand-700 hover:bg-brand-50 bg-white"
+                    >
+                      <span className={sendingWelcome ? 'hidden' : 'flex items-center gap-1.5'}>
+                        <MailCheck className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Renvoyer bienvenue</span>
+                      </span>
+                      <span className={sendingWelcome ? 'flex items-center gap-1.5' : 'hidden'}>
+                        <Loader className="w-3.5 h-3.5 animate-spin" />
+                        <span className="hidden sm:inline">Envoi...</span>
+                      </span>
+                    </button>
+                  </div>
+                  {welcomeStatus === 'success' && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-medium">
+                      <Check className="w-3.5 h-3.5" />
+                      Email de bienvenue envoyé avec succes
+                    </div>
+                  )}
+                  {welcomeStatus === 'error' && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-lg text-xs font-medium">
+                      <X className="w-3.5 h-3.5" />
+                      Echec de l'envoi. Verifiez la configuration Resend.
+                    </div>
+                  )}
                 </div>
               )}
               {client.instagram_handle && (

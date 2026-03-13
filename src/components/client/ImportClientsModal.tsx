@@ -122,6 +122,7 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
   };
 
   const [emailsSent, setEmailsSent] = useState(0);
+  const [emailsFailed, setEmailsFailed] = useState(false);
 
   const handleImport = async () => {
     if (!user || !profile?.company_id) return;
@@ -183,28 +184,33 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
     }
 
     if (importedWithEmail.length > 0) {
-      (async () => {
-        try {
-          const { data: company } = await supabase
-            .from('company_profiles')
-            .select('company_name, booking_slug')
-            .eq('user_id', user.id)
-            .maybeSingle();
+      try {
+        const { data: company } = await supabase
+          .from('company_profiles')
+          .select('company_name, booking_slug')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-          if (company) {
-            await supabase.functions.invoke('send-welcome-email', {
-              body: {
-                clients: importedWithEmail,
-                providerName: company.company_name || 'Votre professionnel(le)',
-                bookingSlug: company.booking_slug || null,
-              },
-            });
-            setEmailsSent(importedWithEmail.length);
+        if (company) {
+          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+            body: {
+              clients: importedWithEmail,
+              providerName: company.company_name || 'Votre professionnel(le)',
+              bookingSlug: company.booking_slug || null,
+            },
+          });
+
+          if (emailError || emailResult?.failed > 0) {
+            console.error('Welcome emails error:', emailError || emailResult);
+            setEmailsFailed(true);
+          } else {
+            setEmailsSent(emailResult?.sent || importedWithEmail.length);
           }
-        } catch (e) {
-          console.error('Welcome emails failed (non-blocking):', e);
         }
-      })();
+      } catch (e) {
+        console.error('Welcome emails failed:', e);
+        setEmailsFailed(true);
+      }
     }
 
     setImportResults({ imported, skipped, errors });
@@ -444,6 +450,13 @@ export default function ImportClientsModal({ onClose, onImportComplete }: Import
                   <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                     <span className="text-sm font-medium text-blue-800">Emails de bienvenue envoyés</span>
                     <span className="text-lg font-bold text-blue-900">{emailsSent}</span>
+                  </div>
+                )}
+
+                {emailsFailed && (
+                  <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
+                    <span className="text-sm font-medium text-orange-800">Emails de bienvenue non envoyés (erreur)</span>
+                    <AlertCircle className="w-5 h-5 text-orange-600" />
                   </div>
                 )}
               </div>

@@ -702,32 +702,44 @@ export default function Clients() {
         if (customDataError) throw customDataError;
       }
 
-      if (formData.email) {
-        (async () => {
-          try {
-            const { data: company } = await supabase
-              .from('company_profiles')
-              .select('company_name, booking_slug')
-              .eq('user_id', user!.id)
-              .maybeSingle();
-
-            if (company) {
-              supabase.functions.invoke('send-welcome-email', {
-                body: {
-                  clients: [{ email: formData.email, firstName: formData.first_name }],
-                  providerName: company.company_name || 'Votre professionnel(le)',
-                  bookingSlug: company.booking_slug || null,
-                },
-              });
-            }
-          } catch (e) {
-            console.error('Welcome email failed (non-blocking):', e);
-          }
-        })();
-      }
-
       clientsCache.invalidate();
-      showToast('success', 'Cliente ajoutée avec succès');
+
+      if (formData.email) {
+        try {
+          const { data: company } = await supabase
+            .from('company_profiles')
+            .select('company_name, booking_slug')
+            .eq('user_id', user!.id)
+            .maybeSingle();
+
+          if (company) {
+            const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+              body: {
+                clients: [{ email: formData.email, firstName: formData.first_name }],
+                providerName: company.company_name || 'Votre professionnel(le)',
+                bookingSlug: company.booking_slug || null,
+              },
+            });
+
+            if (emailError) {
+              console.error('Welcome email error:', emailError);
+              showToast('warning', 'Client ajouté, mais échec de l\'envoi de l\'email de bienvenue');
+            } else if (emailResult?.failed > 0) {
+              console.warn('Welcome email partial failure:', emailResult);
+              showToast('warning', 'Client ajouté, mais l\'email de bienvenue n\'a pas pu être envoyé');
+            } else {
+              showToast('success', 'Client ajouté et email de bienvenue envoyé');
+            }
+          } else {
+            showToast('success', 'Cliente ajoutée avec succès');
+          }
+        } catch (e) {
+          console.error('Welcome email failed:', e);
+          showToast('warning', 'Client ajouté, mais échec de l\'envoi de l\'email');
+        }
+      } else {
+        showToast('success', 'Cliente ajoutée avec succès');
+      }
       loadClients();
     } catch (error) {
       console.error('Error adding client:', error);

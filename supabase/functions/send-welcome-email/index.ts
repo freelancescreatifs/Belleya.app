@@ -1,3 +1,10 @@
+// RESEND TEST MODE LIMITATION:
+// In Resend test mode, emails can ONLY be delivered to the email address
+// that owns the Resend account. Sending to any other address will return
+// a 403 or validation error. To send to real clients, either:
+//   1. Verify the domain "belaya.app" in Resend and use a production API key
+//   2. Or test with the Resend account owner's email as the recipient
+
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
@@ -92,6 +99,7 @@ Deno.serve(async (req: Request) => {
   try {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
+      console.error("[send-welcome-email] RESEND_API_KEY is not set in Edge Function secrets");
       return new Response(
         JSON.stringify({ error: "RESEND_API_KEY not configured" }),
         {
@@ -104,7 +112,10 @@ Deno.serve(async (req: Request) => {
     const payload: WelcomeEmailPayload = await req.json();
     const { clients, providerName, bookingSlug } = payload;
 
+    console.log(`[send-welcome-email] Invoked: ${clients?.length || 0} client(s), provider="${providerName}", slug="${bookingSlug || 'none'}"`);
+
     if (!clients || !Array.isArray(clients) || clients.length === 0 || !providerName) {
+      console.warn("[send-welcome-email] Missing required fields in payload");
       return new Response(
         JSON.stringify({
           error: "Missing required fields",
@@ -125,8 +136,12 @@ Deno.serve(async (req: Request) => {
       const client = clients[i];
 
       if (!client.email || !client.email.includes("@")) {
+        console.warn(`[send-welcome-email] Skipping invalid email: "${client.email}"`);
         continue;
       }
+
+      const maskedEmail = client.email.replace(/(.{2}).*(@.*)/, "$1***$2");
+      console.log(`[send-welcome-email] Sending to ${maskedEmail}...`);
 
       try {
         const html = buildEmailHtml(
@@ -150,28 +165,29 @@ Deno.serve(async (req: Request) => {
         });
 
         if (res.ok) {
+          const resBody = await res.json();
           sent++;
           results.push({ email: client.email, success: true });
+          console.log(`[send-welcome-email] OK for ${maskedEmail}, id=${resBody?.id || 'unknown'}`);
         } else {
           const errBody = await res.text();
           failed++;
           results.push({ email: client.email, success: false, error: errBody });
-          console.error(`Failed to send to ${client.email}:`, errBody);
+          console.error(`[send-welcome-email] FAILED for ${maskedEmail}: HTTP ${res.status} - ${errBody}`);
         }
       } catch (err) {
         failed++;
-        results.push({
-          email: client.email,
-          success: false,
-          error: err instanceof Error ? err.message : "Unknown error",
-        });
-        console.error(`Error sending to ${client.email}:`, err);
+        const errMsg = err instanceof Error ? err.message : "Unknown error";
+        results.push({ email: client.email, success: false, error: errMsg });
+        console.error(`[send-welcome-email] EXCEPTION for ${maskedEmail}: ${errMsg}`);
       }
 
       if (clients.length > 5 && i < clients.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
+
+    console.log(`[send-welcome-email] Done: ${sent} sent, ${failed} failed`);
 
     return new Response(
       JSON.stringify({ success: true, sent, failed, results }),
@@ -181,12 +197,13 @@ Deno.serve(async (req: Request) => {
       }
     );
   } catch (error) {
-    console.error("Error in send-welcome-email:", error);
+    const errMsg = error instanceof Error ? error.message : "Unknown error";
+    console.error(`[send-welcome-email] Unhandled error: ${errMsg}`);
 
     return new Response(
       JSON.stringify({
         error: "Failed to process welcome emails",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: errMsg,
       }),
       {
         status: 500,
