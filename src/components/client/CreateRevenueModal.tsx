@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { type ServiceType } from '../../lib/serviceTypeHelpers';
 import InfoTooltip from '../shared/InfoTooltip';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface Service {
   id: string;
@@ -256,9 +257,7 @@ export default function CreateRevenueModal({
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-gray-500">
-            Chargement...
-          </div>
+          <BelayaLoader variant="inline" />
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>

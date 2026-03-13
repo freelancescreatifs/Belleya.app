@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import { CalendarView as ViewType, FilterType, CalendarItem, Event, CalendarTask, SocialMediaContent } from '../types/agenda';
 import CalendarView from '../components/agenda/CalendarView';
 import ViewToggle from '../components/agenda/ViewToggle';
@@ -794,13 +795,7 @@ export default function Agenda() {
   };
 
   if (loading) {
-    return (
-      <div className="p-3 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-600">Chargement...</div>
-        </div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

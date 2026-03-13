@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Pencil, Trash2, Upload, Download, FileText, Plus, X, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import { useToast } from '../hooks/useToast';
 import ToastContainer from '../components/shared/ToastContainer';
 import type { StudentWithDetails, TrainingProgram, StudentTraining, StudentDocument, DocumentStage, DocumentType } from '../types/training';
@@ -280,11 +281,7 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   if (error) {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Lightbulb, Calendar, Grid2x2 as Grid, AlertCircle, X, Kanban, ListFilter, Layers, Table, BarChart3, Clapperboard, Instagram } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import { useMenuPreferences } from '../lib/useMenuPreferences';
 import IdeasGenerator from '../components/content/IdeasGenerator';
 import InstagramFeed from '../components/content/InstagramFeed';
@@ -347,11 +348,7 @@ export default function Content() {
   }
 
   if (loading) {
-    return (
-      <div className="p-3 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

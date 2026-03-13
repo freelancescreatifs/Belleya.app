@@ -2,6 +2,7 @@ import { User, Mail, Phone, LogOut, ChevronRight, Image as ImageIcon, Camera, X,
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import BelayaLoader from '../../components/shared/BelayaLoader';
 
 interface ClientPhoto {
   id: string;
@@ -220,9 +221,7 @@ export default function ClientProfile() {
           </h2>
 
           {loadingPhotos ? (
-            <div className="px-5 py-8 text-center text-gray-500">
-              Chargement...
-            </div>
+            <BelayaLoader variant="inline" />
           ) : myPhotos.length === 0 ? (
             <div className="px-5 py-8 text-center">
               <div className="w-16 h-16 bg-gradient-to-br from-brand-600 to-brand-50 rounded-full flex items-center justify-center mx-auto mb-3">

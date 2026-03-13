@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Plus, Search, User, Phone, Mail, Instagram, Star, Pencil, X, Calendar, Scissors, Trash2, Archive, ArchiveRestore, TrendingUp, Users, AlertCircle, DollarSign, UserPlus, Info, Upload, Loader2, XCircle, PackageX } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import ClientDetailDrawer from '../components/client/ClientDetailDrawer';
 import ClientForm from '../components/client/ClientForm';
 import InfoTooltip from '../components/shared/InfoTooltip';
@@ -805,11 +806,7 @@ export default function Clients() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

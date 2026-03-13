@@ -7,6 +7,7 @@ import { getCurrentPosition } from '../../lib/geocodingHelpers';
 import ProviderFeedCard from '../../components/client/ProviderFeedCard';
 import ContentFeedCard from '../../components/client/ContentFeedCard';
 import SpecialOffersSlider from '../../components/client/SpecialOffersSlider';
+import BelayaLoader from '../../components/shared/BelayaLoader';
 
 interface Booking {
   id: string;
@@ -480,10 +481,7 @@ export default function ClientHome({ onNavigateToMap }: ClientHomeProps) {
           </div>
 
           {feedLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
-              <p className="text-gray-600">Chargement...</p>
-            </div>
+            <BelayaLoader variant="inline" message="Chargement..." />
           ) : activeTab === 'foryou' ? (
             followingContent.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl shadow-sm">

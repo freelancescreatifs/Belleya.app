@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, X, Clock, PlayCircle, PauseCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import GoalCard from '../components/goals/GoalCard';
 import GoalStats from '../components/goals/GoalStats';
 import GoalSuggestions from '../components/goals/GoalSuggestions';
@@ -432,11 +433,7 @@ export default function Goals() {
   ];
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   const handleAddGoalFromSuggestion = async (

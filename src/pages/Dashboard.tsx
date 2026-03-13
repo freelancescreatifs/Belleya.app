@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, Users, Euro, Package, Calendar, Calculator, Receipt, FileText, Building, AlertCircle, ChevronLeft, ChevronRight, Filter, Lightbulb } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import AlertCard from '../components/shared/AlertCard';
 import EducationalCard from '../components/shared/EducationalCard';
 import TaxCalculator from '../components/dashboard/TaxCalculator';
@@ -562,11 +563,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   ];
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">{t('dashboard.loading')}</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   const allValues = monthlyData.flatMap(d => [d.revenue, d.expenses]).filter(v => v > 0);

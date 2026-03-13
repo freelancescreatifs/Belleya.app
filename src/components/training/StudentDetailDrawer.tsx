@@ -7,6 +7,7 @@ import ToastContainer from '../shared/ToastContainer';
 import type { StudentWithDetails, StudentDocument, DocumentStage, DocumentTemplate } from '../../types/training';
 import { calculateStudentStatus, getStatusLabel, getStatusColor } from '../../lib/studentHelpers';
 import StudentForm from './StudentForm';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface StudentDetailDrawerProps {
   studentId: string;
@@ -388,7 +389,7 @@ export default function StudentDetailDrawer({ studentId, onClose, onDeleted, onU
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-xl shadow-xl p-8">
-          <div className="text-gray-500">Chargement...</div>
+          <BelayaLoader variant="inline" />
         </div>
       </div>
     );

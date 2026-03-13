@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Eye, Save, Upload, X, Plus, Trash2, MapPin, Instagram, Heart, Star, Sparkles, AlertCircle, Image as ImageIcon, Scissors, Clock, ChevronDown, ChevronUp, Share2, Check, Pencil, Download, MessageSquare, MessageCircle, Building2, Calendar, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import { GeocodeResult } from '../lib/geocodingHelpers';
 import { convertWeeklyAvailabilityToSchedule, convertWeekScheduleToAvailability } from '../lib/availabilityHelpers';
 import { fetchUserCategories } from '../lib/categoryHelpers';
@@ -1148,11 +1149,7 @@ export default function PublicProfile() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-600">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" className="min-h-screen" />;
   }
 
   return (
@@ -2348,9 +2345,7 @@ export default function PublicProfile() {
                 </p>
 
                 {loadingComments ? (
-                  <div className="text-center py-6">
-                    <p className="text-sm text-gray-500">Chargement...</p>
-                  </div>
+                  <BelayaLoader variant="inline" />
                 ) : photoComments.length === 0 ? (
                   <div className="text-center py-6">
                     <MessageCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />

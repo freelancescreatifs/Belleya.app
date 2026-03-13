@@ -5,6 +5,7 @@ import { updateBookingSlug, getBookingUrl } from '../../lib/slugHelpers';
 import { supabase } from '../../lib/supabase';
 import { PROFESSIONS, type ProfessionKey } from '../../lib/professionHelpers';
 import { convertWeeklyAvailabilityToSchedule } from '../../lib/availabilityHelpers';
+import BelayaLoader from '../shared/BelayaLoader';
 
 type LegalStatus = 'MICRO' | 'EI' | 'SASU_EURL' | 'OTHER' | '';
 type TaxCategory =
@@ -317,11 +318,7 @@ export default function CompanyProfileForm({ userId, onSaved, onProfileUpdated }
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

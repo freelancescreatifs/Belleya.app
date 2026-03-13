@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Shield } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import BelayaLoader from './BelayaLoader';
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -42,11 +43,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
-      </div>
-    );
+    return <BelayaLoader variant="section" className="min-h-screen" />;
   }
 
   if (isAdmin === false) {

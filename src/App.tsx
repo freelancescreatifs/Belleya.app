@@ -43,6 +43,7 @@ import AffiliateLanding from './pages/AffiliateLanding';
 import AffiliateApply from './pages/AffiliateApply';
 import PartnerDashboard from './pages/PartnerDashboard';
 import ChatBot from './components/shared/ChatBot';
+import BelayaLoader from './components/shared/BelayaLoader';
 import { supabase } from './lib/supabase';
 import TrialBanner from './components/shared/TrialBanner';
 import {
@@ -250,11 +251,7 @@ function AppContent() {
   }, [pathname, isKnownRoute, affiliateCodeChecked]);
 
   if (!affiliateCodeChecked && !isKnownRoute) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    );
+    return <BelayaLoader variant="full" />;
   }
 
   if (pathname === '/book') {
@@ -391,11 +388,7 @@ function AppContent() {
   }, [isSettingsRedirect, user, profile]);
 
   if (loading || awaitingGoogleProfile) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="full" showTimer showTips />;
   }
 
   if (!user) {
@@ -423,35 +416,33 @@ function AppContent() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <div className="text-gray-500 mb-2">Chargement du profil...</div>
-          {profileRetryCount > 0 && (
-            <div className="text-sm text-gray-400 mb-4">
-              Tentative {profileRetryCount}/10
-            </div>
-          )}
-          {profileRetryCount >= 10 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-yellow-800 mb-2">
-                Le profil prend plus de temps que prévu à se charger.
-              </p>
-              <p className="text-xs text-yellow-600">
-                Veuillez vous déconnecter et vous reconnecter.
-              </p>
-            </div>
-          )}
-          <button
-            onClick={async () => {
-              await signOut();
-              setSelectedRole(null);
-              setProfileRetryCount(0);
-            }}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
-          >
-            Se déconnecter
-          </button>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-belaya-50 flex flex-col items-center justify-center px-6">
+        <BelayaLoader variant="section" message="Chargement du profil..." />
+        {profileRetryCount > 0 && (
+          <div className="text-sm text-gray-400 mb-4">
+            Tentative {profileRetryCount}/10
+          </div>
+        )}
+        {profileRetryCount >= 10 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 max-w-sm">
+            <p className="text-sm text-yellow-800 mb-2">
+              Le profil prend plus de temps que prévu à se charger.
+            </p>
+            <p className="text-xs text-yellow-600">
+              Veuillez vous déconnecter et vous reconnecter.
+            </p>
+          </div>
+        )}
+        <button
+          onClick={async () => {
+            await signOut();
+            setSelectedRole(null);
+            setProfileRetryCount(0);
+          }}
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
+        >
+          Se déconnecter
+        </button>
       </div>
     );
   }

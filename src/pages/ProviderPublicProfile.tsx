@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Scissors, Image as ImageIcon, Star, Check, AlertCircle, Trash2, ChevronDown, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import { usePublicProfile } from '../hooks/usePublicProfile';
 import ProfileHeader from '../components/public-profile/ProfileHeader';
 import ServiceCard from '../components/public-profile/ServiceCard';
@@ -323,14 +324,7 @@ export default function ProviderPublicProfile() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement du profil...</p>
-        </div>
-      </div>
-    );
+    return <BelayaLoader variant="full" message="Chargement du profil..." />;
   }
 
   if (error || !profile) {

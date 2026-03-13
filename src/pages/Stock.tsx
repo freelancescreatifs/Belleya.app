@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Package, AlertTriangle, Pencil, X, DollarSign, ShoppingCart, Boxes, TrendingUp, Trash2, Upload } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import InfoTooltip from '../components/shared/InfoTooltip';
 import ImportStockModal from '../components/stock/ImportStockModal';
 
@@ -223,11 +224,7 @@ export default function Stock() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

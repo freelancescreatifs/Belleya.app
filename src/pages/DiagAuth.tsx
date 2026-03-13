@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import BelayaLoader from '../components/shared/BelayaLoader';
 
 export default function DiagAuth() {
   const [session, setSession] = useState<any>(null);
@@ -73,11 +74,7 @@ export default function DiagAuth() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="full" />;
   }
 
   return (

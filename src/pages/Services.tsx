@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Copy, Power, TrendingUp, X, Upload, Trash2, CheckCircle, Archive, Eye, Search, FileText, ClipboardList } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import InfoTooltip from '../components/shared/InfoTooltip';
 import ErrorBoundary from '../components/shared/ErrorBoundary';
 import { getServiceTypeTag, SERVICE_TYPES, type ServiceType } from '../lib/serviceTypeHelpers';
@@ -505,11 +506,7 @@ export default function Services() {
   const archivedCount = safeServices.filter(s => s?.status === 'archived').length;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

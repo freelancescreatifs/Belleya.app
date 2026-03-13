@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Upload, FileText, Trash2, Download, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface UserDocument {
   id: string;
@@ -130,11 +131,7 @@ export default function MyDocuments() {
   }));
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

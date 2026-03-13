@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface Service {
   id: string;
@@ -136,9 +137,7 @@ export default function CreateAppointmentModal({
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-gray-500">
-            Chargement...
-          </div>
+          <BelayaLoader variant="inline" />
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>

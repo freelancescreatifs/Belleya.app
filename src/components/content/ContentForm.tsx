@@ -10,6 +10,7 @@ import PublishModal from './PublishModal';
 import { MediaFile, uploadMultipleMedia, getMediaType, urlsToMediaFiles } from '../../lib/mediaHelpers';
 import InfoTooltip from '../shared/InfoTooltip';
 import ToastContainer from '../shared/ToastContainer';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface ContentItem {
   id: string;
@@ -827,11 +828,7 @@ export default function ContentForm({
   }
 
   if (loading) {
-    return (
-      <div className="p-8 text-center text-gray-500">
-        Chargement...
-      </div>
-    );
+    return <BelayaLoader variant="inline" />;
   }
 
   return (

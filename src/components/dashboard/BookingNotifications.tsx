@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { autoSendQuestionnairesOnBooking } from '../../lib/questionnaireHelpers';
 import { Bell, X, Check, Calendar, Clock, User } from 'lucide-react';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface Notification {
   id: string;
@@ -260,7 +261,7 @@ export default function BookingNotifications() {
           <Bell className="w-5 h-5 text-belaya-500" />
           <h2 className="text-lg font-semibold text-gray-900">Nouvelles réservations</h2>
         </div>
-        <p className="text-gray-600">Chargement...</p>
+        <BelayaLoader variant="inline" />
       </div>
     );
   }

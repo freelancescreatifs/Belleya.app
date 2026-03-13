@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
 import ToastContainer from '../shared/ToastContainer';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface Marronnier {
   id: string;
@@ -121,7 +122,7 @@ export default function MarronniersCalendar() {
   if (loading) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <div className="text-gray-500">Chargement...</div>
+        <BelayaLoader variant="inline" />
       </div>
     );
   }

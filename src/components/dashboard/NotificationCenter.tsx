@@ -3,6 +3,7 @@ import { Bell, Check, X, Calendar, Star, Heart, Users, Eye, Repeat, Share2, Chec
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { autoSendQuestionnairesOnBooking } from '../../lib/questionnaireHelpers';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface Notification {
   id: string;
@@ -445,9 +446,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
 
               <div className="overflow-y-auto flex-1">
                 {loading ? (
-                  <div className="p-8 text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-belaya-500 mx-auto"></div>
-                  </div>
+                  <BelayaLoader variant="inline" />
                 ) : notifications.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">
                     <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -526,10 +525,7 @@ export default function NotificationCenter({ compact = true }: NotificationCente
       </div>
 
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belaya-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
-        </div>
+        <BelayaLoader variant="inline" message="Chargement..." />
       ) : notifications.length === 0 ? (
         <div className="text-center py-12">
           <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />

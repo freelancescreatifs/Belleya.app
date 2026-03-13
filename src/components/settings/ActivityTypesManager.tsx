@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Trash2, GripVertical, Settings as SettingsIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface ActivityType {
   id: string;
@@ -215,7 +216,7 @@ export default function ActivityTypesManager() {
   }
 
   if (loading) {
-    return <div className="text-gray-500">Chargement...</div>;
+    return <BelayaLoader variant="inline" />;
   }
 
   return (

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Users, Eye, EyeOff, ChevronLeft, ChevronRight, Pencil, X, Trash2, Calendar, Clock, AlertCircle, FolderKanban, Image, Instagram, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import { normalizeTime } from '../lib/timeHelpers';
 import TimelineView from '../components/tasks/TimelineView';
 import ProjectCard from '../components/tasks/ProjectCard';
@@ -1417,11 +1418,7 @@ export default function Tasks() {
   ];
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

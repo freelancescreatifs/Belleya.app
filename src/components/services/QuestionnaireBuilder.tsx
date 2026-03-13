@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, X, GripVertical, ChevronDown, ChevronUp, Save, ClipboardList, ToggleLeft, ToggleRight, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface QuestionField {
   id: string;
@@ -197,7 +198,7 @@ export default function QuestionnaireBuilder({ serviceId, onClose, onUpdate }: P
 
         <div className="flex-1 overflow-y-auto p-5">
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Chargement...</div>
+            <BelayaLoader variant="inline" />
           ) : !showNewForm ? (
             <div className="space-y-4">
               {questionnaires.length === 0 && (

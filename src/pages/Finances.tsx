@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, TrendingUp, TrendingDown, Search, Trash2, ChevronLeft, ChevronRight, User as UserIcon, X, Pencil, Upload, GraduationCap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import { getServiceTypeTag, type ServiceType } from '../lib/serviceTypeHelpers';
 import ImportTransactionsModal from '../components/finances/ImportTransactionsModal';
 import RevenueForm from '../components/finances/RevenueForm';
@@ -530,11 +531,7 @@ export default function Finances() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

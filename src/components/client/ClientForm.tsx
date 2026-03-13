@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getSectionsForProfessions, getSectionConfig, type ProfessionKey, type ClientSection } from '../../lib/professionHelpers';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface CustomField {
   id: string;
@@ -193,7 +194,7 @@ export default function ClientForm({ isEdit, clientId, initialData, onSubmit, on
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6">
-          <div className="text-gray-500">Chargement...</div>
+          <BelayaLoader variant="inline" />
         </div>
       </div>
     );

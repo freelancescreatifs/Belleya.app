@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface AppointmentDetailModalProps {
   bookingId: string;
@@ -162,8 +163,7 @@ export default function AppointmentDetailModal({
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
         <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto"></div>
-          <p className="text-center mt-4 text-gray-600">Chargement...</p>
+          <BelayaLoader variant="inline" />
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { Clock, Sparkles, Lock } from 'lucide-react';
 import { getUserCompanyId, checkSubscriptionAccess } from '../../lib/subscriptionHelpers';
+import BelayaLoader from './BelayaLoader';
 
 interface SubscriptionGuardProps {
   children: ReactNode;
@@ -41,14 +42,7 @@ export default function SubscriptionGuard({ children }: SubscriptionGuardProps) 
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-belaya-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Vérification de votre abonnement...</p>
-        </div>
-      </div>
-    );
+    return <BelayaLoader variant="full" message="Vérification de votre abonnement..." />;
   }
 
   if (!hasAccess) {

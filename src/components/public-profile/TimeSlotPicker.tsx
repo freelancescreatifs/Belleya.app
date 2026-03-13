@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar, Clock, X, AlertCircle } from 'luci
 import { supabase } from '../../lib/supabase';
 import { formatMonthYear, getDaysInMonth, getFirstDayOfMonth } from '../../lib/calendarHelpers';
 import { generateTimeSlots } from '../../lib/availabilityHelpers';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface TimeSlot {
   time: string;
@@ -303,12 +304,7 @@ export default function TimeSlotPicker({
   today.setHours(0, 0, 0, 0);
 
   if (loading) {
-    return (
-      <div className="p-8 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 mx-auto mb-4"></div>
-        <p className="text-gray-600">Chargement des disponibilités...</p>
-      </div>
-    );
+    return <BelayaLoader variant="inline" message="Chargement des disponibilités..." />;
   }
 
   return (

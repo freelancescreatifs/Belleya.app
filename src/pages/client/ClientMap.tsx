@@ -9,6 +9,7 @@ import ProviderMapMarker from '../../components/client/ProviderMapMarker';
 import CategoryChips from '../../components/client/CategoryChips';
 import ToastContainer from '../../components/shared/ToastContainer';
 import { useToast } from '../../hooks/useToast';
+import BelayaLoader from '../../components/shared/BelayaLoader';
 import 'leaflet/dist/leaflet.css';
 
 const DEFAULT_CENTER: [number, number] = [48.8566, 2.3522];
@@ -391,10 +392,7 @@ export default function ClientMap() {
         </h2>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-belaya-bright mx-auto mb-4"></div>
-            <p className="text-gray-600">Chargement...</p>
-          </div>
+          <BelayaLoader variant="inline" message="Chargement..." />
         ) : filteredProviders.length === 0 ? (
           <div className="text-center py-12">
             <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />

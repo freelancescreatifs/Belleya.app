@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Mail, TrendingUp, History } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import MarketingStats from '../components/marketing/MarketingStats';
 import ClientReminderList from '../components/marketing/ClientReminderList';
 import SendReminderModal from '../components/marketing/SendReminderModal';
@@ -193,11 +194,7 @@ export default function Marketing() {
   const stats = calculateStats();
 
   if (loading) {
-    return (
-      <div className="p-3 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
-        <div className="text-center text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   return (

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { GraduationCap, BookOpen, CheckCircle, Clock, AlertTriangle, Plus, Search, Filter, Settings, ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import BelayaLoader from '../components/shared/BelayaLoader';
 import type { StudentWithDetails, TrainingDashboardStats, StudentStatus } from '../types/training';
 import { calculateStudentStatus, getStatusLabel, getStatusColor } from '../lib/studentHelpers';
 import StudentForm from '../components/training/StudentForm';
@@ -158,11 +159,7 @@ export default function Training({ onPageChange }: TrainingProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Chargement...</div>
-      </div>
-    );
+    return <BelayaLoader variant="section" />;
   }
 
   if (!profile?.company_id && !loading) {

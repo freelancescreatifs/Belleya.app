@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface MarketingSend {
   id: string;
@@ -93,7 +94,7 @@ export default function MarketingHistory({ userId }: MarketingHistoryProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
-        <div className="text-center text-gray-500">Chargement...</div>
+        <BelayaLoader variant="inline" />
       </div>
     );
   }

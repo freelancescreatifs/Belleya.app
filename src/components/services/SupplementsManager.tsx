@@ -3,6 +3,7 @@ import { Plus, Trash2, Clock, Euro, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { type ServiceType } from '../../lib/serviceTypeHelpers';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface Supplement {
   id: string;
@@ -138,7 +139,7 @@ export default function SupplementsManager({ serviceId, serviceType = 'prestatio
   };
 
   if (loading) {
-    return <div className="text-sm text-gray-500">Chargement...</div>;
+    return <BelayaLoader variant="inline" />;
   }
 
   return (

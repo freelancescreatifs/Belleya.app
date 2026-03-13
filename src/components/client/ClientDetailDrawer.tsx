@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getClientTag } from '../../lib/clientTagHelpers';
 import SupplementsDisplay from '../shared/SupplementsDisplay';
+import BelayaLoader from '../shared/BelayaLoader';
 import ClientGallery from './ClientGallery';
 
 interface Client {
@@ -630,7 +631,7 @@ export default function ClientDetailDrawer({
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-xl shadow-xl p-8">
-          <div className="text-gray-500">Chargement...</div>
+          <BelayaLoader variant="inline" />
         </div>
       </div>
     );
@@ -1077,9 +1078,7 @@ export default function ClientDetailDrawer({
               {profile?.company_id ? (
                 <ClientGallery clientId={clientId} companyId={profile.company_id} />
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <p>Chargement...</p>
-                </div>
+                <BelayaLoader variant="inline" />
               )}
             </div>
           )}

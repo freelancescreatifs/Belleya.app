@@ -38,6 +38,25 @@ export default {
           '900': '#8f2d5f',
         },
       },
+      animation: {
+        'belaya-ring': 'belaya-ring 1.4s linear infinite',
+        'belaya-pulse': 'belaya-pulse 2s ease-in-out infinite',
+        'belaya-bounce': 'belaya-bounce 1.2s ease-in-out infinite',
+      },
+      keyframes: {
+        'belaya-ring': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        'belaya-pulse': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' },
+          '50%': { transform: 'translate(-50%, -50%) scale(0.92)', opacity: '0.85' },
+        },
+        'belaya-bounce': {
+          '0%, 80%, 100%': { transform: 'scale(0.6)', opacity: '0.4' },
+          '40%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #c43586 0%, #c43586 100%)',
         'gradient-auth': 'linear-gradient(135deg, #eea09e 0%, #db58a2 50%, #c43586 100%)',
