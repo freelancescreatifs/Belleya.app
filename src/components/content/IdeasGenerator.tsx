@@ -885,11 +885,10 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                       disabled={saving}
                       className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {saving ? (
+                      <span className={saving ? 'hidden' : ''}>Creer l'idee</span>
+                      <span className={saving ? '' : 'hidden'}>
                         <BelayaLoader variant="inline" message="Création..." className="py-0" />
-                      ) : (
-                        'Creer l\'idee'
-                      )}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -1036,14 +1035,13 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     disabled={generating}
                     className={`w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2 ${generating ? 'opacity-70 animate-pulse' : ''}`}
                   >
-                    {generating ? (
+                    <span className={generating ? 'hidden' : 'flex items-center gap-2'}>
+                      <Sparkles className="w-5 h-5" />
+                      <span>Générer 3 idées stratégiques</span>
+                    </span>
+                    <span className={generating ? '' : 'hidden'}>
                       <Loader className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5" />
-                        Générer 3 idées stratégiques
-                      </>
-                    )}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1138,11 +1136,10 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               disabled={producing}
               className="flex-1 px-4 py-2 bg-gradient-to-r from-belaya-bright to-belaya-bright text-white rounded-lg hover:from-belaya-deep hover:to-belaya-deep transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {producing ? (
+              <span className={producing ? 'hidden' : ''}>Confirmer</span>
+              <span className={producing ? '' : 'hidden'}>
                 <BelayaLoader variant="inline" message="Production..." className="py-0" />
-              ) : (
-                'Confirmer'
-              )}
+              </span>
             </button>
           </div>
         </div>

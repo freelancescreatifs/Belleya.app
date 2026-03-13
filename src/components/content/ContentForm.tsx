@@ -1229,12 +1229,9 @@ export default function ContentForm({
             disabled={generatingCaption || !formData.title}
             className={`px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg ${generatingCaption ? 'opacity-70 animate-pulse' : 'disabled:opacity-50'}`}
           >
-            {generatingCaption ? (
-              <Loader className="w-4 h-4 animate-spin" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
-            {generatingCaption ? 'Génération en cours...' : 'Générer IA'}
+            <span className={generatingCaption ? 'hidden' : ''}><Sparkles className="w-4 h-4" /></span>
+            <span className={generatingCaption ? '' : 'hidden'}><Loader className="w-4 h-4 animate-spin" /></span>
+            <span>{generatingCaption ? 'Génération en cours...' : 'Générer IA'}</span>
           </button>
         </div>
         <div className="relative">
@@ -1243,14 +1240,12 @@ export default function ContentForm({
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={16}
             disabled={generatingCaption}
-            className={`w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm whitespace-pre-wrap ${generatingCaption ? 'opacity-40' : ''}`}
+            className={`w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm whitespace-pre-wrap transition-opacity ${generatingCaption ? 'opacity-40' : ''}`}
             placeholder="Cliquez sur 'Générer IA' pour créer un script stratégique ultra-détaillé..."
           />
-          {generatingCaption && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg backdrop-blur-[1px]">
-              <BelayaLoader variant="inline" message="Génération du script IA en cours..." />
-            </div>
-          )}
+          <div className={`absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg backdrop-blur-[1px] transition-opacity ${generatingCaption ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <BelayaLoader variant="inline" message="Génération du script IA en cours..." />
+          </div>
         </div>
       </div>
 
@@ -1265,12 +1260,9 @@ export default function ContentForm({
             disabled={generatingScript || !formData.description}
             className={`px-4 py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-lg hover:from-blue-600 hover:to-sky-600 transition-all disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg ${generatingScript ? 'opacity-70 animate-pulse' : 'disabled:opacity-50'}`}
           >
-            {generatingScript ? (
-              <Loader className="w-4 h-4 animate-spin" />
-            ) : (
-              <Wand2 className="w-4 h-4" />
-            )}
-            {generatingScript ? 'Génération...' : 'Générer légende'}
+            <span className={generatingScript ? 'hidden' : ''}><Wand2 className="w-4 h-4" /></span>
+            <span className={generatingScript ? '' : 'hidden'}><Loader className="w-4 h-4 animate-spin" /></span>
+            <span>{generatingScript ? 'Génération...' : 'Générer légende'}</span>
           </button>
         </div>
         <div className="relative">
@@ -1279,14 +1271,12 @@ export default function ContentForm({
             onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
             rows={3}
             disabled={generatingScript}
-            className={`w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base ${generatingScript ? 'opacity-40' : ''}`}
+            className={`w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base transition-opacity ${generatingScript ? 'opacity-40' : ''}`}
             placeholder="Génération automatique basée sur le script..."
           />
-          {generatingScript && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg">
-              <BelayaLoader variant="inline" message="Génération de la légende..." className="py-2" />
-            </div>
-          )}
+          <div className={`absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg transition-opacity ${generatingScript ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <BelayaLoader variant="inline" message="Génération de la légende..." className="py-2" />
+          </div>
         </div>
       </div>
 
