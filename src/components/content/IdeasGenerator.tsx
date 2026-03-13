@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
 import { type ProfessionKey } from '../../lib/professionHelpers';
 import ToastContainer from '../shared/ToastContainer';
+import BelayaLoader from '../shared/BelayaLoader';
 
 interface SavedIdea {
   id: string;
@@ -885,10 +886,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                       className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {saving ? (
-                        <>
-                          <Loader className="w-4 h-4 animate-spin" />
-                          Creation...
-                        </>
+                        <BelayaLoader variant="inline" message="Création..." className="py-0" />
                       ) : (
                         'Creer l\'idee'
                       )}
@@ -1036,13 +1034,10 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                   <button
                     onClick={handleGenerateAI}
                     disabled={generating}
-                    className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
+                    className={`w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2 ${generating ? 'opacity-70 animate-pulse' : ''}`}
                   >
                     {generating ? (
-                      <>
-                        <Loader className="w-5 h-5 animate-spin" />
-                        <span>Génération en cours... Cela peut prendre quelques secondes</span>
-                      </>
+                      <Loader className="w-5 h-5 animate-spin" />
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5" />
@@ -1054,16 +1049,11 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               </div>
 
               {generating ? (
-                <div className="flex flex-col items-center justify-center py-16 space-y-4">
-                  <div className="relative w-16 h-16">
-                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full animate-pulse"></div>
-                    <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
-                      <Sparkles className="w-8 h-8 text-orange-500 animate-spin" />
-                    </div>
-                  </div>
-                  <p className="text-gray-600 font-medium">Génération des idées en cours...</p>
-                  <p className="text-gray-400 text-sm">Quelques secondes...</p>
-                </div>
+                <BelayaLoader
+                  variant="inline"
+                  message="Génération des idées en cours..."
+                  className="py-12"
+                />
               ) : aiIdeas.length === 0 ? (
                 <div className="text-center py-12">
                   <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -1102,9 +1092,8 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
           </p>
 
           {producing && (
-            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-2">
-              <Loader className="w-4 h-4 animate-spin text-orange-600" />
-              <p className="text-sm text-orange-700">Generation du script IA en cours...</p>
+            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <BelayaLoader variant="inline" message="Génération du script IA en cours..." className="py-2" />
             </div>
           )}
 
@@ -1150,10 +1139,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
               className="flex-1 px-4 py-2 bg-gradient-to-r from-belaya-bright to-belaya-bright text-white rounded-lg hover:from-belaya-deep hover:to-belaya-deep transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {producing ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  Production...
-                </>
+                <BelayaLoader variant="inline" message="Production..." className="py-0" />
               ) : (
                 'Confirmer'
               )}

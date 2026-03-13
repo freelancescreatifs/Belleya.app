@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Calendar, Clock, Image as ImageIcon, Upload, Sparkles, Info, Link as LinkIcon, Trash2, Wand2, FileText, Video, Scissors, CheckCircle, Send, File as FileEdit, AlertTriangle, Plus, X, Check } from 'lucide-react';
+import { Save, Calendar, Clock, Image as ImageIcon, Upload, Sparkles, Info, Link as LinkIcon, Trash2, Wand2, FileText, Video, Scissors, CheckCircle, Send, File as FileEdit, AlertTriangle, Plus, X, Check, Loader } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
@@ -1227,19 +1227,31 @@ export default function ContentForm({
             type="button"
             onClick={handleGenerateAI}
             disabled={generatingCaption || !formData.title}
-            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
+            className={`px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg ${generatingCaption ? 'opacity-70 animate-pulse' : 'disabled:opacity-50'}`}
           >
-            <Sparkles className="w-4 h-4" />
-            {generatingCaption ? 'Génération...' : 'Générer IA'}
+            {generatingCaption ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            {generatingCaption ? 'Génération en cours...' : 'Générer IA'}
           </button>
         </div>
-        <textarea
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={16}
-          className="w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm whitespace-pre-wrap"
-          placeholder="Cliquez sur 'Générer IA' pour créer un script stratégique ultra-détaillé..."
-        />
+        <div className="relative">
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            rows={16}
+            disabled={generatingCaption}
+            className={`w-full px-3 py-2 md:px-4 md:py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-mono text-xs md:text-sm whitespace-pre-wrap ${generatingCaption ? 'opacity-40' : ''}`}
+            placeholder="Cliquez sur 'Générer IA' pour créer un script stratégique ultra-détaillé..."
+          />
+          {generatingCaption && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg backdrop-blur-[1px]">
+              <BelayaLoader variant="inline" message="Génération du script IA en cours..." />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -1251,19 +1263,31 @@ export default function ContentForm({
             type="button"
             onClick={handleGenerateCaption}
             disabled={generatingScript || !formData.description}
-            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-lg hover:from-blue-600 hover:to-sky-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
+            className={`px-4 py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-lg hover:from-blue-600 hover:to-sky-600 transition-all disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg ${generatingScript ? 'opacity-70 animate-pulse' : 'disabled:opacity-50'}`}
           >
-            <Wand2 className="w-4 h-4" />
+            {generatingScript ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <Wand2 className="w-4 h-4" />
+            )}
             {generatingScript ? 'Génération...' : 'Générer légende'}
           </button>
         </div>
-        <textarea
-          value={formData.caption}
-          onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
-          rows={3}
-          className="w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
-          placeholder="Génération automatique basée sur le script..."
-        />
+        <div className="relative">
+          <textarea
+            value={formData.caption}
+            onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
+            rows={3}
+            disabled={generatingScript}
+            className={`w-full px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base ${generatingScript ? 'opacity-40' : ''}`}
+            placeholder="Génération automatique basée sur le script..."
+          />
+          {generatingScript && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg">
+              <BelayaLoader variant="inline" message="Génération de la légende..." className="py-2" />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
