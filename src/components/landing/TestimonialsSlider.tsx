@@ -5,7 +5,7 @@ const testimonials = [
     name: "Sophie Martin",
     profession: "Prothésiste ongulaire",
     instagram: "@sophie_nailart",
-    image: "/3f444bf0-6b58-4ab1-bc0e-8e22de6bb900.png",
+    image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     text: "Belaya a transformé ma gestion quotidienne. Plus de stress, tout est organisé et mes clientes adorent réserver en ligne.",
     rating: 5
   },
@@ -13,7 +13,7 @@ const testimonials = [
     name: "Camille Dubois",
     profession: "Esthéticienne",
     instagram: "@camille_beauty",
-    image: "/4f818305-0d16-45fa-a026-0e08a8ca914a-1.png",
+    image: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     text: "Enfin un outil qui comprend vraiment mes besoins. Le suivi client est incroyable et j'ai gagné 5h par semaine.",
     rating: 5
   },
@@ -21,7 +21,7 @@ const testimonials = [
     name: "Emma Rousseau",
     profession: "Tech cils & sourcils",
     instagram: "@emma_lashes",
-    image: "/e4879098-e7c4-443a-a046-54f40bb7fd64.png",
+    image: "https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     text: "Je recommande à 100%. Interface intuitive, calendrier éditorial génial, et le support est ultra réactif.",
     rating: 5
   },
@@ -29,7 +29,7 @@ const testimonials = [
     name: "Léa Bernard",
     profession: "Nail artist",
     instagram: "@lea_nails",
-    image: "/3f444bf0-6b58-4ab1-bc0e-8e22de6bb900.png",
+    image: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     text: "Mes finances sont enfin claires, mes objectifs suivis, et mes clientes fidélisées. Belaya c'est le game changer.",
     rating: 5
   },
@@ -37,7 +37,7 @@ const testimonials = [
     name: "Julie Petit",
     profession: "Maquilleuse pro",
     instagram: "@julie_makeup",
-    image: "/4f818305-0d16-45fa-a026-0e08a8ca914a-1.png",
+    image: "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     text: "La galerie inspiration et le CRM client sont parfaits. Je gagne un temps fou et mes réservations ont explosé.",
     rating: 5
   },
@@ -45,7 +45,7 @@ const testimonials = [
     name: "Chloé Laurent",
     profession: "Esthéticienne",
     instagram: "@chloe_skincare",
-    image: "/e4879098-e7c4-443a-a046-54f40bb7fd64.png",
+    image: "https://images.pexels.com/photos/1065084/pexels-photo-1065084.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
     text: "Simple, efficace, et pensé pour nous. J'ai enfin une vision claire de mon business. Merci Belaya.",
     rating: 5
   }
