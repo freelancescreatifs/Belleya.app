@@ -5,7 +5,7 @@ const testimonials = [
     name: "Sophie Martin",
     profession: "Prothésiste ongulaire",
     instagram: "@sophie_nailart",
-    image: "/4f818305-0d16-45fa-a026-0e08a8ca914a-1.png",
+    image: "/Sophie_nailart.png",
     text: "Belaya a transformé ma gestion quotidienne. Plus de stress, tout est organisé et mes clientes adorent réserver en ligne.",
     rating: 5
   },
@@ -13,7 +13,7 @@ const testimonials = [
     name: "Camille Dubois",
     profession: "Esthéticienne",
     instagram: "@camille_beauty",
-    image: "/e4879098-e7c4-443a-a046-54f40bb7fd64.png",
+    image: "/camille_beauty.jpg",
     text: "Enfin un outil qui comprend vraiment mes besoins. Le suivi client est incroyable et j'ai gagné 5h par semaine.",
     rating: 5
   },
@@ -21,7 +21,7 @@ const testimonials = [
     name: "Emma Rousseau",
     profession: "Tech cils & sourcils",
     instagram: "@emma_lashes",
-    image: "/4f818305-0d16-45fa-a026-0e08a8ca914a-1.png",
+    image: "/emma_lashes.jpg",
     text: "Je recommande à 100%. Interface intuitive, calendrier éditorial génial, et le support est ultra réactif.",
     rating: 5
   },
@@ -29,7 +29,7 @@ const testimonials = [
     name: "Léa Bernard",
     profession: "Nail artist",
     instagram: "@lea_nails",
-    image: "/e4879098-e7c4-443a-a046-54f40bb7fd64.png",
+    image: "/Sophie_nailart.png",
     text: "Mes finances sont enfin claires, mes objectifs suivis, et mes clientes fidélisées. Belaya c'est le game changer.",
     rating: 5
   },
@@ -37,7 +37,7 @@ const testimonials = [
     name: "Julie Petit",
     profession: "Maquilleuse pro",
     instagram: "@julie_makeup",
-    image: "/4f818305-0d16-45fa-a026-0e08a8ca914a-1.png",
+    image: "/camille_beauty.jpg",
     text: "La galerie inspiration et le CRM client sont parfaits. Je gagne un temps fou et mes réservations ont explosé.",
     rating: 5
   },
@@ -45,7 +45,7 @@ const testimonials = [
     name: "Chloé Laurent",
     profession: "Esthéticienne",
     instagram: "@chloe_skincare",
-    image: "/e4879098-e7c4-443a-a046-54f40bb7fd64.png",
+    image: "/emma_lashes.jpg",
     text: "Simple, efficace, et pensé pour nous. J'ai enfin une vision claire de mon business. Merci Belaya.",
     rating: 5
   }
