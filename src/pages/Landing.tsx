@@ -376,11 +376,11 @@ export default function Landing({ onSelectRole }: LandingProps) {
             {[
               { icon: BarChart, key: 'dashboard', image: '/1-dashboard_intelligent.png' },
               { icon: TrendingUp, key: 'finances' },
-              { icon: Users, key: 'clients' },
-              { icon: Calendar, key: 'agenda' },
-              { icon: Target, key: 'goals' },
-              { icon: Image, key: 'gallery' },
-              { icon: Globe, key: 'booking' },
+              { icon: Users, key: 'clients', image: '/3-_fiches_clients_completes.png' },
+              { icon: Calendar, key: 'agenda', image: '/4-agenda_unifie.png' },
+              { icon: Target, key: 'goals', image: '/objectifs_et_suivi.gif' },
+              { icon: Image, key: 'gallery', image: '/Galerie_organise.gif' },
+              { icon: Globe, key: 'booking', image: '/ta_page_belaya_unique.gif' },
               { icon: Package, key: 'stock' },
               { icon: Sparkles, key: 'content' }
             ].map((feature, i) => (
