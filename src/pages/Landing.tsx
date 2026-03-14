@@ -395,22 +395,21 @@ export default function Landing({ onSelectRole }: LandingProps) {
 
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#efaa9a]/10 to-[#d9629b]/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
 
-                {(feature as any).image && (
-                  <div className="w-full overflow-hidden rounded-t-xl md:rounded-t-2xl bg-gray-50">
+                {(feature as any).image ? (
+                  <div className="w-full overflow-hidden rounded-t-xl md:rounded-t-2xl bg-gray-100 flex items-center justify-center" style={{ height: '220px' }}>
                     <img
                       src={(feature as any).image}
                       alt={t(`landing.features.list.${feature.key}.title`)}
-                      className="w-full h-44 md:h-52 object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
+                  </div>
+                ) : (
+                  <div className="w-full overflow-hidden rounded-t-xl md:rounded-t-2xl bg-gradient-to-br from-[#efaa9a]/10 to-[#d9629b]/10 flex items-center justify-center" style={{ height: '120px' }}>
+                    <feature.icon className="w-12 h-12 text-[#d9629b]/40" />
                   </div>
                 )}
 
-                <div className="relative p-5 md:p-8">
-                  <div className="relative w-11 h-11 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gradient-to-br from-[#efaa9a]/30 to-[#d9629b]/30 flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#efaa9a] to-[#d9629b] rounded-lg md:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <feature.icon className="w-5 h-5 md:w-7 md:h-7 text-[#d9629b] group-hover:text-white transition-colors duration-500 relative z-10" />
-                  </div>
-
+                <div className="relative p-5 md:p-6">
                   <div className="mb-3 md:mb-4">
                     <h3 className="text-base md:text-xl font-bold text-gray-900 mb-1 leading-tight">
                       {t(`landing.features.list.${feature.key}.title`)}
