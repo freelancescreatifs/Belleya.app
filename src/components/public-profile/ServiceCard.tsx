@@ -53,8 +53,8 @@ export default function ServiceCard({ service, onClick, isSelected }: ServiceCar
             />
           </div>
         ) : (
-          <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
-            <Scissors className="w-8 h-8 text-rose-400" />
+          <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-rose-400 to-pink-400 flex items-center justify-center">
+            <Scissors className="w-8 h-8 text-white" />
           </div>
         )}
 
