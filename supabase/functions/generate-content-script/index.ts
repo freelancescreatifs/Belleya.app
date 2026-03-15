@@ -29,6 +29,7 @@ function getProfessionLabel(profession: string): string {
     facialiste: "Facialiste / Specialiste soins du visage",
     prothesiste_ongulaire: "Prothesiste ongulaire",
     multi_metiers: "Professionnelle de la beaute multi-services",
+    makeup_artist: "Maquilleuse professionnelle / Makeup Artist",
     coach: "Coach / Consultante",
     freelance: "Freelance creatif",
     photographe: "Photographe",

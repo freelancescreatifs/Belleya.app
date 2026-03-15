@@ -6,6 +6,7 @@ export type ProfessionKey =
   | 'brow_artist'
   | 'facialiste'
   | 'prothesiste_ongulaire'
+  | 'makeup_artist'
   | 'multi_metiers';
 
 export type ClientSection =
@@ -58,6 +59,11 @@ export const PROFESSIONS: Profession[] = [
     key: 'prothesiste_ongulaire',
     label: 'Prothésiste ongulaire',
     sections: ['nails']
+  },
+  {
+    key: 'makeup_artist',
+    label: 'Makeup Artist',
+    sections: ['skin', 'skin_conditions']
   },
   {
     key: 'multi_metiers',

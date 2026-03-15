@@ -57,6 +57,7 @@ function buildContext(objective?: string, pillar?: string, profession?: string):
       'brow_artist': 'sourcils',
       'facialiste': 'soins du visage',
       'prothesiste_ongulaire': 'prothésie ongulaire',
+      'makeup_artist': 'maquillage professionnel',
       'multi_metiers': 'beauté et bien-être'
     };
     parts.push(`Contexte professionnel : ${professionLabels[profession] || profession}`);
