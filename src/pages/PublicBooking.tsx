@@ -80,7 +80,7 @@ type BookingStep = 'browse' | 'supplements' | 'datetime' | 'summary' | 'auth' | 
 const PHOTOS_PER_PAGE = 12;
 
 export default function PublicBooking({ slug }: PublicBookingProps) {
-  const { user, profile: authProfile } = useAuth();
+  const { user, profile: authProfile, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [proProfile, setProProfile] = useState<ProProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
@@ -116,7 +116,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', photo: null as File | null });
   const [submitting, setSubmitting] = useState(false);
 
-  const isClientLoggedIn = !!user && authProfile?.role === 'client';
+  const isClientLoggedIn = !authLoading && !!user && authProfile?.role === 'client';
 
   useEffect(() => {
     if (slug) loadProProfile();

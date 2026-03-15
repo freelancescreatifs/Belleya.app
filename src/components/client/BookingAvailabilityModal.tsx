@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
+import ToastContainer from '../shared/ToastContainer';
 
 interface Service {
   id: string;
@@ -54,6 +56,7 @@ export default function BookingAvailabilityModal({
   onSuccess,
 }: BookingAvailabilityModalProps) {
   const { user } = useAuth();
+  const { showToast, toasts, dismissToast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedTime, setSelectedTime] = useState<string>('');
@@ -233,12 +236,11 @@ export default function BookingAvailabilityModal({
 
       if (error) throw error;
 
-      alert('Demande de rendez-vous envoyée avec succès');
+      showToast('success', 'Demande de rendez-vous envoyée avec succès !');
       if (onSuccess) onSuccess();
       onClose();
     } catch (error: any) {
-      console.error('Error creating booking:', error);
-      alert('Erreur lors de la réservation: ' + error.message);
+      showToast('error', 'Erreur lors de la réservation: ' + (error?.message || 'Erreur inconnue'));
     } finally {
       setLoading(false);
     }
@@ -264,6 +266,8 @@ export default function BookingAvailabilityModal({
   const daySchedule = weekSchedule?.[selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()];
 
   return (
+    <>
+    <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex items-center justify-between">
@@ -423,5 +427,6 @@ export default function BookingAvailabilityModal({
         </div>
       </div>
     </div>
+    </>
   );
 }

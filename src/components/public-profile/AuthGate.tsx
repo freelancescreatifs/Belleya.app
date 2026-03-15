@@ -75,11 +75,22 @@ export default function AuthGate({
   async function handleSignIn() {
     const signInResponse = await signIn(formData.email, formData.password);
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    if (!sessionData?.session?.user) throw new Error('Erreur de connexion. Vérifiez vos identifiants.');
+    let authUser = null;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (sessionData?.session?.user) {
+        authUser = sessionData.session.user;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 300 + attempt * 200));
+    }
 
-    const authUser = sessionData.session.user;
+    if (!authUser) {
+      showToast('error', 'Erreur de connexion. Vérifiez vos identifiants.');
+      setError('Erreur de connexion. Vérifiez vos identifiants.');
+      return;
+    }
 
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
@@ -123,11 +134,22 @@ export default function AuthGate({
 
     await signUp(formData.email, formData.password, 'client', formData.firstName, formData.lastName);
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    if (!sessionData?.session?.user) throw new Error('Erreur lors de la création du compte');
+    let userId: string | null = null;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (sessionData?.session?.user?.id) {
+        userId = sessionData.session.user.id;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 500 + attempt * 300));
+    }
 
-    const userId = sessionData.session.user.id;
+    if (!userId) {
+      setSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.');
+      showToast('success', 'Compte créé ! Vérifiez votre email pour confirmer.');
+      return;
+    }
 
     await supabase
       .from('user_profiles')
