@@ -27,6 +27,10 @@ export function getEventColor(item: CalendarItem): string {
     return 'bg-blue-500';
   }
 
+  if (event.type === 'google' || event.type === 'planity') {
+    return 'bg-gray-400';
+  }
+
   return 'bg-[rgb(6,182,212)]';
 }
 

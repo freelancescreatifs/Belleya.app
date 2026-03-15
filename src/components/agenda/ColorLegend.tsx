@@ -25,6 +25,10 @@ export default function ColorLegend() {
         <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: 'rgb(240,62,151)' }}></div>
         <span className="text-gray-600 font-medium">Réseaux sociaux</span>
       </div>
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-gray-400 shadow-sm"></div>
+        <span className="text-gray-600 font-medium">Google Calendar</span>
+      </div>
     </div>
   );
 }
