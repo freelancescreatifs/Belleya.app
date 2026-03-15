@@ -267,14 +267,16 @@ export default function StudentDetail({ onPageChange }: StudentDetailProps) {
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Échec de l\'envoi');
+        const detail = errData.details || errData.error || 'Échec de l\'envoi';
+        throw new Error(detail);
       }
 
       showToast('success', 'Email envoyé avec succès');
       setShowEmailModal(false);
     } catch (error) {
       console.error('Error sending email:', error);
-      showToast('error', 'Erreur lors de l\'envoi de l\'email');
+      const msg = error instanceof Error ? error.message : 'Erreur lors de l\'envoi de l\'email';
+      showToast('error', msg);
     } finally {
       setSendingEmail(false);
     }
