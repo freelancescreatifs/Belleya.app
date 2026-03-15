@@ -826,6 +826,9 @@ export default function EditorialCalendar({ contents, onContentCreated, onConten
           >
             ←
           </button>
+          <span className="text-sm font-semibold text-gray-800 w-36 text-center capitalize">
+            {currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+          </span>
           <button
             onClick={() => setCurrentDate(new Date())}
             className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
