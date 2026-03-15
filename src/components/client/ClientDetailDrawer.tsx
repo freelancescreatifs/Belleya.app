@@ -143,6 +143,17 @@ export default function ClientDetailDrawer({
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [revenueBreakdown, setRevenueBreakdown] = useState<RevenueBreakdown[]>([]);
+  const [loyaltySettings, setLoyaltySettings] = useState<{
+    loyalty_enabled: boolean;
+    loyalty_visits_required: number;
+    loyalty_reward_description: string | null;
+    loyalty_card_background_url: string | null;
+  }>({
+    loyalty_enabled: true,
+    loyalty_visits_required: 10,
+    loyalty_reward_description: null,
+    loyalty_card_background_url: null,
+  });
   const [stats, setStats] = useState<ClientStats>({
     clientSince: null,
     lastAppointment: null,
@@ -187,6 +198,32 @@ export default function ClientDetailDrawer({
       loadQuoteRequests();
     }
   }, [clientId]);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadLoyaltySettings();
+    }
+  }, [user?.id]);
+
+  async function loadLoyaltySettings() {
+    try {
+      const { data } = await supabase
+        .from('company_profiles')
+        .select('loyalty_enabled, loyalty_visits_required, loyalty_reward_description, loyalty_card_background_url')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      if (data) {
+        setLoyaltySettings({
+          loyalty_enabled: data.loyalty_enabled ?? true,
+          loyalty_visits_required: data.loyalty_visits_required ?? 10,
+          loyalty_reward_description: data.loyalty_reward_description ?? null,
+          loyalty_card_background_url: data.loyalty_card_background_url ?? null,
+        });
+      }
+    } catch (err) {
+      console.error('[ClientDetailDrawer] Error loading loyalty settings:', err);
+    }
+  }
 
   useEffect(() => {
     if (clientId && profile?.company_id) {
@@ -1033,40 +1070,72 @@ export default function ClientDetailDrawer({
             </div>
           </div>
 
-          {(stats.clientStatus === 'loyal' || stats.completedAppointments >= 3) && (
-            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-200">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-yellow-600" />
-                  <h3 className="font-bold text-yellow-900">Programme de fidélité</h3>
-                </div>
-                {stats.clientStatus === 'loyal' && (
-                  <span className="px-3 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
-                    <Gift className="w-3 h-3" />
-                    Cliente fidèle
-                  </span>
-                )}
-              </div>
+          {loyaltySettings.loyalty_enabled && (
+            (() => {
+              const visitsRequired = loyaltySettings.loyalty_visits_required || 10;
+              const completed = stats.completedAppointments;
+              const rewardUnlocked = completed >= visitsRequired;
+              const stamps = Array.from({ length: Math.min(visitsRequired, 10) }, (_, i) => i < completed);
+              const extraStamps = visitsRequired > 10 ? visitsRequired - 10 : 0;
+              return (
+                <div
+                  className="relative rounded-2xl overflow-hidden shadow-md"
+                  style={{
+                    background: loyaltySettings.loyalty_card_background_url
+                      ? `url(${loyaltySettings.loyalty_card_background_url}) center/cover no-repeat`
+                      : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                    minHeight: '160px',
+                  }}
+                >
+                  <div className="absolute inset-0 bg-black/45" />
+                  <div className="relative p-4 md:p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-white/70 text-[10px] font-semibold uppercase tracking-widest mb-0.5">
+                          Programme fidélité
+                        </p>
+                        <p className="text-white font-bold text-base leading-tight">
+                          {loyaltySettings.loyalty_reward_description || 'Récompense offerte'}
+                        </p>
+                      </div>
+                      {rewardUnlocked ? (
+                        <span className="flex items-center gap-1 px-2.5 py-1 bg-amber-400 text-amber-900 text-xs font-bold rounded-full shrink-0">
+                          <Gift className="w-3 h-3" />
+                          Débloqué !
+                        </span>
+                      ) : (
+                        <Gift className="w-7 h-7 text-amber-400 shrink-0" />
+                      )}
+                    </div>
 
-              <div className="mb-2">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-yellow-700">Progression vers récompense</span>
-                  <span className="font-bold text-yellow-900">{stats.completedAppointments} / 10 RDV</span>
-                </div>
-                <div className="w-full bg-yellow-200 rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-yellow-500 to-amber-500 h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min((stats.completedAppointments / 10) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {stamps.map((filled, i) => (
+                        <div
+                          key={i}
+                          className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                            filled
+                              ? 'bg-amber-400 border-amber-400'
+                              : 'border-white/40 bg-white/10'
+                          }`}
+                        >
+                          {filled && <Award className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />}
+                        </div>
+                      ))}
+                      {extraStamps > 0 && (
+                        <span className="text-white/60 text-xs self-center ml-0.5">+{extraStamps}</span>
+                      )}
+                    </div>
 
-              <p className="text-xs text-yellow-700">
-                {10 - stats.completedAppointments > 0
-                  ? `Plus que ${10 - stats.completedAppointments} RDV pour débloquer une récompense !`
-                  : 'Récompense débloquée ! 🎉'}
-              </p>
-            </div>
+                    <p className="text-white/60 text-xs">
+                      {rewardUnlocked
+                        ? `${completed} / ${visitsRequired} RDV — Récompense débloquée !`
+                        : `${completed} / ${visitsRequired} RDV — encore ${visitsRequired - completed} pour la récompense`
+                      }
+                    </p>
+                  </div>
+                </div>
+              );
+            })()
           )}
 
           <div className="flex gap-2 md:gap-3">

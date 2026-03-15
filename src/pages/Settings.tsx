@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Building2, FileText, Calculator, LayoutGrid, Globe, Crown, Plug } from 'lucide-react';
+import { Building2, FileText, Calculator, LayoutGrid, Globe, Crown, Plug, Gift } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import CompanyProfileForm from '../components/settings/CompanyProfileForm';
 import MyDocuments from '../components/settings/MyDocuments';
@@ -10,6 +10,7 @@ import LanguageSettings from '../components/settings/LanguageSettings';
 import SubscriptionStatus from '../components/settings/SubscriptionStatus';
 import GoogleCalendarIntegration from '../components/settings/GoogleCalendarIntegration';
 import SocialAccountConnections from '../components/settings/SocialAccountConnections';
+import LoyaltySettings from '../components/settings/LoyaltySettings';
 import { useSubscription } from '../hooks/useSubscription';
 import UpgradeOverlay from '../components/shared/UpgradeOverlay';
 
@@ -17,7 +18,7 @@ export default function Settings() {
   const { user, refreshProfile } = useAuth();
   const { t } = useTranslation();
   const { canAccess } = useSubscription();
-  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language' | 'subscription' | 'integrations'>(() => {
+  const [activeTab, setActiveTab] = useState<'company' | 'documents' | 'profitability' | 'tabs' | 'language' | 'subscription' | 'integrations' | 'loyalty'>(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('tab') === 'integrations' || params.get('google_connected') || params.get('google_error')) {
       return 'integrations';
@@ -102,6 +103,17 @@ export default function Settings() {
               Integrations
             </button>
             <button
+              onClick={() => setActiveTab('loyalty')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                activeTab === 'loyalty'
+                  ? 'text-[#C43586] border-b-2 border-[#C43586]'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Gift className="w-5 h-5" />
+              Fidélité
+            </button>
+            <button
               onClick={() => setActiveTab('subscription')}
               className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'subscription'
@@ -152,6 +164,10 @@ export default function Settings() {
                 <GoogleCalendarIntegration />
               </div>
             </div>
+          )}
+
+          {activeTab === 'loyalty' && user && (
+            <LoyaltySettings userId={user.id} />
           )}
 
           {activeTab === 'subscription' && user && (
