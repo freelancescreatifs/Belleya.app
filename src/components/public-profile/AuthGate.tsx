@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { User, Mail, Phone, Lock, AlertCircle, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
 
 interface BookingContext {
   service: {
@@ -33,7 +34,8 @@ export default function AuthGate({
   providerId,
   companyId,
 }: AuthGateProps) {
-  const { user, signIn, signUp } = useAuth();
+  const { signIn, signUp } = useAuth();
+  const { showToast } = useToast();
   const [hasAccount, setHasAccount] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -61,35 +63,40 @@ export default function AuthGate({
       }
     } catch (err: any) {
       console.error('Auth error:', err);
-      setError(err.message || 'Une erreur est survenue');
+      const message = err?.message || 'Une erreur est survenue';
+      setError(message);
+      showToast('error', message);
     } finally {
       setLoading(false);
     }
   }
 
   async function handleSignIn() {
-    const { data, error: signInError } = await signIn(formData.email, formData.password);
+    const signInResponse = await signIn(formData.email, formData.password);
 
-    if (signInError) throw signInError;
-    if (!data.user) throw new Error('Erreur de connexion');
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!sessionData?.session?.user) throw new Error('Erreur de connexion. Vérifiez vos identifiants.');
+
+    const authUser = sessionData.session.user;
 
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
       .select('id')
       .eq('user_id', providerId)
-      .eq('belaya_user_id', data.user.id)
+      .eq('belaya_user_id', authUser.id)
       .maybeSingle();
 
     if (clientError) throw clientError;
 
     if (clientData) {
-      onAuthenticated(data.user.id, clientData.id);
+      onAuthenticated(authUser.id, clientData.id);
     } else {
       const insertPayload: any = {
         user_id: providerId,
-        belaya_user_id: data.user.id,
-        first_name: formData.firstName || 'Client',
-        last_name: formData.lastName || '',
+        belaya_user_id: authUser.id,
+        first_name: signInResponse?.first_name || formData.firstName || 'Client',
+        last_name: signInResponse?.last_name || formData.lastName || '',
         email: formData.email,
         phone: formData.phone || null,
         source: 'public_booking',
@@ -104,23 +111,24 @@ export default function AuthGate({
 
       if (createError) throw createError;
 
-      onAuthenticated(data.user.id, newClient.id);
+      onAuthenticated(authUser.id, newClient.id);
     }
   }
 
   async function handleSignUp() {
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-      throw new Error('Tous les champs sont obligatoires');
+      throw new Error('Tous les champs obligatoires sont manquants (prénom, nom, email, mot de passe)');
     }
 
-    const { data: authData, error: signUpError } = await signUp(formData.email, formData.password);
+    await signUp(formData.email, formData.password, 'client', formData.firstName, formData.lastName);
 
-    if (signUpError) throw signUpError;
-    if (!authData.user) throw new Error('Erreur lors de la création du compte');
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!sessionData?.session?.user) throw new Error('Erreur lors de la création du compte');
 
-    const userId = authData.user.id;
+    const userId = sessionData.session.user.id;
 
-    const { error: profileError } = await supabase
+    await supabase
       .from('user_profiles')
       .upsert({
         user_id: userId,
@@ -131,10 +139,6 @@ export default function AuthGate({
       }, {
         onConflict: 'user_id',
       });
-
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-    }
 
     const signUpPayload: any = {
       user_id: providerId,
