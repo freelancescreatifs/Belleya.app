@@ -18,7 +18,7 @@ interface EventRow {
   company_id: string | null;
 }
 
-function formatDateFR(isoDate: string): string {
+function formatDateFR(isoDate: string): { date: string; time: string } {
   const d = new Date(isoDate);
   const days = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
   const months = [
@@ -28,23 +28,25 @@ function formatDateFR(isoDate: string): string {
   const dayName = days[d.getUTCDay()];
   const dayNum = d.getUTCDate();
   const month = months[d.getUTCMonth()];
+  const year = d.getUTCFullYear();
   const hours = d.getUTCHours().toString().padStart(2, "0");
   const minutes = d.getUTCMinutes().toString().padStart(2, "0");
-  return `${dayName} ${dayNum} ${month} \u00e0 ${hours}h${minutes}`;
+  return {
+    date: `${dayName} ${dayNum} ${month} ${year}`,
+    time: `${hours}h${minutes}`,
+  };
 }
 
 function buildReminderHtml(
   firstName: string,
   companyName: string,
   serviceName: string | null,
-  dateFormatted: string,
+  dateStr: string,
+  timeStr: string,
   location: string | null
 ): string {
-  const serviceBlock = serviceName
-    ? `<p style="margin:0 0 8px;color:#4b5563;font-size:16px;line-height:1.6;"><strong>Prestation :</strong> ${serviceName}</p>`
-    : "";
   const locationBlock = location
-    ? `<p style="margin:0 0 8px;color:#4b5563;font-size:16px;line-height:1.6;"><strong>Lieu :</strong> ${location}</p>`
+    ? `<p style="margin:0 0 8px;color:#5A3A44;"><strong>Lieu :</strong> ${location}</p>`
     : "";
 
   return `<!DOCTYPE html>
@@ -52,54 +54,88 @@ function buildReminderHtml(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rappel de votre rendez-vous</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;padding:0;background-color:#f9fafb;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#FDF0F4;font-family:'DM Sans',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:40px 20px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 8px 40px rgba(220,100,130,0.12);">
+
           <tr>
-            <td style="background:linear-gradient(135deg,#e84c8a,#d63a78);padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">Belaya</h1>
-              <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Rappel de rendez-vous</p>
+            <td style="background:linear-gradient(135deg,#e84c8a,#d63a78);padding:40px 48px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-family:'Playfair Display',serif;font-size:32px;font-weight:600;letter-spacing:-0.5px;">Belaya</h1>
+              <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;font-weight:300;">Rappel de rendez-vous</p>
             </td>
           </tr>
+
           <tr>
-            <td style="padding:40px;">
-              <h2 style="margin:0 0 16px;color:#1f2937;font-size:22px;font-weight:600;">Bonjour ${firstName},</h2>
-              <p style="margin:0 0 20px;color:#4b5563;font-size:16px;line-height:1.6;">
-                Nous vous rappelons que vous avez un rendez-vous pr&eacute;vu <strong>demain</strong> :
+            <td style="padding:40px 48px;">
+              <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:#2D1B22;margin:0 0 20px;">
+                Rappel de votre rendez-vous demain
+              </h2>
+
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 20px;">
+                Bonjour <strong>${firstName}</strong>,
               </p>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#fdf2f8;border-radius:12px;margin:0 0 24px;">
+
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 20px;">
+                Nous vous rappelons que vous avez un rendez-vous avec <strong>${companyName}</strong> demain.
+              </p>
+
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FDF0F4;border-radius:14px;margin:0 0 24px;">
                 <tr>
-                  <td style="padding:24px;">
-                    <p style="margin:0 0 8px;color:#1f2937;font-size:18px;font-weight:600;">${companyName}</p>
-                    <p style="margin:0 0 8px;color:#4b5563;font-size:16px;line-height:1.6;"><strong>Date :</strong> ${dateFormatted}</p>
-                    ${serviceBlock}
+                  <td style="font-size:14px;color:#2D1B22;padding:20px;">
+                    <p style="margin:0 0 12px;font-size:16px;font-weight:600;color:#2D1B22;">${companyName}</p>
+                    ${serviceName ? `<p style="margin:0 0 8px;color:#5A3A44;"><strong>Service :</strong> ${serviceName}</p>` : ""}
+                    <p style="margin:0 0 8px;color:#5A3A44;"><strong>Date :</strong> ${dateStr}</p>
+                    <p style="margin:0 0 8px;color:#5A3A44;"><strong>Heure :</strong> ${timeStr}</p>
                     ${locationBlock}
                   </td>
                 </tr>
               </table>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 20px;">
+                Si vous avez un emp&ecirc;chement, merci de pr&eacute;venir votre prestataire &agrave; l'avance.
+              </p>
+
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 20px;">
+                Pr&eacute;venir &agrave; temps permet de respecter le travail du prestataire et de lib&eacute;rer ce cr&eacute;neau pour une autre cliente.
+              </p>
+
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 28px;">
+                Vous pouvez g&eacute;rer ou modifier votre rendez-vous directement depuis votre espace client.
+              </p>
+
+              <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 28px;">
                 <tr>
-                  <td align="center" style="padding:8px 0 32px;">
-                    <a href="https://belaya.app/" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84c8a,#d63a78);color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:16px;font-weight:600;letter-spacing:0.3px;">
-                      Voir mes rendez-vous
+                  <td align="center" bgcolor="#E91E8C" style="border-radius:50px;">
+                    <a href="https://belaya.app" style="display:inline-block;color:#ffffff;text-decoration:none;font-size:16px;font-weight:500;padding:18px 40px;">
+                      Voir mon rendez-vous
                     </a>
                   </td>
                 </tr>
               </table>
-              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 24px;">
-              <p style="margin:0;color:#9ca3af;font-size:13px;line-height:1.5;text-align:center;">
-                Cet email vous a &eacute;t&eacute; envoy&eacute; automatiquement par Belaya au nom de <strong>${companyName}</strong>. Si vous pensez avoir re&ccedil;u ce message par erreur, vous pouvez l'ignorer.
+
+              <p style="margin:0;font-size:13px;color:#C49BAA;text-align:center;">
+                Merci pour votre respect et votre ponctualit&eacute;
               </p>
             </td>
           </tr>
+
           <tr>
-            <td style="background-color:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
-              <p style="margin:0;color:#9ca3af;font-size:12px;">&copy; ${new Date().getFullYear()} Belaya. Tous droits r&eacute;serv&eacute;s.</p>
+            <td style="padding:28px 48px;text-align:center;background:#FDF8FA;border-top:1px solid #F9D4E4;">
+              <p style="font-size:14px;color:#2D1B22;margin:0 0 4px;">L'&eacute;quipe Belaya</p>
+              <p style="font-size:12px;color:#9E5070;margin:0 0 16px;">Beauty is my priority</p>
+              <p style="font-size:12px;color:#C49BAA;margin:0;">
+                <a href="https://www.instagram.com/belaya.app" style="color:#E91E8C;text-decoration:none;">Instagram</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://www.tiktok.com/belaya.app" style="color:#E91E8C;text-decoration:none;">TikTok</a>
+              </p>
             </td>
           </tr>
+
         </table>
       </td>
     </tr>
@@ -223,14 +259,15 @@ Deno.serve(async (req: Request) => {
         if (service?.name) serviceName = service.name;
       }
 
-      const dateFormatted = formatDateFR(event.start_at);
+      const { date: dateStr, time: timeStr } = formatDateFR(event.start_at);
       const firstName = client.first_name || "cher(e) client(e)";
 
       const html = buildReminderHtml(
         firstName,
         companyName,
         serviceName || event.title,
-        dateFormatted,
+        dateStr,
+        timeStr,
         event.location || null
       );
 

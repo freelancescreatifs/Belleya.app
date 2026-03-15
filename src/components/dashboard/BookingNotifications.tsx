@@ -3,6 +3,38 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { autoSendQuestionnairesOnBooking } from '../../lib/questionnaireHelpers';
 import { Bell, X, Check, Calendar, Clock, User } from 'lucide-react';
+
+async function sendBookingConfirmedEmail(
+  clientEmail: string,
+  clientFirstName: string,
+  providerName: string,
+  serviceName: string,
+  appointmentDate: string,
+  bookingId: string
+): Promise<void> {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${anonKey}`,
+      },
+      body: JSON.stringify({
+        clientEmail,
+        clientFirstName,
+        providerName,
+        serviceName,
+        appointmentDate,
+        bookingId,
+        type: 'booking_confirmed',
+      }),
+    });
+  } catch (err) {
+    console.error('Failed to send booking confirmed email:', err);
+  }
+}
 import BelayaLoader from '../shared/BelayaLoader';
 
 interface Notification {
@@ -162,19 +194,43 @@ export default function BookingNotifications() {
 
       console.log('Booking accepted successfully:', data);
 
-      if (profile?.company_id) {
-        const { data: bookingInfo } = await supabase
-          .from('bookings')
-          .select('service_id')
-          .eq('id', bookingId)
-          .maybeSingle();
+      const { data: bookingInfo } = await supabase
+        .from('bookings')
+        .select(`
+          service_id,
+          appointment_date,
+          service:services(name),
+          crm_client:crm_clients(first_name, last_name, email)
+        `)
+        .eq('id', bookingId)
+        .maybeSingle();
 
-        if (bookingInfo?.service_id) {
-          autoSendQuestionnairesOnBooking(
-            bookingId,
-            bookingInfo.service_id,
-            profile.company_id,
-            user!.id
+      if (profile?.company_id && bookingInfo?.service_id) {
+        autoSendQuestionnairesOnBooking(
+          bookingId,
+          bookingInfo.service_id,
+          profile.company_id,
+          user!.id
+        );
+      }
+
+      if (bookingInfo) {
+        const crmClient = Array.isArray(bookingInfo.crm_client)
+          ? bookingInfo.crm_client[0]
+          : bookingInfo.crm_client;
+        const serviceObj = Array.isArray(bookingInfo.service)
+          ? bookingInfo.service[0]
+          : bookingInfo.service;
+        const companyName = profile?.company_name || 'votre prestataire';
+
+        if (crmClient?.email && crmClient?.first_name && serviceObj?.name) {
+          sendBookingConfirmedEmail(
+            crmClient.email,
+            crmClient.first_name,
+            companyName,
+            serviceObj.name,
+            bookingInfo.appointment_date,
+            bookingId
           );
         }
       }

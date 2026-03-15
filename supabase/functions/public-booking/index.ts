@@ -30,6 +30,34 @@ interface BookingRequest {
   };
 }
 
+async function sendBookingConfirmationEmail(
+  supabaseUrl: string,
+  clientEmail: string,
+  clientFirstName: string,
+  providerName: string,
+  serviceName: string,
+  appointmentDate: string,
+  bookingId: string
+): Promise<void> {
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientEmail,
+        clientFirstName,
+        providerName,
+        serviceName,
+        appointmentDate,
+        bookingId,
+        type: "booking_received",
+      }),
+    });
+  } catch (err) {
+    console.error("Failed to send booking confirmation email:", err);
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -64,7 +92,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: companyProfile, error: companyError } = await supabase
       .from("company_profiles")
-      .select("user_id")
+      .select("user_id, company_name")
       .eq("booking_slug", proSlug)
       .maybeSingle();
 
@@ -79,6 +107,14 @@ Deno.serve(async (req: Request) => {
     }
 
     const proId = companyProfile.user_id;
+    const providerName = companyProfile.company_name || "votre prestataire";
+
+    const { data: serviceData } = await supabase
+      .from("services")
+      .select("name")
+      .eq("id", serviceId)
+      .maybeSingle();
+    const serviceName = serviceData?.name || "Prestation";
 
     let crmClientId: string;
 
@@ -187,6 +223,18 @@ Deno.serve(async (req: Request) => {
         .update(updateData)
         .eq("id", crmClientId);
     }
+
+    EdgeRuntime.waitUntil(
+      sendBookingConfirmationEmail(
+        supabaseUrl,
+        clientInfo.email,
+        clientInfo.firstName,
+        providerName,
+        serviceName,
+        appointmentDate,
+        booking.id
+      )
+    );
 
     return new Response(
       JSON.stringify({
