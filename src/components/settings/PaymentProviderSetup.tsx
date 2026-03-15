@@ -3,6 +3,7 @@ import { CreditCard, CheckCircle, XCircle, AlertTriangle, ExternalLink, Loader, 
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
+import ToastContainer from '../shared/ToastContainer';
 
 interface PaymentAccount {
   id: string;
@@ -22,7 +23,7 @@ interface PaymentProviderSetupProps {
 
 export default function PaymentProviderSetup({ depositRequired, onStatusChange }: PaymentProviderSetupProps) {
   const { user } = useAuth();
-  const { showToast } = useToast();
+  const { toasts, showToast, dismissToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [connectingPayPal, setConnectingPayPal] = useState(false);
@@ -493,6 +494,8 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
           Les frais de la plateforme (1,5%) peuvent être à la charge du prestataire ou du client selon vos paramètres.
         </p>
       </div>
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
