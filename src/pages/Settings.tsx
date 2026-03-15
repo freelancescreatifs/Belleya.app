@@ -23,6 +23,9 @@ export default function Settings() {
     if (params.get('tab') === 'integrations' || params.get('google_connected') || params.get('google_error')) {
       return 'integrations';
     }
+    if (params.get('tab') === 'loyalty') {
+      return 'loyalty';
+    }
     return 'company';
   });
 

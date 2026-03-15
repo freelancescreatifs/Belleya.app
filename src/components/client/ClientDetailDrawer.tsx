@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText, Loader, MailCheck, Download, AlertCircle, CheckCircle, Paperclip } from 'lucide-react';
+import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText, Loader, MailCheck, Download, AlertCircle, CheckCircle, Paperclip, Settings } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,6 +7,7 @@ import { getClientTag } from '../../lib/clientTagHelpers';
 import SupplementsDisplay from '../shared/SupplementsDisplay';
 import BelayaLoader from '../shared/BelayaLoader';
 import ClientGallery from './ClientGallery';
+import { LoyaltyCardPreview } from '../settings/LoyaltySettings';
 
 interface Client {
   id: string;
@@ -145,14 +146,20 @@ export default function ClientDetailDrawer({
   const [revenueBreakdown, setRevenueBreakdown] = useState<RevenueBreakdown[]>([]);
   const [loyaltySettings, setLoyaltySettings] = useState<{
     loyalty_enabled: boolean;
+    loyalty_program_name: string | null;
     loyalty_visits_required: number;
     loyalty_reward_description: string | null;
     loyalty_card_background_url: string | null;
+    loyalty_card_accent_color: string | null;
+    loyalty_reset_on_redeem: boolean;
   }>({
     loyalty_enabled: true,
+    loyalty_program_name: null,
     loyalty_visits_required: 10,
     loyalty_reward_description: null,
     loyalty_card_background_url: null,
+    loyalty_card_accent_color: null,
+    loyalty_reset_on_redeem: false,
   });
   const [stats, setStats] = useState<ClientStats>({
     clientSince: null,
@@ -209,15 +216,18 @@ export default function ClientDetailDrawer({
     try {
       const { data } = await supabase
         .from('company_profiles')
-        .select('loyalty_enabled, loyalty_visits_required, loyalty_reward_description, loyalty_card_background_url')
+        .select('loyalty_enabled, loyalty_program_name, loyalty_visits_required, loyalty_reward_description, loyalty_card_background_url, loyalty_card_accent_color, loyalty_reset_on_redeem')
         .eq('user_id', user!.id)
         .maybeSingle();
       if (data) {
         setLoyaltySettings({
           loyalty_enabled: data.loyalty_enabled ?? true,
+          loyalty_program_name: data.loyalty_program_name ?? null,
           loyalty_visits_required: data.loyalty_visits_required ?? 10,
           loyalty_reward_description: data.loyalty_reward_description ?? null,
           loyalty_card_background_url: data.loyalty_card_background_url ?? null,
+          loyalty_card_accent_color: data.loyalty_card_accent_color ?? null,
+          loyalty_reset_on_redeem: data.loyalty_reset_on_redeem ?? false,
         });
       }
     } catch (err) {
@@ -1070,73 +1080,36 @@ export default function ClientDetailDrawer({
             </div>
           </div>
 
-          {loyaltySettings.loyalty_enabled && (
-            (() => {
-              const visitsRequired = loyaltySettings.loyalty_visits_required || 10;
-              const completed = stats.completedAppointments;
-              const rewardUnlocked = completed >= visitsRequired;
-              const stamps = Array.from({ length: Math.min(visitsRequired, 10) }, (_, i) => i < completed);
-              const extraStamps = visitsRequired > 10 ? visitsRequired - 10 : 0;
-              return (
-                <div
-                  className="relative rounded-2xl overflow-hidden shadow-md"
-                  style={{
-                    background: loyaltySettings.loyalty_card_background_url
-                      ? `url(${loyaltySettings.loyalty_card_background_url}) center/cover no-repeat`
-                      : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                    minHeight: '160px',
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black/45" />
-                  <div className="relative p-4 md:p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-white/70 text-[10px] font-semibold uppercase tracking-widest mb-0.5">
-                          Programme fidélité
-                        </p>
-                        <p className="text-white font-bold text-base leading-tight">
-                          {loyaltySettings.loyalty_reward_description || 'Récompense offerte'}
-                        </p>
-                      </div>
-                      {rewardUnlocked ? (
-                        <span className="flex items-center gap-1 px-2.5 py-1 bg-amber-400 text-amber-900 text-xs font-bold rounded-full shrink-0">
-                          <Gift className="w-3 h-3" />
-                          Débloqué !
-                        </span>
-                      ) : (
-                        <Gift className="w-7 h-7 text-amber-400 shrink-0" />
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {stamps.map((filled, i) => (
-                        <div
-                          key={i}
-                          className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                            filled
-                              ? 'bg-amber-400 border-amber-400'
-                              : 'border-white/40 bg-white/10'
-                          }`}
-                        >
-                          {filled && <Award className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />}
-                        </div>
-                      ))}
-                      {extraStamps > 0 && (
-                        <span className="text-white/60 text-xs self-center ml-0.5">+{extraStamps}</span>
-                      )}
-                    </div>
-
-                    <p className="text-white/60 text-xs">
-                      {rewardUnlocked
-                        ? `${completed} / ${visitsRequired} RDV — Récompense débloquée !`
-                        : `${completed} / ${visitsRequired} RDV — encore ${visitsRequired - completed} pour la récompense`
-                      }
-                    </p>
-                  </div>
+          {loyaltySettings.loyalty_enabled && (() => {
+            const visitsRequired = loyaltySettings.loyalty_visits_required || 10;
+            const completed = stats.completedAppointments;
+            const accentColor = loyaltySettings.loyalty_card_accent_color || '#F59E0B';
+            const stamps = Array.from({ length: Math.min(visitsRequired, 10) }, (_, i) => i < completed);
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Carte de fidélité</p>
+                  <a
+                    href="/settings"
+                    onClick={e => { e.preventDefault(); window.location.href = '/settings?tab=loyalty'; }}
+                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-[#C43586] transition-colors"
+                  >
+                    <Settings className="w-3 h-3" />
+                    Modifier
+                  </a>
                 </div>
-              );
-            })()
-          )}
+                <LoyaltyCardPreview
+                  programName={loyaltySettings.loyalty_program_name || 'Programme fidélité'}
+                  rewardDescription={loyaltySettings.loyalty_reward_description || 'Récompense offerte'}
+                  backgroundUrl={loyaltySettings.loyalty_card_background_url}
+                  accentColor={accentColor}
+                  visitsRequired={visitsRequired}
+                  previewCompleted={completed}
+                  previewStamps={stamps}
+                />
+              </div>
+            );
+          })()}
 
           <div className="flex gap-2 md:gap-3">
             {onAddRevenue && (

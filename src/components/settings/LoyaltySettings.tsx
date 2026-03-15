@@ -1,18 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
-import { Gift, Upload, X, Save, Loader, Award, ToggleLeft, ToggleRight, Image } from 'lucide-react';
+import { Gift, Upload, X, Save, Loader, Award, ToggleLeft, ToggleRight, Image, RefreshCw, Palette } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
 
 interface LoyaltySettingsData {
   loyalty_enabled: boolean;
+  loyalty_program_name: string;
   loyalty_visits_required: number;
   loyalty_reward_description: string;
   loyalty_card_background_url: string | null;
+  loyalty_card_accent_color: string;
+  loyalty_reset_on_redeem: boolean;
 }
 
 interface LoyaltySettingsProps {
   userId: string;
 }
+
+const ACCENT_PRESETS = [
+  { label: 'Or', value: '#F59E0B' },
+  { label: 'Rose', value: '#C43586' },
+  { label: 'Corail', value: '#EF4444' },
+  { label: 'Vert', value: '#10B981' },
+  { label: 'Bleu', value: '#3B82F6' },
+  { label: 'Gris', value: '#6B7280' },
+];
 
 export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
   const { showToast } = useToast();
@@ -22,9 +34,12 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [data, setData] = useState<LoyaltySettingsData>({
     loyalty_enabled: true,
+    loyalty_program_name: '',
     loyalty_visits_required: 10,
     loyalty_reward_description: '',
     loyalty_card_background_url: null,
+    loyalty_card_accent_color: '#F59E0B',
+    loyalty_reset_on_redeem: false,
   });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -37,7 +52,7 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
     try {
       const { data: profile, error } = await supabase
         .from('company_profiles')
-        .select('id, loyalty_enabled, loyalty_visits_required, loyalty_reward_description, loyalty_card_background_url')
+        .select('id, loyalty_enabled, loyalty_program_name, loyalty_visits_required, loyalty_reward_description, loyalty_card_background_url, loyalty_card_accent_color, loyalty_reset_on_redeem')
         .eq('user_id', userId)
         .maybeSingle();
 
@@ -46,9 +61,12 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
         setCompanyId(profile.id);
         setData({
           loyalty_enabled: profile.loyalty_enabled ?? true,
+          loyalty_program_name: profile.loyalty_program_name ?? '',
           loyalty_visits_required: profile.loyalty_visits_required ?? 10,
           loyalty_reward_description: profile.loyalty_reward_description ?? '',
           loyalty_card_background_url: profile.loyalty_card_background_url ?? null,
+          loyalty_card_accent_color: profile.loyalty_card_accent_color ?? '#F59E0B',
+          loyalty_reset_on_redeem: profile.loyalty_reset_on_redeem ?? false,
         });
       }
     } catch (err) {
@@ -66,9 +84,12 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
         .from('company_profiles')
         .update({
           loyalty_enabled: data.loyalty_enabled,
+          loyalty_program_name: data.loyalty_program_name || null,
           loyalty_visits_required: Math.max(1, Math.min(100, data.loyalty_visits_required)),
           loyalty_reward_description: data.loyalty_reward_description || null,
           loyalty_card_background_url: data.loyalty_card_background_url,
+          loyalty_card_accent_color: data.loyalty_card_accent_color || null,
+          loyalty_reset_on_redeem: data.loyalty_reset_on_redeem,
         })
         .eq('id', companyId);
 
@@ -114,7 +135,9 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
   }
 
   const visitsRequired = data.loyalty_visits_required || 10;
-  const previewStamps = Array.from({ length: visitsRequired }, (_, i) => i < 3);
+  const accentColor = data.loyalty_card_accent_color || '#F59E0B';
+  const previewCompleted = Math.min(3, visitsRequired);
+  const previewStamps = Array.from({ length: Math.min(visitsRequired, 10) }, (_, i) => i < previewCompleted);
 
   if (loading) {
     return (
@@ -158,6 +181,22 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
           <>
             <div className="border-t border-gray-100 pt-6">
               <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Nom du programme
+              </label>
+              <p className="text-xs text-gray-500 mb-3">
+                Donnez un nom à votre programme (ex: "Club VIP", "Carte Or", "Fidélité Premium")
+              </p>
+              <input
+                type="text"
+                placeholder="Ex : Club VIP, Carte Or, Fidélité Premium..."
+                value={data.loyalty_program_name}
+                onChange={e => setData(prev => ({ ...prev, loyalty_program_name: e.target.value }))}
+                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#C43586] focus:border-transparent"
+              />
+            </div>
+
+            <div className="border-t border-gray-100 pt-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Nombre de RDV avant récompense
               </label>
               <p className="text-xs text-gray-500 mb-3">
@@ -190,6 +229,65 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
                 onChange={e => setData(prev => ({ ...prev, loyalty_reward_description: e.target.value }))}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#C43586] focus:border-transparent"
               />
+            </div>
+
+            <div className="border-t border-gray-100 pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 text-gray-500" />
+                    <p className="font-semibold text-gray-900">Réinitialiser après récompense</p>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-0.5 ml-6">
+                    Le compteur repart à 0 une fois la récompense débloquée
+                  </p>
+                </div>
+                <button
+                  onClick={() => setData(prev => ({ ...prev, loyalty_reset_on_redeem: !prev.loyalty_reset_on_redeem }))}
+                  className="focus:outline-none"
+                >
+                  {data.loyalty_reset_on_redeem ? (
+                    <ToggleRight className="w-10 h-10 text-[#C43586]" />
+                  ) : (
+                    <ToggleLeft className="w-10 h-10 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-2 ml-6">
+                {data.loyalty_reset_on_redeem
+                  ? 'Le client recommence à 0 après chaque récompense — idéal pour récompenser régulièrement.'
+                  : 'La récompense reste débloquée — le badge "Débloqué" reste affiché.'
+                }
+              </p>
+            </div>
+
+            <div className="border-t border-gray-100 pt-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
+                <Palette className="w-4 h-4 text-gray-500" />
+                Couleur d'accent
+              </label>
+              <p className="text-xs text-gray-500 mb-3">
+                Couleur utilisée pour les tampons et accents de la carte (si pas d'image de fond)
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {ACCENT_PRESETS.map(preset => (
+                  <button
+                    key={preset.value}
+                    onClick={() => setData(prev => ({ ...prev, loyalty_card_accent_color: preset.value }))}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-sm font-medium transition-all ${
+                      data.loyalty_card_accent_color === preset.value
+                        ? 'border-gray-900 shadow-sm scale-105'
+                        : 'border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    <span
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: preset.value }}
+                    />
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="border-t border-gray-100 pt-6">
@@ -248,46 +346,17 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
                 <Award className="w-4 h-4 text-amber-500" />
                 Aperçu de la carte
               </p>
-              <div
-                className="relative rounded-2xl overflow-hidden shadow-md"
-                style={{
-                  background: data.loyalty_card_background_url
-                    ? `url(${data.loyalty_card_background_url}) center/cover no-repeat`
-                    : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                  minHeight: '160px',
-                }}
-              >
-                <div className="absolute inset-0 bg-black/40" />
-                <div className="relative p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-white/80 text-xs font-medium uppercase tracking-wider">Programme fidélité</p>
-                      <p className="text-white font-bold text-lg leading-tight">
-                        {data.loyalty_reward_description || 'Votre récompense'}
-                      </p>
-                    </div>
-                    <Gift className="w-8 h-8 text-amber-400" />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {previewStamps.slice(0, Math.min(visitsRequired, 10)).map((filled, i) => (
-                      <div
-                        key={i}
-                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                          filled
-                            ? 'bg-amber-400 border-amber-400'
-                            : 'border-white/50 bg-white/10'
-                        }`}
-                      >
-                        {filled && <Award className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                    ))}
-                    {visitsRequired > 10 && (
-                      <span className="text-white/70 text-xs self-center ml-1">+{visitsRequired - 10} autres</span>
-                    )}
-                  </div>
-                  <p className="text-white/70 text-xs mt-2">3 / {visitsRequired} RDV</p>
-                </div>
-              </div>
+
+              <LoyaltyCardPreview
+                programName={data.loyalty_program_name || 'Programme fidélité'}
+                rewardDescription={data.loyalty_reward_description || 'Votre récompense'}
+                backgroundUrl={data.loyalty_card_background_url}
+                accentColor={accentColor}
+                visitsRequired={visitsRequired}
+                previewCompleted={previewCompleted}
+                previewStamps={previewStamps}
+              />
+              <p className="text-xs text-gray-400 mt-2 text-center">Aperçu avec 3 RDV validés</p>
             </div>
           </>
         )}
@@ -301,6 +370,90 @@ export default function LoyaltySettings({ userId }: LoyaltySettingsProps) {
         {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
         {saving ? 'Sauvegarde...' : 'Sauvegarder'}
       </button>
+    </div>
+  );
+}
+
+interface LoyaltyCardPreviewProps {
+  programName: string;
+  rewardDescription: string;
+  backgroundUrl: string | null;
+  accentColor: string;
+  visitsRequired: number;
+  previewCompleted: number;
+  previewStamps: boolean[];
+}
+
+export function LoyaltyCardPreview({
+  programName,
+  rewardDescription,
+  backgroundUrl,
+  accentColor,
+  visitsRequired,
+  previewCompleted,
+  previewStamps,
+}: LoyaltyCardPreviewProps) {
+  const rewardUnlocked = previewCompleted >= visitsRequired;
+
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden shadow-lg"
+      style={{
+        background: backgroundUrl
+          ? `url(${backgroundUrl}) center/cover no-repeat`
+          : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        minHeight: '180px',
+      }}
+    >
+      <div className="absolute inset-0 bg-black/45" />
+      <div className="relative p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-white/60 text-[10px] font-semibold uppercase tracking-widest mb-0.5">
+              {programName}
+            </p>
+            <p className="text-white font-bold text-base leading-tight">
+              {rewardDescription}
+            </p>
+          </div>
+          {rewardUnlocked ? (
+            <span
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full shrink-0"
+              style={{ backgroundColor: accentColor, color: '#1a1a2e' }}
+            >
+              <Gift className="w-3 h-3" />
+              Débloqué !
+            </span>
+          ) : (
+            <Gift className="w-7 h-7 shrink-0" style={{ color: accentColor }} />
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          {previewStamps.map((filled, i) => (
+            <div
+              key={i}
+              className="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all"
+              style={filled
+                ? { backgroundColor: accentColor, borderColor: accentColor }
+                : { borderColor: 'rgba(255,255,255,0.35)', backgroundColor: 'rgba(255,255,255,0.08)' }
+              }
+            >
+              {filled && <Award className="w-3.5 h-3.5 text-white" />}
+            </div>
+          ))}
+          {visitsRequired > 10 && (
+            <span className="text-white/60 text-xs self-center ml-0.5">+{visitsRequired - 10}</span>
+          )}
+        </div>
+
+        <p className="text-white/60 text-xs">
+          {rewardUnlocked
+            ? `${previewCompleted} / ${visitsRequired} RDV — Récompense débloquée !`
+            : `${previewCompleted} / ${visitsRequired} RDV — encore ${visitsRequired - previewCompleted} pour la récompense`
+          }
+        </p>
+      </div>
     </div>
   );
 }
