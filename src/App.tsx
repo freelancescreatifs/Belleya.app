@@ -38,6 +38,7 @@ import ClientBookings from './pages/client/ClientBookings';
 import ClientMap from './pages/client/ClientMap';
 import ClientFavorites from './pages/client/ClientFavorites';
 import ClientProfile from './pages/client/ClientProfile';
+import ClientDocuments from './pages/client/ClientDocuments';
 import ProviderProfile from './pages/client/ProviderProfile';
 import AffiliateLanding from './pages/AffiliateLanding';
 import AffiliateApply from './pages/AffiliateApply';
@@ -469,6 +470,8 @@ function AppContent() {
           return <ClientFavorites />;
         case 'profile':
           return <ClientProfile />;
+        case 'documents':
+          return <ClientDocuments />;
         default:
           return <ClientHome onNavigateToMap={() => setCurrentPage('map')} />;
       }

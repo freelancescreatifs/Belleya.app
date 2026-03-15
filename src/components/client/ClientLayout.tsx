@@ -1,4 +1,4 @@
-import { Home, Map, Calendar, Heart, User } from 'lucide-react';
+import { Home, Map, Calendar, Heart, User, FileText } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
 
@@ -12,7 +12,7 @@ const navItems = [
   { id: 'home', label: 'Accueil', icon: Home },
   { id: 'map', label: 'Carte', icon: Map },
   { id: 'bookings', label: 'RDV', icon: Calendar },
-  { id: 'favorites', label: 'Favoris', icon: Heart },
+  { id: 'documents', label: 'Docs', icon: FileText },
   { id: 'profile', label: 'Profil', icon: User },
 ];
 

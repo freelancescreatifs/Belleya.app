@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText, Loader, MailCheck } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Pencil, Trash2, ArchiveRestore, Upload, Phone, Mail, Instagram, Calendar, Plus, Euro, TrendingUp, Award, Gift, Clock, Activity, Cake, ClipboardList, Send, Eye, ChevronDown, ChevronUp, Check, FileText, Loader, MailCheck, Download, AlertCircle, CheckCircle, Paperclip } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -104,6 +104,20 @@ interface AvailableQuestionnaire {
   service_name: string;
 }
 
+interface ClientDocument {
+  id: string;
+  title: string;
+  file_url: string;
+  file_name: string;
+  file_type: string;
+  notes: string | null;
+  status: 'pending' | 'viewed' | 'returned';
+  returned_file_url: string | null;
+  returned_file_name: string | null;
+  returned_at: string | null;
+  created_at: string;
+}
+
 interface ClientDetailDrawerProps {
   clientId: string;
   onClose: () => void;
@@ -150,6 +164,16 @@ export default function ClientDetailDrawer({
   const [showSendModal, setShowSendModal] = useState(false);
   const [sendingWelcome, setSendingWelcome] = useState(false);
   const [welcomeStatus, setWelcomeStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [clientDocuments, setClientDocuments] = useState<ClientDocument[]>([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [showUploadDocModal, setShowUploadDocModal] = useState(false);
+  const [docUploadFile, setDocUploadFile] = useState<File | null>(null);
+  const [docTitle, setDocTitle] = useState('');
+  const [docNotes, setDocNotes] = useState('');
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docToast, setDocToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const docFileInputRef = useRef<HTMLInputElement | null>(null);
+  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (clientId) {
@@ -160,8 +184,48 @@ export default function ClientDetailDrawer({
       loadStats();
       loadSubmissions();
       loadQuoteRequests();
+      loadClientDocuments();
     }
   }, [clientId]);
+
+  useEffect(() => {
+    if (!clientId || !profile?.company_id) return;
+
+    const channel = supabase
+      .channel(`client-docs-${clientId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'client_documents',
+          filter: `client_id=eq.${clientId}`,
+        },
+        (payload) => {
+          const updated = payload.new as ClientDocument;
+          setClientDocuments((prev) =>
+            prev.map((d) => (d.id === updated.id ? { ...d, ...updated } : d))
+          );
+          if (updated.status === 'returned') {
+            setDocToast({ type: 'success', message: `Document "${updated.title}" retourne par la cliente !` });
+          }
+        }
+      )
+      .subscribe();
+
+    realtimeChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [clientId, profile?.company_id]);
+
+  useEffect(() => {
+    if (docToast) {
+      const t = setTimeout(() => setDocToast(null), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [docToast]);
 
   async function loadClient() {
     if (!user) return;
@@ -538,6 +602,120 @@ export default function ClientDetailDrawer({
     if (!error) {
       setShowSendModal(false);
       loadSubmissions();
+    }
+  }
+
+  async function loadClientDocuments() {
+    if (!profile?.company_id) return;
+    setDocsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('client_documents')
+        .select('*')
+        .eq('client_id', clientId)
+        .eq('company_id', profile.company_id)
+        .order('created_at', { ascending: false });
+      if (!error && data) setClientDocuments(data);
+    } catch (err) {
+      console.error('[ClientDetailDrawer] Error loading client documents:', err);
+    } finally {
+      setDocsLoading(false);
+    }
+  }
+
+  async function handleDocumentUpload() {
+    if (!docUploadFile || !docTitle.trim() || !client || !user || !profile?.company_id) return;
+
+    const maxSize = 20 * 1024 * 1024;
+    if (docUploadFile.size > maxSize) {
+      setDocToast({ type: 'error', message: 'Fichier trop grand. Maximum 20 MB' });
+      return;
+    }
+
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(docUploadFile.type)) {
+      setDocToast({ type: 'error', message: 'Format non supporte. Utilisez PDF, JPG, PNG ou WEBP' });
+      return;
+    }
+
+    setUploadingDoc(true);
+    try {
+      const fileExt = docUploadFile.name.split('.').pop();
+      const fileName = `${profile.company_id}/${clientId}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('client-documents')
+        .upload(fileName, docUploadFile, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('client-documents')
+        .getPublicUrl(fileName);
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('client_documents')
+        .insert({
+          client_id: clientId,
+          company_id: profile.company_id,
+          client_user_id: (client as any).belaya_user_id || null,
+          file_url: urlData.publicUrl,
+          file_name: docUploadFile.name,
+          file_type: docUploadFile.type,
+          title: docTitle.trim(),
+          notes: docNotes.trim() || null,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      setClientDocuments((prev) => [inserted, ...prev]);
+
+      if (client.email) {
+        const { data: company } = await supabase
+          .from('company_profiles')
+          .select('company_name')
+          .eq('id', profile.company_id)
+          .maybeSingle();
+
+        await supabase.functions.invoke('send-document-notification', {
+          body: {
+            clientEmail: client.email,
+            clientFirstName: client.first_name,
+            providerName: company?.company_name || 'Votre professionnel(le)',
+            documentTitle: docTitle.trim(),
+            clientAreaUrl: 'https://belaya.app',
+          },
+        });
+      }
+
+      setDocToast({ type: 'success', message: 'Document envoye avec succes !' });
+      setShowUploadDocModal(false);
+      setDocUploadFile(null);
+      setDocTitle('');
+      setDocNotes('');
+    } catch (err: any) {
+      console.error('[ClientDetailDrawer] Error uploading document:', err);
+      setDocToast({ type: 'error', message: `Erreur: ${err.message || 'Erreur inconnue'}` });
+    } finally {
+      setUploadingDoc(false);
+    }
+  }
+
+  async function handleDeleteDocument(docId: string, fileUrl: string) {
+    if (!confirm('Supprimer ce document ?')) return;
+    try {
+      const { error } = await supabase
+        .from('client_documents')
+        .delete()
+        .eq('id', docId);
+      if (error) throw error;
+      setClientDocuments((prev) => prev.filter((d) => d.id !== docId));
+      setDocToast({ type: 'success', message: 'Document supprime' });
+    } catch (err: any) {
+      setDocToast({ type: 'error', message: `Erreur: ${err.message}` });
     }
   }
 
@@ -960,8 +1138,8 @@ export default function ClientDetailDrawer({
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <span className="hidden sm:inline">Documents ({submissions.length})</span>
-                <span className="sm:hidden">Docs ({submissions.length})</span>
+                <span className="hidden sm:inline">Documents ({submissions.length + clientDocuments.length})</span>
+                <span className="sm:hidden">Docs ({submissions.length + clientDocuments.length})</span>
               </button>
             </div>
           </div>
@@ -1280,98 +1458,230 @@ export default function ClientDetailDrawer({
           )}
 
           {activeTab === 'questionnaires' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4 text-brand-600" />
-                  Documents & Questionnaires
-                </h3>
-                <button
-                  onClick={loadAvailableQuestionnaires}
-                  className="px-3 py-1.5 text-xs font-medium bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition-colors flex items-center gap-1"
-                >
-                  <Send className="w-3 h-3" />
-                  Envoyer
-                </button>
-              </div>
+            <div className="space-y-6">
 
-              {submissions.length === 0 ? (
-                <div className="text-center py-8">
-                  <ClipboardList className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">Aucun document envoye</p>
-                  <p className="text-xs text-gray-400 mt-1">Les questionnaires lies aux services seront envoyes automatiquement lors de la reservation</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {submissions.map((sub) => (
-                    <div key={sub.id} className={`border rounded-xl overflow-hidden ${
-                      sub.status === 'completed' ? 'border-green-200' : sub.status === 'pending' ? 'border-amber-200' : 'border-gray-200'
-                    }`}>
-                      <div
-                        className={`flex items-center gap-3 p-3 cursor-pointer ${
-                          sub.status === 'completed' ? 'bg-green-50' : sub.status === 'pending' ? 'bg-amber-50' : 'bg-gray-50'
-                        }`}
-                        onClick={() => setExpandedSubmission(expandedSubmission === sub.id ? null : sub.id)}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{sub.questionnaire_title}</p>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                              sub.status === 'completed' ? 'bg-green-200 text-green-800'
-                              : sub.status === 'pending' ? 'bg-amber-200 text-amber-800'
-                              : 'bg-gray-200 text-gray-700'
-                            }`}>
-                              {sub.status === 'completed' ? 'Complete' : sub.status === 'pending' ? 'En cours' : 'Envoye'}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            Service: {sub.service_name} - Envoye le {new Date(sub.sent_at).toLocaleDateString('fr-FR')}
-                            {sub.completed_at && ` - Complete le ${new Date(sub.completed_at).toLocaleDateString('fr-FR')}`}
-                          </p>
-                        </div>
-                        {expandedSubmission === sub.id ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-                      </div>
-
-                      {expandedSubmission === sub.id && sub.status === 'completed' && (
-                        <div className="p-4 border-t border-gray-100 space-y-3">
-                          {sub.questionnaire_fields.map((field) => {
-                            const response = sub.responses[field.id];
-                            return (
-                              <div key={field.id} className="p-3 bg-white rounded-lg border border-gray-100">
-                                <p className="text-xs font-medium text-gray-600 mb-1">
-                                  {field.label}
-                                  {field.required && <span className="text-red-500 ml-0.5">*</span>}
-                                </p>
-                                {response !== undefined && response !== null && response !== '' ? (
-                                  Array.isArray(response) ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {response.map((val: string, i: number) => (
-                                        <span key={i} className="px-2 py-0.5 bg-brand-100 text-brand-800 rounded text-xs">{val}</span>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <p className="text-sm text-gray-900">{String(response)}</p>
-                                  )
-                                ) : (
-                                  <p className="text-sm text-gray-400 italic">Non renseigne</p>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {expandedSubmission === sub.id && sub.status !== 'completed' && (
-                        <div className="p-4 border-t border-gray-100">
-                          <p className="text-sm text-gray-500 text-center">
-                            En attente de la reponse du client
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+              {/* Toast notification */}
+              {docToast && (
+                <div className={`flex items-center gap-2 p-3 rounded-xl text-sm font-medium ${
+                  docToast.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  {docToast.type === 'success' ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                  {docToast.message}
                 </div>
               )}
+
+              {/* Questionnaires section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-brand-600" />
+                    Questionnaires
+                  </h3>
+                  <button
+                    onClick={loadAvailableQuestionnaires}
+                    className="px-3 py-1.5 text-xs font-medium bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition-colors flex items-center gap-1"
+                  >
+                    <Send className="w-3 h-3" />
+                    Envoyer
+                  </button>
+                </div>
+
+                {submissions.length === 0 ? (
+                  <div className="text-center py-6 bg-gray-50 rounded-xl">
+                    <ClipboardList className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Aucun questionnaire envoye</p>
+                    <p className="text-xs text-gray-400 mt-1">Les questionnaires lies aux services seront envoyes automatiquement lors de la reservation</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {submissions.map((sub) => (
+                      <div key={sub.id} className={`border rounded-xl overflow-hidden ${
+                        sub.status === 'completed' ? 'border-green-200' : sub.status === 'pending' ? 'border-amber-200' : 'border-gray-200'
+                      }`}>
+                        <div
+                          className={`flex items-center gap-3 p-3 cursor-pointer ${
+                            sub.status === 'completed' ? 'bg-green-50' : sub.status === 'pending' ? 'bg-amber-50' : 'bg-gray-50'
+                          }`}
+                          onClick={() => setExpandedSubmission(expandedSubmission === sub.id ? null : sub.id)}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold text-gray-900 truncate">{sub.questionnaire_title}</p>
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                sub.status === 'completed' ? 'bg-green-200 text-green-800'
+                                : sub.status === 'pending' ? 'bg-amber-200 text-amber-800'
+                                : 'bg-gray-200 text-gray-700'
+                              }`}>
+                                {sub.status === 'completed' ? 'Complete' : sub.status === 'pending' ? 'En cours' : 'Envoye'}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Service: {sub.service_name} - Envoye le {new Date(sub.sent_at).toLocaleDateString('fr-FR')}
+                              {sub.completed_at && ` - Complete le ${new Date(sub.completed_at).toLocaleDateString('fr-FR')}`}
+                            </p>
+                          </div>
+                          {expandedSubmission === sub.id ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                        </div>
+
+                        {expandedSubmission === sub.id && sub.status === 'completed' && (
+                          <div className="p-4 border-t border-gray-100 space-y-3">
+                            {sub.questionnaire_fields.map((field) => {
+                              const response = sub.responses[field.id];
+                              return (
+                                <div key={field.id} className="p-3 bg-white rounded-lg border border-gray-100">
+                                  <p className="text-xs font-medium text-gray-600 mb-1">
+                                    {field.label}
+                                    {field.required && <span className="text-red-500 ml-0.5">*</span>}
+                                  </p>
+                                  {response !== undefined && response !== null && response !== '' ? (
+                                    Array.isArray(response) ? (
+                                      <div className="flex flex-wrap gap-1">
+                                        {response.map((val: string, i: number) => (
+                                          <span key={i} className="px-2 py-0.5 bg-brand-100 text-brand-800 rounded text-xs">{val}</span>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-gray-900">{String(response)}</p>
+                                    )
+                                  ) : (
+                                    <p className="text-sm text-gray-400 italic">Non renseigne</p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {expandedSubmission === sub.id && sub.status !== 'completed' && (
+                          <div className="p-4 border-t border-gray-100">
+                            <p className="text-sm text-gray-500 text-center">
+                              En attente de la reponse du client
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100" />
+
+              {/* File documents section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                    <Paperclip className="w-4 h-4 text-brand-600" />
+                    Fichiers partages
+                  </h3>
+                  <button
+                    onClick={() => setShowUploadDocModal(true)}
+                    className="px-3 py-1.5 text-xs font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-1"
+                  >
+                    <Upload className="w-3 h-3" />
+                    Ajouter un fichier
+                  </button>
+                </div>
+
+                {docsLoading ? (
+                  <div className="text-center py-6">
+                    <div className="w-6 h-6 border-2 border-brand-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                  </div>
+                ) : clientDocuments.length === 0 ? (
+                  <div className="text-center py-6 bg-gray-50 rounded-xl">
+                    <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Aucun fichier partage</p>
+                    <p className="text-xs text-gray-400 mt-1">Envoyez des PDF ou images a signer/remplir</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {clientDocuments.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className={`border rounded-xl overflow-hidden ${
+                          doc.status === 'returned'
+                            ? 'border-green-200 bg-green-50'
+                            : doc.status === 'viewed'
+                            ? 'border-blue-200 bg-blue-50'
+                            : 'border-brand-200 bg-brand-50'
+                        }`}
+                      >
+                        <div className="p-3">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                              doc.status === 'returned' ? 'bg-green-100' : doc.status === 'viewed' ? 'bg-blue-100' : 'bg-brand-100'
+                            }`}>
+                              <FileText className={`w-4 h-4 ${
+                                doc.status === 'returned' ? 'text-green-600' : doc.status === 'viewed' ? 'text-blue-600' : 'text-brand-600'
+                              }`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-sm font-semibold text-gray-900 truncate">{doc.title}</p>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                                  doc.status === 'returned'
+                                    ? 'bg-green-200 text-green-800'
+                                    : doc.status === 'viewed'
+                                    ? 'bg-blue-200 text-blue-800'
+                                    : 'bg-amber-200 text-amber-800'
+                                }`}>
+                                  {doc.status === 'returned' ? 'Retourne' : doc.status === 'viewed' ? 'Consulte' : 'En attente'}
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {doc.file_name} &bull; {new Date(doc.created_at).toLocaleDateString('fr-FR')}
+                              </p>
+                              {doc.notes && (
+                                <p className="text-xs text-gray-600 mt-1 italic">{doc.notes}</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex gap-2">
+                            <a
+                              href={doc.file_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <Download className="w-3 h-3" />
+                              Telecharger
+                            </a>
+                            {doc.status === 'returned' && doc.returned_file_url && (
+                              <a
+                                href={doc.returned_file_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                              >
+                                <Download className="w-3 h-3" />
+                                Voir le retour
+                              </a>
+                            )}
+                            <button
+                              onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                              className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+
+                          {doc.status === 'returned' && doc.returned_file_name && (
+                            <div className="mt-2 flex items-center gap-2 p-2 bg-green-100 rounded-lg">
+                              <CheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                              <p className="text-xs text-green-800 truncate">
+                                Retourne : {doc.returned_file_name}
+                                {doc.returned_at && ` le ${new Date(doc.returned_at).toLocaleDateString('fr-FR')}`}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -1413,6 +1723,115 @@ export default function ClientDetailDrawer({
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUploadDocModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[10000] p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full flex flex-col">
+            <div className="p-5 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+              <h3 className="text-base font-bold text-gray-900">Partager un fichier</h3>
+              <button
+                onClick={() => {
+                  setShowUploadDocModal(false);
+                  setDocUploadFile(null);
+                  setDocTitle('');
+                  setDocNotes('');
+                }}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Titre du document <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={docTitle}
+                  onChange={(e) => setDocTitle(e.target.value)}
+                  placeholder="Ex: Fiche sante, Contrat de soins..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Fichier (PDF ou image) <span className="text-red-500">*</span></label>
+                <input
+                  ref={docFileInputRef}
+                  type="file"
+                  accept=".pdf,image/jpeg,image/jpg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) setDocUploadFile(f);
+                  }}
+                />
+                {docUploadFile ? (
+                  <div className="flex items-center gap-3 p-3 bg-brand-50 border border-brand-200 rounded-lg">
+                    <FileText className="w-5 h-5 text-brand-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{docUploadFile.name}</p>
+                      <p className="text-xs text-gray-500">{(docUploadFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                    <button
+                      onClick={() => setDocUploadFile(null)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => docFileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-gray-300 hover:border-brand-400 rounded-lg p-6 text-center transition-colors group"
+                  >
+                    <Upload className="w-8 h-8 text-gray-300 group-hover:text-brand-400 mx-auto mb-2 transition-colors" />
+                    <p className="text-sm text-gray-500 group-hover:text-brand-600">Cliquer pour choisir un fichier</p>
+                    <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG, WEBP — max 20 MB</p>
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Note pour la cliente (optionnel)</label>
+                <textarea
+                  value={docNotes}
+                  onChange={(e) => setDocNotes(e.target.value)}
+                  placeholder="Instructions ou informations supplementaires..."
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-400 resize-none"
+                />
+              </div>
+
+              {!client?.email && (
+                <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  Cette cliente n'a pas d'adresse email. Le document sera visible dans son espace client mais aucun email ne sera envoye.
+                </div>
+              )}
+
+              <button
+                onClick={handleDocumentUpload}
+                disabled={!docUploadFile || !docTitle.trim() || uploadingDoc}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              >
+                {uploadingDoc ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Envoyer le fichier
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
