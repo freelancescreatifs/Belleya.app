@@ -12,6 +12,7 @@ interface BookingConfirmationPayload {
   providerName: string;
   serviceName: string;
   appointmentDate: string;
+  providerAddress?: string;
   bookingId?: string;
   type: "booking_received" | "booking_confirmed";
 }
@@ -36,27 +37,22 @@ function formatDateFR(isoDate: string): { date: string; time: string } {
 }
 
 function buildConfirmationHtml(payload: BookingConfirmationPayload): string {
-  const { clientFirstName, providerName, serviceName, appointmentDate, type } = payload;
+  const { clientFirstName, providerName, serviceName, appointmentDate, providerAddress, type } = payload;
   const { date, time } = formatDateFR(appointmentDate);
 
-  const isReceived = type === "booking_received";
+  const isConfirmed = type === "booking_confirmed";
 
-  const title = isReceived
-    ? "Votre demande de r\u00e9servation a \u00e9t\u00e9 envoy\u00e9e"
-    : "Votre rendez-vous est confirm\u00e9 !";
+  const title = isConfirmed
+    ? "Votre rendez-vous est confirm\u00e9 \u2728"
+    : "Votre demande de r\u00e9servation a \u00e9t\u00e9 envoy\u00e9e";
 
-  const subtitle = isReceived
-    ? "Demande de r\u00e9servation re\u00e7ue"
-    : "Rendez-vous confirm\u00e9";
+  const bodyText = isConfirmed
+    ? `Votre rendez-vous avec <strong>${providerName}</strong> a bien \u00e9t\u00e9 confirm\u00e9.`
+    : `Votre demande de rendez-vous avec <strong>${providerName}</strong> a bien \u00e9t\u00e9 re\u00e7ue. Vous recevrez une confirmation d\u00e8s que le prestataire aura valid\u00e9 votre cr\u00e9neau.`;
 
-  const bodyText = isReceived
-    ? `Votre demande de rendez-vous avec <strong>${providerName}</strong> a bien \u00e9t\u00e9 re\u00e7ue. Vous recevrez une confirmation d\u00e8s que le prestataire aura valid\u00e9 votre cr\u00e9neau.`
-    : `Votre rendez-vous avec <strong>${providerName}</strong> est confirm\u00e9. \u00c0 tr\u00e8s bient\u00f4t !`;
-
-  const statusBg = isReceived ? "#FDF0F4" : "#F0FDF4";
-  const statusBorder = isReceived ? "#F9A8C9" : "#86EFAC";
-  const statusColor = isReceived ? "#BE185D" : "#166534";
-  const statusText = isReceived ? "En attente de confirmation" : "Confirm\u00e9";
+  const addressRow = providerAddress
+    ? `<br><br><strong>Lieu :</strong> ${providerAddress}`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -73,57 +69,50 @@ function buildConfirmationHtml(payload: BookingConfirmationPayload): string {
         <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 8px 40px rgba(220,100,130,0.12);">
 
           <tr>
-            <td style="background:linear-gradient(135deg,#e84c8a,#d63a78);padding:40px 48px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-family:'Playfair Display',serif;font-size:32px;font-weight:600;letter-spacing:-0.5px;">Belaya</h1>
-              <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;font-weight:300;">${subtitle}</p>
-            </td>
-          </tr>
-
-          <tr>
             <td style="padding:40px 48px;">
-              <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:#2D1B22;margin:0 0 20px;">${title}</h2>
+              <h1 style="font-family:'Playfair Display',serif;font-size:28px;color:#2D1B22;margin:0 0 20px;">${title}</h1>
 
               <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 20px;">
-                Bonjour <strong>${clientFirstName}</strong>,
+                Bonjour ${clientFirstName},
               </p>
 
-              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 24px;">
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 20px;">
                 ${bodyText}
               </p>
 
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FDF0F4;border-radius:14px;padding:20px;margin:0 0 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FDF0F4;border-radius:14px;padding:20px;margin:20px 0;">
                 <tr>
                   <td style="font-size:14px;color:#2D1B22;padding:20px;">
-                    <p style="margin:0 0 12px;font-size:16px;font-weight:600;color:#2D1B22;">${providerName}</p>
-                    <p style="margin:0 0 8px;color:#5A3A44;"><strong>Service :</strong> ${serviceName}</p>
-                    <p style="margin:0 0 8px;color:#5A3A44;"><strong>Date :</strong> ${date}</p>
-                    <p style="margin:0;color:#5A3A44;"><strong>Heure :</strong> ${time}</p>
+                    <strong>Service :</strong> ${serviceName}<br><br>
+                    <strong>Date :</strong> ${date}<br><br>
+                    <strong>Heure :</strong> ${time}${addressRow}
                   </td>
                 </tr>
               </table>
 
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${statusBg};border:1px solid ${statusBorder};border-radius:10px;margin:0 0 28px;">
-                <tr>
-                  <td style="padding:14px 20px;text-align:center;">
-                    <p style="margin:0;font-size:14px;font-weight:500;color:${statusColor};">${statusText}</p>
-                  </td>
-                </tr>
-              </table>
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 20px;">
+                Vous pouvez retrouver ce rendez-vous \u00e0 tout moment dans votre espace client Belaya.
+              </p>
 
-              <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 28px;">
+              <p style="font-size:15px;color:#5A3A44;line-height:1.8;margin:0 0 30px;">
+                Depuis votre profil, vous pouvez :<br><br>
+                &bull; consulter vos prochains rendez-vous<br>
+                &bull; g\u00e9rer vos r\u00e9servations<br>
+                &bull; voir vos prestations et documents
+              </p>
+
+              <table cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
                   <td align="center" bgcolor="#E91E8C" style="border-radius:50px;">
                     <a href="https://belaya.app" style="display:inline-block;color:#ffffff;text-decoration:none;font-size:16px;font-weight:500;padding:18px 40px;">
-                      Voir mon rendez-vous
+                      Acc\u00e9der \u00e0 mon espace client
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <hr style="border:none;border-top:1px solid #F9D4E4;margin:0 0 24px;">
-
-              <p style="margin:0;font-size:13px;color:#C49BAA;text-align:center;line-height:1.6;">
-                Si vous avez des questions, vous pouvez contacter directement votre prestataire ou g\u00e9rer vos rendez-vous depuis votre espace client Belaya.
+              <p style="margin:30px 0 0;font-size:13px;color:#C49BAA;text-align:center;">
+                Merci de faire confiance \u00e0 votre prestataire et \u00e0 Belaya
               </p>
             </td>
           </tr>
@@ -131,7 +120,7 @@ function buildConfirmationHtml(payload: BookingConfirmationPayload): string {
           <tr>
             <td style="padding:28px 48px;text-align:center;background:#FDF8FA;border-top:1px solid #F9D4E4;">
               <p style="font-size:14px;color:#2D1B22;margin:0 0 4px;">L'\u00e9quipe Belaya</p>
-              <p style="font-size:12px;color:#9E5070;margin:0 0 16px;">Beauty is my priority</p>
+              <p style="font-size:12px;color:#9E5070;margin:4px 0 16px;">Beauty is my priority</p>
               <p style="font-size:12px;color:#C49BAA;margin:0;">
                 <a href="https://www.instagram.com/belaya.app" style="color:#E91E8C;text-decoration:none;">Instagram</a>
                 &nbsp;&middot;&nbsp;
@@ -182,10 +171,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const isReceived = type === "booking_received";
-    const subject = isReceived
-      ? `Demande de r\u00e9servation re\u00e7ue - ${providerName}`
-      : `Rendez-vous confirm\u00e9 avec ${providerName}`;
+    const isConfirmed = type === "booking_confirmed";
+    const subject = isConfirmed
+      ? `Rendez-vous confirm\u00e9 avec ${providerName}`
+      : `Demande de r\u00e9servation re\u00e7ue - ${providerName}`;
 
     const html = buildConfirmationHtml(payload);
 

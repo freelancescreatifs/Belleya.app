@@ -37,7 +37,8 @@ async function sendBookingConfirmationEmail(
   providerName: string,
   serviceName: string,
   appointmentDate: string,
-  bookingId: string
+  bookingId: string,
+  providerAddress?: string
 ): Promise<void> {
   try {
     await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
@@ -50,6 +51,7 @@ async function sendBookingConfirmationEmail(
         serviceName,
         appointmentDate,
         bookingId,
+        providerAddress,
         type: "booking_received",
       }),
     });
@@ -92,7 +94,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: companyProfile, error: companyError } = await supabase
       .from("company_profiles")
-      .select("user_id, company_name")
+      .select("user_id, company_name, address")
       .eq("booking_slug", proSlug)
       .maybeSingle();
 
@@ -108,6 +110,7 @@ Deno.serve(async (req: Request) => {
 
     const proId = companyProfile.user_id;
     const providerName = companyProfile.company_name || "votre prestataire";
+    const providerAddress = companyProfile.address || undefined;
 
     const { data: serviceData } = await supabase
       .from("services")
@@ -232,7 +235,8 @@ Deno.serve(async (req: Request) => {
         providerName,
         serviceName,
         appointmentDate,
-        booking.id
+        booking.id,
+        providerAddress
       )
     );
 
