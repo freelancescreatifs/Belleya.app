@@ -227,7 +227,6 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         .from('content_ideas')
         .select('*')
         .eq('user_id', user.id)
-        .eq('status', 'saved')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -623,6 +622,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   }
 
   async function handleToggleSave(ideaId: string, currentlySaved: boolean) {
+    setSavedIdeas(prev => prev.map(i => i.id === ideaId ? { ...i, is_saved: !currentlySaved } : i));
     try {
       const { error } = await supabase
         .from('content_ideas')
@@ -630,8 +630,10 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
         .eq('id', ideaId)
         .eq('user_id', user.id);
 
-      if (error) throw error;
-      loadSavedIdeas();
+      if (error) {
+        setSavedIdeas(prev => prev.map(i => i.id === ideaId ? { ...i, is_saved: currentlySaved } : i));
+        throw error;
+      }
     } catch (error) {
       console.error('Error toggling save:', error);
     }
