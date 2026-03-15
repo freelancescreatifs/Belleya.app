@@ -182,9 +182,10 @@ export default function AuthGate({
 
     if (clientError) throw clientError;
 
+    const confirmedUserId = userId as string;
     setSuccess('Compte créé avec succès !');
     setTimeout(() => {
-      onAuthenticated(userId, clientData.id);
+      onAuthenticated(confirmedUserId, clientData.id);
     }, 1000);
   }
 

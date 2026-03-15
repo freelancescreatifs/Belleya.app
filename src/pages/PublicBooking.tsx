@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../hooks/useToast';
+import ToastContainer from '../components/shared/ToastContainer';
 import {
   getProviderReviews,
   createReview,
@@ -81,6 +83,7 @@ const PHOTOS_PER_PAGE = 12;
 
 export default function PublicBooking({ slug }: PublicBookingProps) {
   const { user, profile: authProfile, loading: authLoading } = useAuth();
+  const { showToast, toasts, dismissToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [proProfile, setProProfile] = useState<ProProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
@@ -405,9 +408,8 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
       } else {
         setBookingStep('success');
       }
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      alert('Erreur lors de la reservation. Veuillez reessayer.');
+    } catch (error: any) {
+      showToast('error', 'Erreur lors de la réservation. Veuillez réessayer.');
     } finally {
       setCreatingBooking(false);
     }
@@ -440,12 +442,12 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         setShowReviewForm(false);
         setReviewForm({ rating: 5, comment: '', photo: null });
         await loadReviews(proProfile.user_id);
-        alert('Votre avis a ete publie avec succes !');
+        showToast('success', 'Votre avis a été publié avec succès !');
       } else {
-        alert(result.error || 'Erreur lors de la publication');
+        showToast('error', result.error || 'Erreur lors de la publication');
       }
     } catch {
-      alert('Erreur lors de la publication');
+      showToast('error', 'Erreur lors de la publication');
     } finally {
       setSubmitting(false);
     }
@@ -491,6 +493,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white">
         <div className="container mx-auto px-4 py-6">
           <a
