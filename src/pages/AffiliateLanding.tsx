@@ -2,7 +2,7 @@ import {
   ArrowRight, CheckCircle, DollarSign, Link2, BarChart3,
   MessageSquare, BookOpen, Headphones, X, TrendingUp, Zap, Target,
   ChevronRight, HelpCircle, Sparkles, LogIn, LayoutDashboard, Handshake,
-  Star, Award, Shield
+  Star, Award, Shield, ExternalLink, Euro
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -95,11 +95,19 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
   const faqs = [
     {
       q: 'Est-ce un emploi salarie ?',
-      a: 'Non. C\'est un programme partenaire independant. Tu es libre de gerer ton activite comme tu le souhaites.'
+      a: 'Non. C\'est un programme partenaire independant. Tu es libre de gerer ton activite comme tu le souhaites, sans contrainte d\'horaires ni de lieu.'
     },
     {
       q: 'Quand suis-je paye(e) ?',
-      a: 'Paiement mensuel sur les abonnements actifs de tes filleules.'
+      a: 'Paiement mensuel sur les abonnements actifs de tes filleules. Tant qu\'elles restent abonnees, tu touches ta commission.'
+    },
+    {
+      q: 'Sur quel plan suis-je commissionne(e) ?',
+      a: 'Sur tous les plans actifs : Belaya Start (29€/mois), Belaya Studio (39€/mois) et Belaya Empire (59€/mois). Une cliente sur le plan Empire te rapporte 5,90€ chaque mois, sans refaire la vente. Nous te recommendons de cibler le plan Empire pour maximiser tes revenus.'
+    },
+    {
+      q: 'Si une cliente upgrade son plan, je gagne plus ?',
+      a: 'Oui. Si ta filleule passe du plan Start (29€) au plan Empire (59€), ta commission mensuelle double automatiquement. Les upgrades jouent en ta faveur.'
     },
     {
       q: 'Les commissions sont-elles limitees ?',
@@ -126,18 +134,15 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
-        @keyframes grain {
-          0%, 100% { transform: translate(0, 0); }
-          10% { transform: translate(-1%, -1%); }
-          20% { transform: translate(1%, 0%); }
-          30% { transform: translate(0%, 1%); }
-          40% { transform: translate(-1%, 1%); }
-          50% { transform: translate(1%, -1%); }
+        @keyframes price-pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.02); }
         }
         .float-blob { animation: float 6s ease-in-out infinite; }
         .float-blob-delayed { animation: float 8s ease-in-out 2s infinite; }
         .cta-glow { animation: pulse-glow 3s ease-in-out infinite; }
         .cta-glow:hover { animation: none; box-shadow: 0 20px 60px rgba(196,53,134,0.5); }
+        .price-pulse { animation: price-pulse 3s ease-in-out infinite; }
         .feature-card {
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -151,6 +156,12 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         .step-card:hover {
           transform: translateY(-6px);
           box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        .plan-card {
+          transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .plan-card:hover {
+          transform: translateY(-6px);
         }
       `}</style>
 
@@ -190,6 +201,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </header>
 
+      {/* HERO -- 59€ anchor strategy */}
       <section className="relative overflow-hidden py-24 md:py-36">
         <div className="absolute inset-0 bg-gradient-to-br from-[#fdf2f8] via-white to-[#fce4ec]/20"></div>
         <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-br from-belaya-100/40 to-belaya-50/20 rounded-full blur-3xl float-blob"></div>
@@ -209,33 +221,61 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
             </div>
 
             <h1
-              className={`text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold text-gray-900 mb-8 leading-[1.15] tracking-tight transition-all duration-700 delay-150 ${
+              className={`text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold text-gray-900 mb-6 leading-[1.15] tracking-tight transition-all duration-700 delay-150 ${
                 heroLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
-              Gagne un revenu mensuel{' '}
-              <span className="bg-gradient-to-r from-belaya-deep via-belaya-bright to-belaya-deep bg-clip-text text-transparent bg-[length:200%_auto]">
-                recurrent
-              </span>{' '}
-              en recommandant Belaya
+              Chaque abonnement Belaya vaut{' '}
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-belaya-deep via-belaya-bright to-belaya-deep bg-clip-text text-transparent bg-[length:200%_auto] price-pulse">
+                  59€/mois
+                </span>
+                <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-belaya-deep to-belaya-bright rounded-full"></span>
+              </span>
+              {' '}— tu en touches une part, pour toujours.
             </h1>
 
             <p
-              className={`text-lg md:text-xl text-gray-500 mb-5 max-w-2xl mx-auto leading-relaxed font-light transition-all duration-700 delay-300 ${
+              className={`text-lg md:text-xl text-gray-500 mb-4 max-w-2xl mx-auto leading-relaxed font-light transition-all duration-700 delay-300 ${
                 heroLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
-              Rejoins le programme partenaire Belaya et touche{' '}
-              <strong className="text-gray-800 font-semibold">10% de commission</strong>{' '}
-              pendant toute la duree d'abonnement des clientes que tu apportes.
+              Recommande Belaya aux entrepreneuses beaute et touche{' '}
+              <strong className="text-gray-800 font-semibold">10% de commission recurrente</strong>{' '}
+              pendant toute la duree de leur abonnement.
             </p>
 
-            <p
-              className={`text-2xl md:text-3xl font-bold text-belaya-deep mb-12 transition-all duration-700 delay-[450ms] ${
+            {/* Concrete math line */}
+            <div
+              className={`inline-flex items-center gap-3 bg-white border border-belaya-100 rounded-2xl px-6 py-4 mb-10 shadow-sm transition-all duration-700 delay-[400ms] ${
                 heroLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
-              Potentiel : 500 a 2 000+ EUR / mois
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span className="font-semibold text-gray-700">1 cliente</span>
+                <span>=</span>
+                <span className="font-bold text-belaya-deep">5,90€/mois</span>
+              </div>
+              <div className="w-px h-4 bg-gray-200"></div>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span className="font-semibold text-gray-700">50 clientes</span>
+                <span>=</span>
+                <span className="font-bold text-belaya-deep">295€/mois</span>
+              </div>
+              <div className="w-px h-4 bg-gray-200 hidden sm:block"></div>
+              <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+                <span className="font-semibold text-gray-700">200 clientes</span>
+                <span>=</span>
+                <span className="font-bold text-belaya-deep">1 180€/mois</span>
+              </div>
+            </div>
+
+            <p
+              className={`text-2xl md:text-3xl font-bold text-belaya-deep mb-12 transition-all duration-700 delay-[500ms] ${
+                heroLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+            >
+              Potentiel : 500 a 2 000€+ / mois
             </p>
 
             <div
@@ -260,14 +300,15 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* STATS BAR -- corrected with 59€ anchor */}
       <section className="py-6 bg-white border-y border-gray-100">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-8 md:gap-16 text-center flex-wrap">
+          <div className="flex items-center justify-center gap-6 md:gap-14 text-center flex-wrap">
             {[
+              { val: '59€', label: 'plan Empire / mois' },
+              { val: '5,90€', label: 'commission par abonnee Empire' },
               { val: '10%', label: 'commission recurrente' },
-              { val: '29 EUR', label: '/ mois par abonnee' },
-              { val: '0 EUR', label: 'investissement initial' },
-              { val: '48h', label: 'delai de validation' },
+              { val: '0€', label: 'investissement initial' },
             ].map((s, i) => (
               <div key={i} className="py-3">
                 <p className="text-xl md:text-2xl font-bold text-gray-900">{s.val}</p>
@@ -278,6 +319,113 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* CE QUE TU VENDS -- new product anchor section */}
+      <section className="py-24 md:py-32 bg-[#fafafa]">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <RevealSection>
+              <div className="text-center mb-14">
+                <span className="text-sm font-medium text-belaya-deep bg-belaya-50 px-4 py-1.5 rounded-full border border-belaya-100 inline-block mb-5">
+                  Le produit
+                </span>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Ce que tu vends
+                </h2>
+                <p className="text-lg text-gray-500 max-w-2xl mx-auto font-light">
+                  Belaya est le logiciel tout-en-un des entrepreneuses beaute. CRM, agenda, finances, contenu IA — une seule app, un seul abonnement.
+                </p>
+              </div>
+            </RevealSection>
+
+            <div className="grid md:grid-cols-3 gap-5 mb-10">
+              {[
+                {
+                  name: 'Belaya Start',
+                  price: '29€',
+                  badge: null,
+                  commission: '2,90€',
+                  description: 'Ideal pour les debutantes ou les freelances qui demarrent leur activite beaute.',
+                  features: ['Agenda & reservations', 'CRM client de base', 'Suivi financier'],
+                  accent: 'border-gray-200',
+                  badgeBg: '',
+                  priceColor: 'text-gray-900',
+                  commissionColor: 'bg-gray-50 border-gray-100 text-gray-600',
+                },
+                {
+                  name: 'Belaya Studio',
+                  price: '39€',
+                  badge: 'Le plus choisi',
+                  commission: '3,90€',
+                  description: 'Pour les techniciennes en croissance qui veulent professionnaliser leur gestion.',
+                  features: ['Tout Start +', 'Galerie avant/apres', 'Marketing & relances'],
+                  accent: 'border-belaya-200',
+                  badgeBg: 'bg-belaya-50 text-belaya-deep',
+                  priceColor: 'text-belaya-deep',
+                  commissionColor: 'bg-belaya-50 border-belaya-100 text-belaya-deep',
+                },
+                {
+                  name: 'Belaya Empire',
+                  price: '59€',
+                  badge: 'Max commission',
+                  commission: '5,90€',
+                  description: 'Pour les pros ambitieuses qui veulent tout : contenu IA, objectifs, partenariats.',
+                  features: ['Tout Studio +', 'IA Contenu & idees', 'Formations & objectifs'],
+                  accent: 'border-[#711341]',
+                  badgeBg: 'bg-gradient-to-r from-belaya-deep to-belaya-bright text-white',
+                  priceColor: 'text-belaya-deep',
+                  commissionColor: 'bg-gradient-to-r from-belaya-deep to-belaya-bright text-white border-transparent',
+                },
+              ].map((plan, i) => (
+                <RevealSection key={i} delay={100 + i * 120}>
+                  <div className={`plan-card bg-white rounded-2xl border-2 ${plan.accent} p-7 h-full flex flex-col shadow-sm ${i === 2 ? 'shadow-md ring-1 ring-belaya-100' : ''}`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">{plan.name}</p>
+                        <p className={`text-4xl font-extrabold ${plan.priceColor}`}>{plan.price}<span className="text-base font-normal text-gray-400">/mois</span></p>
+                      </div>
+                      {plan.badge && (
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${plan.badgeBg}`}>
+                          {plan.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mb-5 leading-relaxed flex-1">{plan.description}</p>
+                    <ul className="space-y-2 mb-6">
+                      {plan.features.map((f, fi) => (
+                        <li key={fi} className="flex items-center gap-2 text-sm text-gray-600">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className={`flex items-center justify-between rounded-xl px-4 py-3 border ${plan.commissionColor}`}>
+                      <span className="text-xs font-medium opacity-80">Ta commission / mois</span>
+                      <span className="text-lg font-extrabold">{plan.commission}</span>
+                    </div>
+                  </div>
+                </RevealSection>
+              ))}
+            </div>
+
+            <RevealSection delay={400}>
+              <div className="text-center">
+                <a
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 px-7 py-3.5 border-2 border-belaya-deep text-belaya-deep rounded-full font-semibold text-sm hover:bg-belaya-deep hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 group"
+                >
+                  <ExternalLink className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                  Voir le site Belaya.app
+                </a>
+                <p className="text-xs text-gray-400 mt-2">Explore le produit que tu vas recommander</p>
+              </div>
+            </RevealSection>
+          </div>
+        </div>
+      </section>
+
+      {/* OPPORTUNITY */}
       <section className="py-24 md:py-32 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -298,9 +446,24 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
 
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { icon: DollarSign, title: '10% sur chaque abonnement', desc: 'Commission recurrente tant que la cliente reste abonnee. Pas de one-shot.', accent: 'from-rose-500 to-pink-500' },
-                { icon: Target, title: '2,90 EUR / mois / cliente', desc: 'Montant fixe et previsible par abonnement actif genere.', accent: 'from-belaya-deep to-belaya-bright' },
-                { icon: TrendingUp, title: 'Revenu cumulatif', desc: 'Tes commissions augmentent chaque mois si tes clientes restent.', accent: 'from-emerald-500 to-teal-500' }
+                {
+                  icon: Euro,
+                  title: '59€/mois = 5,90€ pour toi',
+                  desc: 'Le plan Empire te rapporte 5,90€ par mois par cliente. Sans relance. Sans re-vendre. En automatique.',
+                  accent: 'from-belaya-deep to-belaya-bright'
+                },
+                {
+                  icon: TrendingUp,
+                  title: 'Revenu cumulatif illimite',
+                  desc: 'Chaque mois ou ta filleule reste abonnee, tu gagnes. Pas de one-shot : ton portefeuille grossit dans le temps.',
+                  accent: 'from-emerald-500 to-teal-500'
+                },
+                {
+                  icon: Target,
+                  title: 'Marche sous-exploite',
+                  desc: 'Des milliers de nail artists, techniciennes cils et estheticiennes en France — et la majorite n\'ont aucun outil de gestion. Tu arrives avec la solution.',
+                  accent: 'from-rose-500 to-pink-500'
+                }
               ].map((card, i) => (
                 <RevealSection key={i} delay={150 + i * 100}>
                   <div className="feature-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm h-full relative overflow-hidden group">
@@ -318,59 +481,97 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* SIMULATION */}
       <section className="py-24 md:py-32 bg-[#fafafa]">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <RevealSection>
-              <div className="text-center mb-16">
+              <div className="text-center mb-4">
                 <span className="text-sm font-medium text-belaya-deep bg-belaya-50 px-4 py-1.5 rounded-full border border-belaya-100 inline-block mb-5">
                   Simulation
                 </span>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
                   Combien tu peux gagner
                 </h2>
+                <p className="text-gray-500 font-light text-sm">Base : plan Empire a 59€/mois — commission 10%</p>
               </div>
             </RevealSection>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
               {[
-                { amount: 290, subs: 100, label: 'Starter' },
-                { amount: 870, subs: 300, label: 'Pro' },
-                { amount: 1450, subs: 500, label: 'Elite' }
+                {
+                  amount: 177,
+                  subs: 30,
+                  label: 'Starter',
+                  math: '30 x 59€ x 10%',
+                  note: 'Quelques heures de prospection par semaine'
+                },
+                {
+                  amount: 590,
+                  subs: 100,
+                  label: 'Pro',
+                  math: '100 x 59€ x 10%',
+                  note: 'Un revenu complementaire serieux'
+                },
+                {
+                  amount: 1770,
+                  subs: 300,
+                  label: 'Elite',
+                  math: '300 x 59€ x 10%',
+                  note: 'L\'equivalence d\'un salaire'
+                }
               ].map((tier, i) => (
                 <RevealSection key={i} delay={100 + i * 150}>
                   <div
                     className={`relative rounded-2xl p-8 text-center transition-all duration-400 ${
-                      i === 2
+                      i === 1
                         ? 'bg-gradient-to-br from-belaya-deep via-belaya-bright to-belaya-deep text-white shadow-2xl hover:-translate-y-3 hover:shadow-[0_30px_60px_rgba(196,53,134,0.3)]'
                         : 'bg-white border border-gray-100 shadow-sm hover:-translate-y-2 hover:shadow-lg hover:border-belaya-100'
                     }`}
                   >
-                    {i === 2 && (
+                    {i === 1 && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-belaya-deep text-xs font-bold px-4 py-1 rounded-full shadow-md flex items-center gap-1">
                         <Star className="w-3 h-3" />
-                        POPULAIRE
+                        OBJECTIF CIBLE
                       </div>
                     )}
-                    <p className={`text-xs font-medium uppercase tracking-widest mb-4 ${i === 2 ? 'text-white/70' : 'text-gray-400'}`}>
+                    <p className={`text-xs font-medium uppercase tracking-widest mb-4 ${i === 1 ? 'text-white/70' : 'text-gray-400'}`}>
                       {tier.label}
                     </p>
-                    <p className={`text-4xl md:text-5xl font-extrabold mb-1 ${i === 2 ? 'text-white' : 'text-gray-900'}`}>
-                      <AnimatedCounter target={tier.amount} suffix=" EUR" />
+                    <p className={`text-4xl md:text-5xl font-extrabold mb-1 ${i === 1 ? 'text-white' : 'text-gray-900'}`}>
+                      <AnimatedCounter target={tier.amount} suffix="€" />
                     </p>
-                    <p className={`text-sm ${i === 2 ? 'text-white/80' : 'text-gray-400'}`}>/ mois</p>
-                    <div className={`w-10 h-px mx-auto my-5 ${i === 2 ? 'bg-white/20' : 'bg-gray-100'}`}></div>
-                    <p className={`font-medium text-sm ${i === 2 ? 'text-white/90' : 'text-gray-600'}`}>
+                    <p className={`text-sm ${i === 1 ? 'text-white/80' : 'text-gray-400'}`}>/ mois</p>
+                    <div className={`w-10 h-px mx-auto my-4 ${i === 1 ? 'bg-white/20' : 'bg-gray-100'}`}></div>
+                    <p className={`font-medium text-sm mb-2 ${i === 1 ? 'text-white/90' : 'text-gray-600'}`}>
                       {tier.subs} abonnees actives
+                    </p>
+                    <p className={`text-xs font-mono px-3 py-1.5 rounded-lg inline-block ${i === 1 ? 'bg-white/10 text-white/70' : 'bg-gray-50 text-gray-400'}`}>
+                      {tier.math}
+                    </p>
+                    <p className={`text-xs mt-3 italic ${i === 1 ? 'text-white/60' : 'text-gray-400'}`}>
+                      {tier.note}
                     </p>
                   </div>
                 </RevealSection>
               ))}
             </div>
+
+            <RevealSection delay={500}>
+              <div className="mt-8 bg-white rounded-2xl border border-belaya-100 p-5 flex items-center gap-4 shadow-sm">
+                <div className="w-10 h-10 bg-belaya-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-belaya-deep" />
+                </div>
+                <p className="text-sm text-gray-600">
+                  <strong className="text-gray-900">Note :</strong> Les simulations ci-dessus sont basees sur le plan Empire (59€/mois). Si tes filleules choisissent le plan Start (29€) ou Studio (39€), les commissions s'ajustent proportionnellement. Les upgrades augmentent ta commission automatiquement.
+                </p>
+              </div>
+            </RevealSection>
           </div>
         </div>
       </section>
 
+      {/* MISSIONS */}
       <section className="py-24 md:py-32 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -388,7 +589,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
             <div className="grid sm:grid-cols-2 gap-4">
               {[
                 { text: 'Prospecter des entrepreneuses beaute', icon: Target },
-                { text: 'Presenter Belaya et ses avantages', icon: Sparkles },
+                { text: 'Presenter Belaya et ses plans (29€ a 59€)', icon: Sparkles },
                 { text: 'Expliquer la valeur de la plateforme', icon: MessageSquare },
                 { text: 'Accompagner jusqu\'a l\'inscription', icon: CheckCircle }
               ].map((task, i) => (
@@ -406,6 +607,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* TOOLKIT */}
       <section className="py-24 md:py-32 bg-[#fafafa]">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -446,6 +648,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* LEVELS */}
       <section className="py-24 md:py-32 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -465,10 +668,10 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { level: 'Recrue', range: '0-9', rate: '10%', icon: Shield, color: 'gray' },
-                { level: 'Closer', range: '10-49', rate: '12%', icon: Zap, color: 'blue' },
-                { level: 'Pro', range: '50-149', rate: '15%', icon: Award, color: 'amber' },
-                { level: 'Elite', range: '150+', rate: '15%+', icon: Star, color: 'rose' },
+                { level: 'Recrue', range: '0-9', rate: '10%', example: '5,90€/sub', icon: Shield, color: 'gray' },
+                { level: 'Closer', range: '10-49', rate: '12%', example: '7,08€/sub', icon: Zap, color: 'blue' },
+                { level: 'Pro', range: '50-149', rate: '15%', example: '8,85€/sub', icon: Award, color: 'amber' },
+                { level: 'Elite', range: '150+', rate: '15%+', example: '8,85€+/sub', icon: Star, color: 'rose' },
               ].map((tier, i) => {
                 const bgMap: Record<string, string> = {
                   gray: 'from-gray-50 to-gray-100/50 border-gray-200',
@@ -490,7 +693,8 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
                       </div>
                       <h3 className="font-bold text-gray-900 text-lg mb-1">{tier.level}</h3>
                       <p className="text-xs text-gray-400 mb-3">{tier.range} abonnees</p>
-                      <p className="text-2xl font-extrabold text-gray-900">{tier.rate}</p>
+                      <p className="text-2xl font-extrabold text-gray-900 mb-1">{tier.rate}</p>
+                      <p className="text-xs text-gray-500 font-mono">{tier.example}</p>
                     </div>
                   </RevealSection>
                 );
@@ -500,6 +704,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* FOR WHO */}
       <section className="py-24 md:py-32 bg-[#fafafa]">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -563,6 +768,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* STEPS */}
       <section className="py-24 md:py-32 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -582,6 +788,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* FAQ */}
       <section className="py-24 md:py-32 bg-[#fafafa]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
@@ -606,7 +813,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
                     </button>
                     <div
                       className={`overflow-hidden transition-all duration-300 ${
-                        openFaq === i ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                        openFaq === i ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
                       }`}
                     >
                       <div className="px-5 pb-5">
@@ -621,6 +828,7 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         </div>
       </section>
 
+      {/* FINAL CTA */}
       <section className="py-24 md:py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-belaya-deep via-belaya-bright to-belaya-deep"></div>
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl float-blob"></div>
@@ -630,19 +838,33 @@ export default function AffiliateLanding({ onApply, onDashboard }: AffiliateLand
         <div className="container mx-auto px-4 relative">
           <RevealSection>
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-6 text-white leading-tight">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 text-white leading-tight">
                 Pret(e) a demarrer ?
               </h2>
-              <p className="text-lg md:text-xl mb-12 text-white/80 font-light max-w-xl mx-auto">
+              <p className="text-lg md:text-xl mb-6 text-white/80 font-light max-w-xl mx-auto">
                 Rejoins une equipe de partenaires ambitieux et commence a generer des commissions recurrentes.
               </p>
-              <button
-                onClick={onApply}
-                className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-belaya-deep rounded-full font-bold text-lg shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.25)] transition-all duration-300 hover:scale-105 active:scale-95"
-              >
-                Je postule maintenant
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
+
+              {/* Final math reminder */}
+              <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-3 mb-10">
+                <p className="text-white/90 text-sm">
+                  Une cliente sur le plan Empire = <strong className="text-white">5,90€/mois</strong> — chaque mois, sans refaire la vente.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button
+                  onClick={onApply}
+                  className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-belaya-deep rounded-full font-bold text-lg shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.25)] transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  Je postule maintenant
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </button>
+                <span className="text-white/60 text-sm flex items-center gap-1.5">
+                  <Shield className="w-4 h-4" />
+                  Gratuit, sans engagement
+                </span>
+              </div>
             </div>
           </RevealSection>
         </div>
