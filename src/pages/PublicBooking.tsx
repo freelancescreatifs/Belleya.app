@@ -669,12 +669,6 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <h3 className="font-bold text-gray-900">{service.name}</h3>
-                                  {service.special_offer && service.offer_type && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-300 whitespace-nowrap">
-                                      <Sparkles className="w-3 h-3 mr-1" />
-                                      -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '\u20AC'}
-                                    </span>
-                                  )}
                                 </div>
                                 {service.service_type && (
                                   <p className="text-xs text-gray-500">{service.service_type}</p>
@@ -685,10 +679,19 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">Sur devis</span>
                                 ) : (
                                   <>
-                                    {service.special_offer && service.offer_type && (
-                                      <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} €</div>
+                                    {service.special_offer && service.offer_type ? (
+                                      <div className="flex flex-col items-end gap-0.5">
+                                        <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} €</div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} €</span>
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-pink-100 text-pink-700 border border-pink-200 whitespace-nowrap">
+                                            -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '€'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} €</span>
                                     )}
-                                    <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} €</span>
                                   </>
                                 )}
                               </div>

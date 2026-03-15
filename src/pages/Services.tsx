@@ -694,7 +694,23 @@ export default function Services() {
                             </span>
                           ) : (
                             <>
-                              <div className="font-semibold text-gray-900">{service.price || 0}€</div>
+                              {service.special_offer && service.offer_type ? (
+                                <div className="flex flex-col gap-0.5">
+                                  <div className="text-xs text-gray-400 line-through">{(service.price || 0).toFixed(2)}€</div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-gray-900">
+                                      {service.offer_type === 'percentage'
+                                        ? ((service.price || 0) * (1 - parseFloat(service.special_offer) / 100)).toFixed(2)
+                                        : ((service.price || 0) - parseFloat(service.special_offer)).toFixed(2)}€
+                                    </span>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-pink-100 text-pink-700 border border-pink-200 whitespace-nowrap">
+                                      -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '€'}
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="font-semibold text-gray-900">{service.price || 0}€</div>
+                              )}
                               {service.has_vat && (
                                 <div className="text-xs text-gray-500">TVA incluse</div>
                               )}
