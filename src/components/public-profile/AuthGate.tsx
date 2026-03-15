@@ -3,6 +3,7 @@ import { User, Mail, Phone, Lock, AlertCircle, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
+import ToastContainer from '../shared/ToastContainer';
 
 interface BookingContext {
   service: {
@@ -35,7 +36,7 @@ export default function AuthGate({
   companyId,
 }: AuthGateProps) {
   const { signIn, signUp } = useAuth();
-  const { showToast } = useToast();
+  const { showToast, toasts, dismissToast } = useToast();
   const [hasAccount, setHasAccount] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -166,6 +167,8 @@ export default function AuthGate({
   }
 
   return (
+    <>
+    <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     <div className="bg-white rounded-xl max-w-md w-full">
       <div className="p-6 border-b border-gray-200">
         <h3 className="text-xl font-bold text-gray-900">
@@ -299,5 +302,6 @@ export default function AuthGate({
         </button>
       </form>
     </div>
+    </>
   );
 }
