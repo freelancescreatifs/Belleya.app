@@ -96,7 +96,11 @@ async function callContentAI(
   });
 
   if (error) {
-    throw new Error(error.message || 'Erreur de connexion avec le serveur AI');
+    throw new Error(error.message || 'Erreur de connexion avec le serveur IA');
+  }
+
+  if (data && typeof data === 'object' && !Array.isArray(data) && data.error) {
+    throw new Error(data.error);
   }
 
   return data;
@@ -137,6 +141,7 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
   const [errorMessage, setErrorMessage] = useState('');
   const [showNewAudienceModal, setShowNewAudienceModal] = useState(false);
   const [newAudience, setNewAudience] = useState({ audience_name: '', keywords: '' });
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   useEffect(() => {
     loadProfession();
@@ -984,47 +989,58 @@ export default function IdeasGenerator({ onClose, onIdeaSaved }: IdeasGeneratorP
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Profil cible</label>
-                      <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedOptions(v => !v)}
+                    className="flex items-center gap-1.5 text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                  >
+                    <span className={`transition-transform duration-200 ${showAdvancedOptions ? 'rotate-90' : ''}`}>›</span>
+                    {showAdvancedOptions ? 'Masquer les options avancees' : '+ Plus d\'options (profil cible, conscience prospect)'}
+                  </button>
+
+                  {showAdvancedOptions && (
+                    <div className="grid grid-cols-2 gap-4 pt-1">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Profil cible</label>
+                        <div className="flex gap-2">
+                          <select
+                            value={aiIdea.target_audience_id}
+                            onChange={(e) => setAiIdea({ ...aiIdea, target_audience_id: e.target.value })}
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          >
+                            <option value="">Aucun profil</option>
+                            {targetAudiences.map(audience => (
+                              <option key={audience.id} value={audience.id}>
+                                {audience.audience_name}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => setShowNewAudienceModal(true)}
+                            className="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors font-medium"
+                            title="Créer un nouveau profil cible"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect</label>
                         <select
-                          value={aiIdea.target_audience_id}
-                          onChange={(e) => setAiIdea({ ...aiIdea, target_audience_id: e.target.value })}
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          value={aiIdea.awareness_level || 'conscient_probleme'}
+                          onChange={(e) => setAiIdea({ ...aiIdea, awareness_level: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         >
-                          <option value="">Aucun profil</option>
-                          {targetAudiences.map(audience => (
-                            <option key={audience.id} value={audience.id}>
-                              {audience.audience_name}
-                            </option>
-                          ))}
+                          <option value="probleme_inconscient">Probleme inconscient</option>
+                          <option value="conscient_probleme">Conscient du probleme</option>
+                          <option value="conscient_solution">Conscient de la solution</option>
+                          <option value="conscient_produit">Conscient du produit</option>
+                          <option value="pret_acheter">Pret a acheter</option>
                         </select>
-                        <button
-                          onClick={() => setShowNewAudienceModal(true)}
-                          className="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors font-medium"
-                          title="Créer un nouveau profil cible"
-                        >
-                          +
-                        </button>
                       </div>
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Conscience du prospect *</label>
-                      <select
-                        value={aiIdea.awareness_level || 'conscient_probleme'}
-                        onChange={(e) => setAiIdea({ ...aiIdea, awareness_level: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        <option value="probleme_inconscient">Problème inconscient</option>
-                        <option value="conscient_probleme">Conscient du problème</option>
-                        <option value="conscient_solution">Conscient de la solution</option>
-                        <option value="conscient_produit">Conscient du produit</option>
-                        <option value="pret_acheter">Prêt à acheter</option>
-                      </select>
-                    </div>
-                  </div>
+                  )}
 
                   {errorMessage && activeTab === 'ai' && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg">

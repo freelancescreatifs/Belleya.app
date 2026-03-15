@@ -475,8 +475,8 @@ Deno.serve(async (req: Request) => {
     const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (!anthropicKey) {
       return new Response(
-        JSON.stringify({ error: "Claude API key not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Cle API Claude non configuree. Contactez le support." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -485,8 +485,8 @@ Deno.serve(async (req: Request) => {
 
     if (!mode || !["ideas", "produce"].includes(mode)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid mode. Use "ideas" or "produce".' }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Mode invalide. Utilisez 'ideas' ou 'produce'." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -539,7 +539,7 @@ Deno.serve(async (req: Request) => {
       if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
         return new Response(
           JSON.stringify({ error: "La generation a pris trop de temps. Veuillez reessayer." }),
-          { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       throw fetchError;
@@ -550,19 +550,19 @@ Deno.serve(async (req: Request) => {
     if (!claudeResponse.ok) {
       const errorText = await claudeResponse.text();
       console.error("Claude API error:", claudeResponse.status, errorText);
-      let errorMsg = "AI generation failed";
+      let errorMsg = "Erreur de generation IA. Veuillez reessayer.";
 
       if (claudeResponse.status === 401) {
-        errorMsg = "Claude API key invalid or expired. Please check configuration.";
+        errorMsg = "Cle API Claude invalide ou expiree. Contactez le support.";
       } else if (claudeResponse.status === 429) {
-        errorMsg = "Claude rate limit exceeded. Please try again in a moment.";
+        errorMsg = "Limite de requetes atteinte. Veuillez reessayer dans quelques instants.";
       } else if (claudeResponse.status === 500) {
-        errorMsg = "Claude service error. Please try again later.";
+        errorMsg = "Service Claude temporairement indisponible. Reessayez dans un moment.";
       }
 
       return new Response(
-        JSON.stringify({ error: errorMsg, details: errorText.substring(0, 200) }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: errorMsg }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -572,11 +572,8 @@ Deno.serve(async (req: Request) => {
     if (!content) {
       console.error("Claude empty response:", JSON.stringify(claudeData));
       return new Response(
-        JSON.stringify({
-          error: "Empty response from Claude",
-          details: "Aucun contenu retourne par l'IA Claude"
-        }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Reponse vide de l'IA. Veuillez reessayer." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -607,8 +604,8 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error("Edge function error:", error);
     return new Response(
-      JSON.stringify({ error: "Internal server error", details: String(error) }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ error: "Erreur interne. Veuillez reessayer." }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
