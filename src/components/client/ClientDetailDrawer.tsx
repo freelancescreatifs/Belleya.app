@@ -24,6 +24,7 @@ interface Client {
   loyalty_points: number;
   is_archived: boolean;
   created_at: string;
+  belaya_user_id: string | null;
 }
 
 interface Revenue {
@@ -184,9 +185,14 @@ export default function ClientDetailDrawer({
       loadStats();
       loadSubmissions();
       loadQuoteRequests();
-      loadClientDocuments();
     }
   }, [clientId]);
+
+  useEffect(() => {
+    if (clientId && profile?.company_id) {
+      loadClientDocuments();
+    }
+  }, [clientId, profile?.company_id]);
 
   useEffect(() => {
     if (!clientId || !profile?.company_id) return;
@@ -658,7 +664,7 @@ export default function ClientDetailDrawer({
         .insert({
           client_id: clientId,
           company_id: profile.company_id,
-          client_user_id: (client as any).belaya_user_id || null,
+          client_user_id: client.belaya_user_id || null,
           file_url: urlData.publicUrl,
           file_name: docUploadFile.name,
           file_type: docUploadFile.type,
@@ -704,7 +710,7 @@ export default function ClientDetailDrawer({
     }
   }
 
-  async function handleDeleteDocument(docId: string, fileUrl: string) {
+  async function handleDeleteDocument(docId: string) {
     if (!confirm('Supprimer ce document ?')) return;
     try {
       const { error } = await supabase
@@ -1660,7 +1666,7 @@ export default function ClientDetailDrawer({
                               </a>
                             )}
                             <button
-                              onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                              onClick={() => handleDeleteDocument(doc.id)}
                               className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             >
                               <Trash2 className="w-3 h-3" />
