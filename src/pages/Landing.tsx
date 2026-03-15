@@ -2,7 +2,7 @@ import {
   Sparkles, Calendar, Globe, Users, Image, Scissors, TrendingUp,
   Target, Package, BarChart, CheckCircle, Heart, Star, Zap, Shield,
   Clock, Lock, MessageCircle, ArrowRight, MessageSquare, Brain, DollarSign,
-  BarChart3, AlertCircle, Search, Flame, Eye, Crown, Handshake
+  BarChart3, AlertCircle, Search, Flame, Eye, Crown, Handshake, CheckSquare, Megaphone
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AnimatedKeywords from '../components/landing/AnimatedKeywords';
@@ -382,7 +382,10 @@ export default function Landing({ onSelectRole }: LandingProps) {
               { icon: Image, key: 'gallery', image: '/Galerie_organise.gif' },
               { icon: Globe, key: 'booking', image: '/ta_page_belaya_unique.gif' },
               { icon: Package, key: 'stock' },
-              { icon: Sparkles, key: 'content' }
+              { icon: Sparkles, key: 'content' },
+              { icon: Handshake, key: 'partnerships' },
+              { icon: CheckSquare, key: 'tasks' },
+              { icon: Megaphone, key: 'marketing' }
             ].map((feature, i) => (
               <div
                 key={i}

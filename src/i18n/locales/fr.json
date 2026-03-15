@@ -134,6 +134,21 @@
           "title": "Publie sans réfléchir",
           "subtitle": "Calendrier éditorial IA",
           "desc": "Planifie tes posts Insta, génère des idées. Zéro panne d'inspiration."
+        },
+        "partnerships": {
+          "title": "Développe ton réseau",
+          "subtitle": "Gestion des partenariats",
+          "desc": "Suis tes collaborations, commissions et revenus générés par chaque partenaire."
+        },
+        "tasks": {
+          "title": "Ne rate plus rien",
+          "subtitle": "Gestion des tâches",
+          "desc": "Organise tes to-do, projets et rappels. Priorités claires, deadlines tenues."
+        },
+        "marketing": {
+          "title": "Relance sans effort",
+          "subtitle": "Marketing & relances clientes",
+          "desc": "Identifie tes clientes inactives et envoie des messages de relance en un clic."
         }
       }
     }
