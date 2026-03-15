@@ -492,10 +492,10 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-brand-100 overflow-x-hidden w-full">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-      <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white">
-        <div className="container mx-auto px-4 py-6">
+      <div className="bg-gradient-to-r from-brand-600 to-brand-50 text-white w-full">
+        <div className="w-full max-w-screen-lg mx-auto px-4 py-6">
           <a
             href="/"
             className="relative z-10 inline-flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors"
@@ -504,25 +504,25 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
             Retour
           </a>
 
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 w-full min-w-0">
             <div className="flex-shrink-0">
               {proProfile.profile_photo ? (
                 <img
                   src={proProfile.profile_photo}
                   alt={proProfile.company_name}
-                  className="w-24 h-24 rounded-2xl object-cover border-4 border-white/30"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-4 border-white/30"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center border-4 border-white/30">
-                  <span className="text-white font-bold text-3xl">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/20 flex items-center justify-center border-4 border-white/30">
+                  <span className="text-white font-bold text-2xl sm:text-3xl">
                     {proProfile.company_name.charAt(0)}
                   </span>
                 </div>
               )}
             </div>
 
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{proProfile.company_name}</h1>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-3xl font-bold mb-2 break-words">{proProfile.company_name}</h1>
               {proProfile.activity_type && (
                 <p className="text-lg mb-3 text-white font-medium">{proProfile.activity_type}</p>
               )}
@@ -578,9 +578,9 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="bg-white rounded-t-2xl border-b border-gray-200 sticky top-0 z-10">
-          <div className="flex gap-1">
+      <div className="w-full max-w-screen-lg mx-auto px-4 py-6">
+        <div className="bg-white rounded-t-2xl border-b border-gray-200 sticky top-0 z-10 overflow-x-auto">
+          <div className="flex min-w-max">
             {(['services', 'gallery', 'reviews', 'institute'] as const).map(tab => {
               const icons = { services: Scissors, gallery: ImageIcon, reviews: Star, institute: ImageIcon };
               const labels = { services: 'Services', gallery: 'Galerie', reviews: 'Avis', institute: 'Institut' };
@@ -589,15 +589,15 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-4 px-4 font-semibold transition-all ${
+                  className={`py-4 px-4 font-semibold transition-all whitespace-nowrap ${
                     activeTab === tab
                       ? 'text-brand-600 border-b-2 border-brand-600'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   <div className="flex items-center justify-center gap-2">
-                    <Icon className="w-5 h-5" />
-                    <span>{labels[tab]}</span>
+                    <Icon className="w-4 h-4" />
+                    <span className="text-sm">{labels[tab]}</span>
                   </div>
                 </button>
               );
@@ -605,7 +605,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-b-2xl p-6 shadow-sm">
+        <div className="bg-white rounded-b-2xl p-4 sm:p-6 shadow-sm">
           {activeTab === 'services' && (
             <div>
               {services.length === 0 ? (
@@ -615,7 +615,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
               ) : (
                 <div className="space-y-4">
                   {providerCategories.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                       <button
                         onClick={() => setServiceCategoryFilter('all')}
                         className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
@@ -665,32 +665,28 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                           )}
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-3 mb-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-bold text-gray-900">{service.name}</h3>
-                                </div>
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-bold text-gray-900 break-words">{service.name}</h3>
                                 {service.service_type && (
                                   <p className="text-xs text-gray-500">{service.service_type}</p>
                                 )}
                               </div>
-                              <div className="text-right">
+                              <div className="text-right flex-shrink-0 ml-2">
                                 {service.is_on_quote ? (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">Sur devis</span>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800 whitespace-nowrap">Sur devis</span>
                                 ) : (
                                   <>
                                     {service.special_offer && service.offer_type ? (
                                       <div className="flex flex-col items-end gap-0.5">
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-pink-100 text-pink-700 border border-pink-200 whitespace-nowrap">
+                                          -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '€'}
+                                        </span>
                                         <div className="text-xs text-gray-400 line-through">{service.price.toFixed(2)} €</div>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} €</span>
-                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-pink-100 text-pink-700 border border-pink-200 whitespace-nowrap">
-                                            -{service.special_offer}{service.offer_type === 'percentage' ? '%' : '€'}
-                                          </span>
-                                        </div>
+                                        <span className="font-bold text-brand-600 text-base whitespace-nowrap">{calculatedPrice.toFixed(2)} €</span>
                                       </div>
                                     ) : (
-                                      <span className="font-bold text-brand-600 text-lg">{calculatedPrice.toFixed(2)} €</span>
+                                      <span className="font-bold text-brand-600 text-base whitespace-nowrap">{calculatedPrice.toFixed(2)} €</span>
                                     )}
                                   </>
                                 )}
@@ -758,7 +754,7 @@ export default function PublicBooking({ slug }: PublicBookingProps) {
                 ) : (
                   <>
                     {galleryCategories.length > 1 && (
-                      <div className="flex gap-2 overflow-x-auto pb-4 -mx-1 px-1">
+                      <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
                         <button
                           onClick={() => { setGalleryCategoryFilter('all'); setPhotosDisplayCount(PHOTOS_PER_PAGE); }}
                           className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
