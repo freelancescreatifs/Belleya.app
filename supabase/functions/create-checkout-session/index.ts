@@ -263,7 +263,7 @@ Deno.serve(async (req: Request) => {
     const session = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
       mode: "subscription",
-      payment_method_types: ["card"],
+      automatic_payment_methods: { enabled: true },
       line_items: [
         {
           price: priceId,
@@ -271,7 +271,6 @@ Deno.serve(async (req: Request) => {
         },
       ],
       subscription_data: {
-        trial_period_days: 14,
         metadata: {
           company_id: companyId,
           plan_type: planId,
