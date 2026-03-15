@@ -24,6 +24,7 @@ export default function Marketing() {
   const [debugInfo, setDebugInfo] = useState<MarketingDebugInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'reminders' | 'history'>('reminders');
+  const [providerName, setProviderName] = useState<string>('');
 
   const [showSendModal, setShowSendModal] = useState(false);
   const [selectedClients, setSelectedClients] = useState<ClientReminder[]>([]);
@@ -32,8 +33,18 @@ export default function Marketing() {
   useEffect(() => {
     if (user) {
       loadData();
+      loadProviderName();
     }
   }, [user]);
+
+  const loadProviderName = async () => {
+    const { data } = await supabase
+      .from('company_profiles')
+      .select('business_name')
+      .eq('user_id', user!.id)
+      .maybeSingle();
+    if (data?.business_name) setProviderName(data.business_name);
+  };
 
   const loadData = async () => {
     try {
@@ -283,6 +294,7 @@ export default function Marketing() {
           clients={selectedClients}
           channel={selectedChannel}
           userId={user!.id}
+          providerName={providerName}
         />
       )}
     </div>
