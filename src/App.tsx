@@ -45,6 +45,7 @@ import AffiliateApply from './pages/AffiliateApply';
 import PartnerDashboard from './pages/PartnerDashboard';
 import ChatBot from './components/shared/ChatBot';
 import BelayaLoader from './components/shared/BelayaLoader';
+import WelcomeVideoModal from './components/shared/WelcomeVideoModal';
 import { supabase } from './lib/supabase';
 import TrialBanner from './components/shared/TrialBanner';
 import {
@@ -69,6 +70,7 @@ function AppContent() {
   const awaitingGoogleRef = useRef(awaitingGoogleProfile);
   const [affiliatePage, setAffiliatePage] = useState<'landing' | 'apply' | 'dashboard' | null>(null);
   const [affiliateCodeChecked, setAffiliateCodeChecked] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const safeNavigate = (to: string, source?: string) => {
     console.trace('[NAVIGATION TRACE] safeNavigate called →', { to, source, currentPage, navigationLocked });
@@ -130,6 +132,15 @@ function AppContent() {
       }
     }
   }, [user, profile]);
+
+  useEffect(() => {
+    if (user && profile && profile.role === 'pro') {
+      const key = `belaya_welcome_seen_${user.id}`;
+      if (!localStorage.getItem(key)) {
+        setShowWelcomeModal(true);
+      }
+    }
+  }, [user?.id, profile?.role]);
 
   useEffect(() => {
     if (user && !profile && !loading && profileRetryCount < 10) {
@@ -559,6 +570,21 @@ function AppContent() {
 
       {/* ChatBot accessible from all pages */}
       <ChatBot />
+
+      {/* Welcome modal - shown once per pro user */}
+      {showWelcomeModal && user && (
+        <WelcomeVideoModal
+          onGoToSettings={() => {
+            localStorage.setItem(`belaya_welcome_seen_${user.id}`, '1');
+            setShowWelcomeModal(false);
+            setCurrentPage('settings');
+          }}
+          onDismiss={() => {
+            localStorage.setItem(`belaya_welcome_seen_${user.id}`, '1');
+            setShowWelcomeModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }
