@@ -1,5 +1,5 @@
 export type EventType = 'pro' | 'personal' | 'google' | 'planity' | 'formation';
-export type EventStatus = 'confirmed' | 'pending' | 'cancelled';
+export type EventStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed';
 export type BadgeType = 'student' | 'fidele' | 'vip';
 export type CalendarView = 'month' | 'week' | 'day';
 export type FilterType = 'events' | 'tasks' | 'social_media';

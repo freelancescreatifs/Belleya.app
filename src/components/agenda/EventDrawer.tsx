@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Pencil, Trash2, Clock, User, FileText, Calendar, Receipt, Plus, Send } from 'lucide-react';
+import { X, Pencil, Trash2, Clock, User, FileText, Calendar, Receipt, Plus, Send, CheckCircle, Star } from 'lucide-react';
 import { Event } from '../../types/agenda';
 import { supabase } from '../../lib/supabase';
 import EventForm from './EventForm';
@@ -9,6 +9,7 @@ import InvoiceDetailDrawer from '../client/InvoiceDetailDrawer';
 import InvoiceForm from '../client/InvoiceForm';
 import SendReceiptModal from './SendReceiptModal';
 import { useToast } from '../../hooks/useToast';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface EventDrawerProps {
   event: Event;
@@ -19,8 +20,10 @@ interface EventDrawerProps {
 }
 
 export default function EventDrawer({ event, onClose, onUpdate, onDelete, existingEvents }: EventDrawerProps) {
+  const { profile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [completingEvent, setCompletingEvent] = useState(false);
   const [isEditingDates, setIsEditingDates] = useState(false);
   const [formationDates, setFormationDates] = useState({
     startDate: event.start_at.split('T')[0],
@@ -120,16 +123,78 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
     }
   };
 
+  const handleMarkCompleted = async () => {
+    if (!confirm('Marquer ce rendez-vous comme terminé et envoyer une demande d\'avis au client ?')) return;
+
+    setCompletingEvent(true);
+    try {
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ status: 'completed', review_request_sent: true })
+        .eq('id', event.id);
+
+      if (updateError) throw updateError;
+
+      const updatedEvent = { ...event, status: 'completed' as const };
+      onUpdate(updatedEvent);
+
+      if (event.client_id && clientDetails?.email) {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        let bookingSlug = '';
+        let companyName = 'votre prestataire';
+
+        if (profile?.company_id) {
+          const { data: companyData } = await supabase
+            .from('company_profiles')
+            .select('booking_slug, company_name')
+            .eq('id', profile.company_id)
+            .maybeSingle();
+          bookingSlug = companyData?.booking_slug || '';
+          companyName = companyData?.company_name || companyName;
+        }
+
+        if (bookingSlug && clientDetails.email) {
+          await fetch(`${supabaseUrl}/functions/v1/send-review-request`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${anonKey}`,
+            },
+            body: JSON.stringify({
+              clientEmail: clientDetails.email,
+              clientFirstName: clientDetails.first_name,
+              providerName: companyName,
+              serviceName: event.service?.name || 'Prestation',
+              appointmentDate: event.start_at,
+              bookingSlug,
+              eventId: event.id,
+            }),
+          });
+        }
+      }
+
+      showToast('success', 'Rendez-vous terminé · Demande d\'avis envoyée au client');
+    } catch (error) {
+      console.error('Error marking event as completed:', error);
+      showToast('error', 'Erreur lors de la mise à jour du statut');
+    } finally {
+      setCompletingEvent(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const styles = {
       confirmed: 'bg-green-100 text-green-800',
       pending: 'bg-yellow-100 text-yellow-800',
       cancelled: 'bg-red-100 text-red-800',
+      completed: 'bg-belaya-100 text-belaya-deep',
     };
     const labels = {
       confirmed: 'Confirmé',
       pending: 'En attente',
       cancelled: 'Annulé',
+      completed: 'Terminé',
     };
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status as keyof typeof styles]}`}>
@@ -297,6 +362,38 @@ export default function EventDrawer({ event, onClose, onUpdate, onDelete, existi
                         <Send className="w-4 h-4" />
                         Envoyer le recu par email / SMS
                       </button>
+                    </div>
+                  )}
+
+                  {event.type === 'pro' && event.client_id && event.status !== 'completed' && event.status !== 'cancelled' && (
+                    <div className="bg-belaya-50 rounded-lg p-4 border border-belaya-200">
+                      <p className="text-xs text-belaya-deep mb-3 text-center">
+                        Marquer comme terminé envoie automatiquement une demande d&apos;avis au client.
+                      </p>
+                      <button
+                        onClick={handleMarkCompleted}
+                        disabled={completingEvent}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-belaya-vivid text-white rounded-lg hover:bg-belaya-bright transition-colors disabled:opacity-50"
+                      >
+                        {completingEvent ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 animate-pulse" />
+                            Envoi en cours...
+                          </>
+                        ) : (
+                          <>
+                            <Star className="w-4 h-4" />
+                            Marquer comme terminé &amp; demander un avis
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {event.type === 'pro' && event.status === 'completed' && (
+                    <div className="bg-belaya-50 rounded-lg p-3 border border-belaya-200 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-belaya-vivid flex-shrink-0" />
+                      <p className="text-sm text-belaya-deep">Demande d&apos;avis envoyée au client</p>
                     </div>
                   )}
                 </div>

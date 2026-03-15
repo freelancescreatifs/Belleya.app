@@ -547,6 +547,7 @@ export default function EventForm({ event, initialDate, onSave, onCancel, existi
           <option value="confirmed">Confirmé</option>
           <option value="pending">En attente</option>
           <option value="cancelled">Annulé</option>
+          <option value="completed">Terminé</option>
         </select>
       </div>
 
