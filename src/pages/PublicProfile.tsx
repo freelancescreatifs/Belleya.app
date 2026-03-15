@@ -955,14 +955,19 @@ export default function PublicProfile() {
   };
 
   const toggleCommentApproval = async (commentId: string, currentApproval: boolean) => {
+    setPhotoComments(prev => prev.map(c =>
+      c.id === commentId ? { ...c, is_approved: !currentApproval } : c
+    ));
+
     const { error } = await supabase
       .from('content_comments')
       .update({ is_approved: !currentApproval })
-      .eq('id', commentId);
+      .eq('id', commentId)
+      .eq('provider_id', user?.id);
 
-    if (!error) {
+    if (error) {
       setPhotoComments(prev => prev.map(c =>
-        c.id === commentId ? { ...c, is_approved: !currentApproval } : c
+        c.id === commentId ? { ...c, is_approved: currentApproval } : c
       ));
     }
   };
