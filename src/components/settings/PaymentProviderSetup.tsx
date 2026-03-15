@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CreditCard, CheckCircle, XCircle, AlertTriangle, ExternalLink, Loader, RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/useToast';
 
 interface PaymentAccount {
   id: string;
@@ -21,6 +22,7 @@ interface PaymentProviderSetupProps {
 
 export default function PaymentProviderSetup({ depositRequired, onStatusChange }: PaymentProviderSetupProps) {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [connectingPayPal, setConnectingPayPal] = useState(false);
@@ -81,6 +83,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
             'Content-Type': 'application/json',
           },
         }
@@ -96,6 +99,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
     } catch (err: any) {
       console.error('Error connecting Stripe:', err);
       setError(err.message);
+      showToast('error', 'Le service de paiement est temporairement indisponible. Veuillez réessayer.');
       setConnectingStripe(false);
     }
   };
@@ -114,6 +118,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
             'Content-Type': 'application/json',
           },
         }
@@ -129,6 +134,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
     } catch (err: any) {
       console.error('Error connecting PayPal:', err);
       setError(err.message);
+      showToast('error', 'Le service de paiement est temporairement indisponible. Veuillez réessayer.');
       setConnectingPayPal(false);
     }
   };
@@ -147,6 +153,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
         }
       );
@@ -161,6 +168,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
     } catch (err: any) {
       console.error('Error refreshing Stripe status:', err);
       setError(err.message);
+      showToast('error', 'Le service de paiement est temporairement indisponible. Veuillez réessayer.');
     } finally {
       setRefreshingStripe(false);
     }
@@ -180,6 +188,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
         }
       );
@@ -194,6 +203,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
     } catch (err: any) {
       console.error('Error refreshing PayPal status:', err);
       setError(err.message);
+      showToast('error', 'Le service de paiement est temporairement indisponible. Veuillez réessayer.');
     } finally {
       setRefreshingPayPal(false);
     }
@@ -210,6 +220,7 @@ export default function PaymentProviderSetup({ depositRequired, onStatusChange }
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
         }
       );

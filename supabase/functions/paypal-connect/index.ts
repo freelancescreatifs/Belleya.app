@@ -6,7 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
-const PAYPAL_API_BASE = Deno.env.get('PAYPAL_MODE') === 'live'
+const PAYPAL_MODE = Deno.env.get('PAYPAL_MODE') || 'sandbox';
+const PAYPAL_API_BASE = PAYPAL_MODE === 'live'
   ? 'https://api-m.paypal.com'
   : 'https://api-m.sandbox.paypal.com';
 
@@ -14,7 +15,11 @@ const PAYPAL_CLIENT_ID = Deno.env.get('PAYPAL_CLIENT_ID') || '';
 const PAYPAL_CLIENT_SECRET = Deno.env.get('PAYPAL_CLIENT_SECRET') || '';
 const PAYPAL_PARTNER_ID = Deno.env.get('PAYPAL_PARTNER_ID') || '';
 
-async function getPayPalAccessToken() {
+async function getPayPalAccessToken(): Promise<string> {
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+    throw new Error(`PayPal credentials not configured (mode: ${PAYPAL_MODE}). PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are required.`);
+  }
+
   const auth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
 
   const response = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
@@ -27,6 +32,13 @@ async function getPayPalAccessToken() {
   });
 
   const data = await response.json();
+
+  if (!response.ok || !data.access_token) {
+    console.error('[paypal-connect] Token response:', JSON.stringify(data));
+    throw new Error(`PayPal authentication failed (${response.status}): ${data.error_description || data.message || 'unknown error'}`);
+  }
+
+  console.log(`[paypal-connect] Access token obtained (mode: ${PAYPAL_MODE})`);
   return data.access_token;
 }
 
